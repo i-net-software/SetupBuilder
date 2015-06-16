@@ -39,6 +39,8 @@ public class SetupBuilder implements SetupSources {
     private String                 version;
 
     private String                 baseName;
+    
+    private Object licenseFile;
 
     public SetupBuilder( Project project ) {
         this.project = project;
@@ -119,5 +121,16 @@ public class SetupBuilder implements SetupSources {
 
     public void setBaseName( String baseName ) {
         this.baseName = baseName;
+    }
+
+    public File getLicenseFile() {
+        if( licenseFile != null ) {
+            return project.file( licenseFile );
+        }
+        return null;
+    }
+
+    public void setLicenseFile( Object licenseFile ) {
+        this.licenseFile = licenseFile;
     }
 }

@@ -55,7 +55,7 @@ class MsiBuilder {
         try {
             buildDir = new File( msi.getProject().getBuildDir(), "setup/msi" );
             File wxsFile = getWxsFile();
-            new WxsFileBuilder( msi, setup, wxsFile ).build();
+            new WxsFileBuilder( msi, setup, wxsFile, buildDir ).build();
             candle();
             light();
 

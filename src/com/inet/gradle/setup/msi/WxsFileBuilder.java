@@ -16,10 +16,17 @@
 package com.inet.gradle.setup.msi;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.UUID;
 
+import javax.swing.JEditorPane;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.EditorKit;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -52,10 +59,13 @@ class WxsFileBuilder {
 
     private final File         wxsFile;
 
-    WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile ) {
+    private File               buildDir;
+
+    WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) {
         this.msi = msi;
         this.setup = setup;
         this.wxsFile = wxsFile;
+        this.buildDir = buildDir;
     }
 
     /**
@@ -154,12 +164,59 @@ class WxsFileBuilder {
      * Add the GUI to the Setup
      * 
      * @param product the product node in the XML.
+     * @throws Exception if any exception occur
      */
-    private void addGUI( Element product ) {
+    private void addGUI( Element product ) throws Exception {
+        addLicense( product );
         Element installdir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR", true );
         addAttributeIfNotExists( installdir, "Value", "INSTALLDIR" );
         Element uiRef = getOrCreateChild( product, "UIRef", true );
         addAttributeIfNotExists( uiRef, "Id", "WixUI_InstallDir" );
+    }
+
+    /**
+     * Add a license file to the setup. If the license file is not an RTF file then it convert it to RTF.
+     * 
+     * @param product the product node in the XML.
+     * @return true, if license was added; false if license was not added.
+     * @throws Exception if any exception occur
+     */
+    private boolean addLicense( Element product ) throws Exception {
+        File license = setup.getLicenseFile();
+        if( license == null ) {
+            return false;
+        }
+        boolean isRtf;
+        try( FileInputStream fis = new FileInputStream( license ) ) {
+            byte[] bytes = new byte[5];
+            fis.read( bytes );
+            isRtf = "{\rtf".equals( new String( bytes ) );
+        }
+        if( !isRtf ) {
+            // Convert a txt file in a rtf file
+            JEditorPane p = new JEditorPane();
+            EditorKit kit = p.getEditorKitForContentType( "text/plain" );
+            p.setContentType( "text/rtf" );
+            DefaultStyledDocument doc = (DefaultStyledDocument)p.getDocument();
+
+            try( FileInputStream fis = new FileInputStream( license ) ) {
+                kit.read( fis, doc, 0 );
+            }
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setFontSize( attrs, 9 );
+            StyleConstants.setFontFamily( attrs, "Courier New" );
+            doc.setCharacterAttributes( 0, doc.getLength(), attrs, false );
+
+            kit = p.getEditorKitForContentType( "text/rtf" );
+            license = new File( buildDir, "license.rtf" );
+            try( FileOutputStream output = new FileOutputStream( license ) ) {
+                kit.write( output, doc, 0, doc.getLength() );
+            }
+        }
+
+        Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUILicenseRtf", true );
+        addAttributeIfNotExists( licenseNode, "Value", license.getAbsolutePath() );
+        return true;
     }
 
     /**
