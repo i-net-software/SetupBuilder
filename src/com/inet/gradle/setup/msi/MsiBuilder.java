@@ -98,6 +98,8 @@ class MsiBuilder {
      */
     private void light() {
         ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( "-ext" );
+        parameters.add( "WixUIExtension" );
         parameters.add( "*.wixobj" );
         callWixTool( "light.exe", parameters );
     }

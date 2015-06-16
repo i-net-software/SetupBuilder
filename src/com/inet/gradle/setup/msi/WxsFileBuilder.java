@@ -97,12 +97,12 @@ class WxsFileBuilder {
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR", true );
         addAttributeIfNotExists( directory, "Name", "SourceDir" );
         Element programFiles = getOrCreateChildById( directory, "Directory", "ProgramFilesFolder", true );
-        Element appDirectory = getOrCreateChildById( programFiles, "Directory", "APPLICATIONROOTDIRECTORY", true );
+        Element appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR", true );
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
         //Files
         HashSet<String> components = new HashSet<>();
-        Element appDirRef = getOrCreateChildById( product, "DirectoryRef", "APPLICATIONROOTDIRECTORY", true );
+        Element appDirRef = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
         FileTree fileTree = new UnionFileTree( setup.getSource(), msi.getSource() );
         fileTree.visit( new FileVisitor() {
             @Override
@@ -139,6 +139,8 @@ class WxsFileBuilder {
             Element compRef = getOrCreateChildById( feature, "ComponentRef", compID, true );
         }
 
+        addGUI( product );
+
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource( doc );
@@ -148,6 +150,25 @@ class WxsFileBuilder {
         transformer.transform( source, result );
     }
 
+    /**
+     * Add the GUI to the Setup
+     * 
+     * @param product the product node in the XML.
+     */
+    private void addGUI( Element product ) {
+        Element installdir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR", true );
+        addAttributeIfNotExists( installdir, "Value", "INSTALLDIR" );
+        Element uiRef = getOrCreateChild( product, "UIRef", true );
+        addAttributeIfNotExists( uiRef, "Id", "WixUI_InstallDir" );
+    }
+
+    /**
+     * Add a attribute if not exists.
+     * 
+     * @param el the element/node in the XML
+     * @param name the name of the attribute
+     * @param value the value
+     */
     private void addAttributeIfNotExists( Element el, String name, String value ) {
         if( !el.hasAttribute( name ) ) {
             el.setAttribute( name, value );
