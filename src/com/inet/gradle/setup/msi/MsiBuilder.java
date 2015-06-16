@@ -37,6 +37,8 @@ class MsiBuilder {
 
     private FileResolver       fileResolver;
 
+    private File               buildDir;
+
     /**
      * Create a new instance
      * 
@@ -51,6 +53,7 @@ class MsiBuilder {
 
     void build() {
         try {
+            buildDir = new File( msi.getProject().getBuildDir(), "setup/msi" );
             File wxsFile = getWxsFile();
             new WxsFileBuilder( msi, setup, wxsFile ).build();
             candle();
@@ -77,7 +80,7 @@ class MsiBuilder {
         System.out.println( "\t" + parameters );
         DefaultExecAction action = new DefaultExecAction( fileResolver );
         action.setCommandLine( parameters );
-        action.setWorkingDir( setup.getDestinationDir() );
+        action.setWorkingDir( buildDir );
         action.execute();
     }
 
@@ -87,7 +90,7 @@ class MsiBuilder {
     private void candle() {
         ArrayList<String> command = new ArrayList<>();
         command.add( "-out" );
-        command.add( setup.getDestinationDir().getAbsolutePath() + '\\' );
+        command.add( buildDir.getAbsolutePath() + '\\' );
         command.add( getWxsFile().getAbsolutePath() );
 
         callWixTool( "candle.exe", command );
@@ -100,6 +103,9 @@ class MsiBuilder {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-ext" );
         parameters.add( "WixUIExtension" );
+        parameters.add( "-out" );
+        parameters.add( new File( setup.getDestinationDir(), setup.getBaseName() + ".msi" ).getAbsolutePath() );
+        parameters.add( "-spdb" );
         parameters.add( "*.wixobj" );
         callWixTool( "light.exe", parameters );
     }
@@ -110,7 +116,7 @@ class MsiBuilder {
      * @return the xml file
      */
     private File getWxsFile() {
-        return new File( setup.getDestinationDir(), setup.getBaseName() + ".wxs" );
+        return new File( buildDir, setup.getBaseName() + ".wxs" );
     }
 
     /**
