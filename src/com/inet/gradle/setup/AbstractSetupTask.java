@@ -29,7 +29,7 @@ import org.gradle.api.tasks.OutputFile;
  * 
  * @author Volker Berlin
  */
-public class AbstractSetupTask extends DefaultTask implements SetupSources {
+public abstract class AbstractSetupTask extends DefaultTask implements SetupSources {
 
     private final CopySpecInternal rootSpec;
 
