@@ -3,6 +3,8 @@ apply plugin: 'maven'
 
 group = 'de.inetsoftware'
 version = '1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
