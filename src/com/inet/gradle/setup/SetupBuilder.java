@@ -39,8 +39,10 @@ public class SetupBuilder implements SetupSources {
     private String                 version;
 
     private String                 baseName;
-    
-    private Object licenseFile;
+
+    private Object                 licenseFile;
+
+    private Object                 icons;
 
     public SetupBuilder( Project project ) {
         this.project = project;
@@ -132,5 +134,18 @@ public class SetupBuilder implements SetupSources {
 
     public void setLicenseFile( Object licenseFile ) {
         this.licenseFile = licenseFile;
+    }
+
+    public Object getIcons() {
+        return icons;
+    }
+
+    /**
+     * Set the icons for the setup. This can be one or multiple images in different size. The usage depends on the platform.
+     * This can be an *.ico file, *.icns file or an list of Java readable image files like *.png or *.jpeg.
+     * @param icons the icons
+     */
+    public void setIcons( Object icons ) {
+        this.icons = icons;
     }
 }
