@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.process.internal.DefaultExecAction;
+import org.gradle.util.GUtil;
 
 import com.inet.gradle.setup.SetupBuilder;
 
@@ -104,7 +105,7 @@ class MsiBuilder {
         parameters.add( "-ext" );
         parameters.add( "WixUIExtension" );
         parameters.add( "-out" );
-        parameters.add( new File( setup.getDestinationDir(), setup.getBaseName() + ".msi" ).getAbsolutePath() );
+        parameters.add( new File( setup.getDestinationDir(), setup.getSetupName() + ".msi" ).getAbsolutePath() );
         parameters.add( "-spdb" );
         parameters.add( "*.wixobj" );
         callWixTool( "light.exe", parameters );
@@ -116,7 +117,7 @@ class MsiBuilder {
      * @return the xml file
      */
     private File getWxsFile() {
-        return new File( buildDir, setup.getBaseName() + ".wxs" );
+        return new File( buildDir, setup.getSetupName() + ".wxs" );
     }
 
     /**

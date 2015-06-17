@@ -40,6 +40,8 @@ public class SetupBuilder implements SetupSources {
 
     private String                 baseName;
 
+    private String                 setupName;
+
     private Object                 licenseFile;
 
     private Object                 icons;
@@ -107,13 +109,17 @@ public class SetupBuilder implements SetupSources {
         if( version != null ) {
             return version.toString();
         }
-        return "1.0.0.0";
+        return "1.0";
     }
 
     public void setVersion( String version ) {
         this.version = version;
     }
 
+    /**
+     * Get the base name of the setup file. If not set then the project name is used. 
+     * @return the base name
+     */
     public String getBaseName() {
         if( baseName != null ) {
             return baseName;
@@ -123,6 +129,22 @@ public class SetupBuilder implements SetupSources {
 
     public void setBaseName( String baseName ) {
         this.baseName = baseName;
+    }
+
+    /**
+     * Get the name of the setup file without extension. 
+     * If not set then baseName-version is used. 
+     * @return the setup file name
+     */
+    public String getSetupName() {
+        if( setupName != null ) {
+            return setupName;
+        }
+        return getBaseName() + '-' + getVersion();
+    }
+
+    public void setSetupName( String setupName ) {
+        this.setupName = setupName;
     }
 
     public File getLicenseFile() {
@@ -141,8 +163,9 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Set the icons for the setup. This can be one or multiple images in different size. The usage depends on the platform.
-     * This can be an *.ico file, *.icns file or an list of Java readable image files like *.png or *.jpeg.
+     * Set the icons for the setup. This can be one or multiple images in different size. The usage depends on the
+     * platform. This can be an *.ico file, *.icns file or an list of Java readable image files like *.png or *.jpeg.
+     * 
      * @param icons the icons
      */
     public void setIcons( Object icons ) {

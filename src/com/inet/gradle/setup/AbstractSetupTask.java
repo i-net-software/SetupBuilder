@@ -71,7 +71,7 @@ public class AbstractSetupTask extends DefaultTask implements SetupSources {
     @OutputFile
     public File getSetupFile() {
         SetupBuilder setup = getSetupBuilder();
-        return new File( setup.getDestinationDir(), setup.getBaseName() + "." + getExtension() );
+        return new File( setup.getDestinationDir(), setup.getSetupName() + "." + getExtension() );
     }
 
     public String getExtension() {
