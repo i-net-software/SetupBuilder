@@ -167,11 +167,34 @@ class WxsFileBuilder {
      * @throws Exception if any exception occur
      */
     private void addGUI( Element product ) throws Exception {
-        addLicense( product );
         Element installdir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR", true );
         addAttributeIfNotExists( installdir, "Value", "INSTALLDIR" );
         Element uiRef = getOrCreateChild( product, "UIRef", true );
         addAttributeIfNotExists( uiRef, "Id", "WixUI_InstallDir" );
+
+        boolean isLicense = addLicense( product );
+        if( !isLicense ) {
+            // skip license dialog because we does no hat a license text
+            Document doc = product.getOwnerDocument();
+            Element ui = getOrCreateChild( product, "UI", true );
+            Element child = doc.createElement( "Publish" );
+            child.setAttribute( "Dialog", "WelcomeDlg" );
+            child.setAttribute( "Control", "Next" );
+            child.setAttribute( "Event", "NewDialog" );
+            child.setAttribute( "Value", "InstallDirDlg" );
+            child.setAttribute( "Order", "2" );
+            child.setTextContent( "1" );
+            ui.appendChild( child );
+
+            child = doc.createElement( "Publish" );
+            child.setAttribute( "Dialog", "InstallDirDlg" );
+            child.setAttribute( "Control", "Back" );
+            child.setAttribute( "Event", "NewDialog" );
+            child.setAttribute( "Value", "WelcomeDlg" );
+            child.setAttribute( "Order", "2" );
+            child.setTextContent( "1" );
+            ui.appendChild( child );
+        }
     }
 
     /**
