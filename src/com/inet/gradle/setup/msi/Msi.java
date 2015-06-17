@@ -35,6 +35,7 @@ public class Msi extends AbstractSetupTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        project.getArtifacts().add( "archives", getSetupFile() );
     }
 
 }
