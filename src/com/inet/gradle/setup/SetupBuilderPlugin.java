@@ -17,6 +17,7 @@ package com.inet.gradle.setup;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.BasePlugin;
 
 import com.inet.gradle.setup.msi.Msi;
 
@@ -29,6 +30,7 @@ public class SetupBuilderPlugin implements Plugin<Project> {
 
     @Override
     public void apply( Project project ) {
+        project.getPluginManager().apply( BasePlugin.class );
         project.getTasks().create( "msi", Msi.class );
         project.getExtensions().create( "setupBuilder", SetupBuilder.class, project );
 
