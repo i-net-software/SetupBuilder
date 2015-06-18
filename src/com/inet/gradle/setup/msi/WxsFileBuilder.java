@@ -18,6 +18,7 @@ package com.inet.gradle.setup.msi;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.UUID;
@@ -45,6 +46,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.image.ImageFactory;
 
 /**
  * Builder for a *.wsx file. A *.wsx file is a XML that described MSI setup and is needed for the Wix tool.
@@ -60,6 +62,8 @@ class WxsFileBuilder {
     private final File         wxsFile;
 
     private File               buildDir;
+
+    private HashSet<String>    components = new HashSet<>();
 
     WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) {
         this.msi = msi;
@@ -111,7 +115,6 @@ class WxsFileBuilder {
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
         //Files
-        HashSet<String> components = new HashSet<>();
         Element appDirRef = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
         FileTree fileTree = new UnionFileTree( setup.getSource(), msi.getSource() );
         fileTree.visit( new FileVisitor() {
@@ -143,13 +146,14 @@ class WxsFileBuilder {
             }
         } );
 
+        addGUI( product );
+        addIcon( product );
+
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication", true );
         for( String compID : components ) {
             Element compRef = getOrCreateChildById( feature, "ComponentRef", compID, true );
         }
-
-        addGUI( product );
 
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
@@ -195,6 +199,25 @@ class WxsFileBuilder {
             child.setTextContent( "1" );
             ui.appendChild( child );
         }
+    }
+
+    /**
+     * Add an icon in Add/Remove Programs
+     * 
+     * @param product the product node in the XML.
+     * @param appDirRef 
+     * @throws IOException if an error occur on reading the image files
+     */
+    private void addIcon( Element product ) throws IOException {
+        File iconFile = ImageFactory.getImageFile( msi.getProject(), setup.getIcons(), buildDir, "ico" );
+        if( iconFile == null ) {
+            // no icon was set
+            return;
+        }
+        Element icon = getOrCreateChildById( product, "Icon", "icon.ico", true );
+        addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
+        Element appProduction = getOrCreateChildById( product, "Property", "ARPPRODUCTICON", true );
+        addAttributeIfNotExists( appProduction, "Value", "icon.ico" );
     }
 
     /**
