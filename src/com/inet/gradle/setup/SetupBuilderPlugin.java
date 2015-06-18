@@ -31,8 +31,11 @@ public class SetupBuilderPlugin implements Plugin<Project> {
     @Override
     public void apply( Project project ) {
         project.getPluginManager().apply( BasePlugin.class );
-        project.getTasks().create( "msi", Msi.class );
         project.getExtensions().create( "setupBuilder", SetupBuilder.class, project );
+        project.getTasks().create( "deb", Msi.class );
+        project.getTasks().create( "dmg", Msi.class );
+        project.getTasks().create( "msi", Msi.class );
+        project.getTasks().create( "rpm", Msi.class );
 
         //        project.afterEvaluate( arg0 );
     }

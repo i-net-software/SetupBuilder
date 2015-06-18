@@ -43,12 +43,18 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         this.rootSpec = (CopySpecInternal)getProject().copySpec( null );
     }
 
+    /**
+     * The action called from Gradle
+     */
     @TaskAction
     public void action() {
         build();
         getProject().getArtifacts().add( "archives", getSetupFile() );
     }
 
+    /**
+     * The platform depending build.
+     */
     public abstract void build();
 
     public SetupBuilder getSetupBuilder() {

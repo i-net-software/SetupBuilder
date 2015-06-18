@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup.msi;
+package com.inet.gradle.setup.deb;
 
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 
 /**
- * The msi Gradle task. It build a msi setup for Windows.
+ * The deb Gradle task. It build a deb package for Debian / Ubuntu.
  * 
  * @author Volker Berlin
  */
-public class Msi extends AbstractSetupTask {
+public class Deb extends AbstractSetupTask {
 
-    public Msi() {
-        super( "msi" );
+    public Deb() {
+        super( "deb" );
     }
 
     /**
@@ -36,6 +36,6 @@ public class Msi extends AbstractSetupTask {
     @Override
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
-        new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new DebBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 }

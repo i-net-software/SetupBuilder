@@ -43,12 +43,13 @@ class MsiBuilder {
     /**
      * Create a new instance
      * 
-     * @param task the calling task
+     * @param msi the calling task
+     * @param setup the shared settings
      * @param fileResolver the file Resolver
      */
-    MsiBuilder( Msi msi, SetupBuilder task, FileResolver fileResolver ) {
+    MsiBuilder( Msi msi, SetupBuilder setup, FileResolver fileResolver ) {
         this.msi = msi;
-        this.setup = task;
+        this.setup = setup;
         this.fileResolver = fileResolver;
     }
 

@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup.msi;
+package com.inet.gradle.setup.rpm;
 
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 
 /**
- * The msi Gradle task. It build a msi setup for Windows.
+ * The rpm Gradle task. It build a rpm package for Linux.
  * 
  * @author Volker Berlin
  */
-public class Msi extends AbstractSetupTask {
+public class Rpm extends AbstractSetupTask {
 
-    public Msi() {
-        super( "msi" );
+    public Rpm() {
+        super( "rpm" );
     }
 
     /**
@@ -36,6 +36,6 @@ public class Msi extends AbstractSetupTask {
     @Override
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
-        new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new RpmBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 }

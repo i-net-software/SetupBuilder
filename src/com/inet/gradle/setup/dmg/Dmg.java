@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup.msi;
+package com.inet.gradle.setup.dmg;
 
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 
 /**
- * The msi Gradle task. It build a msi setup for Windows.
+ * The dmg Gradle task. It build a dmg package for Mac.
  * 
  * @author Volker Berlin
  */
-public class Msi extends AbstractSetupTask {
+public class Dmg extends AbstractSetupTask {
 
-    public Msi() {
-        super( "msi" );
+    public Dmg() {
+        super( "dmg" );
     }
 
     /**
@@ -36,6 +36,6 @@ public class Msi extends AbstractSetupTask {
     @Override
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
-        new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new DmgBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 }
