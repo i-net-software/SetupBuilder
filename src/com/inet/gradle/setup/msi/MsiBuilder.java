@@ -78,7 +78,18 @@ class MsiBuilder {
      */
     private void callWixTool( String tool, ArrayList<String> parameters ) {
         parameters.add( 0, getToolPath( tool ) );
-        System.out.println( "\t" + parameters );
+
+        // print command line to the log
+        StringBuilder log = new StringBuilder();
+        for( String para : parameters ) {
+            log.append( '\"' ).append( para );
+            if( para.endsWith( "\\" ) ) {
+                log.append( '\\' );
+            }
+            log.append( "\" " );
+        }
+        msi.getProject().getLogger().lifecycle( log.toString() );
+
         DefaultExecAction action = new DefaultExecAction( fileResolver );
         action.setCommandLine( parameters );
         action.setWorkingDir( buildDir );
