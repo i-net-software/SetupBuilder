@@ -39,6 +39,16 @@ import com.inet.gradle.setup.image.image4j.codec.ico.ICOEncoder;
  */
 public class ImageFactory {
 
+    /**
+     * Get a file to an icon in the platform format if set or null if not set in the gradle script
+     * 
+     * @param project current project for resolving the file locations
+     * @param data the set values
+     * @param dir directory for temporary build files if the file(s) need converted
+     * @param format the platform format, currently "ico" and "icns"
+     * @return a file or null
+     * @throws IOException if an error occur on reading the image files
+     */
     public static File getImageFile( Project project, Object data, File dir, String format ) throws IOException {
         if( data == null ) {
             return null;
@@ -91,10 +101,12 @@ public class ImageFactory {
             }
         }
 
-        File file = new File( dir, "icons." + format );
+        File file = new File( dir, "icon." + format );
         switch( format ) {
             case "ico":
-                ICOEncoder.write( images, file );
+                try( FileOutputStream fos = new FileOutputStream( file ) ) {
+                    ICOEncoder.write( images, fos );
+                }
                 break;
             case "icns":
                 try( FileOutputStream fos = new FileOutputStream( file ) ) {
