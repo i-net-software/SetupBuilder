@@ -102,6 +102,8 @@ class MsiBuilder {
      */
     private void candle() {
         ArrayList<String> command = new ArrayList<>();
+        command.add( "-arch" );
+        command.add( msi.getArch() );
         command.add( "-out" );
         command.add( buildDir.getAbsolutePath() + '\\' );
         command.add( getWxsFile().getAbsolutePath() );

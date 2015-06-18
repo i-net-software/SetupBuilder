@@ -26,6 +26,8 @@ import com.inet.gradle.setup.AbstractSetupTask;
  */
 public class Msi extends AbstractSetupTask {
 
+    private String arch = "x64";
+
     public Msi() {
         super( "msi" );
     }
@@ -37,5 +39,34 @@ public class Msi extends AbstractSetupTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+    }
+
+    public String getArch() {
+        return arch;
+    }
+
+    /**
+     * Set the architecture of the setup. The default is x64. Possible values are:
+     * <li>x86
+     * <li>x64
+     * <li>ia64
+     * @param arch the architecture
+     */
+    public void setArch( String arch ) {
+        this.arch = arch;
+    }
+
+    /**
+     * if the setup is a 64 bit setup.
+     * @return true, if 64 bit.
+     */
+    boolean is64Bit() {
+        switch( getArch() ) {
+            case "x64":
+            case "ia64":
+                return true;
+            default:
+                return false;
+        }
     }
 }

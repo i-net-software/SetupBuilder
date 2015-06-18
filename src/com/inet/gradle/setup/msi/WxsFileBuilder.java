@@ -110,7 +110,7 @@ class WxsFileBuilder {
         // Directory
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR", true );
         addAttributeIfNotExists( directory, "Name", "SourceDir" );
-        Element programFiles = getOrCreateChildById( directory, "Directory", "ProgramFilesFolder", true );
+        Element programFiles = getOrCreateChildById( directory, "Directory", msi.is64Bit() ? "ProgramFiles64Folder" : "ProgramFilesFolder", true );
         Element appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR", true );
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
