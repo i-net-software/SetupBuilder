@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -37,6 +38,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.gradle.api.GradleException;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
 import org.gradle.api.file.FileVisitor;
@@ -115,29 +117,13 @@ class WxsFileBuilder {
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
         //Files
-        Element appDirRef = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
+        Element installDir = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
         FileTree fileTree = new UnionFileTree( setup.getSource(), msi.getSource() );
         fileTree.visit( new FileVisitor() {
             @Override
             public void visitFile( FileVisitDetails details ) {
-                Element parent = appDirRef;
                 String[] segemnts = details.getRelativePath().getSegments();
-                StringBuilder pathID = new StringBuilder();
-                for( int i = 0; i < segemnts.length - 1; i++ ) {
-                    String seg = segemnts[i];
-                    parent = getOrCreateChildById( parent, "Directory", seg, true );
-                    addAttributeIfNotExists( parent, "Name", seg );
-                    pathID.append( seg ).append( '_' );
-                }
-
-                String compID = pathID + "application";
-                components.add( compID );
-                Element component = getOrCreateChildById( parent, "Component", compID, true );
-                addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
-                Element fileEl = doc.createElement( "File" );
-                fileEl.setAttribute( "Id", pathID + details.getName() );
-                fileEl.setAttribute( "Source", details.getFile().getAbsolutePath() );
-                component.appendChild( fileEl );
+                addFile( installDir, details.getFile(), segemnts );
             }
 
             @Override
@@ -146,6 +132,7 @@ class WxsFileBuilder {
             }
         } );
 
+        addBundleJre( installDir );
         addGUI( product );
         addIcon( product );
 
@@ -162,6 +149,76 @@ class WxsFileBuilder {
         transformer.setOutputProperty( OutputKeys.INDENT, "yes" );
         transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "2" );
         transformer.transform( source, result );
+    }
+
+    /**
+     * Add a file to the setup 
+     * @param installDir The XML element of the install directory.
+     * @param file the file to add.
+     * @param segemnts the segments of the path in the target. The last segment contains the file name.
+     */
+    private void addFile( Element installDir, File file, String[] segemnts ) {
+        Document doc = installDir.getOwnerDocument();
+        Element parent = installDir;
+        StringBuilder pathID = new StringBuilder();
+        for( int i = 0; i < segemnts.length - 1; i++ ) {
+            String seg = segemnts[i];
+            parent = getOrCreateChildById( parent, "Directory", seg, true );
+            addAttributeIfNotExists( parent, "Name", seg );
+            pathID.append( seg ).append( '_' );
+        }
+
+        String compID = pathID + "application";
+        components.add( compID );
+        Element component = getOrCreateChildById( parent, "Component", compID, true );
+        addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
+        Element fileEl = doc.createElement( "File" );
+        String name = segemnts[segemnts.length - 1];
+        fileEl.setAttribute( "Id", pathID + id( name ) );
+        fileEl.setAttribute( "Source", file.getAbsolutePath() );
+        fileEl.setAttribute( "Name", name );
+        component.appendChild( fileEl );
+    }
+
+    /**
+     * Add all files in a directory.
+     * @param installDir The XML element of the install directory.
+     * @param dir the source directory
+     * @param baseLength the base length of the directory. This length will be cut from the absolute path.
+     * @param target the target directory
+     */
+    private void addDirectory( Element installDir, File dir, int baseLength, String target ) {
+        for( File file : dir.listFiles() ) {
+            if( file.isDirectory() ) {
+                addDirectory( installDir, file, baseLength, target );
+            } else {
+                String name = file.getAbsolutePath().substring( baseLength );
+                addFile( installDir, file, (target + name).split( "\\\\" ) );
+            }
+        }
+    }
+
+    /**
+     * Bundle a JRE if setup.
+     * 
+     * @param appDirRef the
+     */
+    private void addBundleJre( Element installDir ) {
+        Object jre = setup.getBundleJre();
+        if( jre == null ) {
+            return;
+        }
+        File jreDir = msi.getProject().file( jre );
+        if( !jreDir.isDirectory() ) {
+            throw new GradleException( "bundleJre can not solved to a directory: " + jreDir );
+        }
+        int baseLength = jreDir.getAbsolutePath().length();
+        String target = setup.getBundleJreTarget().replace( '/', '\\' );
+        if( target.endsWith( "\\" ) ) {
+            baseLength++;
+        }
+
+        addDirectory( installDir, jreDir, baseLength, target );
     }
 
     /**
@@ -205,7 +262,7 @@ class WxsFileBuilder {
      * Add an icon in Add/Remove Programs
      * 
      * @param product the product node in the XML.
-     * @param appDirRef 
+     * @param appDirRef
      * @throws IOException if an error occur on reading the image files
      */
     private void addIcon( Element product ) throws IOException {
@@ -311,5 +368,33 @@ class WxsFileBuilder {
             parent.insertBefore( child, first );
         }
         return child;
+    }
+
+    /**
+     * Create a valid id from string for the wxs file.
+     * 
+     * @param str possible id but with possible invalid characters
+     * @return a valid id
+     */
+    private String id( String str ) {
+        StringBuilder builder = null;
+        for( int i = 0; i < str.length(); i++ ) {
+            char ch = str.charAt( i );
+            if( (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || (ch == '_') || (ch == '.') ) {
+                continue;
+            }
+            if( builder == null ) {
+                builder = new StringBuilder();
+            }
+            builder.append( str.substring( builder.length(), i ) );
+            builder.append( '_' );
+        }
+        if( builder == null ) {
+            return str;
+        }
+        builder.append( str.substring( builder.length() ) );
+        builder.append( '_' );
+        builder.append( Math.abs( str.hashCode() ) );//add a hashcode to prevent name collision
+        return builder.toString();
     }
 }
