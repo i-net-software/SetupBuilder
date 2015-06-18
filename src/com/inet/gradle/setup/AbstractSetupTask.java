@@ -23,6 +23,7 @@ import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.TaskAction;
 
 /**
  * Base class for all setup task.
@@ -37,9 +38,18 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
 
     private String                 extension;
 
-    public AbstractSetupTask() {
+    public AbstractSetupTask( String extension ) {
+        this.extension = extension;
         this.rootSpec = (CopySpecInternal)getProject().copySpec( null );
     }
+
+    @TaskAction
+    public void action() {
+        build();
+        getProject().getArtifacts().add( "archives", getSetupFile() );
+    }
+
+    public abstract void build();
 
     public SetupBuilder getSetupBuilder() {
         if( setupBuilder == null ) {

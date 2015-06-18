@@ -16,7 +16,6 @@
 package com.inet.gradle.setup.msi;
 
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.api.tasks.TaskAction;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 
@@ -28,14 +27,12 @@ import com.inet.gradle.setup.AbstractSetupTask;
 public class Msi extends AbstractSetupTask {
 
     public Msi() {
-        setExtension( "msi" );
+        super( "msi" );
     }
 
-    @TaskAction
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
-        project.getArtifacts().add( "archives", getSetupFile() );
     }
 
 }
