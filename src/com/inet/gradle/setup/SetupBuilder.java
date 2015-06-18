@@ -46,6 +46,10 @@ public class SetupBuilder implements SetupSources {
 
     private Object                 icons;
 
+    private Object                 bundleJre;
+
+    private String                 bundleJreTarget;
+
     public SetupBuilder( Project project ) {
         this.project = project;
         this.rootSpec = (CopySpecInternal)project.copySpec( null );
@@ -117,7 +121,8 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Get the base name of the setup file. If not set then the project name is used. 
+     * Get the base name of the setup file. If not set then the project name is used.
+     * 
      * @return the base name
      */
     public String getBaseName() {
@@ -132,8 +137,8 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Get the name of the setup file without extension. 
-     * If not set then baseName-version is used. 
+     * Get the name of the setup file without extension. If not set then baseName-version is used.
+     * 
      * @return the setup file name
      */
     public String getSetupName() {
@@ -170,5 +175,29 @@ public class SetupBuilder implements SetupSources {
      */
     public void setIcons( Object icons ) {
         this.icons = icons;
+    }
+
+    public Object getBundleJre() {
+        return bundleJre;
+    }
+
+    public void setBundleJre( Object bundleJre ) {
+        this.bundleJre = bundleJre;
+    }
+
+    public String getBundleJreTarget() {
+        if( bundleJreTarget != null ) {
+            return bundleJreTarget;
+        }
+        return "jre";
+    }
+
+    /**
+     * The target directory in the install directory for a bundled JRE. The default is "jre".
+     * 
+     * @param bundleJreTarget the new value
+     */
+    public void setBundleJreTarget( String bundleJreTarget ) {
+        this.bundleJreTarget = bundleJreTarget;
     }
 }
