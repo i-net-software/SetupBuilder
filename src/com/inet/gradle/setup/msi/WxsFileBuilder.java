@@ -208,9 +208,14 @@ class WxsFileBuilder {
         if( jre == null ) {
             return;
         }
-        File jreDir = msi.getProject().file( jre );
-        if( !jreDir.isDirectory() ) {
-            throw new GradleException( "bundleJre can not solved to a directory: " + jreDir );
+        File jreDir;
+        try {
+            jreDir = msi.getProject().file( jre );
+        } catch( Exception e ) {
+            jreDir = null;
+        }
+        if( jreDir == null || !jreDir.isDirectory() ) {
+            throw new GradleException( "bundleJre can not solved to a directory: " + jre );
         }
         int baseLength = jreDir.getAbsolutePath().length();
         String target = setup.getBundleJreTarget().replace( '/', '\\' );
