@@ -20,7 +20,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -214,9 +216,33 @@ class WxsFileBuilder {
         } catch( Exception e ) {
             jreDir = null;
         }
+
         if( jreDir == null || !jreDir.isDirectory() ) {
-            throw new GradleException( "bundleJre can not solved to a directory: " + jre );
+            // bundleJRE is not a directory, we interpret it as a version number
+            String programFiles = System.getenv( msi.is64Bit() ? "ProgramW6432" : "ProgramFiles(x86)" );
+            if( programFiles == null ) {
+                throw new GradleException( "Environment ProgramFiles not found." );
+            }
+            File java = new File( new File(programFiles), "Java" );
+            if( !java.isDirectory() ) {
+                throw new GradleException( "No installed Java VMs found: " + java );
+            }
+            ArrayList<File> versions = new ArrayList<File>();
+            String javaVersion = "jre" + jre;
+            for( File file : java.listFiles() ) {
+                if( file.isDirectory() && file.getName().startsWith( javaVersion ) ) {
+                    versions.add( file );
+                }
+            }
+            if( versions.size() == 0 ) {
+                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java );
+            }
+            Collections.sort( versions );
+            jreDir = versions.get( versions.size()-1 );
         }
+
+        msi.getProject().getLogger().lifecycle( "\tbundle jre: " + jreDir );
+
         int baseLength = jreDir.getAbsolutePath().length();
         String target = setup.getBundleJreTarget().replace( '/', '\\' );
         if( target.endsWith( "\\" ) ) {
@@ -227,7 +253,7 @@ class WxsFileBuilder {
     }
 
     /**
-     * Add the GUI to the Setup
+     * Add the GUI to the Setup.
      * 
      * @param product the product node in the XML.
      * @throws Exception if any exception occur
