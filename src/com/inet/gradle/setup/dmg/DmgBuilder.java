@@ -17,10 +17,19 @@ package com.inet.gradle.setup.dmg;
 
 import java.io.File;
 
+import org.gradle.api.file.FileTree;
+import org.gradle.api.file.FileVisitDetails;
+import org.gradle.api.file.FileVisitor;
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.file.UnionFileTree;
 
 import com.inet.gradle.setup.SetupBuilder;
 
+/**
+ * Build a DMG image for OSX.
+ * 
+ * @author Volker Berlin
+ */
 public class DmgBuilder {
 
     private final Dmg          dmg;
@@ -45,7 +54,26 @@ public class DmgBuilder {
     }
 
     public void build() {
-        throw new RuntimeException("Currently not implemented");
+        buildDir = new File( dmg.getProject().getBuildDir(), "setup/dmg" );
+
+        copyFiles();
     }
 
+    /**
+     * Copy the files to the build directory.
+     */
+    private void copyFiles() {
+        FileTree fileTree = new UnionFileTree( setup.getSource(), dmg.getSource() );
+        fileTree.visit( new FileVisitor() {
+            @Override
+            public void visitFile( FileVisitDetails details ) {
+                details.copyTo( details.getRelativePath().getFile( buildDir ) );
+            }
+
+            @Override
+            public void visitDir( FileVisitDetails arg0 ) {
+                //ignore
+            }
+        } );
+    }
 }
