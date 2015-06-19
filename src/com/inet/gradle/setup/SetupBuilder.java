@@ -50,6 +50,10 @@ public class SetupBuilder implements SetupSources {
 
     private String                 bundleJreTarget;
 
+    private String                 mainClass;
+
+    private String                 mainJar;
+
     public SetupBuilder( Project project ) {
         this.project = project;
         this.rootSpec = (CopySpecInternal)project.copySpec( null );
@@ -216,5 +220,41 @@ public class SetupBuilder implements SetupSources {
      */
     public void setBundleJreTarget( String bundleJreTarget ) {
         this.bundleJreTarget = bundleJreTarget;
+    }
+
+    /**
+     * Get the main class.
+     * 
+     * @return the class name
+     */
+    public String getMainClass() {
+        return mainClass;
+    }
+
+    /**
+     * Set the main class of the Java application.
+     * 
+     * @param mainClass the class name
+     */
+    public void setMainClass( String mainClass ) {
+        this.mainClass = mainClass;
+    }
+
+    /**
+     * Get the main jar file.
+     * 
+     * @return the main jar
+     */
+    public String getMainJar() {
+        return mainJar;
+    }
+
+    /**
+     * Set the jar which contains the main class.
+     * 
+     * @param mainJar the main jar file
+     */
+    public void setMainJar( String mainJar ) {
+        this.mainJar = mainJar;
     }
 }
