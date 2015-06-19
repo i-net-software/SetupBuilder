@@ -17,6 +17,7 @@ package com.inet.gradle.setup.dmg;
 
 import java.io.File;
 
+import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
 import org.gradle.api.file.FileVisitor;
@@ -24,6 +25,8 @@ import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.file.UnionFileTree;
 
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.image.ImageFactory;
+import com.oracle.appbundler.AppBundlerTask;
 
 /**
  * Build a DMG image for OSX.
@@ -54,20 +57,54 @@ public class DmgBuilder {
     }
 
     public void build() {
-        buildDir = new File( dmg.getProject().getBuildDir(), "setup/dmg" );
+        try {
+            Project project = dmg.getProject();
+            buildDir = new File( project.getBuildDir(), "setup/dmg" );
+            buildDir.mkdirs();
 
-        copyFiles();
+            String name = setup.getBaseName();
+            AppBundlerTask appBundler = new AppBundlerTask();
+            appBundler.setOutputDirectory( buildDir );
+            appBundler.setName( name );
+            appBundler.setDisplayName( setup.getApplication() );
+
+            String version = setup.getVersion();
+            appBundler.setVersion( version );
+            int idx = version.indexOf( '.' );
+            if( idx >= 0 ) {
+                idx = version.indexOf( '.', idx + 1 );
+                if( idx >= 0 ) {
+                    version = version.substring( 0, idx );
+                }
+            }
+            appBundler.setShortVersion( version );
+
+            appBundler.setExecutableName( setup.getBaseName() );
+            appBundler.setIdentifier( setup.getMainClass() );
+            appBundler.setMainClassName( setup.getMainClass() );
+            appBundler.setJarLauncherName( setup.getMainJar() );
+            appBundler.setCopyright( setup.getVendor() );
+            appBundler.setIcon( ImageFactory.getImageFile( project, setup.getIcons(), buildDir, "icns" ) );
+            appBundler.execute();
+
+            copyFiles( new File( buildDir, name + ".app/Contents/Java" ) );
+        } catch( RuntimeException ex ) {
+            throw ex;
+        } catch( Exception ex ) {
+            throw new RuntimeException( ex );
+        }
+
     }
 
     /**
      * Copy the files to the build directory.
      */
-    private void copyFiles() {
+    private void copyFiles( File target ) {
         FileTree fileTree = new UnionFileTree( setup.getSource(), dmg.getSource() );
         fileTree.visit( new FileVisitor() {
             @Override
             public void visitFile( FileVisitDetails details ) {
-                details.copyTo( details.getRelativePath().getFile( buildDir ) );
+                details.copyTo( details.getRelativePath().getFile( target ) );
             }
 
             @Override
