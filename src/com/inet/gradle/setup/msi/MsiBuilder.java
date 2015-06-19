@@ -60,10 +60,6 @@ class MsiBuilder {
             new WxsFileBuilder( msi, setup, wxsFile, buildDir ).build();
             candle();
             light();
-
-            if( !wxsFile.exists() ) {
-                throw new GradleException( "Setup file not created: " + wxsFile );
-            }
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {

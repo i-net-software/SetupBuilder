@@ -18,6 +18,7 @@ package com.inet.gradle.setup;
 import java.io.File;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -49,7 +50,11 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
     @TaskAction
     public void action() {
         build();
-        getProject().getArtifacts().add( "archives", getSetupFile() );
+        File setupFile = getSetupFile();
+        if( !setupFile.exists() ) {
+            throw new GradleException( "Setup file was not created: " + setupFile );
+        }
+        getProject().getArtifacts().add( "archives", setupFile );
     }
 
     /**
