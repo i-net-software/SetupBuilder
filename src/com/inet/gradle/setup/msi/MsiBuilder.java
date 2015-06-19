@@ -81,7 +81,7 @@ class MsiBuilder {
         parameters.add( 0, getToolPath( tool ) );
 
         // print command line to the log
-        StringBuilder log = new StringBuilder();
+        StringBuilder log = new StringBuilder("\t");
         for( String para : parameters ) {
             log.append( '\"' ).append( para );
             if( para.endsWith( "\\" ) ) {
@@ -143,10 +143,10 @@ class MsiBuilder {
     private String getToolPath( String tool ) {
         String programFilesStr = System.getenv( "ProgramFiles(x86)" );
         if( programFilesStr == null ) {
-            programFilesStr = System.getenv( "ProgramFiles" );
+            programFilesStr = System.getenv( "ProgramW6432" );
         }
         if( programFilesStr == null ) {
-            throw new GradleException( "Environment ProgramFiles not found." );
+            throw new GradleException( "Environment variable ProgramFiles not found." );
         }
 
         File programFiles = new File( programFilesStr );
