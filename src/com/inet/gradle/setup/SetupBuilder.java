@@ -177,14 +177,31 @@ public class SetupBuilder implements SetupSources {
         this.icons = icons;
     }
 
+    /**
+     * Get the bundle JRE value.
+     * 
+     * @return the value
+     */
     public Object getBundleJre() {
         return bundleJre;
     }
 
+    /**
+     * Add a Java VM into your setup. The resulting behavior depends on the platform. This can be a version or a
+     * directory to a installed Java VM.
+     * 
+     * @param bundleJre
+     * @see #setBundleJreTarget(String)
+     */
     public void setBundleJre( Object bundleJre ) {
         this.bundleJre = bundleJre;
     }
 
+    /**
+     * Get the target for a bundle JRE.
+     * 
+     * @return the target
+     */
     public String getBundleJreTarget() {
         if( bundleJreTarget != null ) {
             return bundleJreTarget;
