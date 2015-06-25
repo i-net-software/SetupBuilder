@@ -44,8 +44,12 @@ public class DebBuilder {
         this.fileResolver = fileResolver;
     }
 
+    /**
+     * executes all necessary steps from copying to building the Debian package
+     */
     public void build() {
-        throw new RuntimeException("Currently not implemented");
+    	buildDir = deb.getTemporaryDir();    	
+    	deb.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
     }
 
 }

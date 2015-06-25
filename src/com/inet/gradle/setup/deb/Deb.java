@@ -15,6 +15,8 @@
  */
 package com.inet.gradle.setup.deb;
 
+import java.io.File;
+
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
@@ -38,5 +40,13 @@ public class Deb extends AbstractSetupTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new DebBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void copyTo(File target) {
+    	super.copyTo(target);
     }
 }
