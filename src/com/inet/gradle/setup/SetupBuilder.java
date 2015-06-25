@@ -32,6 +32,8 @@ public class SetupBuilder implements SetupSources {
 
     private final CopySpecInternal rootSpec;
 
+    private Object                 destinationDir; 
+
     private String                 vendor;
 
     private String                 application;
@@ -59,7 +61,7 @@ public class SetupBuilder implements SetupSources {
         this.rootSpec = (CopySpecInternal)project.copySpec( null );
 
         //init default location
-        into( new File( "distributions" ) );
+        setDestinationDir( new File( "distributions" ) );
     }
 
     @Override
@@ -71,7 +73,7 @@ public class SetupBuilder implements SetupSources {
      * Override to remove the annotation OutputDirectories in the Copy task. {@inheritDoc}
      */
     public File getDestinationDir() {
-        return rootSpec.buildRootResolver().getDestPath().getFile( project.getBuildDir() );
+        return project.file( destinationDir );
     }
 
     public FileTree getSource() {
@@ -79,12 +81,12 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Sets the directory to copy files into. This is the same as calling {@link #into(Object)} on this task.
+     * Sets the destination of this task.
      *
      * @param destinationDir The destination directory. Must not be null.
      */
-    public void setDestinationDir( File destinationDir ) {
-        into( destinationDir );
+    public void setDestinationDir( Object destinationDir ) {
+        this.destinationDir = destinationDir;
     }
 
     public String getVendor() {
