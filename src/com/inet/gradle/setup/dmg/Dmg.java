@@ -15,6 +15,8 @@
  */
 package com.inet.gradle.setup.dmg;
 
+import java.io.File;
+
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
@@ -26,6 +28,9 @@ import com.inet.gradle.setup.AbstractSetupTask;
  */
 public class Dmg extends AbstractSetupTask {
 
+    /**
+     * Create the task.
+     */
     public Dmg() {
         super( "dmg" );
     }
@@ -37,5 +42,13 @@ public class Dmg extends AbstractSetupTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new DmgBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void copyTo( File target ) {
+        super.copyTo( target );
     }
 }

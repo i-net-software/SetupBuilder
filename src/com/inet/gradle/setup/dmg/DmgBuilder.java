@@ -18,11 +18,7 @@ package com.inet.gradle.setup.dmg;
 import java.io.File;
 
 import org.gradle.api.Project;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.file.FileVisitDetails;
-import org.gradle.api.file.FileVisitor;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.file.UnionFileTree;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
@@ -59,8 +55,7 @@ public class DmgBuilder {
     public void build() {
         try {
             Project project = dmg.getProject();
-            buildDir = new File( project.getBuildDir(), "setup/dmg" );
-            buildDir.mkdirs();
+            buildDir = dmg.getTemporaryDir();
 
             String name = setup.getBaseName();
             AppBundlerTask appBundler = new AppBundlerTask();
@@ -87,30 +82,12 @@ public class DmgBuilder {
             appBundler.setIcon( ImageFactory.getImageFile( project, setup.getIcons(), buildDir, "icns" ) );
             appBundler.execute();
 
-            copyFiles( new File( buildDir, name + ".app/Contents/Java" ) );
+            dmg.copyTo( new File( buildDir, name + ".app/Contents/Java" ) );
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
         }
-
     }
 
-    /**
-     * Copy the files to the build directory.
-     */
-    private void copyFiles( File target ) {
-        FileTree fileTree = new UnionFileTree( setup.getSource(), dmg.getSource() );
-        fileTree.visit( new FileVisitor() {
-            @Override
-            public void visitFile( FileVisitDetails details ) {
-                details.copyTo( details.getRelativePath().getFile( target ) );
-            }
-
-            @Override
-            public void visitDir( FileVisitDetails arg0 ) {
-                //ignore
-            }
-        } );
-    }
 }
