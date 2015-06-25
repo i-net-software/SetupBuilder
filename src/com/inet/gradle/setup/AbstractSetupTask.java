@@ -17,14 +17,27 @@ package com.inet.gradle.setup;
 
 import java.io.File;
 
+import javax.inject.Inject;
+
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.FileTree;
+import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
+import org.gradle.api.internal.file.FileLookup;
+import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.file.copy.CopyAction;
+import org.gradle.api.internal.file.copy.CopyActionExecuter;
+import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
+import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.internal.tasks.SimpleWorkResult;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.WorkResult;
+import org.gradle.internal.nativeplatform.filesystem.FileSystem;
+import org.gradle.internal.reflect.Instantiator;
 
 /**
  * Base class for all setup task.
@@ -55,6 +68,64 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
             throw new GradleException( "Setup file was not created: " + setupFile );
         }
         getProject().getArtifacts().add( "archives", setupFile );
+    }
+
+    /**
+     * Copy all files of this task to the given target.
+     * @param target the target directory
+     */
+    protected void copyTo( File target ) {
+        processFiles( new CopyActionProcessingStreamAction() {
+            @Override
+            public void processFile( FileCopyDetailsInternal details ) {
+                details.copyTo( details.getRelativePath().getFile( target ) );
+            }
+        } );
+    }
+
+    /**
+     * Handle all files of this task.
+     * @param action the action that should be process for every file
+     */
+    protected void processFiles( CopyActionProcessingStreamAction action ) {
+        processFiles( action, getSetupBuilder().getCopySpec() );
+        processFiles( action, rootSpec );
+    }
+
+    /**
+     * Handle all files of the CopySpec.
+     * @param action the action that should be process for every file
+     */
+    private void processFiles( CopyActionProcessingStreamAction action, CopySpecInternal copySpec ) {
+        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
+        CopyAction copyAction = new CopyAction() {
+            @Override
+            public WorkResult execute( CopyActionProcessingStream stream ) {
+                stream.process( action );
+                return new SimpleWorkResult( true );
+            }
+        };
+        copyActionExecuter.execute( copySpec, copyAction );
+    }
+
+    @Inject
+    protected Instantiator getInstantiator() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected FileSystem getFileSystem() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected FileResolver getFileResolver() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected FileLookup getFileLookup() {
+        throw new UnsupportedOperationException();
     }
 
     /**
