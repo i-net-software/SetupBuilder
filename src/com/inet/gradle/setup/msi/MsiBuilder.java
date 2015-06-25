@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.process.internal.DefaultExecAction;
-import org.gradle.util.GUtil;
 
 import com.inet.gradle.setup.SetupBuilder;
 
@@ -55,7 +54,7 @@ class MsiBuilder {
 
     void build() {
         try {
-            buildDir = new File( msi.getProject().getBuildDir(), "setup/msi" );
+            buildDir = msi.getTemporaryDir();
             File wxsFile = getWxsFile();
             new WxsFileBuilder( msi, setup, wxsFile, buildDir ).build();
             candle();
