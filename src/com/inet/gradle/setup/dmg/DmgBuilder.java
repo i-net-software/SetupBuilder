@@ -15,13 +15,16 @@
  */
 package com.inet.gradle.setup.dmg;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
 import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DocumentType;
@@ -112,16 +115,101 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         }
     }
 
-    private void createBinary() {
-        setFile();
+    /**
+     * Create the binary with native tools.
+     * 
+     * @throws IOException
+     */
+    private void createBinary() throws IOException {
+        setVolumeIcon();
+        createTempImage();
+        mountImage();
+        applescript();
     }
 
-    private void setFile() {
+    /**
+     * Call SetFile to set the volume icon.
+     */
+    private void setVolumeIcon() {
         ArrayList<String> command = new ArrayList<>();
         command.add( "SetFile" );
         command.add( "-c" );
         command.add( "icnC" );
         command.add( buildDir + "/.VolumeIcon.icns" );
         exec( command );
+    }
+
+    /**
+     * Call hdiutil to create a temporary image.
+     */
+    private void createTempImage() {
+        long size = calcDirectorySize( buildDir );
+        size = ((size + 0x100000) / 0x100000) * 0x100000; // size in MB
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "create" );
+        command.add( "-srcfolder" );
+        command.add( buildDir.toString() );
+        command.add( "-volname" );
+        command.add( setup.getApplication() );
+        command.add( "-fs" );
+        command.add( "HFS+" );
+        command.add( "-fsargs" );
+        command.add( "-c c=64,a=16,e=16" );
+        command.add( "-format" );
+        command.add( "UDRW" );
+        command.add( "-size" );
+        command.add( size + "M" );
+        command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
+        exec( command );
+    }
+
+    /**
+     * Call hdiutil to mount temporary image
+     */
+    private void mountImage() {
+        long size = calcDirectorySize( buildDir );
+        size = ((size + 0x100000) / 0x100000) * 0x100000; // size in MB
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "attach" );
+        command.add( "-readwrite" );
+        command.add( "-noverify" );
+        command.add( "-noautoopen" );
+        command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
+        exec( command );
+    }
+
+    private void applescript() throws IOException {
+        InputStream input = getClass().getResourceAsStream( "applescript.txt" );
+        byte[] bytes = new byte[input.available()];
+        input.read( bytes );
+        input.close();
+        String script = new String( bytes, StandardCharsets.UTF_8 );
+        script.replace( "${title}", setup.getApplication() );
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/osascript" );
+        exec( command, new ByteArrayInputStream( script.getBytes( StandardCharsets.UTF_8 ) ) );
+    }
+
+    /**
+     * Calculate the usage size of a directory
+     * 
+     * @param dir the directory
+     * @return the size in bytes
+     */
+    private long calcDirectorySize( File dir ) {
+        long size = 0;
+        for( File file : dir.listFiles() ) {
+            if( file.isDirectory() ) {
+                size += calcDirectorySize( file ) + 0x10000; // add 64 KB
+            } else {
+                long fileSize = file.length();
+                fileSize = ((fileSize + 0xFFFF) / 0x10000) * 0x10000; //round to 64KB
+                size += fileSize;
+            }
+        }
+        return size;
     }
 }

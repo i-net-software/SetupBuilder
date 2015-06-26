@@ -1,0 +1,41 @@
+try
+    tell application "Finder"
+        
+        #Prepare centering on screen
+        set screenSize to bounds of window of desktop
+        set screenWidth to item 3 of screenSize
+        set screenHeight to item 4 of screenSize
+        
+        set windowWidth to 568
+        set windowHeight to 321
+        set iconSize to 128
+        
+        tell disk "${title}"
+            open
+            set current view of container window to icon view
+            set toolbar visible of container window to false
+            set statusbar visible of container window to false
+
+            # Center on Screen
+            set bounds of container window to {(screenWidth - windowWidth) / 2.0, (screenHeight - windowHeight) / 2.0, (screenWidth + windowWidth) / 2.0, (screenHeight - windowHeight) / 2.0 + windowHeight}
+
+            set theViewOptions to the icon view options of container window
+            set arrangement of theViewOptions to not arranged
+
+            set icon size of theViewOptions to iconSize
+            set text size of theViewOptions to 16
+
+            set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0
+            set appXPos to windowWidth - ourXPos
+            set yPos to windowHeight - 1.5 * iconSize
+
+            set position of item "i-net Clear Reports Designer.app" of container window to {ourXPos, yPos}
+            make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
+            set position of item "Applications" of container window to {appXPos, yPos}
+            set background picture of theViewOptions to file ".resources:background-bottom.jpg"
+            update without registering applications
+            close
+            open
+        end tell
+    end tell
+end try
