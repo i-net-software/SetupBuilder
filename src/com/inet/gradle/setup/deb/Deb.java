@@ -28,6 +28,22 @@ import com.inet.gradle.setup.AbstractSetupTask;
  */
 public class Deb extends AbstractSetupTask {
 
+	
+	private String                 packages;
+
+    private String                 section;
+
+    private String                 priority;
+
+    private String                 architecture;
+
+    private String                 installSize;
+    
+    private String                 recommends;
+    
+    private String                 depends;
+    
+	
     public Deb() {
         super( "deb" );
     }
@@ -49,4 +65,74 @@ public class Deb extends AbstractSetupTask {
     protected void copyTo(File target) {
     	super.copyTo(target);
     }
+
+
+	public String getPackages() {
+		return packages;
+	}
+
+
+	public void setPackages(String packages) {
+		this.packages = packages;
+	}
+
+
+	public String getSection() {
+		return section;
+	}
+
+
+	public void setSection(String section) {
+		this.section = section;
+	}
+
+
+	public String getPriority() {
+		return priority;
+	}
+
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+
+	public String getArchitecture() {
+		return architecture;
+	}
+
+
+	public void setArchitecture(String architecture) {
+		this.architecture = architecture;
+	}
+
+
+	public String getInstallSize() {
+		return installSize;
+	}
+
+
+	public void setInstallSize(String installSize) {
+		this.installSize = installSize;
+	}
+
+
+	public String getRecommends() {
+		return recommends;
+	}
+
+
+	public void setRecommends(String recommends) {
+		this.recommends = recommends;
+	}
+
+
+	public String getDepends() {
+		return depends;
+	}
+
+
+	public void setDepends(String depends) {
+		this.depends = depends;
+	}
 }

@@ -19,17 +19,10 @@ import java.io.File;
 
 import org.gradle.api.internal.file.FileResolver;
 
+import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.SetupBuilder;
 
-public class DebBuilder {
-
-    private final Deb          deb;
-
-    private final SetupBuilder setup;
-
-    private FileResolver       fileResolver;
-
-    private File               buildDir;
+public class DebBuilder extends AbstractBuilder<Deb> {
 
     /**
      * Create a new instance
@@ -39,17 +32,16 @@ public class DebBuilder {
      * @param fileResolver the file Resolver
      */
     public DebBuilder( Deb deb, SetupBuilder setup, FileResolver fileResolver ) {
-        this.deb = deb;
-        this.setup = setup;
-        this.fileResolver = fileResolver;
+        super( deb, setup, fileResolver );
     }
 
     /**
      * executes all necessary steps from copying to building the Debian package
      */
     public void build() {
-    	buildDir = deb.getTemporaryDir();    	
-    	deb.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
+    	task.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
+    	
+    	new DebConfigFileBuilder(deb, setup, buildDir);
     }
 
 }
