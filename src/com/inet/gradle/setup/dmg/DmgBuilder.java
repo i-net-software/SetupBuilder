@@ -144,7 +144,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      */
     private void createTempImage() {
         long size = calcDirectorySize( buildDir );
-        size = ((size + 0x100000) / 0x100000) * 0x100000; // size in MB
+        size = (size + 0x100000) / 0x100000; // size in MB
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "create" );
