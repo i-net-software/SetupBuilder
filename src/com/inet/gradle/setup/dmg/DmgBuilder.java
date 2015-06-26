@@ -16,9 +16,11 @@
 package com.inet.gradle.setup.dmg;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -123,8 +125,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createBinary() throws IOException {
         setVolumeIcon();
         createTempImage();
-        mountImage();
+        attach();
         applescript();
+
+        detach();
+        finalImage();
+        unflatten();
+
+        new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
 
     /**
@@ -166,8 +174,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     /**
      * Call hdiutil to mount temporary image
+     * 
+     * @throws UnsupportedEncodingException
      */
-    private void mountImage() {
+    private void attach() throws IOException {
         long size = calcDirectorySize( buildDir );
         size = ((size + 0x100000) / 0x100000) * 0x100000; // size in MB
         ArrayList<String> command = new ArrayList<>();
@@ -177,7 +187,12 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "-noverify" );
         command.add( "-noautoopen" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
-        exec( command );
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exec( command, null, baos );
+
+        String console = baos.toString( "UTF8" );
+        task.getProject().getLogger().lifecycle( console );
     }
 
     private void applescript() throws IOException {
@@ -186,11 +201,61 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         input.read( bytes );
         input.close();
         String script = new String( bytes, StandardCharsets.UTF_8 );
-        script.replace( "${title}", setup.getApplication() );
+        script = script.replace( "${title}", setup.getApplication() );
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
-        exec( command, new ByteArrayInputStream( script.getBytes( StandardCharsets.UTF_8 ) ) );
+        exec( command, new ByteArrayInputStream( script.getBytes( StandardCharsets.UTF_8 ) ), null );
+    }
+
+    /**
+     * Call hdiutil to detach temporary image
+     */
+    private void detach() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "detach" );
+        command.add( setup.getApplication() );
+        exec( command );
+    }
+
+    /**
+     * convert to final image
+     */
+    private void finalImage() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "convert" );
+        command.add( "-quiet" );
+        command.add( "-format" );
+        command.add( "UDZO" );
+        command.add( "-imagekey" );
+        command.add( "zlib-level=9" );
+        command.add( "-o" );
+        command.add( task.getSetupFile().toString() );
+        exec( command );
+    }
+
+    /**
+     * unflatten for SLA
+     */
+    private void unflatten() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "unflatten" );
+        command.add( task.getSetupFile().toString() );
+        exec( command );
+    }
+
+    /**
+     * re-flatten for SLA
+     */
+    private void flatten() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "flatten" );
+        command.add( task.getSetupFile().toString() );
+        exec( command );
     }
 
     /**

@@ -17,6 +17,7 @@ package com.inet.gradle.setup;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
@@ -53,10 +54,10 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
      * @param parameters the parameters
      */
     protected void exec( ArrayList<String> parameters ) {
-        exec( parameters, null );
+        exec( parameters, null, null );
     }
 
-    protected void exec( ArrayList<String> parameters, InputStream input ) {
+    protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output ) {
         // print command line to the log
         StringBuilder log = new StringBuilder( "\t" );
         for( String para : parameters ) {
@@ -74,6 +75,9 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         if( input != null ) {
             action.setStandardInput( input );
         }
-        action.execute();
+        if( output != null ) {
+            action.setStandardOutput( output );
+        }
+       action.execute();
     }
 }
