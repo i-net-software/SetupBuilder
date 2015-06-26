@@ -15,16 +15,10 @@
  */
 package com.inet.gradle.setup.deb;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import com.inet.gradle.setup.SetupBuilder;
 
@@ -43,13 +37,21 @@ import com.inet.gradle.setup.SetupBuilder;
  */
 class DebConfigFileBuilder {
 
-    private final Deb          deb;
+    private static final String NEWLINE = "\n";
+
+	private final Deb          deb;
 
     private final SetupBuilder setup;
 
     private File               buildDir;
 
 
+    /**
+     * the constructor setting the fields
+     * @param deb the task for the debian package
+     * @param setup the generic task for all setups
+     * @param buildDir the directory to build the package in
+     */
     DebConfigFileBuilder( Deb deb, SetupBuilder setup, File buildDir ) {
         this.deb = deb;
         this.setup = setup;
@@ -57,25 +59,20 @@ class DebConfigFileBuilder {
     }
 
     /**
-     * Create *.wxs file based on the settings in the task.
+     * Create the configuration files for the Debian package based on the settings in the task.
      * 
-     * @throws ParserConfigurationException
      * @throws Exception
      */
     void build() throws Exception {
     	
     	createControlFile();
-    	
-                // Product node
-//        Element product = getOrCreateChildById( wix, "Product", "*", false );
-//        addAttributeIfNotExists( product, "Language", "1033" );
-//        addAttributeIfNotExists( product, "Manufacturer", setup.getVendor() );
-//        addAttributeIfNotExists( product, "Name", setup.getApplication() );
-//        addAttributeIfNotExists( product, "Version", setup.getVersion() );
-//        addAttributeIfNotExists( product, "UpgradeCode", UUID.randomUUID().toString() );
 
     }
 
+    /**
+     * 
+     * @throws IOException if 
+     */
 	private void createControlFile() throws IOException {
 		if(buildDir.isDirectory()) {
 			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
@@ -86,24 +83,22 @@ class DebConfigFileBuilder {
 		
 		FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;
-		
+
 		try {
 			File control = new File(buildDir.getAbsolutePath() + File.separatorChar + "control");
 			fileoutput = new FileOutputStream(control);
 			controlWriter = new OutputStreamWriter(fileoutput, "UTF-8");
 			
-			
-			
-			controlWriter.write("Package: " + deb.getPackages()); // Package muss noch implementiert werden
-			controlWriter.write("Version: " + setup.getVersion());
-			controlWriter.write("Section: " + deb.getSection());
-			controlWriter.write("Priority: " + deb.getPriority());
-			controlWriter.write("Architecture: " + deb.getArchitecture());
-			controlWriter.write("Installed-Size: " + deb.getInstallSize());
-			controlWriter.write("Recommends: " + deb.getRecommends());
-			controlWriter.write("Depends: " + deb.getDepends());
-			controlWriter.write("Maintainer: " + setup.getVendor());
-			controlWriter.write("Description: " + deb.getDescription());
+			putPackage(controlWriter);
+			putVersion(controlWriter);
+			putSection(controlWriter);
+			putPriority(controlWriter);
+			putArchitecture(controlWriter);
+			putInstallSize(controlWriter);
+			putRecommends(controlWriter);
+			putDepends(controlWriter);
+			putMaintainer(controlWriter);
+			putDescription(controlWriter);
 
 			controlWriter.flush();
 			
@@ -125,6 +120,104 @@ class DebConfigFileBuilder {
 		}
 		
 		
+	}
+
+	/**
+	 * Write to description to the file. If no
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putDescription(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Description: " + deb.getDescription() + NEWLINE);
+	}
+
+	/**
+	 * Write to maintainer to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putMaintainer(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Maintainer: " + setup.getVendor() + NEWLINE);
+	}
+	/**
+	 * Write to dependencies to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putDepends(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Depends: " + deb.getDepends() + NEWLINE);
+	}
+	/**
+	 * Write to recommends to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putRecommends(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Recommends: " + deb.getRecommends() + NEWLINE);
+	}
+
+	/**
+	 * Write to installation size to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putInstallSize(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Installed-Size: " + deb.getInstallSize() + NEWLINE);
+	}
+
+	/**
+	 * Write to architecture to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putArchitecture(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Architecture: " + deb.getArchitecture() + NEWLINE);
+	}
+
+	/**
+	 * Write to priority to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putPriority(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Priority: " + deb.getPriority() + NEWLINE);
+	}
+
+	/**
+	 * Write to section to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putSection(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Section: " + deb.getSection() + NEWLINE);
+	}
+
+	/**
+	 * Write to version to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putVersion(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Version: " + setup.getVersion() + NEWLINE);
+	}
+
+	/**
+	 * Write to package to the file
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putPackage(OutputStreamWriter controlWriter)
+			throws IOException {
+		controlWriter.write("Package: " + deb.getPackages() + NEWLINE);
 	}
 
 }
