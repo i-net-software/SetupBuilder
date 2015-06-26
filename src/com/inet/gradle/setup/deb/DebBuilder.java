@@ -40,8 +40,11 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      */
     public void build() {
     	task.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
+<<<<<<< HEAD
     	
     	new DebConfigFileBuilder(deb, setup, buildDir);
+=======
+>>>>>>> branch 'master' of https://github.com/i-net-software/SetupBuilder.git
     }
 
 }

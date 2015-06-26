@@ -22,6 +22,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.process.internal.DefaultExecAction;
 
+import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -29,15 +30,7 @@ import com.inet.gradle.setup.SetupBuilder;
  * 
  * @author Volker Berlin
  */
-class MsiBuilder {
-
-    private final Msi          msi;
-
-    private final SetupBuilder setup;
-
-    private FileResolver       fileResolver;
-
-    private File               buildDir;
+class MsiBuilder extends AbstractBuilder<Msi> {
 
     /**
      * Create a new instance
@@ -47,16 +40,13 @@ class MsiBuilder {
      * @param fileResolver the file Resolver
      */
     MsiBuilder( Msi msi, SetupBuilder setup, FileResolver fileResolver ) {
-        this.msi = msi;
-        this.setup = setup;
-        this.fileResolver = fileResolver;
+        super( msi, setup, fileResolver );
     }
 
     void build() {
         try {
-            buildDir = msi.getTemporaryDir();
             File wxsFile = getWxsFile();
-            new WxsFileBuilder( msi, setup, wxsFile, buildDir ).build();
+            new WxsFileBuilder( task, setup, wxsFile, buildDir ).build();
             candle();
             light();
         } catch( RuntimeException ex ) {
@@ -74,22 +64,7 @@ class MsiBuilder {
      */
     private void callWixTool( String tool, ArrayList<String> parameters ) {
         parameters.add( 0, getToolPath( tool ) );
-
-        // print command line to the log
-        StringBuilder log = new StringBuilder("\t");
-        for( String para : parameters ) {
-            log.append( '\"' ).append( para );
-            if( para.endsWith( "\\" ) ) {
-                log.append( '\\' );
-            }
-            log.append( "\" " );
-        }
-        msi.getProject().getLogger().lifecycle( log.toString() );
-
-        DefaultExecAction action = new DefaultExecAction( fileResolver );
-        action.setCommandLine( parameters );
-        action.setWorkingDir( buildDir );
-        action.execute();
+        exec( parameters );
     }
 
     /**
@@ -98,7 +73,7 @@ class MsiBuilder {
     private void candle() {
         ArrayList<String> command = new ArrayList<>();
         command.add( "-arch" );
-        command.add( msi.getArch() );
+        command.add( task.getArch() );
         command.add( "-out" );
         command.add( buildDir.getAbsolutePath() + '\\' );
         command.add( getWxsFile().getAbsolutePath() );

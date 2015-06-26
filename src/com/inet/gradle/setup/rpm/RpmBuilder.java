@@ -15,21 +15,12 @@
  */
 package com.inet.gradle.setup.rpm;
 
-import java.io.File;
-
 import org.gradle.api.internal.file.FileResolver;
 
+import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.SetupBuilder;
 
-public class RpmBuilder {
-
-    private final Rpm          rpm;
-
-    private final SetupBuilder setup;
-
-    private FileResolver       fileResolver;
-
-    private File               buildDir;
+public class RpmBuilder extends AbstractBuilder<Rpm> {
 
     /**
      * Create a new instance
@@ -39,9 +30,7 @@ public class RpmBuilder {
      * @param fileResolver the file Resolver
      */
     public RpmBuilder( Rpm rpm, SetupBuilder setup, FileResolver fileResolver ) {
-        this.rpm = rpm;
-        this.setup = setup;
-        this.fileResolver = fileResolver;
+        super( rpm, setup, fileResolver );
     }
 
     public void build() {
