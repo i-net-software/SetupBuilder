@@ -20,10 +20,12 @@ import java.io.File;
 import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
 
+import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
+import com.oracle.appbundler.BundleDocument;
 
 /**
  * Build a DMG image for OSX.
@@ -80,10 +82,29 @@ public class DmgBuilder {
             appBundler.setMainClassName( setup.getMainClass() );
             appBundler.setJarLauncherName( setup.getMainJar() );
             appBundler.setCopyright( setup.getVendor() );
-            appBundler.setIcon( ImageFactory.getImageFile( project, setup.getIcons(), buildDir, "icns" ) );
+            Object iconData = setup.getIcons();
+            File iconFile = ImageFactory.getImageFile( project, iconData, buildDir, "icns" );
+            appBundler.setIcon( iconFile );
             Architecture x86_64 = new Architecture();
             x86_64.setName( "x86_64" );
             appBundler.addConfiguredArch( x86_64 );
+
+            // add file extensions
+            for( DocumentType doc : setup.getDocumentType() ) {
+                BundleDocument bundle = new BundleDocument();
+                bundle.setExtensions( String.join( ",", doc.getFileExtension() ) );
+                bundle.setName( doc.getName() );
+                bundle.setRole( doc.getRole() ); //Viewer or Editor
+                Object icons = doc.getIcons();
+                if( icons == null ) {
+                    // nothing
+                } else if( icons == iconData ) {
+                    bundle.setIcon( iconFile.toString() );
+                } else {
+                    bundle.setIcon( ImageFactory.getImageFile( project, icons, buildDir, "icns" ).toString() );
+                }
+                appBundler.addConfiguredBundleDocument( bundle );
+            }
 
             appBundler.execute();
 

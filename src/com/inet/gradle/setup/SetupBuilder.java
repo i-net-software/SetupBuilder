@@ -15,11 +15,17 @@
  */
 package com.inet.gradle.setup;
 
-import java.io.File;
+import groovy.lang.Closure;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
+import org.gradle.util.ConfigureUtil;
 
 /**
  * The Gradle extension for all setup tasks.
@@ -32,7 +38,7 @@ public class SetupBuilder implements SetupSources {
 
     private final CopySpecInternal rootSpec;
 
-    private Object                 destinationDir; 
+    private Object                 destinationDir;
 
     private String                 vendor;
 
@@ -56,6 +62,8 @@ public class SetupBuilder implements SetupSources {
 
     private String                 mainJar;
 
+    private List<DocumentType>     documentTypes = new ArrayList<>();
+
     public SetupBuilder( Project project ) {
         this.project = project;
         this.rootSpec = (CopySpecInternal)project.copySpec( null );
@@ -67,6 +75,15 @@ public class SetupBuilder implements SetupSources {
     @Override
     public CopySpecInternal getCopySpec() {
         return rootSpec;
+    }
+
+    /**
+     * Get the current project.
+     * 
+     * @return the project
+     */
+    Project getProject() {
+        return project;
     }
 
     /**
@@ -258,5 +275,21 @@ public class SetupBuilder implements SetupSources {
      */
     public void setMainJar( String mainJar ) {
         this.mainJar = mainJar;
+    }
+
+    /**
+     * Register a file extensions.
+     * @param closue document type
+     */
+    public void documentType( Closure closue ) {
+        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( this ) );
+        if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
+            throw new GradleException( "documentType must contains minimum one fileExtension." );
+        }
+        documentTypes.add( doc );
+    }
+
+    public List<DocumentType> getDocumentType() {
+        return documentTypes;
     }
 }
