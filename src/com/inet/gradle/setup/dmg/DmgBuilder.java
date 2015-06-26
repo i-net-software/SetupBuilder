@@ -23,6 +23,7 @@ import org.gradle.api.internal.file.FileResolver;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.oracle.appbundler.AppBundlerTask;
+import com.oracle.appbundler.Architecture;
 
 /**
  * Build a DMG image for OSX.
@@ -80,6 +81,10 @@ public class DmgBuilder {
             appBundler.setJarLauncherName( setup.getMainJar() );
             appBundler.setCopyright( setup.getVendor() );
             appBundler.setIcon( ImageFactory.getImageFile( project, setup.getIcons(), buildDir, "icns" ) );
+            Architecture x86_64 = new Architecture();
+            x86_64.setName( "x86_64" );
+            appBundler.addConfiguredArch( x86_64 );
+
             appBundler.execute();
 
             dmg.copyTo( new File( buildDir, name + ".app/Contents/Java" ) );
