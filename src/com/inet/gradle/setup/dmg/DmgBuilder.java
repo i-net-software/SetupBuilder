@@ -248,6 +248,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "convert" );
+        command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
         command.add( "-quiet" );
         command.add( "-format" );
         command.add( "UDZO" );
