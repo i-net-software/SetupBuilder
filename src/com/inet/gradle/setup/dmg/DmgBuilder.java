@@ -15,11 +15,13 @@
  */
 package com.inet.gradle.setup.dmg;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,6 +45,8 @@ import com.oracle.appbundler.BundleDocument;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg> {
 
+    private String title, device;
+
     /**
      * Create a new instance
      * 
@@ -54,10 +58,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         super( dmg, setup, fileResolver );
     }
 
+    /**
+     * Build the dmg file. 
+     */
     public void build() {
         try {
             Project project = task.getProject();
 
+            title = setup.getSetupName();
             String name = setup.getBaseName();
             AppBundlerTask appBundler = new AppBundlerTask();
             appBundler.setOutputDirectory( buildDir );
@@ -159,7 +167,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "-srcfolder" );
         command.add( buildDir.toString() );
         command.add( "-volname" );
-        command.add( setup.getApplication() );
+        command.add( title );
         command.add( "-fs" );
         command.add( "HFS+" );
         command.add( "-fsargs" );
@@ -193,6 +201,20 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
         String console = baos.toString( "UTF8" );
         task.getProject().getLogger().lifecycle( console );
+
+        BufferedReader reader = new BufferedReader( new StringReader( console ) );
+        do {
+            String line = reader.readLine();
+            if( line == null ) {
+                break;
+            }
+            line = line.trim();
+            if( line.endsWith( title ) ) {
+                int idx = line.indexOf( ' ' );
+                device = line.substring( 0, idx );
+                break;
+            }
+        } while( true );
     }
 
     private void applescript() throws IOException {
@@ -201,7 +223,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         input.read( bytes );
         input.close();
         String script = new String( bytes, StandardCharsets.UTF_8 );
-        script = script.replace( "${title}", setup.getApplication() );
+        script = script.replace( "${title}", title );
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
@@ -215,7 +237,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "detach" );
-        command.add( setup.getApplication() );
+        command.add( device );
         exec( command );
     }
 
