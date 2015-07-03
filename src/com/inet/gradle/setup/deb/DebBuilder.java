@@ -44,7 +44,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		task.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
     		// 	create the package config files in the DEBIAN subfolder
     	
-    		new DebConfigFileBuilder(super.task, setup, new File(buildDir.getAbsolutePath() + File.separatorChar + "DEBIAN")).build();
+    		new DebControlFileBuilder(super.task, setup, new File(buildDir.getAbsolutePath() + File.separatorChar + "DEBIAN")).build();
     		
     		createDebianPackage();
     		

@@ -20,9 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
-import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
-
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -38,7 +35,7 @@ import com.inet.gradle.setup.SetupBuilder;
  * 
  * @author Stefan Heidrich
  */
-class DebConfigFileBuilder {
+class DebControlFileBuilder {
 
     private static final String NEWLINE = "\n";
 
@@ -55,7 +52,7 @@ class DebConfigFileBuilder {
      * @param setup the generic task for all setups
      * @param buildDir the directory to build the package in
      */
-    DebConfigFileBuilder( Deb deb, SetupBuilder setup, File buildDir ) {
+    DebControlFileBuilder( Deb deb, SetupBuilder setup, File buildDir ) {
         this.deb = deb;
         this.setup = setup;
         this.buildDir = buildDir;
@@ -73,8 +70,8 @@ class DebConfigFileBuilder {
     }
 
     /**
-     * 
-     * @throws IOException if 
+     * Creates the 'control' file for the Debian package
+     * @throws IOException if something could not be written to the file
      */
 	private void createControlFile() throws IOException {
 		if(buildDir.isDirectory()) {
