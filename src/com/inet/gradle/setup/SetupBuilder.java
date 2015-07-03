@@ -90,7 +90,7 @@ public class SetupBuilder implements SetupSources {
      * Override to remove the annotation OutputDirectories in the Copy task. {@inheritDoc}
      */
     public File getDestinationDir() {
-        return project.file( destinationDir );
+        return new File( project.getBuildDir(), String.valueOf( destinationDir ) );
     }
 
     public FileTree getSource() {
