@@ -39,13 +39,16 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      * executes all necessary steps from copying to building the Debian package
      */
     public void build() {
-    	task.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
-    	// create the package config files in the DEBIAN subfolder
     	try {
+    		task.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
+    		// 	create the package config files in the DEBIAN subfolder
+    	
     		new DebConfigFileBuilder(super.task, setup, new File(buildDir.getAbsolutePath() + File.separatorChar + "DEBIAN")).build();
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
+    	} catch( RuntimeException ex ) {
+            throw ex;
+        } catch( Exception ex ) {
+            throw new RuntimeException( ex );
+        }
     }
 
 }
