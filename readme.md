@@ -1,7 +1,7 @@
 Gradle Setup Builder Plugin
 ====
 
-The Setup Builder is a plugin for Gradle which can create native setups for different platforms. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file. The target are Java applications.
+The Setup Builder is a plugin for Gradle which can create a native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file. The target is an installer for Java applications.
 
 System Requirements
 ----
