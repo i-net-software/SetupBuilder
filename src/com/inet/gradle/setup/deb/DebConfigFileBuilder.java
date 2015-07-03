@@ -20,6 +20,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
+import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
+
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -91,14 +94,16 @@ class DebConfigFileBuilder {
 			
 			putPackage(controlWriter);
 			putVersion(controlWriter);
-			putSection(controlWriter);
-			putPriority(controlWriter);
+			putSection(controlWriter); // r
+			putPriority(controlWriter); // r 
 			putArchitecture(controlWriter);
 			putInstallSize(controlWriter);
 			putRecommends(controlWriter);
 			putDepends(controlWriter);
-			putMaintainer(controlWriter);
-			putDescription(controlWriter);
+			putMaintainer(controlWriter); 
+			putDescription(controlWriter); 
+			putHomepage(controlWriter); 
+
 
 			controlWriter.flush();
 			
@@ -122,102 +127,174 @@ class DebConfigFileBuilder {
 		
 	}
 
+	
 	/**
-	 * Write to description to the file. If no
+	 * Write the description to the file. The description is mandatory. If no description is declared a runtime exception will be thrown.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putDescription(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Description: " + deb.getDescription() + NEWLINE);
+		String description = deb.getDescription();
+		if(description == null || description.length() == 0) {
+			throw new RuntimeException("No description declared in the setup configuration.");
+		} else {
+			controlWriter.write("Description: " + description + NEWLINE);
+		}
 	}
 
 	/**
-	 * Write to maintainer to the file
+	 * Write the maintainer to the file. The maintainer is mandatory. If no maintainer is declared a runtime exception will be thrown.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putMaintainer(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Maintainer: " + setup.getVendor() + NEWLINE);
+		String vendor = setup.getVendor();
+		if(vendor == null || vendor.length() == 0) {
+			throw new RuntimeException("No vendor declared in the setup configuration.");
+		} else {
+			controlWriter.write("Maintainer: " + vendor + NEWLINE);
+		}
 	}
 	/**
-	 * Write to dependencies to the file
+	 * Write the dependencies to the file. If no dependencies are specified, the java dependencies will be used.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putDepends(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Depends: " + deb.getDepends() + NEWLINE);
+		String depends = deb.getDepends();
+		if(depends == null || depends.length() == 0 ) {
+			depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+		}
+		controlWriter.write("Depends: " + depends + NEWLINE);
 	}
 	/**
-	 * Write to recommends to the file
+	 * Write the recommends to the file.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putRecommends(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Recommends: " + deb.getRecommends() + NEWLINE);
+		String recommends = deb.getRecommends();
+		if(recommends != null && recommends.length() > 0) {
+			controlWriter.write("Recommends: " + recommends + NEWLINE);
+		}
 	}
 
 	/**
-	 * Write to installation size to the file
+	 * Write the installation size to the file. If no size is specified it will count the size of all files it has to install and round it to full megabytes.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putInstallSize(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Installed-Size: " + deb.getInstallSize() + NEWLINE);
+		
+		String installSize = deb.getInstallSize();
+		if(installSize == null || installSize.length() == 0) {
+			long fileSize = 0;
+			for (File file : deb.getSetupSource().getFiles()) {
+				if(file.isFile()) {
+					fileSize = fileSize + file.length();
+				}
+			}
+			for (File file : deb.getSource().getFiles()) {
+				if(file.isFile()) {
+					fileSize = fileSize + file.length();
+				}
+			}	
+			
+			installSize = String.valueOf(fileSize);
+			
+		}
+		controlWriter.write("Installed-Size: " + installSize + NEWLINE);
 	}
 
 	/**
-	 * Write to architecture to the file
+	 * Write the architecture to the file. If no architecture is specified then 'all' will be used.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putArchitecture(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Architecture: " + deb.getArchitecture() + NEWLINE);
+		String architecture = deb.getArchitecture();
+		if(architecture == null || architecture.length() == 0) {
+			architecture = "all";
+		}
+		controlWriter.write("Architecture: " + architecture + NEWLINE);
 	}
 
 	/**
-	 * Write to priority to the file
+	 * Write the priority to the file. If no priority are specified then 'optional' will be used.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putPriority(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Priority: " + deb.getPriority() + NEWLINE);
+		String priority = deb.getPriority();
+		if(priority == null || priority.length() == 0) {
+			priority = "optional";
+		}
+		controlWriter.write("Priority: " + priority + NEWLINE);
 	}
 
 	/**
-	 * Write to section to the file
+	 * Write the section to the file. If no section is specified then 'java' will be used.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putSection(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Section: " + deb.getSection() + NEWLINE);
+		String section = deb.getSection();
+		if(section == null || section.length() == 0) {
+			section = "java";
+		}
+		controlWriter.write("Section: " + section + NEWLINE);
 	}
 
 	/**
-	 * Write to version to the file
+	 * Write the version to the file. The version is mandatory. If no version is declared a runtime exception will be thrown.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putVersion(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Version: " + setup.getVersion() + NEWLINE);
+		String version = setup.getVersion();
+		if(version == null || version.length() == 0) {
+			throw new RuntimeException("No version declared in the setup configuration.");
+		} else {
+			controlWriter.write("Version: " + version + NEWLINE);
+		}
 	}
 
 	/**
-	 * Write to package to the file
+	 * Write the package to the file. The package is mandatory. If no package is declared a runtime exception will be thrown.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putPackage(OutputStreamWriter controlWriter)
 			throws IOException {
-		controlWriter.write("Package: " + deb.getPackages() + NEWLINE);
+		String packages = deb.getPackages();
+		if(packages == null || packages.length() == 0) {
+			throw new RuntimeException("No package declared in the setup configuration.");
+		} else {
+			controlWriter.write("Package: " + packages + NEWLINE);
+		}
 	}
 
+	/**
+	 * Write the homepage to the file.
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putHomepage(OutputStreamWriter controlWriter)
+			throws IOException {
+		String homepage = deb.getHomepage();
+		if(homepage != null && homepage.length() > 0) {
+			controlWriter.write("Homepage: " + homepage + NEWLINE);
+		}
+	}
+
+	
 }

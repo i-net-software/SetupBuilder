@@ -43,6 +43,8 @@ public class Deb extends AbstractSetupTask {
     
     private String                 depends;
     
+    private String                 homepage;
+    
 	
     public Deb() {
         super( "deb" );
@@ -134,5 +136,15 @@ public class Deb extends AbstractSetupTask {
 
 	public void setDepends(String depends) {
 		this.depends = depends;
+	}
+
+
+	public String getHomepage() {
+		return homepage;
+	}
+
+
+	public void setHomepage(String homepage) {
+		this.homepage = homepage;
 	}
 }
