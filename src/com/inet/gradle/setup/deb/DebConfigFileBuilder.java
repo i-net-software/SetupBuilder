@@ -94,8 +94,8 @@ class DebConfigFileBuilder {
 			
 			putPackage(controlWriter);
 			putVersion(controlWriter);
-			putSection(controlWriter); // r
-			putPriority(controlWriter); // r 
+			putSection(controlWriter); 
+			putPriority(controlWriter);  
 			putArchitecture(controlWriter);
 			putInstallSize(controlWriter);
 			putRecommends(controlWriter);
