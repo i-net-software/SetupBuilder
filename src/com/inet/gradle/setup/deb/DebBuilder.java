@@ -16,6 +16,7 @@
 package com.inet.gradle.setup.deb;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -44,6 +45,9 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		// 	create the package config files in the DEBIAN subfolder
     	
     		new DebConfigFileBuilder(super.task, setup, new File(buildDir.getAbsolutePath() + File.separatorChar + "DEBIAN")).build();
+    		
+    		createDebianPackage();
+    		
     	} catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
@@ -51,4 +55,16 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
     }
 
+    /**
+     * execute the command to generate the Debian package
+     */
+    private void createDebianPackage() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "dpkg" );
+        command.add( "--build" );
+        command.add( buildDir.getAbsolutePath() );
+        command.add( setup.getDestinationDir().getAbsolutePath() + "/" +  setup.getSetupName() + "." + task.getExtension() );
+        exec( command );
+    }
+    
 }
