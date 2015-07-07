@@ -27,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
+import org.apache.tools.ant.types.FileSet;
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
 
@@ -112,6 +114,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
                 appBundler.addConfiguredBundleDocument( bundle );
             }
 
+            bundleJre( appBundler );
+
             appBundler.execute();
 
             task.copyTo( new File( buildDir, name + ".app/Contents/Java" ) );
@@ -123,6 +127,39 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
         }
+    }
+
+    /**
+     * Bundle the Java VM if set.
+     * @param appBundler the ANT Task
+     */
+    private void bundleJre( AppBundlerTask appBundler ) {
+        Object jre = setup.getBundleJre();
+        if( jre == null ) {
+            return;
+        }
+        File jreDir;
+        try {
+            jreDir = task.getProject().file( jre );
+        } catch( Exception e ) {
+            jreDir = null;
+        }
+        if( jreDir == null || !jreDir.isDirectory() ) {
+            ArrayList<String> command = new ArrayList<>();
+            command.add( "java_home" );
+            command.add( "-v" );
+            command.add( jre.toString() );
+            command.add( "-F" );
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            exec( command, null, baos );
+            jreDir = new File( baos.toString().trim() );
+            if( !jreDir.isDirectory() ) {
+                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + jreDir );
+            }
+        }
+        FileSet fileSet = new FileSet();
+        fileSet.setDir( jreDir );
+        appBundler.addConfiguredRuntime( fileSet );
     }
 
     /**
