@@ -123,6 +123,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
             createBinary();
         } catch( RuntimeException ex ) {
+            ex.printStackTrace();
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
@@ -157,6 +158,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
                 throw new GradleException( "bundleJre version " + jre + " can not be found in: " + jreDir );
             }
         }
+        task.getProject().getLogger().lifecycle( "\tbundle JRE: " + jreDir );
         FileSet fileSet = new FileSet();
         fileSet.setDir( jreDir );
         appBundler.addConfiguredRuntime( fileSet );
