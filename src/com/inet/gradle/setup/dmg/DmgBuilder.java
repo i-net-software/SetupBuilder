@@ -116,6 +116,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
             bundleJre( appBundler );
 
+            org.apache.tools.ant.Project antProject = new org.apache.tools.ant.Project();
+            appBundler.setProject( antProject );
             appBundler.execute();
 
             task.copyTo( new File( buildDir, name + ".app/Contents/Java" ) );
