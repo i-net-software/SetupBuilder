@@ -146,7 +146,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         }
         if( jreDir == null || !jreDir.isDirectory() ) {
             ArrayList<String> command = new ArrayList<>();
-            command.add( "java_home" );
+            command.add( "/usr/libexec/java_home" );
             command.add( "-v" );
             command.add( jre.toString() );
             command.add( "-F" );
