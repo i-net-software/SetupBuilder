@@ -63,6 +63,7 @@ public class SetupBuilder implements SetupSources {
     private String                 mainJar;
 
     private List<DocumentType>     documentTypes = new ArrayList<>();
+    private List<Service>          services      = new ArrayList<>();
 
     public SetupBuilder( Project project ) {
         this.project = project;
@@ -291,5 +292,22 @@ public class SetupBuilder implements SetupSources {
 
     public List<DocumentType> getDocumentType() {
         return documentTypes;
+    }
+    
+    /**
+     * Register a service.
+     * @param closue the closure of the service definition
+     */
+    public void service( Closure closue ) {
+        Service service = ConfigureUtil.configure( closue, new Service() );
+        services.add( service );
+    }
+    
+    /**
+     * Returns the registered services.
+     * @return the registered services
+     */
+    public List<Service> getServices() {
+        return services;
     }
 }
