@@ -4,16 +4,28 @@ package com.inet.gradle.setup;
  * Definition of a service to be installed on the target system.
  */
 public class Service {
-    private String  name, description;
-    private boolean startOnBoot;
+    private final SetupBuilder setup;
+    private String  name, displayName, description;
+    private boolean startOnBoot = true;
     private String  startArguments;
+
+    /**
+     * Create a new Service
+     * @param setup current SetupBuilder
+     */
+    public Service( SetupBuilder setup ) {
+        this.setup = setup;
+    }
 
     /**
      * Returns the name of this service.
      * @return the name of this service
      */
     public String getName() {
-        return name;
+        if( name != null ) {
+            return name;
+        }
+        return setup.getBaseName();
     }
 
     /**
@@ -22,6 +34,25 @@ public class Service {
      */
     public void setName( String name ) {
         this.name = name;
+    }
+
+    /**
+     * Get the display name
+     * @return the display name
+     */
+    public String getDisplayName() {
+        if( displayName != null ) {
+            return displayName;
+        }
+        return setup.getApplication();
+    }
+
+    /**
+     * Set the display name
+     * @param displayName the display name
+     */
+    public void setDisplayName( String displayName ) {
+        this.displayName = displayName;
     }
 
     /**

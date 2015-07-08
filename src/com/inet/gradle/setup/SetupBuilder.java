@@ -299,7 +299,7 @@ public class SetupBuilder implements SetupSources {
      * @param closue the closure of the service definition
      */
     public void service( Closure closue ) {
-        Service service = ConfigureUtil.configure( closue, new Service() );
+        Service service = ConfigureUtil.configure( closue, new Service( this ) );
         services.add( service );
     }
     
