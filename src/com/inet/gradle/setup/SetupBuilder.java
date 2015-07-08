@@ -270,7 +270,7 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Set the jar which contains the main class.
+     * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in the manifest.
      * 
      * @param mainJar the main jar file
      */
