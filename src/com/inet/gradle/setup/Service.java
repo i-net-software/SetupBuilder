@@ -5,7 +5,7 @@ package com.inet.gradle.setup;
  */
 public class Service {
     private final SetupBuilder setup;
-    private String  name, displayName, description;
+    private String  name, displayName, description, mainJar, mainClass;
     private boolean startOnBoot = true;
     private String  startArguments;
 
@@ -101,5 +101,47 @@ public class Service {
      */
     public void setStartArguments( String startArguments ) {
         this.startArguments = startArguments;
+    }
+
+    /**
+     * Get the main jar file.
+     * 
+     * @return the main jar
+     */
+    public String getMainJar() {
+        if( mainJar != null ) {
+            return mainJar;
+        }
+        return setup.getMainJar();
+    }
+
+    /**
+     * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in the manifest.
+     * 
+     * @param mainJar the main jar file
+     */
+    public void setMainJar( String mainJar ) {
+        this.mainJar = mainJar;
+    }
+
+    /**
+     * Get the main class.
+     * 
+     * @return the class name
+     */
+    public String getMainClass() {
+        if( mainClass != null ) {
+            return mainClass;
+        }
+        return setup.getMainClass();
+    }
+
+    /**
+     * Set the main class of the Java application.
+     * 
+     * @param mainClass the class name
+     */
+    public void setMainClass( String mainClass ) {
+        this.mainClass = mainClass;
     }
 }

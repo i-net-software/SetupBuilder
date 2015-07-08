@@ -19,11 +19,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 import javax.swing.JEditorPane;
@@ -49,6 +52,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
 
@@ -59,7 +63,7 @@ import com.inet.gradle.setup.image.ImageFactory;
  */
 class WxsFileBuilder {
 
-    private final Msi          msi;
+    private final Msi          task;
 
     private final SetupBuilder setup;
 
@@ -69,8 +73,10 @@ class WxsFileBuilder {
 
     private HashSet<String>    components = new HashSet<>();
 
+    private String jvmDll;
+
     WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) {
-        this.msi = msi;
+        this.task = msi;
         this.setup = setup;
         this.wxsFile = wxsFile;
         this.buildDir = buildDir;
@@ -114,18 +120,18 @@ class WxsFileBuilder {
         // Directory
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR", true );
         addAttributeIfNotExists( directory, "Name", "SourceDir" );
-        Element programFiles = getOrCreateChildById( directory, "Directory", msi.is64Bit() ? "ProgramFiles64Folder" : "ProgramFilesFolder", true );
+        Element programFiles = getOrCreateChildById( directory, "Directory", task.is64Bit() ? "ProgramFiles64Folder" : "ProgramFilesFolder", true );
         Element appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR", true );
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
         //Files
         Element installDir = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
-        FileTree fileTree = new UnionFileTree( setup.getSource(), msi.getSource() );
+        FileTree fileTree = new UnionFileTree( setup.getSource(), task.getSource() );
         fileTree.visit( new FileVisitor() {
             @Override
             public void visitFile( FileVisitDetails details ) {
-                String[] segemnts = details.getRelativePath().getSegments();
-                addFile( installDir, details.getFile(), segemnts );
+                String[] segments = details.getRelativePath().getSegments();
+                addFile( installDir, details.getFile(), segments );
             }
 
             @Override
@@ -137,6 +143,7 @@ class WxsFileBuilder {
         addBundleJre( installDir );
         addGUI( product );
         addIcon( product );
+        addServices( product, installDir );
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication", true );
@@ -157,14 +164,15 @@ class WxsFileBuilder {
      * Add a file to the setup 
      * @param installDir The XML element of the install directory.
      * @param file the file to add.
-     * @param segemnts the segments of the path in the target. The last segment contains the file name.
+     * @param segments the segments of the path in the target. The last segment contains the file name.
+     * @return id of the file
      */
-    private void addFile( Element installDir, File file, String[] segemnts ) {
+    private String addFile( Element installDir, File file, String[] segments ) {
         Document doc = installDir.getOwnerDocument();
         Element parent = installDir;
         StringBuilder pathID = new StringBuilder();
-        for( int i = 0; i < segemnts.length - 1; i++ ) {
-            String seg = segemnts[i];
+        for( int i = 0; i < segments.length - 1; i++ ) {
+            String seg = segments[i];
             parent = getOrCreateChildById( parent, "Directory", seg, true );
             addAttributeIfNotExists( parent, "Name", seg );
             pathID.append( seg ).append( '_' );
@@ -175,11 +183,23 @@ class WxsFileBuilder {
         Element component = getOrCreateChildById( parent, "Component", compID, true );
         addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
         Element fileEl = doc.createElement( "File" );
-        String name = segemnts[segemnts.length - 1];
-        fileEl.setAttribute( "Id", pathID + id( name ) );
+        String name = segments[segments.length - 1];
+        if( name.equals( "jvm.dll" ) ){
+            StringBuilder jvm = new StringBuilder();
+            for( String segment : segments ) {
+                if( jvm.length() > 0 ) {
+                    jvm.append( '\\' );
+                }
+                jvm.append( segment );
+            }
+            jvmDll = jvm.toString();
+        }
+        String id = pathID + id( name );
+        fileEl.setAttribute( "Id", id );
         fileEl.setAttribute( "Source", file.getAbsolutePath() );
         fileEl.setAttribute( "Name", name );
         component.appendChild( fileEl );
+        return id;
     }
 
     /**
@@ -212,14 +232,14 @@ class WxsFileBuilder {
         }
         File jreDir;
         try {
-            jreDir = msi.getProject().file( jre );
+            jreDir = task.getProject().file( jre );
         } catch( Exception e ) {
             jreDir = null;
         }
 
         if( jreDir == null || !jreDir.isDirectory() ) {
             // bundleJRE is not a directory, we interpret it as a version number
-            String programFiles = System.getenv( msi.is64Bit() ? "ProgramW6432" : "ProgramFiles(x86)" );
+            String programFiles = System.getenv( task.is64Bit() ? "ProgramW6432" : "ProgramFiles(x86)" );
             if( programFiles == null ) {
                 throw new GradleException( "Environment ProgramFiles not found." );
             }
@@ -241,7 +261,7 @@ class WxsFileBuilder {
             jreDir = versions.get( versions.size()-1 );
         }
 
-        msi.getProject().getLogger().lifecycle( "\tbundle jre: " + jreDir );
+        task.getProject().getLogger().lifecycle( "\tbundle jre: " + jreDir );
 
         int baseLength = jreDir.getAbsolutePath().length();
         String target = setup.getBundleJreTarget().replace( '/', '\\' );
@@ -297,7 +317,7 @@ class WxsFileBuilder {
      * @throws IOException if an error occur on reading the image files
      */
     private void addIcon( Element product ) throws IOException {
-        File iconFile = ImageFactory.getImageFile( msi.getProject(), setup.getIcons(), buildDir, "ico" );
+        File iconFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), buildDir, "ico" );
         if( iconFile == null ) {
             // no icon was set
             return;
@@ -351,6 +371,52 @@ class WxsFileBuilder {
         Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUILicenseRtf", true );
         addAttributeIfNotExists( licenseNode, "Value", license.getAbsolutePath() );
         return true;
+    }
+
+    /**
+     * Add the windows services.
+     * @param product
+     * @throws IOException if an I/O error occurs when reading or writing
+     */
+    private void addServices( Element product, Element installDir ) throws IOException {
+        List<Service> services = setup.getServices();
+        if( services == null || services.isEmpty() ) {
+            return;
+        }
+
+        InputStream input = getClass().getResourceAsStream( task.getArch() + "/prunsrv.exe" );
+        File prunsrv = new File( buildDir, "prunsrv.exe" );
+        Files.copy( input, prunsrv.toPath(), StandardCopyOption.REPLACE_EXISTING );
+
+        Element execute = getOrCreateChild( product, "InstallExecuteSequence", true );
+
+        for( Service service : services ) {
+            String name = service.getName();
+            String exe = name + "Service.exe";
+            String id = id( name );
+            String fileKey = addFile( installDir, prunsrv, new String[]{exe} );
+
+            //http://blogs.technet.com/b/alexshev/archive/2008/02/21/from-msi-to-wix-part-5-custom-actions.aspx
+            Element customAction = getOrCreateChildById( product, "CustomAction", id, true );
+            addAttributeIfNotExists( customAction, "FileKey", fileKey );
+            StringBuilder cmd = new StringBuilder();
+            cmd.append( " install " ).append( name );
+            if( service.getDescription() != null ) {
+                cmd.append( " \"--Description=" ).append( service.getDescription() ).append( '\"' );
+            }
+            cmd.append( " \"--DisplayName=" ).append( service.getDisplayName() ).append( '\"' );
+            if( setup.getBundleJre() != null ) {
+                cmd.append( " \"--Jvm=" ).append( setup.getBundleJreTarget() ).append( "[INSTALLDIR]\\" ).append( jvmDll ).append( '\"' );
+            }
+            cmd.append( " \"--Classpath=" ).append( "[INSTALLDIR]\\" ).append( service.getMainJar() ).append( '\"' );
+            cmd.append( " \"--StartClass=" ).append( service.getMainClass() ).append( '\"' );
+            task.getProject().getLogger().lifecycle( "\t" + cmd );
+
+            addAttributeIfNotExists( customAction, "ExeCommand", cmd.toString() );
+            Element custom = getOrCreateChild( execute, "Custom", true );
+            addAttributeIfNotExists( custom, "Action", id );
+            addAttributeIfNotExists( custom, "After", "InstallFiles" );
+        }
     }
 
     /**
