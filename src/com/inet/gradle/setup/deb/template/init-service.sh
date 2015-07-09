@@ -13,7 +13,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="{{name}}"
 NAME={{name}}
-DAEMON=/usr/sbin/mypackage
+DAEMON=/usr/bin/java
 DAEMON_ARGS="{{startArguments}}"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

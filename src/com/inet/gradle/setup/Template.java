@@ -36,7 +36,7 @@ public class Template {
      * @param content the content to which to placeholder will be replaces
      */
     public void setPlaceholder(String placeholder, String content) {
-        template.replace( "{{" + placeholder + "}}", content );
+        template = template.replace( "{{" + placeholder + "}}", content );
     }
     
     /**
