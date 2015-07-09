@@ -34,7 +34,7 @@ import com.inet.gradle.setup.SetupBuilder;
  * 			<dd>contains scripts and commands that are executed after the files are copied</dd>
  * 		<dt>prerm</dt>
  * 			<dd>contains scripts and commands that are executed before the files are removed</dd>
- * </dl>
+ * </dl>init.d
  * 
  * @author Stefan Heidrich
  */
@@ -78,12 +78,11 @@ class DebControlFileBuilder {
      * @throws IOException if something could not be written to the file
      */
 	private void createControlFile() throws IOException {
-	    
-        if(!buildDir.exists()) {
-            buildDir.mkdirs();
-        } else if(!buildDir.isDirectory()) {
-            throw new IllegalArgumentException("The buildDir parameter must be a directory!");
-        } 
+		if(!buildDir.exists()) {
+			buildDir.mkdirs();
+		} else if(!buildDir.isDirectory()) {
+			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
+		} 
 		
 		FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;

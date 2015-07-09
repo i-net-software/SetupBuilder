@@ -124,7 +124,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         Files.setPosixFilePermissions( file.toPath(), perms );
     }
 
-    /**
+	/**
      * execute the lintian tool to check the Debian package
      * This will only be executed if the task 'checkPackage' property is set to true
      */
