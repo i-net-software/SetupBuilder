@@ -74,18 +74,18 @@ class DebControlFileBuilder {
      * @throws IOException if something could not be written to the file
      */
 	private void createControlFile() throws IOException {
-		if(buildDir.isDirectory()) {
-			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
-		}
+		
 		if(!buildDir.exists()) {
 			buildDir.mkdirs();
-		}
+		} else if(!buildDir.isDirectory()) {
+			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
+		} 
 		
 		FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;
 
 		try {
-			File control = new File(buildDir.getAbsolutePath() + File.separatorChar + "control");
+			File control = new File(buildDir, "control");
 			fileoutput = new FileOutputStream(control);
 			controlWriter = new OutputStreamWriter(fileoutput, "UTF-8");
 			
