@@ -17,8 +17,11 @@ package com.inet.gradle.setup.deb;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.inet.gradle.setup.SetupBuilder;
 
@@ -45,7 +48,8 @@ class DebControlFileBuilder {
 
     private File               buildDir;
 
-
+    private Collection<String> confFiles = new ArrayList<>();
+    
     /**
      * the constructor setting the fields
      * @param deb the task for the debian package
@@ -74,18 +78,18 @@ class DebControlFileBuilder {
      * @throws IOException if something could not be written to the file
      */
 	private void createControlFile() throws IOException {
-		if(buildDir.isDirectory()) {
-			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
-		}
-		if(!buildDir.exists()) {
-			buildDir.mkdirs();
-		}
+	    
+        if(!buildDir.exists()) {
+            buildDir.mkdirs();
+        } else if(!buildDir.isDirectory()) {
+            throw new IllegalArgumentException("The buildDir parameter must be a directory!");
+        } 
 		
 		FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;
 
 		try {
-			File control = new File(buildDir.getAbsolutePath() + File.separatorChar + "control");
+			File control = new File(buildDir, "control");
 			fileoutput = new FileOutputStream(control);
 			controlWriter = new OutputStreamWriter(fileoutput, "UTF-8");
 			
@@ -121,7 +125,12 @@ class DebControlFileBuilder {
 			}
 		}
 		
-		
+		try(FileWriter writer = new FileWriter( new File(buildDir, "conffiles") )) {
+		    for(String confFile: confFiles) {
+		        writer.append( confFile );
+		        writer.append( '\n' );
+		    }
+		}
 	}
 
 	
@@ -151,7 +160,7 @@ class DebControlFileBuilder {
 		if(vendor == null || vendor.length() == 0) {
 			throw new RuntimeException("No vendor declared in the setup configuration.");
 		} else {
-			controlWriter.write("Maintainer: " + vendor + NEWLINE);
+			controlWriter.write("Maintainer: " + vendor + " <" + deb.getMaintainerEmail() + ">" + NEWLINE);
 		}
 	}
 	/**
@@ -202,7 +211,7 @@ class DebControlFileBuilder {
 				}
 			}	
 			
-			installSize = String.valueOf(fileSize);
+			installSize = String.valueOf(fileSize/1024); // Size wird in KB angegeben und nicht in Bytes
 			
 		}
 		controlWriter.write("Installed-Size: " + installSize + NEWLINE);
@@ -293,5 +302,12 @@ class DebControlFileBuilder {
 		}
 	}
 
+	/**
+	 * Adds a config file
+	 * @param file the config file
+	 */
+	public void addConfFile(String file) {
+	    confFiles.add( file.toString() );
+	}
 	
 }
