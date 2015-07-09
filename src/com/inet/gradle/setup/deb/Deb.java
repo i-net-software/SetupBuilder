@@ -49,6 +49,8 @@ public class Deb extends AbstractSetupTask {
     
     private String				   maintainerEmail;
     
+    private String				   changes;
+    
 	
     public Deb() {
         super( "deb" );
@@ -171,4 +173,17 @@ public class Deb extends AbstractSetupTask {
 	public void setMaintainerEmail(String maintainerEmail) {
 		this.maintainerEmail = maintainerEmail;
 	}
+
+
+	public String getChanges() {
+		return changes;
+	}
+
+
+	public void setChanges(String changes) {
+		this.changes = changes;
+	}
+	
+
+	
 }
