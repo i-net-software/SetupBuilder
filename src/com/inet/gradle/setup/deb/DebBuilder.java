@@ -34,6 +34,7 @@ import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
 public class DebBuilder extends AbstractBuilder<Deb> {
 
     private DebControlFileBuilder controlBuilder;
+    private DebDocumentFileBuilder documentBuilder;
 
     /**
      * Create a new instance
@@ -57,14 +58,19 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             
     		// 	create the package config files in the DEBIAN subfolder
     	
-    		controlBuilder = new DebControlFileBuilder(super.task, setup, new File(buildDir.getAbsolutePath() + File.separatorChar + "DEBIAN"));
+    		controlBuilder = new DebControlFileBuilder(super.task, setup, new File(buildDir, "DEBIAN"));
     		
     		for(Service service: setup.getServices()) {
                 setupService( service );
     		}
     		
             controlBuilder.build();
+
+    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + setup.getBaseName()));
+    		documentBuilder.build();
+
             changeDirectoryPermissionsTo755(buildDir);
+
             
     		createDebianPackage();
     		
@@ -144,6 +150,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     	if(task.getCheckPackage() == null || task.getCheckPackage().equalsIgnoreCase("true")) {
     		ArrayList<String> command = new ArrayList<>();
     		command.add( "lintian" );
+//    		command.add( "-d" );
     		command.add( setup.getDestinationDir().getAbsolutePath() + "/" +  setup.getSetupName() + "." + task.getExtension() );
     		exec( command );
     	}
