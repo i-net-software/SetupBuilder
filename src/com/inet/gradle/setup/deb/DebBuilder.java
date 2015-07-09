@@ -29,6 +29,7 @@ import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
 
 public class DebBuilder extends AbstractBuilder<Deb> {
 
@@ -51,7 +52,10 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      */
     public void build() {
     	try {
-    		task.copyTo( new File( buildDir, "/usr/share/" + setup.getBaseName() ) );
+    		File filesPath = new File( buildDir, "/usr/share/" + setup.getBaseName() );
+            task.copyTo( filesPath );
+            changeFilePermissionsTo644(filesPath);
+            
     		// 	create the package config files in the DEBIAN subfolder
     	
     		controlBuilder = new DebControlFileBuilder(super.task, setup, new File(buildDir, "DEBIAN"));
@@ -61,10 +65,14 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		}
     		
             controlBuilder.build();
+<<<<<<< HEAD
 
     		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + setup.getBaseName()));
     		documentBuilder.build();
 
+=======
+            changeDirectoryPermissionsTo755(buildDir);
+>>>>>>> branch 'master' of https://github.com/i-net-software/SetupBuilder.git
             
     		createDebianPackage();
     		
@@ -77,18 +85,22 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
     }
 
+
     /**
      * Creates the files and the corresponding script section for the specified service.
      * @param service the service
      * @throws IOException on errors during creating or writing a file
      */
     public void setupService( Service service ) throws IOException {
-        String lowerCaseName = service.getName().toLowerCase();
+        String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
         Template initScript = new Template( "deb/template/init-service.sh" );
-        initScript.setPlaceholder( "test", "test" );
-        String initScriptFile = "etc/init.d/" + lowerCaseName;
+        initScript.setPlaceholder( "name", serviceUnixName );
+        initScript.setPlaceholder( "description", service.getDescription() );
+        initScript.setPlaceholder( "startArguments", service.getStartArguments() );
+        String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
+        controlBuilder.addScriptTailFragment( Script.POSTINST, "update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null" );
     }
     
     /**
@@ -156,4 +168,32 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         exec( command );
     }
     
+    /**
+     * Changes the permissions of all directories recursively inside the specified path to 755.
+     * @param path the path
+     * @throws IOException on I/O failures
+     */
+    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
+        setPermissions( path, true );
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeDirectoryPermissionsTo755( file );
+            }
+        }
+    }
+    
+    /**
+     * Changes the permissions of all files recursively inside the specified path to 644.
+     * @param path the path
+     * @throws IOException on I/O failures
+     */
+    private void changeFilePermissionsTo644( File path ) throws IOException {
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeFilePermissionsTo644( file );
+            } else {
+                setPermissions( file, false );
+            }
+        }
+    }
 }
