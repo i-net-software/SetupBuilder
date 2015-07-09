@@ -48,6 +48,8 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		
     		createDebianPackage();
     		
+    		checkDebianPackage();
+    		
     	} catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
@@ -55,12 +57,26 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
     }
 
-    /**
+	/**
+     * execute the lintian tool to check the Debian package
+     * This will only be executed if the task 'checkPackage' property is set to true
+     */
+    private void checkDebianPackage() {
+    	if(task.getCheckPackage() == null || task.getCheckPackage().equalsIgnoreCase("true")) {
+    		ArrayList<String> command = new ArrayList<>();
+    		command.add( "lintian" );
+    		command.add( setup.getDestinationDir().getAbsolutePath() + "/" +  setup.getSetupName() + "." + task.getExtension() );
+    		exec( command );
+    	}
+	}
+
+	/**
      * execute the command to generate the Debian package
      */
     private void createDebianPackage() {
         ArrayList<String> command = new ArrayList<>();
-        command.add( "dpkg" );
+        command.add( "fakeroot" );
+        command.add( "dpkg-deb" );
         command.add( "--build" );
         command.add( buildDir.getAbsolutePath() );
         command.add( setup.getDestinationDir().getAbsolutePath() + "/" +  setup.getSetupName() + "." + task.getExtension() );

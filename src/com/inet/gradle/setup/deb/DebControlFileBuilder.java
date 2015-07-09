@@ -151,7 +151,7 @@ class DebControlFileBuilder {
 		if(vendor == null || vendor.length() == 0) {
 			throw new RuntimeException("No vendor declared in the setup configuration.");
 		} else {
-			controlWriter.write("Maintainer: " + vendor + NEWLINE);
+			controlWriter.write("Maintainer: " + vendor + " <" + deb.getMaintainerEmail() + ">" + NEWLINE);
 		}
 	}
 	/**
@@ -202,7 +202,7 @@ class DebControlFileBuilder {
 				}
 			}	
 			
-			installSize = String.valueOf(fileSize);
+			installSize = String.valueOf(fileSize/1024); // Size wird in KB angegeben und nicht in Bytes
 			
 		}
 		controlWriter.write("Installed-Size: " + installSize + NEWLINE);
