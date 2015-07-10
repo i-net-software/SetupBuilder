@@ -47,7 +47,9 @@ import org.gradle.api.GradleException;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileVisitDetails;
 import org.gradle.api.file.FileVisitor;
+import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.UnionFileTree;
+import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -126,17 +128,13 @@ class WxsFileBuilder {
 
         //Files
         Element installDir = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
-        FileTree fileTree = new UnionFileTree( setup.getSource(), task.getSource() );
-        fileTree.visit( new FileVisitor() {
+        task.processFiles( new CopyActionProcessingStreamAction() {
             @Override
-            public void visitFile( FileVisitDetails details ) {
-                String[] segments = details.getRelativePath().getSegments();
-                addFile( installDir, details.getFile(), segments );
-            }
-
-            @Override
-            public void visitDir( FileVisitDetails arg0 ) {
-                //ignore
+            public void processFile( FileCopyDetailsInternal details ) {
+                if( !details.isDirectory() ) {
+                    String[] segments = details.getRelativePath().getSegments();
+                    addFile( installDir, details.getFile(), segments );
+                }
             }
         } );
 
