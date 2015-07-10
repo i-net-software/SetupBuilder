@@ -66,7 +66,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		
             controlBuilder.build();
 
-    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + setup.getBaseName()));
+    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + task.getPackages()));
     		documentBuilder.build();
 
             changeDirectoryPermissionsTo755(buildDir);
@@ -99,6 +99,9 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
         controlBuilder.addScriptTailFragment( Script.POSTINST, "update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null" );
+        controlBuilder.addScriptTailFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + 
+            "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
+            "fi" );
     }
     
     /**

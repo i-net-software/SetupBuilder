@@ -16,9 +16,14 @@
 package com.inet.gradle.setup.deb;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -60,10 +65,22 @@ class DebDocumentFileBuilder {
     void build() throws Exception {
     	
     	createChangelogFile();
+    	copyCopyrightFile();
 
     }
 
-    private void createChangelogFile() throws IOException {
+    private void copyCopyrightFile() throws FileNotFoundException, IOException {
+    	File copyright = new File(buildDir, "copyright");
+		
+		if(!copyright.getParentFile().exists()) {
+			copyright.getParentFile().mkdirs();
+		}
+		
+		Files.copy(setup.getLicenseFile().toPath(), new FileOutputStream(copyright) );
+		changePermission(copyright);
+	}
+
+	private void createChangelogFile() throws IOException {
     	FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;
 
@@ -75,48 +92,26 @@ class DebDocumentFileBuilder {
 			}
 			
 			fileoutput = new FileOutputStream(changelog);
+			GZIPOutputStream gzipstream = new GZIPOutputStream(fileoutput);
 			
-			controlWriter = new OutputStreamWriter(new GZIPOutputStream(fileoutput), "UTF-8");
+			controlWriter = new OutputStreamWriter(gzipstream, "UTF-8");
 		 
 			controlWriter.write( deb.getPackages() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE);
 			
 			String changes = deb.getChanges();
 			if(changes != null && changes.length() > 0) {
 				controlWriter.write( changes + NEWLINE);
+			} else {
+				controlWriter.write( "  * no changes" + NEWLINE);
 			}
-
 			
-		      
-			controlWriter.write( "  * change details" + NEWLINE);
-		    controlWriter.write(NEWLINE);
-		    controlWriter.write( "  -- maintainer name <e@mail.de>  12.12.12. 12:12:12" + NEWLINE);
+			controlWriter.write( "  -- " + setup.getVendor() + " <" + deb.getMaintainerEmail() + ">  " + NEWLINE);
 			
 			controlWriter.flush();
 			
-			changelog = new File(buildDir, "changelog.DEBIAN.gz");
-			
-			if(!changelog.getParentFile().exists()) {
-				changelog.getParentFile().mkdirs();
-			}
-			
-			fileoutput = new FileOutputStream(changelog);
-			
-			controlWriter = new OutputStreamWriter(new GZIPOutputStream(fileoutput), "UTF-8");
-		 
-			controlWriter.write( deb.getPackages() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE);
-			
-			changes = deb.getChanges();
-			if(changes != null && changes.length() > 0) {
-				controlWriter.write( changes + NEWLINE);
-			}
-
-			  
-			controlWriter.write( "  * change details" + NEWLINE);
-		    controlWriter.write(NEWLINE);
-		    controlWriter.write( "  -- maintainer name <e@mail.de>  12.12.12. 12:12:12" + NEWLINE);
+			changePermission(changelog);
 			
 			
-			controlWriter.flush();
 			
 		} finally {
 			if(controlWriter != null) {
@@ -134,6 +129,15 @@ class DebDocumentFileBuilder {
 				}
 			}
 		}
+	}
+
+	private void changePermission(File changelog) throws IOException {
+		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+		perms.add( PosixFilePermission.OWNER_READ );
+		perms.add( PosixFilePermission.OWNER_WRITE );
+		perms.add( PosixFilePermission.GROUP_READ );
+		perms.add( PosixFilePermission.OTHERS_READ );
+		Files.setPosixFilePermissions( changelog.toPath(), perms );
 	}
 
 	
