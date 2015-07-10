@@ -228,6 +228,12 @@ public class SetupBuilder implements SetupSources {
      */
     public String getBundleJreTarget() {
         if( bundleJreTarget != null ) {
+            if( bundleJreTarget.startsWith( "/" ) ) {
+                bundleJreTarget = bundleJreTarget.substring( 1 );
+            }
+            if( bundleJreTarget.endsWith( "/" ) ) {
+                bundleJreTarget = bundleJreTarget.substring( 0, bundleJreTarget.length() - 1 );
+            }
             return bundleJreTarget;
         }
         return "jre";
