@@ -17,11 +17,7 @@ package com.inet.gradle.setup.deb;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -66,7 +62,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		
             controlBuilder.build();
 
-    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + setup.getBaseName()));
+    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + task.getPackages()));
     		documentBuilder.build();
 
             changeDirectoryPermissionsTo755(buildDir);
@@ -118,28 +114,8 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
         file.createNewFile();
         
-        setPermissions( file, executable );
+        DebUtils.setPermissions( file, executable );
         return file;
-    }
-    
-    /**
-     * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
-     * @param file the file 
-     * @param executable if set to <tt>true</tt> the executable bit will be set
-     * @throws IOException on errors when setting the permissions
-     */
-    private void setPermissions( File file, boolean executable ) throws IOException {
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        perms.add( PosixFilePermission.OWNER_READ );
-        perms.add( PosixFilePermission.OWNER_WRITE );
-        perms.add( PosixFilePermission.GROUP_READ );
-        perms.add( PosixFilePermission.OTHERS_READ );
-        if( executable ) {
-            perms.add( PosixFilePermission.OWNER_EXECUTE );
-            perms.add( PosixFilePermission.GROUP_EXECUTE );
-            perms.add( PosixFilePermission.OTHERS_EXECUTE );
-        }
-        Files.setPosixFilePermissions( file.toPath(), perms );
     }
 
 	/**
@@ -175,7 +151,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      * @throws IOException on I/O failures
      */
     private void changeDirectoryPermissionsTo755( File path ) throws IOException {
-        setPermissions( path, true );
+        DebUtils.setPermissions( path, true );
         for( File file : path.listFiles() ) {
             if( file.isDirectory() ) {
                 changeDirectoryPermissionsTo755( file );
@@ -193,7 +169,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             if( file.isDirectory() ) {
                 changeFilePermissionsTo644( file );
             } else {
-                setPermissions( file, false );
+                DebUtils.setPermissions( file, false );
             }
         }
     }

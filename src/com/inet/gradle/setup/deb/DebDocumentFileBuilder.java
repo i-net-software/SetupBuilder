@@ -77,7 +77,8 @@ class DebDocumentFileBuilder {
 		}
 		
 		Files.copy(setup.getLicenseFile().toPath(), new FileOutputStream(copyright) );
-		changePermission(copyright);
+//		changePermission(copyright);
+		DebUtils.setPermissions(copyright, false);
 	}
 
 	private void createChangelogFile() throws IOException {
@@ -109,9 +110,7 @@ class DebDocumentFileBuilder {
 			
 			controlWriter.flush();
 			
-			changePermission(changelog);
-			
-			
+			DebUtils.setPermissions(changelog, false);
 			
 		} finally {
 			if(controlWriter != null) {
@@ -130,15 +129,5 @@ class DebDocumentFileBuilder {
 			}
 		}
 	}
-
-	private void changePermission(File changelog) throws IOException {
-		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-		perms.add( PosixFilePermission.OWNER_READ );
-		perms.add( PosixFilePermission.OWNER_WRITE );
-		perms.add( PosixFilePermission.GROUP_READ );
-		perms.add( PosixFilePermission.OTHERS_READ );
-		Files.setPosixFilePermissions( changelog.toPath(), perms );
-	}
-
 	
 }
