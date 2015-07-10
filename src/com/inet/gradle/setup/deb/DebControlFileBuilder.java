@@ -47,7 +47,7 @@ import com.inet.gradle.setup.Template;
  */
 class DebControlFileBuilder {
 
-    private static final String NEWLINE = "\n";
+    private static final char NEWLINE = '\n';
 
 	private final Deb          deb;
 
@@ -142,7 +142,7 @@ class DebControlFileBuilder {
 		try(FileWriter writer = new FileWriter( new File(buildDir, "conffiles") )) {
 		    for(String confFile: confFiles) {
 		        writer.append( confFile );
-		        writer.append( '\n' );
+		        writer.append( NEWLINE );
 		    }
 		}
 	}
@@ -329,13 +329,20 @@ class DebControlFileBuilder {
 	 * @throws IOException on I/O failures
 	 */
     private void createConfFilesFile() throws IOException {
-        try(FileWriter writer = new FileWriter(new File(buildDir, "conffiles"))) {
+    	File cfile = new File(buildDir, "conffiles");
+        try(FileWriter writer = new FileWriter(cfile)) {
             for(String confFile: confFiles) {
                 writer.write( '/' );
                 writer.write( confFile );
                 writer.write( '\n' );
             }
         }
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        Files.setPosixFilePermissions( cfile.toPath(), perms );
     }
 
 	/**
