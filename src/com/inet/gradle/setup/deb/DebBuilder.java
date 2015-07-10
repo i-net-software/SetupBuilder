@@ -17,11 +17,7 @@ package com.inet.gradle.setup.deb;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -65,7 +61,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
 
             controlBuilder.build();
 
-            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getPackages() ) );
+            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getBaseName() ) );
             documentBuilder.build();
 
             changeDirectoryPermissionsTo755( buildDir );
