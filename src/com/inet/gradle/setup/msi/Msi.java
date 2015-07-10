@@ -15,6 +15,7 @@
  */
 package com.inet.gradle.setup.msi;
 
+import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
@@ -41,15 +42,21 @@ public class Msi extends AbstractSetupTask {
         new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void processFiles( CopyActionProcessingStreamAction action ) {
+        super.processFiles( action );
+    }
+
     public String getArch() {
         return arch;
     }
 
     /**
-     * Set the architecture of the setup. The default is x64. Possible values are:
-     * <li>x86
-     * <li>x64
-     * <li>ia64
+     * Set the architecture of the setup. The default is x64. Possible values are: <li>x86 <li>x64 <li>ia64
+     * 
      * @param arch the architecture
      */
     public void setArch( String arch ) {
@@ -58,6 +65,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * if the setup is a 64 bit setup.
+     * 
      * @return true, if 64 bit.
      */
     boolean is64Bit() {
