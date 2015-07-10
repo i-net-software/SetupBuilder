@@ -407,8 +407,9 @@ class WxsFileBuilder {
             cmd.append( " \"--DisplayName=" ).append( service.getDisplayName() ).append( '\"' );
             if( setup.getBundleJre() != null ) {
                 cmd.append( " \"--Jvm=" ).append( "[INSTALLDIR]" ).append( jvmDll ).append( '\"' );
+                cmd.append( " \"--JavaHome=" ).append( "[INSTALLDIR]" ).append( setup.getBundleJreTarget() ).append( '\"' ); //for bug https://issues.apache.org/jira/browse/DAEMON-335
             }
-            cmd.append( " --StartMode=jvm" );
+            cmd.append( " --StartMode=Java" ); //Java instead jvm because bug https://issues.apache.org/jira/browse/DAEMON-335
             cmd.append( " \"--Classpath=" ).append( service.getMainJar() ).append( '\"' );
             cmd.append( " \"--StartClass=" ).append( service.getMainClass() ).append( '\"' );
             cmd.append( " \"--StartPath=" ).append( "[INSTALLDIR]" ).append( "\\\"" ); //INSTALLDIR ends with a backslash that we need escape the quote 
