@@ -78,6 +78,10 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         if( output != null ) {
             action.setStandardOutput( output );
         }
-       action.execute();
+        try {
+            action.execute();
+        } catch( Throwable th ) {
+            throw new RuntimeException( th );
+        }
     }
 }
