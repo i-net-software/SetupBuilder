@@ -17,10 +17,20 @@ package com.inet.gradle.setup.deb;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.Template;
 
 /**
  * Builder for the control, postinst and prerm files, that are required for the Debian package tool.
@@ -31,7 +41,7 @@ import com.inet.gradle.setup.SetupBuilder;
  * 			<dd>contains scripts and commands that are executed after the files are copied</dd>
  * 		<dt>prerm</dt>
  * 			<dd>contains scripts and commands that are executed before the files are removed</dd>
- * </dl>
+ * </dl>init.d
  * 
  * @author Stefan Heidrich
  */
@@ -45,7 +55,15 @@ class DebControlFileBuilder {
 
     private File               buildDir;
 
-
+    private Collection<String> confFiles = new ArrayList<>();
+    
+    enum Script {
+        PREINST, POSTINST, PRERM, POSTRM
+    }
+    
+    Map<Script, StringBuilder> scriptTailMap = new HashMap<>();
+    
+    
     /**
      * the constructor setting the fields
      * @param deb the task for the debian package
@@ -66,7 +84,8 @@ class DebControlFileBuilder {
     void build() throws Exception {
     	
     	createControlFile();
-
+    	createConfFilesFile();
+    	createScripts();
     }
 
     /**
@@ -74,18 +93,17 @@ class DebControlFileBuilder {
      * @throws IOException if something could not be written to the file
      */
 	private void createControlFile() throws IOException {
-		if(buildDir.isDirectory()) {
-			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
-		}
 		if(!buildDir.exists()) {
 			buildDir.mkdirs();
-		}
+		} else if(!buildDir.isDirectory()) {
+			throw new IllegalArgumentException("The buildDir parameter must be a directory!");
+		} 
 		
 		FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;
 
 		try {
-			File control = new File(buildDir.getAbsolutePath() + File.separatorChar + "control");
+			File control = new File(buildDir, "control");
 			fileoutput = new FileOutputStream(control);
 			controlWriter = new OutputStreamWriter(fileoutput, "UTF-8");
 			
@@ -121,7 +139,12 @@ class DebControlFileBuilder {
 			}
 		}
 		
-		
+		try(FileWriter writer = new FileWriter( new File(buildDir, "conffiles") )) {
+		    for(String confFile: confFiles) {
+		        writer.append( confFile );
+		        writer.append( '\n' );
+		    }
+		}
 	}
 
 	
@@ -151,7 +174,7 @@ class DebControlFileBuilder {
 		if(vendor == null || vendor.length() == 0) {
 			throw new RuntimeException("No vendor declared in the setup configuration.");
 		} else {
-			controlWriter.write("Maintainer: " + vendor + NEWLINE);
+			controlWriter.write("Maintainer: " + vendor + " <" + deb.getMaintainerEmail() + ">" + NEWLINE);
 		}
 	}
 	/**
@@ -202,7 +225,7 @@ class DebControlFileBuilder {
 				}
 			}	
 			
-			installSize = String.valueOf(fileSize);
+			installSize = String.valueOf(fileSize/1024); // Size wird in KB angegeben und nicht in Bytes
 			
 		}
 		controlWriter.write("Installed-Size: " + installSize + NEWLINE);
@@ -293,5 +316,69 @@ class DebControlFileBuilder {
 		}
 	}
 
+	/**
+	 * Adds a config file
+	 * @param file the config file
+	 */
+	public void addConfFile(String file) {
+	    confFiles.add( file );
+	}
 	
+	/**
+	 * Creates the <tt>conffiles</tt> file with a listing of all created configuration files.
+	 * @throws IOException on I/O failures
+	 */
+    private void createConfFilesFile() throws IOException {
+        try(FileWriter writer = new FileWriter(new File(buildDir, "conffiles"))) {
+            for(String confFile: confFiles) {
+                writer.write( '/' );
+                writer.write( confFile );
+                writer.write( '\n' );
+            }
+        }
+    }
+
+	/**
+	 * Adds a fragment to the specified install scripts.
+	 * @param script the install script
+	 * @param scriptFragment the fragment to add
+	 */
+	public void addScriptTailFragment(Script script, String scriptFragment) {
+	    StringBuilder sb = scriptTailMap.get( script );
+	    if ( sb == null ) {
+	        sb = new StringBuilder();
+	        scriptTailMap.put( script, sb );
+	    } else {
+	        sb.append( "\n\n" );
+	    }
+	    sb.append( scriptFragment );
+	}
+
+	/**
+	 * Creates the {post|pre}{inst|rm} install scripts.
+	 * @throws IOException on I/O failures
+	 */
+    private void createScripts() throws IOException {
+        for(Script script: Script.values()) {
+            StringBuilder tail = scriptTailMap.get( script );
+            
+            if (tail != null) {
+                String scriptName = script.toString().toLowerCase();
+                Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
+                tmpl.setPlaceholder( "head", "" );
+                tmpl.setPlaceholder( "tail", tail.toString() );
+                File file = new File(buildDir, scriptName);
+                tmpl.writeTo( file );
+                Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+                perms.add( PosixFilePermission.OWNER_READ );
+                perms.add( PosixFilePermission.OWNER_WRITE );
+                perms.add( PosixFilePermission.GROUP_READ );
+                perms.add( PosixFilePermission.OTHERS_READ );
+                perms.add( PosixFilePermission.OWNER_EXECUTE );
+                perms.add( PosixFilePermission.GROUP_EXECUTE );
+                perms.add( PosixFilePermission.OTHERS_EXECUTE );
+                Files.setPosixFilePermissions( file.toPath(), perms );
+            }
+        }
+    }
 }

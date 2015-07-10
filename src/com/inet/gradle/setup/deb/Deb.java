@@ -45,6 +45,12 @@ public class Deb extends AbstractSetupTask {
     
     private String                 homepage;
     
+    private String                 checkPackage;
+    
+    private String				   maintainerEmail;
+    
+    private String				   changes;
+    
 	
     public Deb() {
         super( "deb" );
@@ -147,4 +153,37 @@ public class Deb extends AbstractSetupTask {
 	public void setHomepage(String homepage) {
 		this.homepage = homepage;
 	}
+
+
+	public String getCheckPackage() {
+		return checkPackage;
+	}
+
+
+	public void setCheckPackage(String checkPackage) {
+		this.checkPackage = checkPackage;
+	}
+
+
+	public String getMaintainerEmail() {
+		return maintainerEmail;
+	}
+
+
+	public void setMaintainerEmail(String maintainerEmail) {
+		this.maintainerEmail = maintainerEmail;
+	}
+
+
+	public String getChanges() {
+		return changes;
+	}
+
+
+	public void setChanges(String changes) {
+		this.changes = changes;
+	}
+	
+
+	
 }
