@@ -73,7 +73,7 @@ class WxsFileBuilder {
 
     private HashSet<String>    components = new HashSet<>();
 
-    private String jvmDll;
+    private String             jvmDll;
 
     WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) {
         this.task = msi;
@@ -161,7 +161,8 @@ class WxsFileBuilder {
     }
 
     /**
-     * Add a file to the setup 
+     * Add a file to the setup
+     * 
      * @param installDir The XML element of the install directory.
      * @param file the file to add.
      * @param segments the segments of the path in the target. The last segment contains the file name.
@@ -184,7 +185,7 @@ class WxsFileBuilder {
         addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
         Element fileEl = doc.createElement( "File" );
         String name = segments[segments.length - 1];
-        if( name.equals( "jvm.dll" ) ){
+        if( name.equals( "jvm.dll" ) ) {
             StringBuilder jvm = new StringBuilder();
             for( String segment : segments ) {
                 if( jvm.length() > 0 ) {
@@ -204,6 +205,7 @@ class WxsFileBuilder {
 
     /**
      * Add all files in a directory.
+     * 
      * @param installDir The XML element of the install directory.
      * @param dir the source directory
      * @param baseLength the base length of the directory. This length will be cut from the absolute path.
@@ -243,7 +245,7 @@ class WxsFileBuilder {
             if( programFiles == null ) {
                 throw new GradleException( "Environment ProgramFiles not found." );
             }
-            File java = new File( new File(programFiles), "Java" );
+            File java = new File( new File( programFiles ), "Java" );
             if( !java.isDirectory() ) {
                 throw new GradleException( "No installed Java VMs found: " + java );
             }
@@ -258,7 +260,7 @@ class WxsFileBuilder {
                 throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java );
             }
             Collections.sort( versions );
-            jreDir = versions.get( versions.size()-1 );
+            jreDir = versions.get( versions.size() - 1 );
         }
 
         task.getProject().getLogger().lifecycle( "\tbundle jre: " + jreDir );
@@ -375,6 +377,7 @@ class WxsFileBuilder {
 
     /**
      * Add the windows services.
+     * 
      * @param product
      * @throws IOException if an I/O error occurs when reading or writing
      */
@@ -384,21 +387,20 @@ class WxsFileBuilder {
             return;
         }
 
-        InputStream input = getClass().getResourceAsStream( task.getArch() + "/prunsrv.exe" );
         File prunsrv = new File( buildDir, "prunsrv.exe" );
-        Files.copy( input, prunsrv.toPath(), StandardCopyOption.REPLACE_EXISTING );
+        try( InputStream input = getClass().getResourceAsStream( task.getArch() + "/prunsrv.exe" ) ) {
+            Files.copy( input, prunsrv.toPath(), StandardCopyOption.REPLACE_EXISTING );
+        }
 
-        Element execute = getOrCreateChild( product, "InstallExecuteSequence", true );
+        Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence", true );
 
         for( Service service : services ) {
             String name = service.getName();
             String exe = name + "Service.exe";
-            String id = id( name );
-            String fileKey = addFile( installDir, prunsrv, new String[]{exe} );
+            String id = id( name.replace( '-', '_' ) ) + "_service";
+            String fileKey = addFile( installDir, prunsrv, new String[] { exe } );
 
-            //http://blogs.technet.com/b/alexshev/archive/2008/02/21/from-msi-to-wix-part-5-custom-actions.aspx
-            Element customAction = getOrCreateChildById( product, "CustomAction", id, true );
-            addAttributeIfNotExists( customAction, "FileKey", fileKey );
+            // Build the service install command line
             StringBuilder cmd = new StringBuilder();
             cmd.append( " install " ).append( name );
             if( service.getDescription() != null ) {
@@ -406,17 +408,85 @@ class WxsFileBuilder {
             }
             cmd.append( " \"--DisplayName=" ).append( service.getDisplayName() ).append( '\"' );
             if( setup.getBundleJre() != null ) {
-                cmd.append( " \"--Jvm=" ).append( setup.getBundleJreTarget() ).append( "[INSTALLDIR]\\" ).append( jvmDll ).append( '\"' );
+                cmd.append( " \"--Jvm=" ).append( setup.getBundleJreTarget() ).append( "[INSTALLDIR]" ).append( jvmDll ).append( '\"' );
             }
-            cmd.append( " \"--Classpath=" ).append( "[INSTALLDIR]\\" ).append( service.getMainJar() ).append( '\"' );
+            cmd.append( " \"--Classpath=" ).append( "[INSTALLDIR]" ).append( service.getMainJar() ).append( '\"' );
             cmd.append( " \"--StartClass=" ).append( service.getMainClass() ).append( '\"' );
             task.getProject().getLogger().lifecycle( "\t" + cmd );
 
-            addAttributeIfNotExists( customAction, "ExeCommand", cmd.toString() );
-            Element custom = getOrCreateChild( execute, "Custom", true );
-            addAttributeIfNotExists( custom, "Action", id );
-            addAttributeIfNotExists( custom, "After", "InstallFiles" );
+            // save the command line as property
+            String propID = "prop." + id;
+            addLargeProperty( product, propID, cmd.toString() );
+
+            Element customAction = getOrCreateChildById( product, "CustomAction", id, true );
+            addAttributeIfNotExists( customAction, "FileKey", fileKey );
+            addAttributeIfNotExists( customAction, "ExeCommand", '[' + propID + ']' );
+            addAttributeIfNotExists( customAction, "Execute", "deferred" );
+            addAttributeIfNotExists( customAction, "Impersonate", "no" );
+
+            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id, true );
+            addAttributeIfNotExists( custom, "Before", "InstallFinalize" );
         }
+    }
+
+    /**
+     * Split a large property into multiple sub properties to handle the length limit.
+     * 
+     * @param product the product element
+     * @param id the if of the property
+     * @param value the value of the property
+     */
+    private void addLargeProperty( Element product, String id, final String value ) {
+        int count = 0;
+        String rest = value;
+        String partValue;
+        String after = "InstallFiles";
+        do {
+            String propID;
+            if( rest.length() < 200 ) {
+                propID = id;
+                partValue = rest;
+            } else {
+                propID = id + count;
+                partValue = rest.substring( 0, 200 );
+                int brackets = 0;
+                int lastSeroPosition = 0;
+                // search for place holder
+                for( int i = 0; i < partValue.length(); i++ ) {
+                    char ch = partValue.charAt( i );
+                    switch( ch ) {
+                        case '[':
+                            if( brackets == 0 ) {
+                                lastSeroPosition = i;
+                            }
+                            brackets++;
+                            break;
+                        case ']':
+                            brackets--;
+                            if( brackets == 0 ) {
+                                lastSeroPosition = i + 1;
+                            }
+                            break;
+                    }
+                }
+                if( brackets != 0 ) {
+                    partValue = partValue.substring( 0, lastSeroPosition );
+                }
+                if( partValue.length() == 0 ) {
+                    throw new GradleException( "Invalid property value: " + value );
+                }
+                rest = '[' + propID + ']' + rest.substring( partValue.length() );
+            }
+            String actionID = "action." + propID;
+            Element action = getOrCreateChildById( product, "CustomAction", actionID, true );
+            addAttributeIfNotExists( action, "Property", propID );
+            addAttributeIfNotExists( action, "Value", partValue );
+            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence", true );
+            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", actionID, true );
+            addAttributeIfNotExists( custom, "After", after );
+            after = actionID;
+            count++;
+        } while( partValue != rest );
     }
 
     /**
@@ -450,15 +520,19 @@ class WxsFileBuilder {
     }
 
     private Element getOrCreateChildById( Element parent, String name, String id, boolean append ) {
+        return getOrCreateChildByKeyValue( parent, name, "Id", id, append );
+    }
+
+    private Element getOrCreateChildByKeyValue( Element parent, String name, String key, String value, boolean append ) {
         Node first = parent.getFirstChild();
         for( Node child = first; child != null; child = child.getNextSibling() ) {
-            if( name.equals( child.getNodeName() ) && id.equals( ((Element)child).getAttribute( "Id" ) ) ) {
+            if( name.equals( child.getNodeName() ) && value.equals( ((Element)child).getAttribute( key ) ) ) {
                 return (Element)child;
             }
         }
         Document doc = parent.getOwnerDocument();
         Element child = doc.createElement( name );
-        child.setAttribute( "Id", id );
+        child.setAttribute( key, value );
         if( append || first == null ) {
             parent.appendChild( child );
         } else {
