@@ -346,11 +346,11 @@ class DebControlFileBuilder {
     }
 
 	/**
-	 * Adds a fragment to the specified install scripts.
+	 * Adds a fragment to the specified install script at the tail section.
 	 * @param script the install script
 	 * @param scriptFragment the fragment to add
 	 */
-	public void addScriptTailFragment(Script script, String scriptFragment) {
+	public void addTailScriptFragment(Script script, String scriptFragment) {
 	    StringBuilder sb = scriptTailMap.get( script );
 	    if ( sb == null ) {
 	        sb = new StringBuilder();
@@ -362,7 +362,8 @@ class DebControlFileBuilder {
 	}
 
 	/**
-	 * Creates the {post|pre}{inst|rm} install scripts.
+	 * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
+	 * they are required.
 	 * @throws IOException on I/O failures
 	 */
     private void createScripts() throws IOException {
