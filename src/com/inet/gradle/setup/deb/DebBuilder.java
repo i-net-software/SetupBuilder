@@ -66,7 +66,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     		
             controlBuilder.build();
 
-    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + task.getPackages()));
+    		documentBuilder = new DebDocumentFileBuilder(super.task, setup, new File(buildDir, "/usr/share/doc/" + setup.getBaseName()));
     		documentBuilder.build();
 
             changeDirectoryPermissionsTo755(buildDir);
