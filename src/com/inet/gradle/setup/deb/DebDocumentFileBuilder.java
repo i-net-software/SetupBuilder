@@ -18,12 +18,10 @@ package com.inet.gradle.setup.deb;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Calendar;
 import java.util.zip.GZIPOutputStream;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -69,17 +67,45 @@ class DebDocumentFileBuilder {
 
     }
 
+    /**
+     * Writes the copyrights file to the specified directory. This should be /user/share/doc/package
+     * @throws FileNotFoundException if the copyright file could not be created
+     * @throws IOException if the are problems writing the copyright file
+     */
     private void copyCopyrightFile() throws FileNotFoundException, IOException {
     	File copyright = new File(buildDir, "copyright");
 		
 		if(!copyright.getParentFile().exists()) {
 			copyright.getParentFile().mkdirs();
 		}
+		FileOutputStream fileoutput = null;
+		OutputStreamWriter controlWriter = null;
+		fileoutput = new FileOutputStream(copyright);
 		
-		Files.copy(setup.getLicenseFile().toPath(), new FileOutputStream(copyright) );
-		changePermission(copyright);
+		controlWriter = new OutputStreamWriter(fileoutput, "UTF-8");
+	 
+		controlWriter.write( "File: *" + NEWLINE);
+		controlWriter.write( "Copyright: 2011-" + Calendar.getInstance().get(Calendar.YEAR) + " i-net software" + NEWLINE);
+		controlWriter.write( "License: commercial" + NEWLINE);
+		
+		FileReader reader = new FileReader(setup.getLicenseFile());
+		int c = reader.read();
+		while(c != -1) {
+			controlWriter.write(c);
+			c = reader.read();
+		}
+		
+		reader.close();
+		controlWriter.flush();
+		controlWriter.close();
+
+		DebUtils.setPermissions(copyright, false);
 	}
 
+    /**
+     * Writes the changelog.gz file to the specified directory. This should be /user/share/doc/package
+     * @throws IOException if there are problems writing the changelog file
+     */
 	private void createChangelogFile() throws IOException {
     	FileOutputStream fileoutput = null;
 		OutputStreamWriter controlWriter = null;
@@ -96,7 +122,7 @@ class DebDocumentFileBuilder {
 			
 			controlWriter = new OutputStreamWriter(gzipstream, "UTF-8");
 		 
-			controlWriter.write( deb.getPackages() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE);
+			controlWriter.write( deb.getPackages() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE);
 			
 			String changes = deb.getChanges();
 			if(changes != null && changes.length() > 0) {
@@ -105,13 +131,11 @@ class DebDocumentFileBuilder {
 				controlWriter.write( "  * no changes" + NEWLINE);
 			}
 			
-			controlWriter.write( "  -- " + setup.getVendor() + " <" + deb.getMaintainerEmail() + ">  " + NEWLINE);
+			controlWriter.write( NEWLINE + "  -- " + setup.getVendor() + " <" + deb.getMaintainerEmail() + ">" + NEWLINE);
 			
 			controlWriter.flush();
 			
-			changePermission(changelog);
-			
-			
+			DebUtils.setPermissions(changelog, false);
 			
 		} finally {
 			if(controlWriter != null) {
@@ -130,15 +154,5 @@ class DebDocumentFileBuilder {
 			}
 		}
 	}
-
-	private void changePermission(File changelog) throws IOException {
-		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-		perms.add( PosixFilePermission.OWNER_READ );
-		perms.add( PosixFilePermission.OWNER_WRITE );
-		perms.add( PosixFilePermission.GROUP_READ );
-		perms.add( PosixFilePermission.OTHERS_READ );
-		Files.setPosixFilePermissions( changelog.toPath(), perms );
-	}
-
 	
 }

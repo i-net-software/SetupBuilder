@@ -47,7 +47,7 @@ import com.inet.gradle.setup.Template;
  */
 class DebControlFileBuilder {
 
-    private static final String NEWLINE = "\n";
+    private static final char NEWLINE = '\n';
 
 	private final Deb          deb;
 
@@ -142,7 +142,7 @@ class DebControlFileBuilder {
 		try(FileWriter writer = new FileWriter( new File(buildDir, "conffiles") )) {
 		    for(String confFile: confFiles) {
 		        writer.append( confFile );
-		        writer.append( '\n' );
+		        writer.append( NEWLINE );
 		    }
 		}
 	}
@@ -184,11 +184,17 @@ class DebControlFileBuilder {
 	 */
 	private void putDepends(OutputStreamWriter controlWriter)
 			throws IOException {
-		String depends = deb.getDepends();
-		if(depends == null || depends.length() == 0 ) {
-			depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+        StringBuilder sb = new StringBuilder();
+        if( !setup.getServices().isEmpty() ) {
+            sb.append( "jsvc, libcommons-daemon-java, " );
+        }
+        String depends = deb.getDepends();
+        if( depends != null && depends.length() > 0 ) {
+            sb.append( depends );
+        } else {
+            sb.append( "default-jre | default-jdk" );
 		}
-		controlWriter.write("Depends: " + depends + NEWLINE);
+		controlWriter.write("Depends: " + sb + NEWLINE);
 	}
 	/**
 	 * Write the recommends to the file.
@@ -329,21 +335,28 @@ class DebControlFileBuilder {
 	 * @throws IOException on I/O failures
 	 */
     private void createConfFilesFile() throws IOException {
-        try(FileWriter writer = new FileWriter(new File(buildDir, "conffiles"))) {
+    	File cfile = new File(buildDir, "conffiles");
+        try(FileWriter writer = new FileWriter(cfile)) {
             for(String confFile: confFiles) {
                 writer.write( '/' );
                 writer.write( confFile );
                 writer.write( '\n' );
             }
         }
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        Files.setPosixFilePermissions( cfile.toPath(), perms );
     }
 
 	/**
-	 * Adds a fragment to the specified install scripts.
+	 * Adds a fragment to the specified install script at the tail section.
 	 * @param script the install script
 	 * @param scriptFragment the fragment to add
 	 */
-	public void addScriptTailFragment(Script script, String scriptFragment) {
+	public void addTailScriptFragment(Script script, String scriptFragment) {
 	    StringBuilder sb = scriptTailMap.get( script );
 	    if ( sb == null ) {
 	        sb = new StringBuilder();
@@ -355,7 +368,8 @@ class DebControlFileBuilder {
 	}
 
 	/**
-	 * Creates the {post|pre}{inst|rm} install scripts.
+	 * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
+	 * they are required.
 	 * @throws IOException on I/O failures
 	 */
     private void createScripts() throws IOException {

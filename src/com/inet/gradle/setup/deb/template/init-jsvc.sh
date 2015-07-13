@@ -41,11 +41,8 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
-		|| return 1
-	start-stop-daemon -b  --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
-		$DAEMON_ARGS \
-		|| return 2
+	/usr/bin/jsvc -pidfile $PIDFILE -wait 10 -errfile "&2" $DAEMON_ARGS  || return 2
+	return $?
 }
 
 #
@@ -58,25 +55,11 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE 
-	RETVAL="$?"
-	[ "$RETVAL" = 2 ] && return 2
+	/usr/bin/jsvc -pidfile $PIDFILE -wait 10 -errfile "&2" -cp /usr/share/java/commons-daemon.jar -stop DAEMON_ARGS || return 1
 	rm -f $PIDFILE
 	return "$RETVAL"
 }
-
-#
-# Function that sends a SIGHUP to the daemon/service
-#
-do_reload() {
-	#
-	# If the daemon can reload its configuration without
-	# restarting (for example, when it is sent a SIGHUP),
-	# then implement that here.
-	#
-	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
-	return 0
-}
+ 
 
 case "$1" in
   start)
@@ -98,15 +81,6 @@ case "$1" in
   status)
 	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
 	;;
-  #reload|force-reload)
-	#
-	# If do_reload() is not implemented then leave this commented out
-	# and leave 'force-reload' as an alias for 'restart'.
-	#
-	#log_daemon_msg "Reloading $DESC" "$NAME"
-	#do_reload
-	#log_end_msg $?
-	#;;
   restart|force-reload)
 	#
 	# If the "reload" option is implemented then remove the
@@ -130,7 +104,6 @@ case "$1" in
 	esac
 	;;
   *)
-	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
 	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
 	exit 3
 	;;

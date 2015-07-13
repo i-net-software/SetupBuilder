@@ -45,7 +45,7 @@ Sample Usage
         }
     }
 
-More properties can you found in the sources of [setupBuilder][setupBuilder], [msi][msi], [deb][deb], [rpm][rpm] and [dmg][dmg].
+More properties can be found in the sources of [setupBuilder][setupBuilder], [msi][msi], [deb][deb], [rpm][rpm] and [dmg][dmg].
 
 License
 ----

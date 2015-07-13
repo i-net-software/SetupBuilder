@@ -60,6 +60,9 @@ public class Service {
      * @return the description
      */
     public String getDescription() {
+        if( description == null ) {
+            return "";
+        }
         return description;
     }
 
@@ -92,6 +95,9 @@ public class Service {
      * @return the command-line arguments for starting the service
      */
     public String getStartArguments() {
+        if (startArguments == null) {
+            return "";
+        }
         return startArguments;
     }
 
