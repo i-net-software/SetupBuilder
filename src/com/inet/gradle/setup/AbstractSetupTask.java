@@ -88,7 +88,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
      * @param action the action that should be process for every file
      */
     protected void processFiles( CopyActionProcessingStreamAction action ) {
-        processFiles( action, getSetupBuilder().getCopySpec() );
+        processFiles( action, getSetupBuilder().getRootSpec() );
         processFiles( action, rootSpec );
     }
 
@@ -142,7 +142,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
     }
 
     @Override
-    public CopySpecInternal getCopySpec() {
+    public CopySpecInternal getRootSpec() {
         return rootSpec;
     }
 

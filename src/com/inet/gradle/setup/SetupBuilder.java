@@ -74,7 +74,7 @@ public class SetupBuilder implements SetupSources {
     }
 
     @Override
-    public CopySpecInternal getCopySpec() {
+    public CopySpecInternal getRootSpec() {
         return rootSpec;
     }
 
