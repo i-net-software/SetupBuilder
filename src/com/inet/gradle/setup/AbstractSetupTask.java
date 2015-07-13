@@ -29,6 +29,7 @@ import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionExecuter;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
+import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.internal.tasks.SimpleWorkResult;
@@ -97,6 +98,13 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
      * @param action the action that should be process for every file
      */
     private void processFiles( CopyActionProcessingStreamAction action, CopySpecInternal copySpec ) {
+        if( getSetupBuilder().isFailOnEmptyFrom() ) {
+            for( CopySpecInternal cs : copySpec.getChildren() ) {
+                if( cs.buildRootResolver().getAllSource().isEmpty() ) {
+                    throw new IllegalArgumentException( "No files selected from: " + ((DefaultCopySpec)cs).getSourcePaths()  + "\nFix your From expression or disable the check with 'failOnEmptyFrom = false'" );
+                }
+            }
+        }
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
         CopyAction copyAction = new CopyAction() {
             @Override

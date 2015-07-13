@@ -65,6 +65,8 @@ public class SetupBuilder implements SetupSources {
     private List<DocumentType>     documentTypes = new ArrayList<>();
     private List<Service>          services      = new ArrayList<>();
 
+    private boolean                failOnEmptyFrom = true;
+
     public SetupBuilder( Project project ) {
         this.project = project;
         this.rootSpec = (CopySpecInternal)project.copySpec( null );
@@ -315,5 +317,21 @@ public class SetupBuilder implements SetupSources {
      */
     public List<Service> getServices() {
         return services;
+    }
+
+    /**
+     * If enabled then an empty from definition is failing the build.
+     * @return true, if enabled
+     */
+    public boolean isFailOnEmptyFrom() {
+        return failOnEmptyFrom;
+    }
+
+    /**
+     * Enable the check.
+     * @param failOnEmptyFrom true, check is enabled
+     */
+    public void setFailOnEmptyFrom( boolean failOnEmptyFrom ) {
+        this.failOnEmptyFrom = failOnEmptyFrom;
     }
 }
