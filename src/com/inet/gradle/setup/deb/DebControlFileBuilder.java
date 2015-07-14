@@ -86,6 +86,7 @@ class DebControlFileBuilder {
     	createControlFile();
     	createConfFilesFile();
     	createScripts();
+    	createPreInstFile();
     }
 
     /**
@@ -183,13 +184,14 @@ class DebControlFileBuilder {
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putDepends(OutputStreamWriter controlWriter)
-			throws IOException {
-		String depends = deb.getDepends();
-		if(depends == null || depends.length() == 0 ) {
-			depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
-		}
-		controlWriter.write("Depends: " + depends + NEWLINE);
+	                throws IOException {
+	    String depends = deb.getDepends();
+	    if(depends == null || depends.length() == 0 ) {
+	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+	    }
+	    controlWriter.write("Depends: " + depends + NEWLINE);
 	}
+	
 	/**
 	 * Write the recommends to the file.
 	 * @param controlWriter the writer for the file
@@ -389,4 +391,17 @@ class DebControlFileBuilder {
             }
         }
     }
+    
+    private void createPreInstFile() throws IOException {
+    	Template initScript = new Template( "deb/template/preinst" );
+    	File file = new File( buildDir, "preinst" );
+        if( !file.getParentFile().exists() ) {
+            file.getParentFile().mkdirs();
+        }
+        file.createNewFile();
+        System.out.println("preinst file :" + file.getAbsolutePath());
+        initScript.writeTo( file );
+
+        DebUtils.setPermissions( file, true );
+	}
 }
