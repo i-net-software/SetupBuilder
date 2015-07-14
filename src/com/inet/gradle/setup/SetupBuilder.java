@@ -63,8 +63,9 @@ public class SetupBuilder implements SetupSources {
     private String                 mainJar;
 
     private List<DocumentType>     documentTypes = new ArrayList<>();
-    private List<Service>          services      = new ArrayList<>();
-
+    private List<Service>          services        = new ArrayList<>();
+    private List<DesktopStarter>   desktopStarters = new ArrayList<>();
+    
     private boolean                failOnEmptyFrom = true;
 
     public SetupBuilder( Project project ) {
@@ -318,7 +319,24 @@ public class SetupBuilder implements SetupSources {
     public List<Service> getServices() {
         return services;
     }
-
+    
+    /**
+     * Register a desktop starter.
+     * @param closue the closure of the desktop starter's definition
+     */
+    public void desktopStarter( Closure closue ) {
+        DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
+        desktopStarters.add( service );
+    }
+    
+    /**
+     * Returns the registered desktop starters.
+     * @return the registered desktop starters
+     */
+    public List<DesktopStarter> getDesktopStarters() {
+        return desktopStarters;
+    }
+    
     /**
      * If enabled then an empty from definition is failing the build.
      * @return true, if enabled

@@ -16,12 +16,14 @@
 package com.inet.gradle.setup.deb;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
+import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
@@ -58,6 +60,10 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             for( Service service : setup.getServices() ) {
                 setupService( service );
             }
+            
+            for( DesktopStarter starter : setup.getDesktopStarters() ) {
+                setupStarter( starter );
+            }
 
             controlBuilder.build();
 
@@ -77,12 +83,13 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
     }
 
+
     /**
      * Creates the files and the corresponding script section for the specified service.
      * @param service the service
      * @throws IOException on errors during creating or writing a file
      */
-    public void setupService( Service service ) throws IOException {
+    private void setupService( Service service ) throws IOException {
         String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
         Template initScript = new Template( "deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
@@ -98,6 +105,34 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + 
             "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
             "fi" );
+    }
+
+    /**
+     * Creates the files and the corresponding scripts for the specified desktop starter.
+     * @param starter the desktop starter
+     * @throws IOException on errors during creating or writing a file
+     */
+    private void setupStarter( DesktopStarter starter ) throws IOException {
+        String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
+        String consoleStarterPath = "usr/bin/" + unixName;
+        try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
+            fw.write( "#!/bin/bash\n" );
+            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " " + starter.getStartArguments()+" \"$@\"");
+        }
+        try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
+            fw.write( "[Desktop Entry]\n" );
+            fw.write( "Name="+starter.getName()+"\n" );
+            fw.write( "Comment="+starter.getDescription().replace( '\n', ' ' )+"\n" );
+//            fw.write( "GenericName=\r\n" );
+            fw.write( "Exec=/"+consoleStarterPath+" %F\r\n" );
+//            fw.write( "Icon=\r\n" );
+            fw.write( "Terminal=false\r\n" );
+            fw.write( "StartupNotify=true\r\n" );
+            fw.write( "Type=Application\r\n" );
+//            fw.write( "MimeType=\r\n" );
+//            fw.write( "Categories=System;Utility;Core;GTK;FileTools;FileManager;\n" );
+        }
+        
     }
 
     /**
