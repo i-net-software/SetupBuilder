@@ -84,12 +84,13 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      */
     public void setupService( Service service ) throws IOException {
         String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
-        Template initScript = new Template( "deb/template/init-jsvc.sh" );
+        Template initScript = new Template( "deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
+        initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
+        initScript.setPlaceholder( "wait", "2" );
         initScript.setPlaceholder( "startArguments",
-                                   "-cp /usr/share/" + setup.getBaseName() + "/" + service.getMainJar() + ":/usr/share/java/commons-daemon.jar " + service.getMainClass() + " "
-                                       + service.getStartArguments() );
+                                   "-cp /usr/share/" + setup.getBaseName() + "/" + service.getMainJar() + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );

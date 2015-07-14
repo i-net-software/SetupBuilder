@@ -183,19 +183,14 @@ class DebControlFileBuilder {
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putDepends(OutputStreamWriter controlWriter)
-			throws IOException {
-        StringBuilder sb = new StringBuilder();
-        if( !setup.getServices().isEmpty() ) {
-            sb.append( "jsvc, libcommons-daemon-java, " );
-        }
-        String depends = deb.getDepends();
-        if( depends != null && depends.length() > 0 ) {
-            sb.append( depends );
-        } else {
-            sb.append( "default-jre | default-jdk" );
-		}
-		controlWriter.write("Depends: " + sb + NEWLINE);
+	                throws IOException {
+	    String depends = deb.getDepends();
+	    if(depends == null || depends.length() == 0 ) {
+	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+	    }
+	    controlWriter.write("Depends: " + depends + NEWLINE);
 	}
+	
 	/**
 	 * Write the recommends to the file.
 	 * @param controlWriter the writer for the file
