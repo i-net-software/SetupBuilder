@@ -30,6 +30,7 @@ import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
+import org.gradle.api.internal.file.copy.CopySpecSource;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
 
@@ -38,9 +39,7 @@ import org.gradle.api.tasks.InputFiles;
  * 
  * @author Volker Berlin
  */
-public interface SetupSources extends CopySpec {
-
-    CopySpecInternal getCopySpec();
+public interface SetupSources extends CopySpec, CopySpecSource {
 
     /**
      * Returns the source files for this task.
@@ -49,158 +48,196 @@ public interface SetupSources extends CopySpec {
      */
     @InputFiles
     default FileTree getSource() {
-        return getCopySpec().buildRootResolver().getAllSource();
+        return getRootSpec().buildRootResolver().getAllSource();
     }
 
+    @Override
     default CopySpec eachFile( Action<? super FileCopyDetails> arg0 ) {
-        return getCopySpec().eachFile( arg0 );
+        return getRootSpec().eachFile( arg0 );
     }
 
+    @Override
     default CopySpec eachFile( Closure arg0 ) {
-        return getCopySpec().eachFile( arg0 );
+        return getRootSpec().eachFile( arg0 );
     }
 
+    @Override
     default CopySpec exclude( Closure arg0 ) {
-        return getCopySpec().exclude( arg0 );
+        return getRootSpec().exclude( arg0 );
     }
 
+    @Override
     default CopySpec exclude( Iterable<String> arg0 ) {
-        return getCopySpec().exclude( arg0 );
+        return getRootSpec().exclude( arg0 );
     }
 
+    @Override
     default CopySpec exclude( Spec<FileTreeElement> arg0 ) {
-        return getCopySpec().exclude( arg0 );
+        return getRootSpec().exclude( arg0 );
     }
 
+    @Override
     default CopySpec exclude( String... arg0 ) {
-        return getCopySpec().exclude( arg0 );
+        return getRootSpec().exclude( arg0 );
     }
 
+    @Override
     default CopySpec expand( Map<String, ?> arg0 ) {
-        return getCopySpec().expand( arg0 );
+        return getRootSpec().expand( arg0 );
     }
 
+    @Override
     default CopySpec filesMatching( String arg0, Action<? super FileCopyDetails> arg1 ) {
-        return getCopySpec().filesMatching( arg0, arg1 );
+        return getRootSpec().filesMatching( arg0, arg1 );
     }
 
+    @Override
     default CopySpec filesNotMatching( String arg0, Action<? super FileCopyDetails> arg1 ) {
-        return getCopySpec().filesNotMatching( arg0, arg1 );
+        return getRootSpec().filesNotMatching( arg0, arg1 );
     }
 
+    @Override
     default CopySpec filter( Class<? extends FilterReader> arg0 ) {
-        return getCopySpec().filter( arg0 );
+        return getRootSpec().filter( arg0 );
     }
 
+    @Override
     default CopySpec filter( Closure arg0 ) {
-        return getCopySpec().filter( arg0 );
+        return getRootSpec().filter( arg0 );
     }
 
+    @Override
     default CopySpec filter( Map<String, ?> arg0, Class<? extends FilterReader> arg1 ) {
-        return getCopySpec().filter( arg0, arg1 );
+        return getRootSpec().filter( arg0, arg1 );
     }
 
+    @Override
     default CopySpec from( Object arg0, Closure arg1 ) {
-        return getCopySpec().from( arg0, arg1 );
+        return getRootSpec().from( arg0, arg1 );
     }
 
+    @Override
     default CopySpec from( Object... arg0 ) {
-        return getCopySpec().from( arg0 );
+        return getRootSpec().from( arg0 );
     }
 
+    @Override
     default Integer getDirMode() {
-        return getCopySpec().getDirMode();
+        return getRootSpec().getDirMode();
     }
 
+    @Override
     default DuplicatesStrategy getDuplicatesStrategy() {
-        return getCopySpec().getDuplicatesStrategy();
+        return getRootSpec().getDuplicatesStrategy();
     }
 
+    @Override
     default Set<String> getExcludes() {
-        return getCopySpec().getExcludes();
+        return getRootSpec().getExcludes();
     }
 
+    @Override
     default Integer getFileMode() {
-        return getCopySpec().getFileMode();
+        return getRootSpec().getFileMode();
     }
 
+    @Override
     default boolean getIncludeEmptyDirs() {
-        return getCopySpec().getIncludeEmptyDirs();
+        return getRootSpec().getIncludeEmptyDirs();
     }
 
+    @Override
     default Set<String> getIncludes() {
-        return getCopySpec().getIncludes();
+        return getRootSpec().getIncludes();
     }
 
+    @Override
     default CopySpec include( Closure arg0 ) {
-        return getCopySpec().include( arg0 );
+        return getRootSpec().include( arg0 );
     }
 
+    @Override
     default CopySpec include( Iterable<String> arg0 ) {
-        return getCopySpec().include( arg0 );
+        return getRootSpec().include( arg0 );
     }
 
+    @Override
     default CopySpec include( Spec<FileTreeElement> arg0 ) {
-        return getCopySpec().include( arg0 );
+        return getRootSpec().include( arg0 );
     }
 
+    @Override
     default CopySpec include( String... arg0 ) {
-        return getCopySpec().include( arg0 );
+        return getRootSpec().include( arg0 );
     }
 
+    @Override
     default CopySpec into( Object arg0, Closure arg1 ) {
-        return getCopySpec().into( arg0, arg1 );
+        return getRootSpec().into( arg0, arg1 );
     }
 
+    @Override
     default CopySpec into( Object arg0 ) {
-        return getCopySpec().into( arg0 );
+        return getRootSpec().into( arg0 );
     }
 
+    @Override
     default boolean isCaseSensitive() {
-        return getCopySpec().isCaseSensitive();
+        return getRootSpec().isCaseSensitive();
     }
 
+    @Override
     default CopySpec rename( Closure arg0 ) {
-        return getCopySpec().rename( arg0 );
+        return getRootSpec().rename( arg0 );
     }
 
+    @Override
     default CopyProcessingSpec rename( Pattern arg0, String arg1 ) {
-        return getCopySpec().rename( arg0, arg1 );
+        return getRootSpec().rename( arg0, arg1 );
     }
 
+    @Override
     default CopySpec rename( String arg0, String arg1 ) {
-        return getCopySpec().rename( arg0, arg1 );
+        return getRootSpec().rename( arg0, arg1 );
     }
 
+    @Override
     default void setCaseSensitive( boolean arg0 ) {
-        getCopySpec().setCaseSensitive( arg0 );
+        getRootSpec().setCaseSensitive( arg0 );
     }
 
+    @Override
     default CopyProcessingSpec setDirMode( Integer arg0 ) {
-        return getCopySpec().setDirMode( arg0 );
+        return getRootSpec().setDirMode( arg0 );
     }
 
+    @Override
     default void setDuplicatesStrategy( DuplicatesStrategy arg0 ) {
-        getCopySpec().setDuplicatesStrategy( arg0 );
+        getRootSpec().setDuplicatesStrategy( arg0 );
     }
 
+    @Override
     default CopySpec setExcludes( Iterable<String> arg0 ) {
-        return getCopySpec().setExcludes( arg0 );
+        return getRootSpec().setExcludes( arg0 );
     }
 
+    @Override
     default CopyProcessingSpec setFileMode( Integer arg0 ) {
-        return getCopySpec().setFileMode( arg0 );
+        return getRootSpec().setFileMode( arg0 );
     }
 
+    @Override
     default void setIncludeEmptyDirs( boolean arg0 ) {
-        getCopySpec().setIncludeEmptyDirs( arg0 );
+        getRootSpec().setIncludeEmptyDirs( arg0 );
     }
 
+    @Override
     default CopySpec setIncludes( Iterable<String> arg0 ) {
-        return getCopySpec().setIncludes( arg0 );
+        return getRootSpec().setIncludes( arg0 );
     }
 
+    @Override
     default CopySpec with( CopySpec... arg0 ) {
-        return getCopySpec().with( arg0 );
+        return getRootSpec().with( arg0 );
     }
 }

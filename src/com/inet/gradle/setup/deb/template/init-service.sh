@@ -5,14 +5,15 @@
 # Required-Stop:     $local_fs $network $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: {{description}}
+# Short-Description: {{displayName}}
 # Description:       {{description}}
 ### END INIT INFO
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="{{description}}"
+DESC="{{displayName}}"
 NAME={{name}}
+WAIT={{wait}}
 DAEMON=/usr/bin/java
 DAEMON_ARGS="{{startArguments}}"
 PIDFILE=/var/run/$NAME.pid
@@ -32,7 +33,7 @@ SCRIPTNAME=/etc/init.d/$NAME
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
-#
+
 # Function that starts the daemon/service
 #
 do_start()
@@ -46,6 +47,15 @@ do_start()
 	start-stop-daemon -b  --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
 		$DAEMON_ARGS \
 		|| return 2
+	sleep $WAIT
+	if start-stop-daemon --test --start --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+		if [ -f "$CATALINA_PID" ]; then
+			rm -f "$CATALINA_PID"
+		fi
+		return 1
+	else
+		return 0
+	fi
 }
 
 #
@@ -64,26 +74,14 @@ do_stop()
 	rm -f $PIDFILE
 	return "$RETVAL"
 }
-
-#
-# Function that sends a SIGHUP to the daemon/service
-#
-do_reload() {
-	#
-	# If the daemon can reload its configuration without
-	# restarting (for example, when it is sent a SIGHUP),
-	# then implement that here.
-	#
-	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
-	return 0
-}
-
+ 
 case "$1" in
   start)
 	log_daemon_msg "Starting" "$NAME"
 	do_start
 	case "$?" in
-		0|1) log_end_msg 0 ;;
+		0) log_end_msg 0 ;;
+		1) log_success_msg "(already running)"; log_end_msg 0 ;;
 		2) log_end_msg 1 ;;
 	esac
 	;;
@@ -96,17 +94,12 @@ case "$1" in
 	esac
 	;;
   status)
-	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+	if start-stop-daemon --test --start --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+	    log_success_msg "$NAME is not running."
+	else
+	    log_success_msg "$NAME is running."
+	fi
 	;;
-  #reload|force-reload)
-	#
-	# If do_reload() is not implemented then leave this commented out
-	# and leave 'force-reload' as an alias for 'restart'.
-	#
-	#log_daemon_msg "Reloading $DESC" "$NAME"
-	#do_reload
-	#log_end_msg $?
-	#;;
   restart|force-reload)
 	#
 	# If the "reload" option is implemented then remove the
@@ -130,7 +123,6 @@ case "$1" in
 	esac
 	;;
   *)
-	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
 	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
 	exit 3
 	;;

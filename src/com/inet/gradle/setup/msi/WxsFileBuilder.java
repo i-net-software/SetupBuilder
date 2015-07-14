@@ -400,16 +400,20 @@ class WxsFileBuilder {
 
             // Build the service install command line
             StringBuilder cmd = new StringBuilder();
-            cmd.append( " install " ).append( name );
+            cmd.append( " update " ).append( name );
             if( service.getDescription() != null ) {
                 cmd.append( " \"--Description=" ).append( service.getDescription() ).append( '\"' );
             }
             cmd.append( " \"--DisplayName=" ).append( service.getDisplayName() ).append( '\"' );
             if( setup.getBundleJre() != null ) {
-                cmd.append( " \"--Jvm=" ).append( setup.getBundleJreTarget() ).append( "[INSTALLDIR]" ).append( jvmDll ).append( '\"' );
+                cmd.append( " \"--Jvm=" ).append( "[INSTALLDIR]" ).append( jvmDll ).append( '\"' );
+                cmd.append( " \"--JavaHome=" ).append( "[INSTALLDIR]" ).append( setup.getBundleJreTarget() ).append( '\"' ); //for bug https://issues.apache.org/jira/browse/DAEMON-335
             }
-            cmd.append( " \"--Classpath=" ).append( "[INSTALLDIR]" ).append( service.getMainJar() ).append( '\"' );
+            cmd.append( " --StartMode=Java" ); //Java instead jvm because bug https://issues.apache.org/jira/browse/DAEMON-335
+            cmd.append( " \"--Classpath=" ).append( service.getMainJar() ).append( '\"' );
             cmd.append( " \"--StartClass=" ).append( service.getMainClass() ).append( '\"' );
+            cmd.append( " \"--StartPath=" ).append( "[INSTALLDIR]" ).append( "\\\"" ); //INSTALLDIR ends with a backslash that we need escape the quote 
+            cmd.append( " --Startup=" ).append( service.isStartOnBoot() ? "auto" : "manual" );
             task.getProject().getLogger().lifecycle( "\t" + cmd );
 
             // save the command line as property

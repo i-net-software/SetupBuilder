@@ -63,7 +63,10 @@ public class SetupBuilder implements SetupSources {
     private String                 mainJar;
 
     private List<DocumentType>     documentTypes = new ArrayList<>();
-    private List<Service>          services      = new ArrayList<>();
+    private List<Service>          services        = new ArrayList<>();
+    private List<DesktopStarter>   desktopStarters = new ArrayList<>();
+    
+    private boolean                failOnEmptyFrom = true;
 
     public SetupBuilder( Project project ) {
         this.project = project;
@@ -74,7 +77,7 @@ public class SetupBuilder implements SetupSources {
     }
 
     @Override
-    public CopySpecInternal getCopySpec() {
+    public CopySpecInternal getRootSpec() {
         return rootSpec;
     }
 
@@ -228,6 +231,12 @@ public class SetupBuilder implements SetupSources {
      */
     public String getBundleJreTarget() {
         if( bundleJreTarget != null ) {
+            if( bundleJreTarget.startsWith( "/" ) ) {
+                bundleJreTarget = bundleJreTarget.substring( 1 );
+            }
+            if( bundleJreTarget.endsWith( "/" ) ) {
+                bundleJreTarget = bundleJreTarget.substring( 0, bundleJreTarget.length() - 1 );
+            }
             return bundleJreTarget;
         }
         return "jre";
@@ -309,5 +318,38 @@ public class SetupBuilder implements SetupSources {
      */
     public List<Service> getServices() {
         return services;
+    }
+    
+    /**
+     * Register a desktop starter.
+     * @param closue the closure of the desktop starter's definition
+     */
+    public void desktopStarter( Closure closue ) {
+        DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
+        desktopStarters.add( service );
+    }
+    
+    /**
+     * Returns the registered desktop starters.
+     * @return the registered desktop starters
+     */
+    public List<DesktopStarter> getDesktopStarters() {
+        return desktopStarters;
+    }
+    
+    /**
+     * If enabled then an empty from definition is failing the build.
+     * @return true, if enabled
+     */
+    public boolean isFailOnEmptyFrom() {
+        return failOnEmptyFrom;
+    }
+
+    /**
+     * Enable the check.
+     * @param failOnEmptyFrom true, check is enabled
+     */
+    public void setFailOnEmptyFrom( boolean failOnEmptyFrom ) {
+        this.failOnEmptyFrom = failOnEmptyFrom;
     }
 }
