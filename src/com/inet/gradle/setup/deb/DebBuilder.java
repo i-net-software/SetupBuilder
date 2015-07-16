@@ -65,6 +65,8 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             for( DesktopStarter starter : setup.getDesktopStarters() ) {
                 setupStarter( starter );
             }
+            
+//            setupEula();
 
             controlBuilder.build();
 
@@ -83,6 +85,80 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             throw new RuntimeException( ex );
         }
     }
+
+
+    private void setupEula() {
+    	controlBuilder.addHeadScriptFragment( Script.PREINST, "if [ \"$1\" = \"install\" ] ; then\n" + 
+                "  . /usr/share/debconf/confmodule\n" +
+                "  \n" +
+                "  license=inet-license\n" +
+                "  \n" +
+                "  errmsg()\n" +
+                "  {\n" +
+                "      echo >&2 ''\n" +
+                "      echo >&2 \"$@\"\n" +
+                "      echo >&2 \"try 'dpkg-reconfigure debconf' to select a frontend other than noninteractive\"\n" +
+                "      echo >&2 ''\n" +
+                "  }\n" +
+                "  \n" +
+                "  db_get shared/accepted-$license\n" +
+                "  if [ \"$RET\" = \"true\" ]; then\n" +
+                "      echo \"$license license has already been accepted\" >&2\n" +
+                "      exit 0\n" +
+                "  fi\n" +
+                "  \n" +
+                "  # facilitate backup capability per debconf-devel(7)\n" +
+                "  STATE=1\n" +
+                "  while true; do\n" +
+                "      case \"$STATE\" in\n" +
+                "      0)  # ensure going back from license presentment is harmless\n" +
+                "          STATE=1 \n" +
+                "          continue\n" +
+                "          ;;   \n" +
+                "      1)  # present license\n" +
+                "          db_fset shared/present-$license seen false\n" +
+                "          if ! db_input critical shared/present-$license ; then\n" +
+                "              errmsg \"$license license could not be presented\"\n" +
+                "	      exit 2\n" +
+                "          fi\n" +
+                "          db_fset shared/accepted-$license seen false\n" +
+                "          if ! db_input critical shared/accepted-$license ; then\n" +
+                "              errmsg \"$license agree question could not be asked\"\n" +
+                "   	    exit 2\n" +
+                "          fi\n" +
+                "          ;;     \n" + 
+                "      2)  # determine users' choice\n" +
+                "          db_get shared/accepted-$license\n" +
+                "          if [ \"$RET\" = \"true\" ]; then\n" +
+                " 	      # license accepted\n" +
+                "              exit 0\n" +
+                "          fi\n" +
+                "          # error on decline license (give user chance to back up)\n" +
+                "          db_input critical shared/error-$license\n" +
+                "          ;;      \n" +
+                "      3)  # user has confirmed declining license\n" +
+                "          echo \"user did not accept the $license license\" >&2\n" +
+                "          exit 1\n" +
+                "          ;;   \n" +
+                "      *)  # unknown state\n" +
+                "          echo \"$license license state unknown: $STATE\" >&2\n" +
+                "          exit 2\n" +
+                "          ;;   \n" +
+                "      esac\n" +
+                "      if db_go; then\n" +
+                "          STATE=$(($STATE + 1))\n" +
+                "      else\n" +
+                "          STATE=$(($STATE - 1))\n" +
+                "      fi\n" +
+                "  done\n" +
+                "   \n" +
+                "  \n" +
+                "  \n" +
+                "  # proper exit (0 or 1) above\n" +
+                "  errmsg \"$license license could not be presented / was not accepted\"\n" +
+                "  exit 2\n" +
+                "fi" );
+	}
 
 
     /**
@@ -142,8 +218,12 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
-            //            fw.write( "MimeType=\r\n" );
-            //            fw.write( "Categories=System;Utility;Core;GTK;FileTools;FileManager;\n" );
+            if( starter.getMimeTypes() != null ) {
+                fw.write( "MimeType=" + starter.getMimeTypes() + "\n" );
+            }
+            if( starter.getCategories() != null ) {
+                fw.write( "Categories=" + starter.getCategories() + "\n" );
+            }
         }
         
     }
