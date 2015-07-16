@@ -28,6 +28,7 @@ import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
+import com.inet.gradle.setup.image.ImageFactory;
 
 public class DebBuilder extends AbstractBuilder<Deb> {
 
@@ -117,20 +118,32 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         String consoleStarterPath = "usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
-            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " " + starter.getStartArguments()+" \"$@\"");
+            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+                + starter.getStartArguments() + " \"$@\"" );
+        }
+        int[] iconSizes = { 16, 32, 48, 64, 128 };
+
+        for( int size : iconSizes ) {
+            File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
+            iconDir.mkdirs();
+            File scaledFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), iconDir, "png" + size );
+            if( scaledFile != null ) {
+                File iconFile = new File( iconDir, unixName + ".png" );
+                scaledFile.renameTo( iconFile );
+                DebUtils.setPermissions( iconFile, false );
+            }
         }
         try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
             fw.write( "[Desktop Entry]\n" );
-            fw.write( "Name="+starter.getName()+"\n" );
-            fw.write( "Comment="+starter.getDescription().replace( '\n', ' ' )+"\n" );
-//            fw.write( "GenericName=\r\n" );
-            fw.write( "Exec=/"+consoleStarterPath+" %F\r\n" );
-//            fw.write( "Icon=\r\n" );
-            fw.write( "Terminal=false\r\n" );
-            fw.write( "StartupNotify=true\r\n" );
-            fw.write( "Type=Application\r\n" );
-//            fw.write( "MimeType=\r\n" );
-//            fw.write( "Categories=System;Utility;Core;GTK;FileTools;FileManager;\n" );
+            fw.write( "Name=" + starter.getName() + "\n" );
+            fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
+            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
+            fw.write( "Icon=" + unixName + "\n" );
+            fw.write( "Terminal=false\n" );
+            fw.write( "StartupNotify=true\n" );
+            fw.write( "Type=Application\n" );
+            //            fw.write( "MimeType=\r\n" );
+            //            fw.write( "Categories=System;Utility;Core;GTK;FileTools;FileManager;\n" );
         }
         
     }
