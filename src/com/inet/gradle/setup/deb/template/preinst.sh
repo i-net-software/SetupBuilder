@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for {{package}}
+# preinst script for {{baseName}}
 #
 # see: dh_installdeb(1)
 

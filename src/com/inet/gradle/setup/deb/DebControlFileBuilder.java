@@ -61,6 +61,7 @@ class DebControlFileBuilder {
         PREINST, POSTINST, PRERM, POSTRM
     }
     
+    Map<Script, StringBuilder> scriptHeadMap = new HashMap<>();
     Map<Script, StringBuilder> scriptTailMap = new HashMap<>();
     
     
@@ -86,7 +87,6 @@ class DebControlFileBuilder {
     	createControlFile();
     	createConfFilesFile();
     	createScripts();
-    	createPreInstFile();
     }
 
     /**
@@ -187,7 +187,7 @@ class DebControlFileBuilder {
 	                throws IOException {
 	    String depends = deb.getDepends();
 	    if(depends == null || depends.length() == 0 ) {
-	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre, debconf";
 	    }
 	    controlWriter.write("Depends: " + depends + NEWLINE);
 	}
@@ -364,31 +364,60 @@ class DebControlFileBuilder {
 	}
 
 	/**
+	 * Adds a fragment to the specified install script at the head section.
+	 * @param script the install script
+	 * @param scriptFragment the fragment to add
+	 */
+	public void addHeadScriptFragment(Script script, String scriptFragment) {
+	    StringBuilder sb = scriptHeadMap.get( script );
+	    if ( sb == null ) {
+	        sb = new StringBuilder();
+	        scriptHeadMap.put( script, sb );
+	    } else {
+	        sb.append( "\n\n" );
+	    }
+	    sb.append( scriptFragment );
+	}
+	
+	/**
 	 * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
 	 * they are required.
 	 * @throws IOException on I/O failures
 	 */
     private void createScripts() throws IOException {
         for(Script script: Script.values()) {
+        	
+        	String scriptName = script.toString().toLowerCase();
+            Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
+            StringBuilder head = scriptHeadMap.get( script );
+            if (head != null) {
+                tmpl.setPlaceholder( "head", head.toString() );
+            } else {
+            	tmpl.setPlaceholder( "head", "" );
+                
+            }
             StringBuilder tail = scriptTailMap.get( script );
             
             if (tail != null) {
-                String scriptName = script.toString().toLowerCase();
-                Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
-                tmpl.setPlaceholder( "head", "" );
-                tmpl.setPlaceholder( "tail", tail.toString() );
-                File file = new File(buildDir, scriptName);
-                tmpl.writeTo( file );
-                Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-                perms.add( PosixFilePermission.OWNER_READ );
-                perms.add( PosixFilePermission.OWNER_WRITE );
-                perms.add( PosixFilePermission.GROUP_READ );
-                perms.add( PosixFilePermission.OTHERS_READ );
-                perms.add( PosixFilePermission.OWNER_EXECUTE );
-                perms.add( PosixFilePermission.GROUP_EXECUTE );
-                perms.add( PosixFilePermission.OTHERS_EXECUTE );
-                Files.setPosixFilePermissions( file.toPath(), perms );
+            	tmpl.setPlaceholder( "tail", tail.toString() );
+            } else {
+            	tmpl.setPlaceholder( "tail", "" );
             }
+            
+            File file = new File(buildDir, scriptName);
+            tmpl.writeTo( file );
+            Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+            perms.add( PosixFilePermission.OWNER_READ );
+            perms.add( PosixFilePermission.OWNER_WRITE );
+            perms.add( PosixFilePermission.GROUP_READ );
+            perms.add( PosixFilePermission.OTHERS_READ );
+            perms.add( PosixFilePermission.OWNER_EXECUTE );
+            perms.add( PosixFilePermission.GROUP_EXECUTE );
+            perms.add( PosixFilePermission.OTHERS_EXECUTE );
+            Files.setPosixFilePermissions( file.toPath(), perms );
+            
+            
+                
         }
     }
     

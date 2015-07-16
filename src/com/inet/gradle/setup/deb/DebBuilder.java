@@ -160,6 +160,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
                 "fi" );
 	}
 
+<<<<<<< HEAD
 
     /**
      * Creates the files and the corresponding script section for the specified service.
@@ -301,4 +302,143 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             }
         }
     }
+=======
+
+    /**
+     * Creates the files and the corresponding script section for the specified service.
+     * @param service the service
+     * @throws IOException on errors during creating or writing a file
+     */
+    private void setupService( Service service ) throws IOException {
+        String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
+        Template initScript = new Template( "deb/template/init-service.sh" );
+        initScript.setPlaceholder( "name", serviceUnixName );
+        initScript.setPlaceholder( "displayName", setup.getApplication() );
+        initScript.setPlaceholder( "description", service.getDescription() );
+        initScript.setPlaceholder( "wait", "2" );
+        initScript.setPlaceholder( "startArguments",
+                                   "-cp /usr/share/" + setup.getBaseName() + "/" + service.getMainJar() + " " + service.getMainClass() + " " + service.getStartArguments() );
+        String initScriptFile = "etc/init.d/" + serviceUnixName;
+        initScript.writeTo( createFile( initScriptFile, true ) );
+        controlBuilder.addConfFile( initScriptFile );
+        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -x \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
+        controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + 
+            "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
+            "fi" );
+    }
+
+    /**
+     * Creates the files and the corresponding scripts for the specified desktop starter.
+     * @param starter the desktop starter
+     * @throws IOException on errors during creating or writing a file
+     */
+    private void setupStarter( DesktopStarter starter ) throws IOException {
+        String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
+        String consoleStarterPath = "usr/bin/" + unixName;
+        try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
+            fw.write( "#!/bin/bash\n" );
+            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+                + starter.getStartArguments() + " \"$@\"" );
+        }
+        int[] iconSizes = { 16, 32, 48, 64, 128 };
+
+        for( int size : iconSizes ) {
+            File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
+            iconDir.mkdirs();
+            File scaledFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), iconDir, "png" + size );
+            if( scaledFile != null ) {
+                File iconFile = new File( iconDir, unixName + ".png" );
+                scaledFile.renameTo( iconFile );
+                DebUtils.setPermissions( iconFile, false );
+            }
+        }
+        try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
+            fw.write( "[Desktop Entry]\n" );
+            fw.write( "Name=" + starter.getName() + "\n" );
+            fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
+            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
+            fw.write( "Icon=" + unixName + "\n" );
+            fw.write( "Terminal=false\n" );
+            fw.write( "StartupNotify=true\n" );
+            fw.write( "Type=Application\n" );
+            //            fw.write( "MimeType=\r\n" );
+            //            fw.write( "Categories=System;Utility;Core;GTK;FileTools;FileManager;\n" );
+        }
+        
+    }
+
+    /**
+     * Creates a file in the build path structure.
+     * @param path the path relative to the root of the build path
+     * @param executable if set to <tt>true</tt> the executable bit will be set in the permission flags
+     * @return the created file
+     * @throws IOException on errors during creating the file or setting the permissions
+     */
+    private File createFile( String path, boolean executable ) throws IOException {
+        File file = new File( buildDir, path );
+        if( !file.getParentFile().exists() ) {
+            file.getParentFile().mkdirs();
+        }
+        file.createNewFile();
+
+        DebUtils.setPermissions( file, executable );
+        return file;
+    }
+
+    /**
+     * execute the lintian tool to check the Debian package This will only be executed if the task 'checkPackage'
+     * property is set to true
+     */
+    private void checkDebianPackage() {
+        if( task.getCheckPackage() == null || task.getCheckPackage().equalsIgnoreCase( "true" ) ) {
+            ArrayList<String> command = new ArrayList<>();
+            command.add( "lintian" );
+            //    		command.add( "-d" );
+            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getSetupName() + "." + task.getExtension() );
+            exec( command );
+        }
+    }
+
+    /**
+     * execute the command to generate the Debian package
+     */
+    private void createDebianPackage() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "fakeroot" );
+        command.add( "dpkg-deb" );
+        command.add( "--build" );
+        command.add( buildDir.getAbsolutePath() );
+        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getSetupName() + "." + task.getExtension() );
+        exec( command );
+    }
+
+    /**
+     * Changes the permissions of all directories recursively inside the specified path to 755.
+     * @param path the path
+     * @throws IOException on I/O failures
+     */
+    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
+     	DebUtils.setPermissions( path, true );
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeDirectoryPermissionsTo755( file );
+            }
+        }
+    }
+
+    /**
+     * Changes the permissions of all files recursively inside the specified path to 644.
+     * @param path the path
+     * @throws IOException on I/O failures
+     */
+    private void changeFilePermissionsTo644( File path ) throws IOException {
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeFilePermissionsTo644( file );
+            } else {
+                DebUtils.setPermissions( file, false );
+            }
+        }
+    }
+>>>>>>> branch 'master' of https://github.com/i-net-software/SetupBuilder.git
 }

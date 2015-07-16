@@ -8,6 +8,8 @@ public class DesktopStarter {
     private String             name, mainJar, mainClass;
     private String             startArguments;
     private String             description;
+    private String             mimeTypes;
+    private String             categories;
 
     /**
      * Create a new DesktopStarter
@@ -114,5 +116,40 @@ public class DesktopStarter {
      */
     public void setMainClass( String mainClass ) {
         this.mainClass = mainClass;
+    }
+    
+    /**
+     * Sets the mime type is application is associated with. Multiple mime types are separated 
+     * by semicolons.
+     * @param mimeTypes
+     */
+    public void setMimeTypes( String mimeTypes ) {
+        this.mimeTypes = mimeTypes;
+    }
+    
+    /**
+     * Returns the mime types separated by semicolon.
+     * @return the mime types or <tt>null</tt> if not set
+     */
+    public String getMimeTypes() {
+        return mimeTypes;
+    }
+    
+    /**
+     * Sets the categories as defined by Freedesktop. Multiple categories are separated
+     * by semicolons.
+     * @see http://standards.freedesktop.org/menu-spec/latest/apa.html
+     * @param categories
+     */
+    public void setCategories( String categories ) {
+        this.categories = categories;
+    }
+    
+    /**
+     * Returns the categories separated by semicolon.
+     * @return the categories or <tt>null</tt> if not set
+     */
+    public String getCategories() {
+        return categories;
     }
 }

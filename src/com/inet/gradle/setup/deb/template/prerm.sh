@@ -1,5 +1,5 @@
 #!/bin/sh
-# prerm script for {{package}}
+# prerm script for {{baseName}}
 #
 # see: dh_installdeb(1)
 
