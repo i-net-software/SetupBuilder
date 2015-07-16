@@ -29,7 +29,7 @@ try
             set appXPos to windowWidth - ourXPos
             set yPos to windowHeight - 1.5 * iconSize
 
-            set position of item "i-net Clear Reports Designer.app" of container window to {ourXPos, yPos}
+            set position of item "${executable}.app" of container window to {ourXPos, yPos}
             make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
             set position of item "Applications" of container window to {appXPos, yPos}
             set background picture of theViewOptions to file ".resources:background-bottom.jpg"

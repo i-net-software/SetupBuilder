@@ -271,6 +271,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         input.close();
         String script = new String( bytes, StandardCharsets.UTF_8 );
         script = script.replace( "${title}", title );
+        script = script.replace( "${executable}", applicationName );
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
