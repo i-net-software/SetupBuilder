@@ -25,6 +25,8 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 
 import org.apache.tools.ant.types.FileSet;
@@ -47,7 +49,9 @@ import com.oracle.appbundler.BundleDocument;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg> {
 
-    private String title, device;
+    private String title, applicationName;
+    private Path tmp;
+	private File iconFile;
 
     /**
      * Create a new instance
@@ -64,14 +68,16 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      * Build the dmg file. 
      */
     public void build() {
-        try {
-            Project project = task.getProject();
 
+        try {
+        	Project project = task.getProject();
+
+        	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
             title = setup.getSetupName();
-            String name = setup.getBaseName();
+            applicationName = setup.getBaseName();
             AppBundlerTask appBundler = new AppBundlerTask();
             appBundler.setOutputDirectory( buildDir );
-            appBundler.setName( name );
+            appBundler.setName( applicationName );
             appBundler.setDisplayName( setup.getApplication() );
 
             String version = setup.getVersion();
@@ -91,7 +97,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             appBundler.setJarLauncherName( setup.getMainJar() );
             appBundler.setCopyright( setup.getVendor() );
             Object iconData = setup.getIcons();
-            File iconFile = ImageFactory.getImageFile( project, iconData, buildDir, "icns" );
+            iconFile = ImageFactory.getImageFile( project, iconData, buildDir, "icns" );
             appBundler.setIcon( iconFile );
             Architecture x86_64 = new Architecture();
             x86_64.setName( "x86_64" );
@@ -120,10 +126,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             appBundler.setProject( antProject );
             appBundler.execute();
 
-            task.copyTo( new File( buildDir, name + ".app/Contents/Java" ) );
-            Files.copy( iconFile.toPath(), new File( buildDir, ".VolumeIcon.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-
+            task.copyTo( new File( buildDir, applicationName + ".app/Contents/Java" ) );
+            
             createBinary();
+            
+            // Remove temporary Path 
+            Files.delete(tmp);
+            tmp = null;
+        
         } catch( RuntimeException ex ) {
             ex.printStackTrace();
             throw ex;
@@ -172,51 +182,34 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      * @throws IOException
      */
     private void createBinary() throws IOException {
-        setVolumeIcon();
+    	
         createTempImage();
         attach();
+
+        setVolumeIcon();
         applescript();
 
         detach();
         finalImage();
-        unflatten();
+        
+        // unflatten();
 
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
-    }
-
-    /**
-     * Call SetFile to set the volume icon.
-     */
-    private void setVolumeIcon() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "SetFile" );
-        command.add( "-c" );
-        command.add( "icnC" );
-        command.add( buildDir + "/.VolumeIcon.icns" );
-        exec( command );
     }
 
     /**
      * Call hdiutil to create a temporary image.
      */
     private void createTempImage() {
-        long size = calcDirectorySize( buildDir );
-        size = (size + 0x100000) / 0x100000; // size in MB
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "create" );
         command.add( "-srcfolder" );
-        command.add( buildDir.toString() );
-        command.add( "-volname" );
-        command.add( title );
-        command.add( "-fs" );
-        command.add( "HFS+" );
-        command.add( "-fsargs" );
-        command.add( "-c c=64,a=16,e=16" );
+        command.add( buildDir.toString() + "/" + applicationName + ".app" );
         command.add( "-format" );
         command.add( "UDRW" );
-        command.add( "-size" );
-        command.add( size + "M" );
+        command.add( "-volname" );
+        command.add( title );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
         exec( command );
     }
@@ -227,8 +220,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      * @throws UnsupportedEncodingException
      */
     private void attach() throws IOException {
-        long size = calcDirectorySize( buildDir );
-        size = ((size + 0x100000) / 0x100000) * 0x100000; // size in MB
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "attach" );
@@ -236,26 +227,41 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "-noverify" );
         command.add( "-noautoopen" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
+        command.add( "-mountroot" );
+        command.add( tmp.toString() );
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        exec( command, null, baos );
+        exec( command );
+    }
 
-        String console = baos.toString( "UTF8" );
-        task.getProject().getLogger().lifecycle( console );
+    /**
+     * Call hdiutil to detach temporary image
+     */
+    private void detach() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/hdiutil" );
+        command.add( "detach" );
+        command.add( tmp.toString() + "/" + title );
+        exec( command );
+    }
 
-        BufferedReader reader = new BufferedReader( new StringReader( console ) );
-        do {
-            String line = reader.readLine();
-            if( line == null ) {
-                break;
-            }
-            line = line.trim();
-            if( line.endsWith( title ) ) {
-                int idx = line.indexOf( ' ' );
-                device = line.substring( 0, idx );
-                break;
-            }
-        } while( true );
+    /**
+     * Call SetFile to set the volume icon.
+     * @throws IOException IOException
+     */
+    private void setVolumeIcon() throws IOException {
+        
+    	// Copy Icon as file icon into attached container 
+        File iconDestination = new File( tmp.toFile() , "/" + title + "/.VolumeIcon.icns" );
+		Files.copy( iconFile.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.createSymbolicLink(new File(tmp.toFile() + "/" + title, "Applications").toPath(), new File("/Applications").toPath(), new FileAttribute[0]);
+    	
+    	ArrayList<String> command = new ArrayList<>();
+        command.add( "SetFile" );
+        command.add( "-a" );
+        command.add( "C" );
+        command.add( iconDestination.toString() );
+        exec( command );
+        
     }
 
     private void applescript() throws IOException {
@@ -272,17 +278,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     }
 
     /**
-     * Call hdiutil to detach temporary image
-     */
-    private void detach() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "detach" );
-        command.add( device );
-        exec( command );
-    }
-
-    /**
      * convert to final image
      */
     private void finalImage() {
@@ -290,7 +285,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "/usr/bin/hdiutil" );
         command.add( "convert" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
-        command.add( "-quiet" );
         command.add( "-format" );
         command.add( "UDZO" );
         command.add( "-imagekey" );
@@ -322,23 +316,4 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         exec( command );
     }
 
-    /**
-     * Calculate the usage size of a directory
-     * 
-     * @param dir the directory
-     * @return the size in bytes
-     */
-    private long calcDirectorySize( File dir ) {
-        long size = 0;
-        for( File file : dir.listFiles() ) {
-            if( file.isDirectory() ) {
-                size += calcDirectorySize( file ) + 0x10000; // add 64 KB
-            } else {
-                long fileSize = file.length();
-                fileSize = ((fileSize + 0xFFFF) / 0x10000) * 0x10000; //round to 64KB
-                size += fileSize;
-            }
-        }
-        return size;
-    }
 }
