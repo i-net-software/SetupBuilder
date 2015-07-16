@@ -67,12 +67,14 @@ class DebDocumentFileBuilder {
 
     }
 
-    /**
+    
+
+	/**
      * Writes the copyrights file to the specified directory. This should be /user/share/doc/package
      * @throws FileNotFoundException if the copyright file could not be created
      * @throws IOException if the are problems writing the copyright file
      */
-    private void copyCopyrightFile() throws FileNotFoundException, IOException {
+    void copyCopyrightFile() throws FileNotFoundException, IOException {
     	File copyright = new File(buildDir, "copyright");
 		
 		if(!copyright.getParentFile().exists()) {
@@ -122,7 +124,7 @@ class DebDocumentFileBuilder {
 			
 			controlWriter = new OutputStreamWriter(gzipstream, "UTF-8");
 		 
-			controlWriter.write( deb.getPackages() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE);
+			controlWriter.write( setup.getBaseName() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE);
 			
 			String changes = deb.getChanges();
 			if(changes != null && changes.length() > 0) {

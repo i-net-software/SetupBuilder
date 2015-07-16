@@ -24,12 +24,9 @@ import com.inet.gradle.setup.AbstractSetupTask;
 /**
  * The deb Gradle task. It build a deb package for Debian / Ubuntu.
  * 
- * @author Volker Berlin
+ * @author Stefan Heidrich
  */
-public class Deb extends AbstractSetupTask {
-
-	
-	private String                 packages;
+public class Deb extends AbstractSetupTask {	
 
     private String                 section;
 
@@ -73,17 +70,6 @@ public class Deb extends AbstractSetupTask {
     protected void copyTo(File target) {
     	super.copyTo(target);
     }
-
-
-	public String getPackages() {
-		return packages;
-	}
-
-
-	public void setPackages(String packages) {
-		this.packages = packages;
-	}
-
 
 	public String getSection() {
 		return section;

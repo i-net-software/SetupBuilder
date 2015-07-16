@@ -297,7 +297,7 @@ class DebControlFileBuilder {
 	 */
 	private void putPackage(OutputStreamWriter controlWriter)
 			throws IOException {
-		String packages = deb.getPackages();
+		String packages = setup.getBaseName();
 		if(packages == null || packages.length() == 0) {
 			throw new RuntimeException("No package declared in the setup configuration.");
 		} else {
