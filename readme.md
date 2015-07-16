@@ -5,13 +5,12 @@ The Setup Builder is a plugin for Gradle which can create a native setups for di
 
 System Requirements
 ----
-| Platform  | Requirement                                   |
-| :---------| :-------------------------------------------- |
-| all       | Gradle 2.3 or higher                          |
-| all       | Java 8 or higher. Gradle must run with Java 8 |
-| Windows   | Wix Toolset or WixEdit must be installed      |
-| Linux     | lintian, fakeroot                             |
-|           | on Ubuntu: `apt-get install lintian fakeroot` |
+| Platform  | Requirement                                                          |
+| :---------| :------------------------------------------------------------------- |
+| all       | Gradle 2.3 or higher                                                 |
+| all       | Java 8 or higher. Gradle must run with Java 8                        |
+| Windows   | Wix Toolset or WixEdit must be installed                             |
+| Linux     | Lintian, FakeRoot <br> on Ubuntu: `apt-get install lintian fakeroot` |
 
 Tasks
 ----
