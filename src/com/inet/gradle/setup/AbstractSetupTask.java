@@ -15,12 +15,15 @@
  */
 package com.inet.gradle.setup;
 
+import groovy.lang.Closure;
+
 import java.io.File;
 
 import javax.inject.Inject;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.FileLookup;
@@ -55,7 +58,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
 
     public AbstractSetupTask( String extension ) {
         this.extension = extension;
-        this.rootSpec = (CopySpecInternal)getProject().copySpec( null );
+        this.rootSpec = (CopySpecInternal)getProject().copySpec( (Closure<CopySpec>)null );
     }
 
     /**
