@@ -11,7 +11,7 @@ System Requirements
 | all       | Java 8 or higher. Gradle must run with Java 8 |
 | Windows   | Wix Toolset or WixEdit must be installed      |
 | Linux     | lintian, fakeroot                             |
-|           | on Ubuntu: `apt-get lintian fakeroot`         |
+|           | on Ubuntu: `apt-get install lintian fakeroot` |
 
 Tasks
 ----
