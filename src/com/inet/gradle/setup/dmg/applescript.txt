@@ -23,7 +23,9 @@ try
             set arrangement of theViewOptions to not arranged
 
             set icon size of theViewOptions to iconSize
-            set text size of theViewOptions to ${fontSize}
+            try
+            	set text size of theViewOptions to ${fontSize}
+            end try
 
             set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0
             set appXPos to windowWidth - ourXPos
@@ -32,7 +34,11 @@ try
             set position of item "${executable}.app" of container window to {ourXPos, yPos}
             make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
             set position of item "Applications" of container window to {appXPos, yPos}
-			set background picture of theViewOptions to file ".resources:background${backgroundExt}"
+            
+            try
+				set background picture of theViewOptions to file ".resources:background${backgroundExt}"
+			end try
+			
             update without registering applications
             close
             open
