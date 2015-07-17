@@ -263,7 +263,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         
         if ( task.getBackgroundImage() != null ) {
         	String name = task.getBackgroundImage().getName();
-            File backgroundDestination = new File( tmp.toFile() , "/" + title + "/.background" + name.substring(name.lastIndexOf('.')) );
+            File backgroundDestination = new File( tmp.toFile() , "/" + title + "/.resources/background" + name.substring(name.lastIndexOf('.')) );
+            Files.createDirectories(backgroundDestination.getParentFile().toPath(), new FileAttribute[0]);
         	Files.copy(task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
     }
