@@ -286,8 +286,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         	String name = task.getBackgroundImage().getName();
 			script = script.replace( "${backgroundExt}", name.substring(name.lastIndexOf('.'))  );
         }
-        
-        System.out.println(script);
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
