@@ -259,7 +259,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "-a" );
         command.add( "C" );
         command.add( iconDestination.getParent() );
-        exec( command );
+        exec( command, null, null, true );
         
         if ( task.getBackgroundImage() != null ) {
         	String name = task.getBackgroundImage().getName();
@@ -289,7 +289,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
-        exec( command, new ByteArrayInputStream( script.getBytes( StandardCharsets.UTF_8 ) ), null );
+        exec( command, new ByteArrayInputStream( script.getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
 
     /**
@@ -308,27 +308,4 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( task.getSetupFile().toString() );
         exec( command );
     }
-
-    /**
-     * unflatten for SLA
-     */
-    private void unflatten() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "unflatten" );
-        command.add( task.getSetupFile().toString() );
-        exec( command );
-    }
-
-    /**
-     * re-flatten for SLA
-     */
-    private void flatten() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "flatten" );
-        command.add( task.getSetupFile().toString() );
-        exec( command );
-    }
-
 }

@@ -58,6 +58,10 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
     }
 
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output ) {
+    	exec( parameters, input, output, false);
+    }
+
+    protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, boolean ignoreExitValue ) {
         // print command line to the log
         StringBuilder log = new StringBuilder( "\t" );
         for( String para : parameters ) {
@@ -71,12 +75,15 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
 
         DefaultExecAction action = new DefaultExecAction( fileResolver );
         action.setCommandLine( parameters );
+        action.setIgnoreExitValue( ignoreExitValue );
         action.setWorkingDir( buildDir );
         if( input != null ) {
             action.setStandardInput( input );
         }
         if( output != null ) {
             action.setStandardOutput( output );
+        } else {
+        	action.setStandardOutput( System.out );
         }
         try {
             action.execute();
