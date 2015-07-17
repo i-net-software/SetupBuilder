@@ -115,6 +115,7 @@ class DebControlFileBuilder {
 			putArchitecture(controlWriter);
 			putInstallSize(controlWriter);
 			putRecommends(controlWriter);
+            putPreDepends(controlWriter);
 			putDepends(controlWriter);
 			putMaintainer(controlWriter); 
 			putDescription(controlWriter); 
@@ -187,11 +188,21 @@ class DebControlFileBuilder {
 	                throws IOException {
 	    String depends = deb.getDepends();
 	    if(depends == null || depends.length() == 0 ) {
-	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre, debconf";
+	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
 	    }
 	    controlWriter.write("Depends: " + depends + NEWLINE);
 	}
 	
+	/**
+     * Writes the pre-dependencies to the file. 
+     * @param controlWriter the writer for the file
+     * @throws IOException if the was an error while writing to the file
+     */
+    private void putPreDepends(OutputStreamWriter controlWriter)
+                    throws IOException {
+        controlWriter.write("Pre-Depends: debconf" + NEWLINE);
+    }
+    
 	/**
 	 * Write the recommends to the file.
 	 * @param controlWriter the writer for the file
@@ -386,17 +397,20 @@ class DebControlFileBuilder {
 	 */
     private void createScripts() throws IOException {
         for(Script script: Script.values()) {
-        	
         	String scriptName = script.toString().toLowerCase();
             Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
             StringBuilder head = scriptHeadMap.get( script );
+            StringBuilder tail = scriptTailMap.get( script );
+            
+            if (head == null && tail == null) {
+                continue;
+            }
+            
             if (head != null) {
                 tmpl.setPlaceholder( "head", head.toString() );
             } else {
             	tmpl.setPlaceholder( "head", "" );
-                
             }
-            StringBuilder tail = scriptTailMap.get( script );
             
             if (tail != null) {
             	tmpl.setPlaceholder( "tail", tail.toString() );
@@ -415,9 +429,6 @@ class DebControlFileBuilder {
             perms.add( PosixFilePermission.GROUP_EXECUTE );
             perms.add( PosixFilePermission.OTHERS_EXECUTE );
             Files.setPosixFilePermissions( file.toPath(), perms );
-            
-            
-                
         }
     }
     
