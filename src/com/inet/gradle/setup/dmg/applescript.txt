@@ -23,7 +23,7 @@ try
             set arrangement of theViewOptions to not arranged
 
             set icon size of theViewOptions to iconSize
-            set text size of theViewOptions to 16
+            set text size of theViewOptions to ${fontSize}
 
             set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0
             set appXPos to windowWidth - ourXPos

@@ -29,7 +29,7 @@ import com.inet.gradle.setup.AbstractSetupTask;
 public class Dmg extends AbstractSetupTask {
 
     private File backgroundImage;
-    private Integer windowWidth = 400, windowHeight = 300, iconSize = 128;
+    private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
 
 	/**
      * Create the task.
@@ -118,5 +118,21 @@ public class Dmg extends AbstractSetupTask {
      */
 	public void setBackgroundImage(File backgroundFile) {
 		this.backgroundImage = backgroundFile;
+	}
+
+    /**
+     * Return font size for Finder View
+     * @return font size for Finder View
+     */
+	public Integer getFontSize() {
+		return fontSize;
+	}
+
+	/**
+     * Set font size for Finder View
+     * @param font size for Finder View
+     */
+	public void setFontSize(Integer fontSize) {
+		this.fontSize = fontSize;
 	}
 }

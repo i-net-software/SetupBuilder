@@ -280,6 +280,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         script = script.replace( "${windowWidth}", task.getWindowWidth().toString() );
         script = script.replace( "${windowHeight}", task.getWindowHeight().toString() );
         script = script.replace( "${iconSize}", task.getIconSize().toString() );
+        script = script.replace( "${fontSize}", task.getFontSize().toString() );
         
         if ( task.getBackgroundImage() != null ) {
         	String name = task.getBackgroundImage().getName();
