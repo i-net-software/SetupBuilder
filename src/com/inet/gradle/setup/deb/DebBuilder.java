@@ -92,12 +92,14 @@ public class DebBuilder extends AbstractBuilder<Deb> {
 
 
     private void setupEula() throws IOException {
-        String templateName = setup.getBaseName()+"/license";
+        String templateLicenseName = setup.getBaseName()+"/license";
+        String templateAcceptName = setup.getBaseName()+"/accept-license";
+        String templateErrorName = setup.getBaseName()+"/error-license";
         try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) );
              BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile() ) )) {
-            fw.write( "Template: " + templateName + "\n" );
-            fw.write( "Type: boolean\n" );
-            fw.write( "Description: Do you accept this license agreement?\n" );
+            fw.write( "Template: " + templateLicenseName + "\n" );
+            fw.write( "Type: note\n" );
+            fw.write( "Description: License agreement\n" );
             while( fr.ready() ) {
                 String line = fr.readLine().trim();
                 if( line.isEmpty() ) {
@@ -109,6 +111,14 @@ public class DebBuilder extends AbstractBuilder<Deb> {
                 }
             }
             fw.write( '\n' );
+            fw.write( "Template: " + templateAcceptName + "\n" );
+            fw.write( "Type: boolean\n" );
+            fw.write( "Description: Do you accept the license agreement?\n" );
+            fw.write( '\n' );
+            fw.write( "Template: " + templateErrorName + "\n" );
+            fw.write( "Type: error\n" );
+            fw.write( "Description: It is required to accept the license to install this package.\n" );
+            fw.write( '\n' );
         }
         
         controlBuilder.addTailScriptFragment( Script.POSTRM,
@@ -118,16 +128,20 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         
     	controlBuilder.addHeadScriptFragment( Script.PREINST, 
     	        "if [ \"$1\" = \"install\" ] ; then\n" + 
-                "  db_get "+templateName+"\n" + 
+                "  db_get "+templateAcceptName+"\n" + 
                 "  if [ \"$RET\" = \"true\" ]; then\n" + 
                 "    echo \"License already accepted\"\n" + 
                 "  else\n" + 
-                "    db_input high "+templateName+" || true\n" + 
+                "    db_input high "+templateLicenseName+" || true\n" + 
                 "    db_go\n" + 
-                "    db_get "+templateName+"\n" + 
+                "    db_input high "+templateAcceptName+" || true\n" + 
+                "    db_go\n" + 
+                "    db_get "+templateAcceptName+"\n" + 
                 "    if [ \"$RET\" != \"true\" ]; then\n" + 
-                "        db_purge\n" + 
                 "        echo \"License was not accepted by the user\"\n" + 
+                "        db_input high "+templateErrorName+" || true\n" + 
+                "        db_go\n" + 
+                "        db_purge\n" + 
                 "        exit 1\n" + 
                 "    fi\n" + 
                 "  fi\n"+
