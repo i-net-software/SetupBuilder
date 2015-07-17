@@ -15,13 +15,11 @@
  */
 package com.inet.gradle.setup.dmg;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -50,7 +48,7 @@ import com.oracle.appbundler.BundleDocument;
 public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     private String title, applicationName;
-    private Path tmp;
+	private Path tmp;
 	private File iconFile;
 
     /**
@@ -75,6 +73,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
             title = setup.getSetupName();
             applicationName = setup.getBaseName();
+            
             AppBundlerTask appBundler = new AppBundlerTask();
             appBundler.setOutputDirectory( buildDir );
             appBundler.setName( applicationName );
@@ -96,6 +95,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             appBundler.setMainClassName( setup.getMainClass() );
             appBundler.setJarLauncherName( setup.getMainJar() );
             appBundler.setCopyright( setup.getVendor() );
+
             Object iconData = setup.getIcons();
             iconFile = ImageFactory.getImageFile( project, iconData, buildDir, "icns" );
             appBundler.setIcon( iconFile );
@@ -253,15 +253,19 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     	// Copy Icon as file icon into attached container 
         File iconDestination = new File( tmp.toFile() , "/" + title + "/.VolumeIcon.icns" );
 		Files.copy( iconFile.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        Files.createSymbolicLink(new File(tmp.toFile() + "/" + title, "Applications").toPath(), new File("/Applications").toPath(), new FileAttribute[0]);
     	
     	ArrayList<String> command = new ArrayList<>();
         command.add( "SetFile" );
         command.add( "-a" );
         command.add( "C" );
-        command.add( iconDestination.toString() );
+        command.add( iconDestination.getParent() );
         exec( command );
         
+        if ( task.getBackgroundImage() != null ) {
+        	String name = task.getBackgroundImage().getName();
+            File backgroundDestination = new File( tmp.toFile() , "/" + title + "/.background" + name.substring(name.lastIndexOf('.')) );
+        	Files.copy(task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        }
     }
 
     private void applescript() throws IOException {
@@ -272,6 +276,16 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         String script = new String( bytes, StandardCharsets.UTF_8 );
         script = script.replace( "${title}", title );
         script = script.replace( "${executable}", applicationName );
+        script = script.replace( "${windowWidth}", task.getWindowWidth().toString() );
+        script = script.replace( "${windowHeight}", task.getWindowHeight().toString() );
+        script = script.replace( "${iconSize}", task.getIconSize().toString() );
+        
+        if ( task.getBackgroundImage() != null ) {
+        	String name = task.getBackgroundImage().getName();
+			script = script.replace( "${backgroundExt}", name.substring(name.lastIndexOf('.'))  );
+        }
+        
+        System.out.println(script);
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
