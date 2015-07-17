@@ -15,7 +15,9 @@
  */
 package com.inet.gradle.setup.deb;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,7 +68,9 @@ public class DebBuilder extends AbstractBuilder<Deb> {
                 setupStarter( starter );
             }
             
-//            setupEula();
+            if( setup.getLicenseFile() != null ) {
+                setupEula();
+            }
 
             controlBuilder.build();
 
@@ -87,77 +91,47 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     }
 
 
-    private void setupEula() {
-    	controlBuilder.addHeadScriptFragment( Script.PREINST, "if [ \"$1\" = \"install\" ] ; then\n" + 
-                "  . /usr/share/debconf/confmodule\n" +
-                "  \n" +
-                "  license=inet-license\n" +
-                "  \n" +
-                "  errmsg()\n" +
-                "  {\n" +
-                "      echo >&2 ''\n" +
-                "      echo >&2 \"$@\"\n" +
-                "      echo >&2 \"try 'dpkg-reconfigure debconf' to select a frontend other than noninteractive\"\n" +
-                "      echo >&2 ''\n" +
-                "  }\n" +
-                "  \n" +
-                "  db_get shared/accepted-$license\n" +
-                "  if [ \"$RET\" = \"true\" ]; then\n" +
-                "      echo \"$license license has already been accepted\" >&2\n" +
-                "      exit 0\n" +
-                "  fi\n" +
-                "  \n" +
-                "  # facilitate backup capability per debconf-devel(7)\n" +
-                "  STATE=1\n" +
-                "  while true; do\n" +
-                "      case \"$STATE\" in\n" +
-                "      0)  # ensure going back from license presentment is harmless\n" +
-                "          STATE=1 \n" +
-                "          continue\n" +
-                "          ;;   \n" +
-                "      1)  # present license\n" +
-                "          db_fset shared/present-$license seen false\n" +
-                "          if ! db_input critical shared/present-$license ; then\n" +
-                "              errmsg \"$license license could not be presented\"\n" +
-                "	      exit 2\n" +
-                "          fi\n" +
-                "          db_fset shared/accepted-$license seen false\n" +
-                "          if ! db_input critical shared/accepted-$license ; then\n" +
-                "              errmsg \"$license agree question could not be asked\"\n" +
-                "   	    exit 2\n" +
-                "          fi\n" +
-                "          ;;     \n" + 
-                "      2)  # determine users' choice\n" +
-                "          db_get shared/accepted-$license\n" +
-                "          if [ \"$RET\" = \"true\" ]; then\n" +
-                " 	      # license accepted\n" +
-                "              exit 0\n" +
-                "          fi\n" +
-                "          # error on decline license (give user chance to back up)\n" +
-                "          db_input critical shared/error-$license\n" +
-                "          ;;      \n" +
-                "      3)  # user has confirmed declining license\n" +
-                "          echo \"user did not accept the $license license\" >&2\n" +
-                "          exit 1\n" +
-                "          ;;   \n" +
-                "      *)  # unknown state\n" +
-                "          echo \"$license license state unknown: $STATE\" >&2\n" +
-                "          exit 2\n" +
-                "          ;;   \n" +
-                "      esac\n" +
-                "      if db_go; then\n" +
-                "          STATE=$(($STATE + 1))\n" +
-                "      else\n" +
-                "          STATE=$(($STATE - 1))\n" +
-                "      fi\n" +
-                "  done\n" +
-                "   \n" +
-                "  \n" +
-                "  \n" +
-                "  # proper exit (0 or 1) above\n" +
-                "  errmsg \"$license license could not be presented / was not accepted\"\n" +
-                "  exit 2\n" +
-                "fi" );
+    private void setupEula() throws IOException {
+        String templateName = setup.getBaseName()+"/license";
+        try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) );
+             BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile() ) )) {
+            fw.write( "Template: " + templateName + "\n" );
+            fw.write( "Type: boolean\n" );
+            fw.write( "Description: Do you accept this license agreement?\n" );
+            while( fr.ready() ) {
+                String line = fr.readLine().trim();
+                if( line.isEmpty() ) {
+                    fw.write( " .\n" );
+                } else {
+                    fw.write( ' ' );
+                    fw.write( line );
+                    fw.write( '\n' );
+                }
+            }
+            fw.write( '\n' );
+        }
+        
+        controlBuilder.addTailScriptFragment( Script.POSTRM,
+                "if [ \"$1\" = \"remove\" ] || [ \"$1\" = \"purge\" ]  ; then\n" + 
+                "  db_purge\n"+
+                "fi");
+        
+    	controlBuilder.addHeadScriptFragment( Script.PREINST, 
+    	        "if [ \"$1\" = \"install\" ] ; then\n" + 
+                "  db_get "+templateName+"\n" + 
+                "  if [ \"$RET\" = \"true\" ]; then\n" + 
+                "    echo \"License already accepted\"\n" + 
+                "  else\n" + 
+                "    db_input high "+templateName+" || true\n" + 
+                "    db_go\n" + 
+                "    db_get "+templateName+"\n" + 
+                "    if [ \"$RET\" != \"true\" ]; then\n" + 
+                "        db_purge\n" + 
+                "        echo \"License was not accepted by the user\"\n" + 
+                "        exit 1\n" + 
+                "    fi\n" + 
+                "  fi\n"+
+                "fi");
 	}
 
 
@@ -168,13 +142,15 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      */
     private void setupService( Service service ) throws IOException {
         String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
+        String mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
         Template initScript = new Template( "deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
+        initScript.setPlaceholder( "mainJar", mainJarPath );
         initScript.setPlaceholder( "startArguments",
-                                   "-cp /usr/share/" + setup.getBaseName() + "/" + service.getMainJar() + " " + service.getMainClass() + " " + service.getStartArguments() );
+                                   "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
