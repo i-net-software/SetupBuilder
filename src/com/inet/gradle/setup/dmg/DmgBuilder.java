@@ -28,25 +28,17 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.XmlFileBuilder;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
@@ -76,6 +68,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     /**
      * Build the dmg file. 
+     * @throws Throwable 
      */
     public void build() {
 
@@ -152,6 +145,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
+	    } catch( Throwable ex ) {
+	        ex.printStackTrace();
         }
     }
 
@@ -191,10 +186,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     /**
      * Create the binary with native tools.
-     * 
-     * @throws IOException
+     * @throws Throwable 
      */
-    private void createBinary() throws IOException {
+    private void createBinary() throws Throwable {
     	
     	if ( !setup.getServices().isEmpty() ) {
     		createPackageFromApp();
@@ -212,7 +206,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
 
-    private void createPackageFromApp() throws IOException {
+    private void createPackageFromApp() throws Throwable {
 
         Files.createDirectories(new File(tmp.toFile(), "distribution").toPath(), new FileAttribute[0]);
     	imageSourceRoot = tmp.toString() + "/distribution";
@@ -277,39 +271,30 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
 	private void patchDistributionXML() throws Throwable {
 
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
         File xml = new File( tmp.toString() + "/distribution.xml" );
         URL url = xml.toURI().toURL();
-        Document doc = docBuilder.parse( url.toString() );
+		XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>(task, setup, xml, buildDir, url);
         
-        Element distribution = (Element)doc.getFirstChild();
+        Element distribution = (Element)xmlFile.doc.getFirstChild();
         if( !"installer-gui-script".equals( distribution.getTagName() ) ) {
             throw new IllegalArgumentException( "Template does not contains a installer-gui-script root: " + distribution.getTagName() );
         }
 
         // Product node
-        Element background = getOrCreateChildById( distribution, "background", "*", false );
-        addAttributeIfNotExists( background, "file", "background.png" );
-        addAttributeIfNotExists( background, "alignment", "left" );
-        addAttributeIfNotExists( background, "proportional", "left" );
+        Element background = xmlFile.getOrCreateChildById( distribution, "background", "*", false );
+        xmlFile.addAttributeIfNotExists( background, "file", "background.png" );
+        xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
+        xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
 
         // Welcome Node
-        Element welcome = getOrCreateChildById( distribution, "welcome", "*", false );
-        addAttributeIfNotExists( welcome, "file", "welcome.rtf" );
+        Element welcome = xmlFile.getOrCreateChildById( distribution, "welcome", "*", false );
+        xmlFile.addAttributeIfNotExists( welcome, "file", "welcome.rtf" );
 
         // License node
-        Element license = getOrCreateChildById( distribution, "license", "*", false );
-        addAttributeIfNotExists( license, "file", "license.txt" );
+        Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
+        xmlFile.addAttributeIfNotExists( license, "file", "license.txt" );
 
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource( doc );
-        StreamResult result = new StreamResult( xml );
-        transformer.setOutputProperty( OutputKeys.INDENT, "yes" );
-        transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "2" );
-        transformer.transform( source, result );
+        xmlFile.save();
 	}
 
 	/**
