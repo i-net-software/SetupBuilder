@@ -21,16 +21,27 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DocumentType;
@@ -201,9 +212,12 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
 
-    private void createPackageFromApp() {
+    private void createPackageFromApp() throws IOException {
 
-    	extractApplicationInformation();
+        Files.createDirectories(new File(tmp.toFile(), "distribution").toPath(), new FileAttribute[0]);
+    	imageSourceRoot = tmp.toString() + "/distribution";
+    	
+        extractApplicationInformation();
     	createAndPatchDistributionXML();
 
 		// Build Product for packaging
@@ -215,11 +229,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( setup.get );*/
         command.add( "--package-path" );
         command.add( tmp.toString() );
-        command.add( buildDir.toString() + "/" + applicationName + ".pkg" );
+        command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
     	exec( command );
 	}
 
-	private void extractApplicationInformation() {
+	private void extractApplicationInformation() throws IOException {
 		// Create application information plist
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/pkgbuild" );
@@ -242,40 +256,60 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( setup.getVersion() );
         command.add( "--install-location" );
         command.add( "/Application" );
-        command.add( tmp.toString() + "/distribution/" + applicationName + ".pkg" );
+        command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
     	exec( command );
     	
-    	imageSourceRoot = tmp.toString() + "/distribution";
 	}
 
-	private void createAndPatchDistributionXML() {
+	private void createAndPatchDistributionXML() throws Throwable {
 		ArrayList<String> command;
 		// Synthesize Distribution xml
         command = new ArrayList<>();
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( tmp.toString() + "/" + applicationName + ".pkg" );
+        command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
         command.add( tmp.toString() + "/distribution.xml" );
     	exec( command );
 
-    	// Add more information to distribution 
-        command = new ArrayList<>();
-        command.add( "sed" );
-        command.add( "-i \"\"" );
+        patchDistributionXML();
+	}
 
-        command.add( "-e '$ i\\" );
-        command.add( "\\    <title>"+title+"</title>' \\" );
+	private void patchDistributionXML() throws Throwable {
 
-        command.add( "-e '$ i\\" );
-        command.add( "\\    <background file=\"background.png\" alignment=\"left\" scaling=\"proportional\" />' \\" );
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-        command.add( "-e '$ i\\" );
-        command.add( "\\    <welcome file=\"welcome.rtf\" />' \\" );
+        File xml = new File( tmp.toString() + "/distribution.xml" );
+        URL url = xml.toURI().toURL();
+        Document doc = docBuilder.parse( url.toString() );
+        
+        Element distribution = (Element)doc.getFirstChild();
+        if( !"installer-gui-script".equals( distribution.getTagName() ) ) {
+            throw new IllegalArgumentException( "Template does not contains a installer-gui-script root: " + distribution.getTagName() );
+        }
 
-        command.add( "-e '$ i\\" );
-        command.add( "\\    <license file=\"license.txt\" />' \\" );
-        exec( command );
+        // Product node
+        Element background = getOrCreateChildById( distribution, "background", "*", false );
+        addAttributeIfNotExists( background, "file", "background.png" );
+        addAttributeIfNotExists( background, "alignment", "left" );
+        addAttributeIfNotExists( background, "proportional", "left" );
+
+        // Welcome Node
+        Element welcome = getOrCreateChildById( distribution, "welcome", "*", false );
+        addAttributeIfNotExists( welcome, "file", "welcome.rtf" );
+
+        // License node
+        Element license = getOrCreateChildById( distribution, "license", "*", false );
+        addAttributeIfNotExists( license, "file", "license.txt" );
+
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        DOMSource source = new DOMSource( doc );
+        StreamResult result = new StreamResult( xml );
+        transformer.setOutputProperty( OutputKeys.INDENT, "yes" );
+        transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "2" );
+        transformer.transform( source, result );
 	}
 
 	/**
