@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 
@@ -31,6 +32,7 @@ import com.inet.gradle.setup.image.icns.IcnsCodec;
 import com.inet.gradle.setup.image.icns.IconSuite;
 import com.inet.gradle.setup.image.image4j.codec.ico.ICODecoder;
 import com.inet.gradle.setup.image.image4j.codec.ico.ICOEncoder;
+import com.inet.gradle.setup.image.image4j.util.ImageUtil;
 
 /**
  * Factory for platform dependent image formats.
@@ -45,7 +47,7 @@ public class ImageFactory {
      * @param project current project for resolving the file locations
      * @param data the set values
      * @param dir directory for temporary build files if the file(s) need converted
-     * @param format the platform format, currently "ico" and "icns"
+     * @param format the platform format, currently "ico", "icns" and png<size>
      * @return a file or null
      * @throws IOException if an error occur on reading the image files
      */
@@ -133,8 +135,43 @@ public class ImageFactory {
                 }
                 break;
             default:
+                if( format.startsWith( "png" ) ) {
+                    try {
+                        int size = Integer.parseInt( format.substring( 3 ) );
+                        BufferedImage scaledImage = scaleBestFromList( images, size );
+                        if( scaledImage != null ) {
+                            ImageIO.write( scaledImage, "png", file );
+                        }
+                        break;
+                    } catch( NumberFormatException e ) {
+                        // throw GradleException later
+                    }             
+                }
                 throw new GradleException( "Unsupported image format: " + format );
         }
         return file;
+    }
+
+    /**
+     * Scales the best matching image from the specified list to the specified size.
+     * @param images the source images
+     * @param size the target size
+     * @return the scaled image, or <tt>null</tt> when the list of source images is empty
+     */
+    private static BufferedImage scaleBestFromList( Collection<BufferedImage> images, int size ) {
+        BufferedImage best = null;
+        int min = Integer.MAX_VALUE;
+        for( BufferedImage img : images ) {
+            int diff = Math.min( img.getWidth(), img.getHeight() ) - size;
+            int p = diff < 0 ? 10000 - diff : diff;
+            if( p < min ) {
+                min = p;
+                best = img;
+            }
+        }
+        if( best == null ) {
+            return null;
+        }
+        return ImageUtil.scaleImage( best, size, size );
     }
 }

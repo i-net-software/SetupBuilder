@@ -1,5 +1,5 @@
 #!/bin/sh
-# postrm script for {{package}}
+# postrm script for {{baseName}}
 #
 # see: dh_installdeb(1)
 
@@ -18,6 +18,8 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+. /usr/share/debconf/confmodule
+
 {{head}}
 
 case "$1" in
@@ -29,6 +31,14 @@ case "$1" in
         exit 1
     ;;
 esac
+
+if [ "$1" = "purge" -a -e /usr/share/debconf/confmodule ]; then
+    # Source debconf library.
+    . /usr/share/debconf/confmodule
+    # Remove my changes to the db.
+    db_purge
+fi
+
 
 {{tail}}
 

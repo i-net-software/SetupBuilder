@@ -61,6 +61,7 @@ class DebControlFileBuilder {
         PREINST, POSTINST, PRERM, POSTRM
     }
     
+    Map<Script, StringBuilder> scriptHeadMap = new HashMap<>();
     Map<Script, StringBuilder> scriptTailMap = new HashMap<>();
     
     
@@ -114,6 +115,7 @@ class DebControlFileBuilder {
 			putArchitecture(controlWriter);
 			putInstallSize(controlWriter);
 			putRecommends(controlWriter);
+            putPreDepends(controlWriter);
 			putDepends(controlWriter);
 			putMaintainer(controlWriter); 
 			putDescription(controlWriter); 
@@ -183,19 +185,24 @@ class DebControlFileBuilder {
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putDepends(OutputStreamWriter controlWriter)
-			throws IOException {
-        StringBuilder sb = new StringBuilder();
-        if( !setup.getServices().isEmpty() ) {
-            sb.append( "jsvc, libcommons-daemon-java, " );
-        }
-        String depends = deb.getDepends();
-        if( depends != null && depends.length() > 0 ) {
-            sb.append( depends );
-        } else {
-            sb.append( "default-jre | default-jdk" );
-		}
-		controlWriter.write("Depends: " + sb + NEWLINE);
+	                throws IOException {
+	    String depends = deb.getDepends();
+	    if(depends == null || depends.length() == 0 ) {
+	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+	    }
+	    controlWriter.write("Depends: " + depends + NEWLINE);
 	}
+	
+	/**
+     * Writes the pre-dependencies to the file. 
+     * @param controlWriter the writer for the file
+     * @throws IOException if the was an error while writing to the file
+     */
+    private void putPreDepends(OutputStreamWriter controlWriter)
+                    throws IOException {
+        controlWriter.write("Pre-Depends: debconf" + NEWLINE);
+    }
+    
 	/**
 	 * Write the recommends to the file.
 	 * @param controlWriter the writer for the file
@@ -301,7 +308,7 @@ class DebControlFileBuilder {
 	 */
 	private void putPackage(OutputStreamWriter controlWriter)
 			throws IOException {
-		String packages = deb.getPackages();
+		String packages = setup.getBaseName();
 		if(packages == null || packages.length() == 0) {
 			throw new RuntimeException("No package declared in the setup configuration.");
 		} else {
@@ -368,31 +375,73 @@ class DebControlFileBuilder {
 	}
 
 	/**
+	 * Adds a fragment to the specified install script at the head section.
+	 * @param script the install script
+	 * @param scriptFragment the fragment to add
+	 */
+	public void addHeadScriptFragment(Script script, String scriptFragment) {
+	    StringBuilder sb = scriptHeadMap.get( script );
+	    if ( sb == null ) {
+	        sb = new StringBuilder();
+	        scriptHeadMap.put( script, sb );
+	    } else {
+	        sb.append( "\n\n" );
+	    }
+	    sb.append( scriptFragment );
+	}
+	
+	/**
 	 * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
 	 * they are required.
 	 * @throws IOException on I/O failures
 	 */
     private void createScripts() throws IOException {
         for(Script script: Script.values()) {
+        	String scriptName = script.toString().toLowerCase();
+            Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
+            StringBuilder head = scriptHeadMap.get( script );
             StringBuilder tail = scriptTailMap.get( script );
             
-            if (tail != null) {
-                String scriptName = script.toString().toLowerCase();
-                Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
-                tmpl.setPlaceholder( "head", "" );
-                tmpl.setPlaceholder( "tail", tail.toString() );
-                File file = new File(buildDir, scriptName);
-                tmpl.writeTo( file );
-                Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-                perms.add( PosixFilePermission.OWNER_READ );
-                perms.add( PosixFilePermission.OWNER_WRITE );
-                perms.add( PosixFilePermission.GROUP_READ );
-                perms.add( PosixFilePermission.OTHERS_READ );
-                perms.add( PosixFilePermission.OWNER_EXECUTE );
-                perms.add( PosixFilePermission.GROUP_EXECUTE );
-                perms.add( PosixFilePermission.OTHERS_EXECUTE );
-                Files.setPosixFilePermissions( file.toPath(), perms );
+            if (head == null && tail == null) {
+                continue;
             }
+            
+            if (head != null) {
+                tmpl.setPlaceholder( "head", head.toString() );
+            } else {
+            	tmpl.setPlaceholder( "head", "" );
+            }
+            
+            if (tail != null) {
+            	tmpl.setPlaceholder( "tail", tail.toString() );
+            } else {
+            	tmpl.setPlaceholder( "tail", "" );
+            }
+            
+            File file = new File(buildDir, scriptName);
+            tmpl.writeTo( file );
+            Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+            perms.add( PosixFilePermission.OWNER_READ );
+            perms.add( PosixFilePermission.OWNER_WRITE );
+            perms.add( PosixFilePermission.GROUP_READ );
+            perms.add( PosixFilePermission.OTHERS_READ );
+            perms.add( PosixFilePermission.OWNER_EXECUTE );
+            perms.add( PosixFilePermission.GROUP_EXECUTE );
+            perms.add( PosixFilePermission.OTHERS_EXECUTE );
+            Files.setPosixFilePermissions( file.toPath(), perms );
         }
     }
+    
+    private void createPreInstFile() throws IOException {
+    	Template initScript = new Template( "deb/template/preinst" );
+    	File file = new File( buildDir, "preinst" );
+        if( !file.getParentFile().exists() ) {
+            file.getParentFile().mkdirs();
+        }
+        file.createNewFile();
+        System.out.println("preinst file :" + file.getAbsolutePath());
+        initScript.writeTo( file );
+
+        DebUtils.setPermissions( file, true );
+	}
 }

@@ -15,6 +15,8 @@
  */
 package com.inet.gradle.setup.msi;
 
+import java.io.File;
+
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
 
@@ -28,6 +30,8 @@ import com.inet.gradle.setup.AbstractSetupTask;
 public class Msi extends AbstractSetupTask {
 
     private String arch = "x64";
+
+    private Object bannerBmp, dialogBmp;
 
     public Msi() {
         super( "msi" );
@@ -76,5 +80,39 @@ public class Msi extends AbstractSetupTask {
             default:
                 return false;
         }
+    }
+
+    public File getBannerBmp() {
+        if( bannerBmp != null ) {
+            return getProject().file( bannerBmp );
+        }
+        return null;
+    }
+
+    /**
+     * Set a file with a banner BMP. The typical size is 493 x 58
+     * @param bannerBmp the file
+     */
+    public void setBannerBmp( Object bannerBmp ) {
+        this.bannerBmp = bannerBmp;
+    }
+
+    /**
+     * Get the banner BMP.
+     * @return the BMP
+     */
+    public File getDialogBmp() {
+        if( dialogBmp != null ) {
+            return getProject().file( dialogBmp );
+        }
+        return null;
+    }
+
+    /**
+     * Set a file with the dialog BMP. The typical size is 493 x 312
+     * @param dialogBmp the file
+     */
+    public void setDialogBmp( Object dialogBmp ) {
+        this.dialogBmp = dialogBmp;
     }
 }

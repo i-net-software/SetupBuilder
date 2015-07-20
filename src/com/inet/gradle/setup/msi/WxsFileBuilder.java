@@ -44,11 +44,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.gradle.api.GradleException;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.file.FileVisitDetails;
-import org.gradle.api.file.FileVisitor;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
-import org.gradle.api.internal.file.UnionFileTree;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -159,30 +155,54 @@ class WxsFileBuilder {
     }
 
     /**
+     * Get or create a directory node.
+     * 
+     * @param installDir The XML element of the install directory.
+     * @param segments the segments of the path in the target. The last segment contains the file name.
+     * @return the directory node
+     */
+    private Element getDirectory( Element installDir, String[] segments ) {
+        Element parent = installDir;
+        for( int i = 0; i < segments.length - 1; i++ ) {
+            String seg = segments[i];
+            parent = getOrCreateChildById( parent, "Directory", seg, true );
+            addAttributeIfNotExists( parent, "Name", seg );
+        }
+        return parent;
+    }
+
+    /**
+     * Get or Create a component node
+     * 
+     * @param dir the parent directory node.
+     * @param compID the ID of the component
+     * @return the component node
+     */
+    private Element getComponent( Element dir, String compID ) {
+        components.add( compID );
+        Element component = getOrCreateChildById( dir, "Component", compID, true );
+        addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
+        return component;
+    }
+
+    /**
      * Add a file to the setup
      * 
      * @param installDir The XML element of the install directory.
      * @param file the file to add.
      * @param segments the segments of the path in the target. The last segment contains the file name.
-     * @return id of the file
      */
-    private String addFile( Element installDir, File file, String[] segments ) {
-        Document doc = installDir.getOwnerDocument();
-        Element parent = installDir;
-        StringBuilder pathID = new StringBuilder();
-        for( int i = 0; i < segments.length - 1; i++ ) {
-            String seg = segments[i];
-            parent = getOrCreateChildById( parent, "Directory", seg, true );
-            addAttributeIfNotExists( parent, "Name", seg );
-            pathID.append( seg ).append( '_' );
-        }
+    private void addFile( Element installDir, File file, String[] segments ) {
+        Element parent = getDirectory( installDir, segments );
 
-        String compID = pathID + "application";
-        components.add( compID );
-        Element component = getOrCreateChildById( parent, "Component", compID, true );
-        addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
-        Element fileEl = doc.createElement( "File" );
+        String pathID = segments.length > 1 ? segments[segments.length - 2] : "";
+        String compID = "application_" + pathID;
+        Element component = getComponent( parent, compID );
+
         String name = segments[segments.length - 1];
+        addFile( component, file, pathID, name );
+
+        // save the jvm.dll position
         if( name.equals( "jvm.dll" ) ) {
             StringBuilder jvm = new StringBuilder();
             for( String segment : segments ) {
@@ -193,12 +213,24 @@ class WxsFileBuilder {
             }
             jvmDll = jvm.toString();
         }
-        String id = pathID + id( name );
+    }
+
+    /**
+     * Add a file.
+     * 
+     * @param component the parent component node
+     * @param file the source file
+     * @param pathID an ID of the parent path
+     * @param name the target file name
+     */
+    private void addFile( Element component, File file, String pathID, String name ) {
+        Document doc = component.getOwnerDocument();
+        Element fileEl = doc.createElement( "File" );
+        String id = pathID + '_' + id( name );
         fileEl.setAttribute( "Id", id );
         fileEl.setAttribute( "Source", file.getAbsolutePath() );
         fileEl.setAttribute( "Name", name );
         component.appendChild( fileEl );
-        return id;
     }
 
     /**
@@ -307,6 +339,17 @@ class WxsFileBuilder {
             child.setTextContent( "1" );
             ui.appendChild( child );
         }
+
+        File file = task.getBannerBmp();
+        if( file != null ) {
+            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIBannerBmp", true );
+            addAttributeIfNotExists( licenseNode, "Value", file.getAbsolutePath() );
+        }
+        file = task.getDialogBmp();
+        if( file != null ) {
+            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIDialogBmp", true );
+            addAttributeIfNotExists( licenseNode, "Value", file.getAbsolutePath() );
+        }
     }
 
     /**
@@ -390,45 +433,68 @@ class WxsFileBuilder {
             Files.copy( input, prunsrv.toPath(), StandardCopyOption.REPLACE_EXISTING );
         }
 
-        Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence", true );
-
         for( Service service : services ) {
             String name = service.getName();
             String exe = name + "Service.exe";
             String id = id( name.replace( '-', '_' ) ) + "_service";
-            String fileKey = addFile( installDir, prunsrv, new String[] { exe } );
 
-            // Build the service install command line
-            StringBuilder cmd = new StringBuilder();
-            cmd.append( " update " ).append( name );
-            if( service.getDescription() != null ) {
-                cmd.append( " \"--Description=" ).append( service.getDescription() ).append( '\"' );
+            // add the service file
+            Element directory = getDirectory( installDir, new String[] { exe } );
+            Element component = getComponent( directory, id );
+            addFile( component, prunsrv, id, exe );
+
+            // install the windows service
+            Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install", true );
+            addAttributeIfNotExists( install, "Name", name );
+            addAttributeIfNotExists( install, "DisplayName", service.getDisplayName() );
+            addAttributeIfNotExists( install, "Description", service.getDescription() );
+            addAttributeIfNotExists( install, "Start", service.isStartOnBoot() ? "auto" : "demand" );
+            addAttributeIfNotExists( install, "Type", "ownProcess" );
+            addAttributeIfNotExists( install, "ErrorControl", "normal" );
+            addAttributeIfNotExists( install, "Arguments", " //RS//" + name );
+
+            // Java parameter of the service
+            String baseKey =
+                            task.is64Bit() ? "SOFTWARE\\Wow6432Node\\Apache Software Foundation\\ProcRun 2.0\\"
+                                            : "SOFTWARE\\Apache Software Foundation\\ProcRun 2.0\\";
+            Element regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegJava", true );
+            addAttributeIfNotExists( regkey, "Root", "HKLM" );
+            addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Java" );
+            addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
+            addRegistryValue( regkey, "Classpath", "string", service.getMainJar() );
+            addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
+            addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
+            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegStart", true );
+            addAttributeIfNotExists( regkey, "Root", "HKLM" );
+            addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Start" );
+            addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
+            addRegistryValue( regkey, "Class", "string", service.getMainClass() );
+            addRegistryValue( regkey, "Mode", "string", "Java" );
+            addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" );
+
+            // start the service
+            if( service.isStartOnBoot() ) {
+                Element start = getOrCreateChildById( component, "ServiceControl", id + "_start", true );
+                addAttributeIfNotExists( start, "Name", name );
+                addAttributeIfNotExists( start, "Start", "install" );
+                addAttributeIfNotExists( start, "Stop", "both" );
+                addAttributeIfNotExists( start, "Remove", "uninstall" );
             }
-            cmd.append( " \"--DisplayName=" ).append( service.getDisplayName() ).append( '\"' );
-            if( setup.getBundleJre() != null ) {
-                cmd.append( " \"--Jvm=" ).append( "[INSTALLDIR]" ).append( jvmDll ).append( '\"' );
-                cmd.append( " \"--JavaHome=" ).append( "[INSTALLDIR]" ).append( setup.getBundleJreTarget() ).append( '\"' ); //for bug https://issues.apache.org/jira/browse/DAEMON-335
-            }
-            cmd.append( " --StartMode=Java" ); //Java instead jvm because bug https://issues.apache.org/jira/browse/DAEMON-335
-            cmd.append( " \"--Classpath=" ).append( service.getMainJar() ).append( '\"' );
-            cmd.append( " \"--StartClass=" ).append( service.getMainClass() ).append( '\"' );
-            cmd.append( " \"--StartPath=" ).append( "[INSTALLDIR]" ).append( "\\\"" ); //INSTALLDIR ends with a backslash that we need escape the quote 
-            cmd.append( " --Startup=" ).append( service.isStartOnBoot() ? "auto" : "manual" );
-            task.getProject().getLogger().lifecycle( "\t" + cmd );
-
-            // save the command line as property
-            String propID = "prop." + id;
-            addLargeProperty( product, propID, cmd.toString() );
-
-            Element customAction = getOrCreateChildById( product, "CustomAction", id, true );
-            addAttributeIfNotExists( customAction, "FileKey", fileKey );
-            addAttributeIfNotExists( customAction, "ExeCommand", '[' + propID + ']' );
-            addAttributeIfNotExists( customAction, "Execute", "deferred" );
-            addAttributeIfNotExists( customAction, "Impersonate", "no" );
-
-            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id, true );
-            addAttributeIfNotExists( custom, "Before", "InstallFinalize" );
         }
+    }
+
+    /**
+     * Add a registry value.
+     * 
+     * @param regkey the parent registry key
+     * @param name the value name
+     * @param type the type
+     * @param value the value
+     */
+    private void addRegistryValue( Element regkey, String name, String type, String value ) {
+        Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name, true );
+        addAttributeIfNotExists( regValue, "Type", type );
+        addAttributeIfNotExists( regValue, "Value", value );
     }
 
     /**

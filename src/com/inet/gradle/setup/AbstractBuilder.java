@@ -82,6 +82,8 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         }
         if( output != null ) {
             action.setStandardOutput( output );
+        } else {
+        	action.setStandardOutput( System.out );
         }
         try {
             action.execute();

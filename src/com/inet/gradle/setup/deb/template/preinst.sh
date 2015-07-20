@@ -1,5 +1,5 @@
 #!/bin/sh
-# preinst script for {{package}}
+# preinst script for {{baseName}}
 #
 # see: dh_installdeb(1)
 
@@ -12,6 +12,8 @@ set -e
 #        * <old-preinst> `abort-upgrade' <new-version>
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
+
+. /usr/share/debconf/confmodule
 
 {{head}}
 

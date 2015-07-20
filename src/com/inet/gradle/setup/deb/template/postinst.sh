@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for {{package}}
+# postinst script for {{baseName}}
 #
 # see: dh_installdeb(1)
 

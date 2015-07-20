@@ -15,17 +15,22 @@
  */
 package com.inet.gradle.setup.deb;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
+import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
+import com.inet.gradle.setup.image.ImageFactory;
 
 public class DebBuilder extends AbstractBuilder<Deb> {
 
@@ -58,6 +63,14 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             for( Service service : setup.getServices() ) {
                 setupService( service );
             }
+            
+            for( DesktopStarter starter : setup.getDesktopStarters() ) {
+                setupStarter( starter );
+            }
+            
+            if( setup.getLicenseFile() != null ) {
+                setupEula();
+            }
 
             controlBuilder.build();
 
@@ -77,26 +90,132 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
     }
 
+
+    private void setupEula() throws IOException {
+        String templateLicenseName = setup.getBaseName()+"/license";
+        String templateAcceptName = setup.getBaseName()+"/accept-license";
+        String templateErrorName = setup.getBaseName()+"/error-license";
+        try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) );
+             BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile() ) )) {
+            fw.write( "Template: " + templateLicenseName + "\n" );
+            fw.write( "Type: note\n" );
+            fw.write( "Description: License agreement\n" );
+            while( fr.ready() ) {
+                String line = fr.readLine().trim();
+                if( line.isEmpty() ) {
+                    fw.write( " .\n" );
+                } else {
+                    fw.write( ' ' );
+                    fw.write( line );
+                    fw.write( '\n' );
+                }
+            }
+            fw.write( '\n' );
+            fw.write( "Template: " + templateAcceptName + "\n" );
+            fw.write( "Type: boolean\n" );
+            fw.write( "Description: Do you accept the license agreement?\n" );
+            fw.write( '\n' );
+            fw.write( "Template: " + templateErrorName + "\n" );
+            fw.write( "Type: error\n" );
+            fw.write( "Description: It is required to accept the license to install this package.\n" );
+            fw.write( '\n' );
+        }
+        
+        controlBuilder.addTailScriptFragment( Script.POSTRM,
+                "if [ \"$1\" = \"remove\" ] || [ \"$1\" = \"purge\" ]  ; then\n" + 
+                "  db_purge\n"+
+                "fi");
+        
+    	controlBuilder.addHeadScriptFragment( Script.PREINST, 
+    	        "if [ \"$1\" = \"install\" ] ; then\n" + 
+                "  db_get "+templateAcceptName+"\n" + 
+                "  if [ \"$RET\" = \"true\" ]; then\n" + 
+                "    echo \"License already accepted\"\n" + 
+                "  else\n" + 
+                "    db_input high "+templateLicenseName+" || true\n" + 
+                "    db_go\n" + 
+                "    db_input high "+templateAcceptName+" || true\n" + 
+                "    db_go\n" + 
+                "    db_get "+templateAcceptName+"\n" + 
+                "    if [ \"$RET\" != \"true\" ]; then\n" + 
+                "        echo \"License was not accepted by the user\"\n" + 
+                "        db_input high "+templateErrorName+" || true\n" + 
+                "        db_go\n" + 
+                "        db_purge\n" + 
+                "        exit 1\n" + 
+                "    fi\n" + 
+                "  fi\n"+
+                "fi");
+	}
+
+
     /**
      * Creates the files and the corresponding script section for the specified service.
      * @param service the service
      * @throws IOException on errors during creating or writing a file
      */
-    public void setupService( Service service ) throws IOException {
+    private void setupService( Service service ) throws IOException {
         String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
-        Template initScript = new Template( "deb/template/init-jsvc.sh" );
+        String mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
+        Template initScript = new Template( "deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
+        initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
+        initScript.setPlaceholder( "wait", "2" );
+        initScript.setPlaceholder( "mainJar", mainJarPath );
         initScript.setPlaceholder( "startArguments",
-                                   "-cp /usr/share/" + setup.getBaseName() + "/" + service.getMainJar() + ":/usr/share/java/commons-daemon.jar " + service.getMainClass() + " "
-                                       + service.getStartArguments() );
+                                   "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null" );
+        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -x \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
         controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + 
             "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
             "fi" );
+    }
+
+    /**
+     * Creates the files and the corresponding scripts for the specified desktop starter.
+     * @param starter the desktop starter
+     * @throws IOException on errors during creating or writing a file
+     */
+    private void setupStarter( DesktopStarter starter ) throws IOException {
+        String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
+        String consoleStarterPath = "usr/bin/" + unixName;
+        try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
+            fw.write( "#!/bin/bash\n" );
+            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+                + starter.getStartArguments() + " \"$@\"" );
+        }
+        int[] iconSizes = { 16, 32, 48, 64, 128 };
+
+        for( int size : iconSizes ) {
+            File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
+            iconDir.mkdirs();
+            File scaledFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), iconDir, "png" + size );
+            if( scaledFile != null ) {
+                File iconFile = new File( iconDir, unixName + ".png" );
+                scaledFile.renameTo( iconFile );
+                DebUtils.setPermissions( iconFile, false );
+            }
+        }
+        try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
+            fw.write( "[Desktop Entry]\n" );
+            fw.write( "Name=" + starter.getName() + "\n" );
+            fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
+            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
+            fw.write( "Icon=" + unixName + "\n" );
+            fw.write( "Terminal=false\n" );
+            fw.write( "StartupNotify=true\n" );
+            fw.write( "Type=Application\n" );
+            if( starter.getMimeTypes() != null ) {
+                fw.write( "MimeType=" + starter.getMimeTypes() + "\n" );
+            }
+            if( starter.getCategories() != null ) {
+                fw.write( "Categories=" + starter.getCategories() + "\n" );
+            }
+        }
+        
     }
 
     /**
@@ -172,4 +291,5 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             }
         }
     }
+
 }
