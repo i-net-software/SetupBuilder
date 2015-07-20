@@ -339,6 +339,17 @@ class WxsFileBuilder {
             child.setTextContent( "1" );
             ui.appendChild( child );
         }
+
+        File file = task.getBannerBmp();
+        if( file != null ) {
+            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIBannerBmp", true );
+            addAttributeIfNotExists( licenseNode, "Value", file.getAbsolutePath() );
+        }
+        file = task.getDialogBmp();
+        if( file != null ) {
+            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIDialogBmp", true );
+            addAttributeIfNotExists( licenseNode, "Value", file.getAbsolutePath() );
+        }
     }
 
     /**
