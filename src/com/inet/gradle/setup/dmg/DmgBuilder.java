@@ -202,8 +202,80 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     }
 
     private void createPackageFromApp() {
-		// TODO Auto-generated method stub
-		
+
+    	extractApplicationInformation();
+    	createAndPatchDistributionXML();
+
+		// Build Product for packaging
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/productbuild" );
+        command.add( "--distribution" );
+        command.add( tmp.toString() + "/distribution.xml" );
+        /*command.add( "--resources" );
+        command.add( setup.get );*/
+        command.add( "--package-path" );
+        command.add( tmp.toString() );
+        command.add( buildDir.toString() + "/" + applicationName + ".pkg" );
+    	exec( command );
+	}
+
+	private void extractApplicationInformation() {
+		// Create application information plist
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/pkgbuild" );
+        command.add( "--analyze" );
+        command.add( "--root" );
+        command.add( buildDir.toString() );
+        command.add( tmp.toString() + "/" + applicationName + ".plist" );
+    	exec( command );
+    	
+    	// set identifier, create package
+        command = new ArrayList<>();
+        command.add( "/usr/bin/pkgbuild" );
+        command.add( "--root" );
+        command.add( buildDir.toString() );
+        command.add( "--component-plist" );
+        command.add( tmp.toString() + "/" + applicationName + ".plist" );
+        command.add( "--identifier" );
+        command.add( setup.getMainClass() );
+        command.add( "--version" );
+        command.add( setup.getVersion() );
+        command.add( "--install-location" );
+        command.add( "/Application" );
+        command.add( tmp.toString() + "/distribution/" + applicationName + ".pkg" );
+    	exec( command );
+    	
+    	imageSourceRoot = tmp.toString() + "/distribution";
+	}
+
+	private void createAndPatchDistributionXML() {
+		ArrayList<String> command;
+		// Synthesize Distribution xml
+        command = new ArrayList<>();
+        command.add( "/usr/bin/productbuild" );
+        command.add( "--synthesize" );
+        command.add( "--package" );
+        command.add( tmp.toString() + "/" + applicationName + ".pkg" );
+        command.add( tmp.toString() + "/distribution.xml" );
+    	exec( command );
+
+    	// Add more information to distribution 
+        command = new ArrayList<>();
+        command.add( "sed" );
+        command.add( "-i \"\"" );
+
+        command.add( "-e '$ i\\" );
+        command.add( "\\    <title>"+title+"</title>' \\" );
+
+        command.add( "-e '$ i\\" );
+        command.add( "\\    <background file=\"background.png\" alignment=\"left\" scaling=\"proportional\" />' \\" );
+
+        command.add( "-e '$ i\\" );
+        command.add( "\\    <welcome file=\"welcome.rtf\" />' \\" );
+
+        command.add( "-e '$ i\\" );
+        command.add( "\\    <license file=\"license.txt\" />' \\" );
+        exec( command );
 	}
 
 	/**
