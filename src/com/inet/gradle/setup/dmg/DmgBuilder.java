@@ -50,6 +50,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private String title, applicationName;
 	private Path tmp;
 	private File iconFile;
+	private String imageSourceRoot;
 
     /**
      * Create a new instance
@@ -73,7 +74,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
             title = setup.getSetupName();
             applicationName = setup.getBaseName();
-            
+            imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
+
             AppBundlerTask appBundler = new AppBundlerTask();
             appBundler.setOutputDirectory( buildDir );
             appBundler.setName( applicationName );
@@ -183,6 +185,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      */
     private void createBinary() throws IOException {
     	
+    	if ( !setup.getServices().isEmpty() ) {
+    		createPackageFromApp();
+    	}
+    	
         createTempImage();
         attach();
 
@@ -192,12 +198,15 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         detach();
         finalImage();
         
-        // unflatten();
-
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
 
-    /**
+    private void createPackageFromApp() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
      * Call hdiutil to create a temporary image.
      */
     private void createTempImage() {
@@ -205,7 +214,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "/usr/bin/hdiutil" );
         command.add( "create" );
         command.add( "-srcfolder" );
-        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+		command.add( imageSourceRoot );
         command.add( "-format" );
         command.add( "UDRW" );
         command.add( "-volname" );
