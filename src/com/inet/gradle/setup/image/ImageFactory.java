@@ -47,7 +47,7 @@ public class ImageFactory {
      * @param project current project for resolving the file locations
      * @param data the set values
      * @param dir directory for temporary build files if the file(s) need converted
-     * @param format the platform format, currently "ico" and "icns"
+     * @param format the platform format, currently "ico", "icns" and png<size>
      * @return a file or null
      * @throws IOException if an error occur on reading the image files
      */
@@ -140,7 +140,7 @@ public class ImageFactory {
                         int size = Integer.parseInt( format.substring( 3 ) );
                         BufferedImage scaledImage = scaleBestFromList( images, size );
                         if( scaledImage != null ) {
-                            ImageIO.write( scaledImage, "PNG", file );
+                            ImageIO.write( scaledImage, "png", file );
                         }
                         break;
                     } catch( NumberFormatException e ) {
