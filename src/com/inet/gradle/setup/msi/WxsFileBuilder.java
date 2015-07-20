@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -34,14 +33,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.EditorKit;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
@@ -53,31 +45,21 @@ import org.w3c.dom.Node;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
  * Builder for a *.wsx file. A *.wsx file is a XML that described MSI setup and is needed for the Wix tool.
  * 
  * @author Volker Berlin
  */
-class WxsFileBuilder {
-
-    private final Msi          task;
-
-    private final SetupBuilder setup;
-
-    private final File         wxsFile;
-
-    private File               buildDir;
+class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     private HashSet<String>    components = new HashSet<>();
 
     private String             jvmDll;
 
-    WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) {
-        this.task = msi;
-        this.setup = setup;
-        this.wxsFile = wxsFile;
-        this.buildDir = buildDir;
+    WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) throws Exception {
+        super( msi, setup, wxsFile, buildDir, WxsFileBuilder.class.getResource( "template.wxs" ) );
     }
 
     /**
@@ -87,13 +69,6 @@ class WxsFileBuilder {
      * @throws Exception
      */
     void build() throws Exception {
-        wxsFile.getParentFile().mkdirs();
-
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-        URL url = getClass().getResource( "template.wxs" );
-        Document doc = docBuilder.parse( url.toString() );
-
         // Wix node
         Element wix = (Element)doc.getFirstChild();
         if( !"Wix".equals( wix.getTagName() ) ) {
@@ -114,6 +89,7 @@ class WxsFileBuilder {
         addAttributeIfNotExists( media, "EmbedCab", "yes" );
         Element packge = getOrCreateChild( product, "Package", false );
         addAttributeIfNotExists( packge, "Compressed", "yes" );
+        addAttributeIfNotExists( packge, "Languages", "1033,1031,1028,2052,1030,1043,1035,1036,1040,1041,1042,1044,1046,1034,1053,1049,1055,1045,2070" );
 
         // Directory
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR", true );
@@ -145,13 +121,7 @@ class WxsFileBuilder {
             Element compRef = getOrCreateChildById( feature, "ComponentRef", compID, true );
         }
 
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        Transformer transformer = transformerFactory.newTransformer();
-        DOMSource source = new DOMSource( doc );
-        StreamResult result = new StreamResult( wxsFile );
-        transformer.setOutputProperty( OutputKeys.INDENT, "yes" );
-        transformer.setOutputProperty( "{http://xml.apache.org/xslt}indent-amount", "2" );
-        transformer.transform( source, result );
+        save();
     }
 
     /**
@@ -555,58 +525,6 @@ class WxsFileBuilder {
             after = actionID;
             count++;
         } while( partValue != rest );
-    }
-
-    /**
-     * Add a attribute if not exists.
-     * 
-     * @param el the element/node in the XML
-     * @param name the name of the attribute
-     * @param value the value
-     */
-    private void addAttributeIfNotExists( Element el, String name, String value ) {
-        if( !el.hasAttribute( name ) ) {
-            el.setAttribute( name, value );
-        }
-    }
-
-    private Element getOrCreateChild( Element parent, String name, boolean append ) {
-        Node first = parent.getFirstChild();
-        for( Node child = first; child != null; child = child.getNextSibling() ) {
-            if( name.equals( child.getNodeName() ) ) {
-                return (Element)child;
-            }
-        }
-        Document doc = parent.getOwnerDocument();
-        Element child = doc.createElement( name );
-        if( append || first == null ) {
-            parent.appendChild( child );
-        } else {
-            parent.insertBefore( child, first );
-        }
-        return child;
-    }
-
-    private Element getOrCreateChildById( Element parent, String name, String id, boolean append ) {
-        return getOrCreateChildByKeyValue( parent, name, "Id", id, append );
-    }
-
-    private Element getOrCreateChildByKeyValue( Element parent, String name, String key, String value, boolean append ) {
-        Node first = parent.getFirstChild();
-        for( Node child = first; child != null; child = child.getNextSibling() ) {
-            if( name.equals( child.getNodeName() ) && value.equals( ((Element)child).getAttribute( key ) ) ) {
-                return (Element)child;
-            }
-        }
-        Document doc = parent.getOwnerDocument();
-        Element child = doc.createElement( name );
-        child.setAttribute( key, value );
-        if( append || first == null ) {
-            parent.appendChild( child );
-        } else {
-            parent.insertBefore( child, first );
-        }
-        return child;
     }
 
     /**
