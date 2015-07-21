@@ -21,7 +21,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -126,6 +128,7 @@ class DebDocumentFileBuilder {
 		 
 			controlWriter.write( setup.getBaseName() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE);
 			
+			
 			String changes = deb.getChanges();
 			if(changes != null && changes.length() > 0) {
 				controlWriter.write( changes + NEWLINE);
@@ -133,7 +136,7 @@ class DebDocumentFileBuilder {
 				controlWriter.write( "  * no changes" + NEWLINE);
 			}
 			
-			controlWriter.write( NEWLINE + "  -- " + setup.getVendor() + " <" + deb.getMaintainerEmail() + ">" + NEWLINE);
+			controlWriter.write( NEWLINE + " -- " + setup.getVendor() + " <" + deb.getMaintainerEmail() + ">  " + new SimpleDateFormat("dd MMM yyyy HH:mm:ss Z").format(new Date(System.currentTimeMillis())) + NEWLINE);
 			
 			controlWriter.flush();
 			
