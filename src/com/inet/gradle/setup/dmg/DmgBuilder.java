@@ -21,9 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 
@@ -31,11 +35,13 @@ import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
+import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.XmlFileBuilder;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
@@ -50,6 +56,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private String title, applicationName;
 	private Path tmp;
 	private File iconFile;
+	private String imageSourceRoot;
 
     /**
      * Create a new instance
@@ -64,8 +71,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     /**
      * Build the dmg file. 
+     * @throws Throwable 
      */
-    public void build() {
+    public void build() throws RuntimeException {
 
         try {
         	Project project = task.getProject();
@@ -73,7 +81,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
             title = setup.getSetupName();
             applicationName = setup.getBaseName();
-            
+            imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
+
             AppBundlerTask appBundler = new AppBundlerTask();
             appBundler.setOutputDirectory( buildDir );
             appBundler.setName( applicationName );
@@ -129,9 +138,23 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             task.copyTo( new File( buildDir, applicationName + ".app/Contents/Java" ) );
             
             createBinary();
+
+            // Remove temporary folder and content.
+            Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
+         	   @Override
+         	   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+         		   Files.delete(file);
+         		   return FileVisitResult.CONTINUE;
+         	   }
+
+         	   @Override
+         	   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+         		   Files.delete(dir);
+         		   return FileVisitResult.CONTINUE;
+         	   }
+
+            });
             
-            // Remove temporary Path 
-            Files.delete(tmp);
             tmp = null;
         
         } catch( RuntimeException ex ) {
@@ -139,6 +162,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
+	    } catch( Throwable ex ) {
+	        ex.printStackTrace();
         }
     }
 
@@ -178,10 +203,13 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     /**
      * Create the binary with native tools.
-     * 
-     * @throws IOException
+     * @throws Throwable 
      */
-    private void createBinary() throws IOException {
+    private void createBinary() throws Throwable {
+    	
+    	if ( !setup.getServices().isEmpty() ) {
+    		createPackageFromApp();
+    	}
     	
         createTempImage();
         attach();
@@ -192,12 +220,103 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         detach();
         finalImage();
         
-        // unflatten();
-
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
 
-    /**
+    private void createPackageFromApp() throws Throwable {
+
+        Files.createDirectories(new File(tmp.toFile(), "distribution").toPath(), new FileAttribute[0]);
+        Files.createDirectories(new File(tmp.toFile(), "packages").toPath(), new FileAttribute[0]);
+    	imageSourceRoot = tmp.toString() + "/distribution";
+    	
+        extractApplicationInformation();
+    	createAndPatchDistributionXML();
+
+		// Build Product for packaging
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/productbuild" );
+        command.add( "--distribution" );
+        command.add( tmp.toString() + "/distribution.xml" );
+        /*command.add( "--resources" );
+        command.add( setup.get );*/
+        command.add( "--package-path" );
+        command.add( tmp.toString() + "/packages" );
+        command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
+    	exec( command );
+	}
+
+	private void extractApplicationInformation() throws IOException {
+		// Create application information plist
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/pkgbuild" );
+        command.add( "--analyze" );
+        command.add( "--root" );
+        command.add( buildDir.toString() );
+        command.add( tmp.toString() + "/" + applicationName + ".plist" );
+    	exec( command );
+    	
+    	// set identifier, create package
+        command = new ArrayList<>();
+        command.add( "/usr/bin/pkgbuild" );
+        command.add( "--root" );
+        command.add( buildDir.toString() );
+        command.add( "--component-plist" );
+        command.add( tmp.toString() + "/" + applicationName + ".plist" );
+        command.add( "--identifier" );
+        command.add( setup.getMainClass() );
+        command.add( "--version" );
+        command.add( setup.getVersion() );
+        command.add( "--install-location" );
+        command.add( "/Application" );
+        command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
+    	exec( command );
+    	
+	}
+
+	private void createAndPatchDistributionXML() throws Throwable {
+		ArrayList<String> command;
+		// Synthesize Distribution xml
+        command = new ArrayList<>();
+        command.add( "/usr/bin/productbuild" );
+        command.add( "--synthesize" );
+        command.add( "--package" );
+        command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
+        command.add( tmp.toString() + "/distribution.xml" );
+    	exec( command );
+
+        patchDistributionXML();
+	}
+
+	private void patchDistributionXML() throws Throwable {
+
+        File xml = new File( tmp.toString() + "/distribution.xml" );
+        URL url = xml.toURI().toURL();
+		@SuppressWarnings("rawtypes")
+		XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>(task, setup, xml, buildDir, url);
+        
+        Element distribution = (Element)xmlFile.doc.getFirstChild();
+        if( !"installer-gui-script".equals( distribution.getTagName() ) ) {
+            throw new IllegalArgumentException( "Template does not contains a installer-gui-script root: " + distribution.getTagName() );
+        }
+
+        // Product node
+        Element background = xmlFile.getOrCreateChildById( distribution, "background", "*", false );
+        xmlFile.addAttributeIfNotExists( background, "file", "background.png" );
+        xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
+        xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
+
+        // Welcome Node
+        Element welcome = xmlFile.getOrCreateChildById( distribution, "welcome", "*", false );
+        xmlFile.addAttributeIfNotExists( welcome, "file", "welcome.rtf" );
+
+        // License node
+        Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
+        xmlFile.addAttributeIfNotExists( license, "file", "license.txt" );
+
+        xmlFile.save();
+	}
+
+	/**
      * Call hdiutil to create a temporary image.
      */
     private void createTempImage() {
@@ -205,7 +324,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "/usr/bin/hdiutil" );
         command.add( "create" );
         command.add( "-srcfolder" );
-        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+		command.add( imageSourceRoot );
         command.add( "-format" );
         command.add( "UDRW" );
         command.add( "-volname" );
