@@ -140,13 +140,6 @@ class DebControlFileBuilder {
 				}
 			}
 		}
-		
-		try(FileWriter writer = new FileWriter( new File(buildDir, "conffiles") )) {
-		    for(String confFile: confFiles) {
-		        writer.append( confFile );
-		        writer.append( NEWLINE );
-		    }
-		}
 	}
 
 	
@@ -341,22 +334,24 @@ class DebControlFileBuilder {
 	 * Creates the <tt>conffiles</tt> file with a listing of all created configuration files.
 	 * @throws IOException on I/O failures
 	 */
-    private void createConfFilesFile() throws IOException {
-    	File cfile = new File(buildDir, "conffiles");
-        try(FileWriter writer = new FileWriter(cfile)) {
-            for(String confFile: confFiles) {
-                writer.write( '/' );
-                writer.write( confFile );
-                writer.write( '\n' );
-            }
-        }
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        perms.add( PosixFilePermission.OWNER_READ );
-        perms.add( PosixFilePermission.OWNER_WRITE );
-        perms.add( PosixFilePermission.GROUP_READ );
-        perms.add( PosixFilePermission.OTHERS_READ );
-        Files.setPosixFilePermissions( cfile.toPath(), perms );
-    }
+	private void createConfFilesFile() throws IOException {
+		if(confFiles.size() > 0) {
+			File cfile = new File(buildDir, "conffiles");
+			try(FileWriter writer = new FileWriter(cfile)) {
+				for(String confFile: confFiles) {
+					writer.write( '/' );
+					writer.write( confFile );
+					writer.write( '\n' );
+				}
+			}
+			Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+			perms.add( PosixFilePermission.OWNER_READ );
+			perms.add( PosixFilePermission.OWNER_WRITE );
+			perms.add( PosixFilePermission.GROUP_READ );
+			perms.add( PosixFilePermission.OTHERS_READ );
+			Files.setPosixFilePermissions( cfile.toPath(), perms );
+		}
+	}
 
 	/**
 	 * Adds a fragment to the specified install script at the tail section.
@@ -431,17 +426,4 @@ class DebControlFileBuilder {
             Files.setPosixFilePermissions( file.toPath(), perms );
         }
     }
-    
-    private void createPreInstFile() throws IOException {
-    	Template initScript = new Template( "deb/template/preinst" );
-    	File file = new File( buildDir, "preinst" );
-        if( !file.getParentFile().exists() ) {
-            file.getParentFile().mkdirs();
-        }
-        file.createNewFile();
-        System.out.println("preinst file :" + file.getAbsolutePath());
-        initScript.writeTo( file );
-
-        DebUtils.setPermissions( file, true );
-	}
 }
