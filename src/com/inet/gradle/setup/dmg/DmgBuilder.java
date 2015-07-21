@@ -284,7 +284,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "--version" );
         command.add( setup.getVersion() );
         command.add( "--install-location" );
-        command.add( "/Application" );
+        command.add( "/Applications" );
         command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
     	exec( command );
     	
