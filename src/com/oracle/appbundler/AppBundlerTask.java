@@ -200,6 +200,11 @@ public class AppBundlerTask extends Task {
 
         this.runtime = runtime;
 
+        // If Patterns are already set up, do not do again.
+        if ( runtime.hasPatterns() ) {
+        	return;
+        }
+        
         runtime.appendIncludes(new String[] {
             "jre/",
         });
