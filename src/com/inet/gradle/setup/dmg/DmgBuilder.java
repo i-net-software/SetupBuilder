@@ -226,6 +226,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createPackageFromApp() throws Throwable {
 
         Files.createDirectories(new File(tmp.toFile(), "distribution").toPath(), new FileAttribute[0]);
+        Files.createDirectories(new File(tmp.toFile(), "packages").toPath(), new FileAttribute[0]);
     	imageSourceRoot = tmp.toString() + "/distribution";
     	
         extractApplicationInformation();
@@ -239,7 +240,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         /*command.add( "--resources" );
         command.add( setup.get );*/
         command.add( "--package-path" );
-        command.add( tmp.toString() );
+        command.add( tmp.toString() + "/packages" );
         command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
     	exec( command );
 	}
@@ -267,7 +268,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( setup.getVersion() );
         command.add( "--install-location" );
         command.add( "/Application" );
-        command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
+        command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
     	exec( command );
     	
 	}
@@ -279,7 +280,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
+        command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
         command.add( tmp.toString() + "/distribution.xml" );
     	exec( command );
 
