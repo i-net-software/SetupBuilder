@@ -16,14 +16,16 @@
 package com.inet.gradle.setup.msi;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.util.ResourceUtils;
 
 /**
  * Build a MSI setup for Windows.
@@ -48,7 +50,26 @@ class MsiBuilder extends AbstractBuilder<Msi> {
             File wxsFile = getWxsFile();
             new WxsFileBuilder( task, setup, wxsFile, buildDir ).build();
             candle();
-            light();
+
+            ResourceUtils.extract( getClass(), "sdk/MsiTran.Exe", buildDir );
+            ResourceUtils.extract( getClass(), "sdk/wilangid.vbs", buildDir );
+            ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
+
+            //TODO 2 languages for testing only
+            MsiLanguages[] languages = { MsiLanguages.en_us, MsiLanguages.de_de };
+
+            File mui = light( languages[0] );
+            StringBuilder langIDs = new StringBuilder( languages[0].getLangID() );
+            for( int i = 1; i < languages.length; i++ ) {
+                MsiLanguages language = languages[i];
+                File file = light( languages[i] );
+                patchLangID( file, language );
+                File mst = msitran( mui, file, language );
+                addTranslation( mui, mst, language );
+                langIDs.append( ',' ).append( language.getLangID() );
+            }
+            patchLangID( mui, langIDs.toString() );
+            Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getSetupName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
@@ -84,15 +105,88 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     /**
      * Call the light.exe tool.
      */
-    private void light() {
+    private File light( MsiLanguages language ) {
+        File out = new File( buildDir, setup.getSetupName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-ext" );
         parameters.add( "WixUIExtension" );
         parameters.add( "-out" );
-        parameters.add( new File( setup.getDestinationDir(), setup.getSetupName() + ".msi" ).getAbsolutePath() );
+        parameters.add( out.getAbsolutePath() );
         parameters.add( "-spdb" );
+        parameters.add( "-cultures:" + language.getCulture() + ";neutral" );
         parameters.add( "*.wixobj" );
         callWixTool( "light.exe", parameters );
+        return out;
+    }
+
+    /**
+     * Change the language ID of a *.msi file.
+     * 
+     * @param file a msi file
+     * @param language the target language
+     */
+    private void patchLangID( File file, MsiLanguages language ) {
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( "cscript" );
+        parameters.add( new File( buildDir, "sdk/wilangid.vbs" ).getAbsolutePath() );
+        parameters.add( file.getAbsolutePath() );
+        parameters.add( "Product" );
+        parameters.add( language.getLangID() );
+        exec( parameters );
+    }
+
+    /**
+     * Set all languages IDs for which translations was added.
+     * 
+     * @param mui the multilingual user interface (MUI) installer file
+     * @param langIDs a comma separated list of languages IDs
+     */
+    private void patchLangID( File mui, String langIDs ) {
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( "cscript" );
+        parameters.add( new File( buildDir, "sdk/wilangid.vbs" ).getAbsolutePath() );
+        parameters.add( mui.getAbsolutePath() );
+        parameters.add( "Package" );
+        parameters.add( langIDs );
+        exec( parameters );
+    }
+
+    /**
+     * Call the msitran.exe tool and create a transform file (*.mst).
+     * 
+     * @param mui the multilingual user interface (MUI) installer file
+     * @param file the current msi file
+     * @param current language
+     * @return the *.mst file
+     */
+    private File msitran( File mui, File file, MsiLanguages language ) {
+        File mst = new File( buildDir, language.getCulture() + ".mst" );
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( new File( buildDir, "sdk/MsiTran.Exe" ).getAbsolutePath() );
+        parameters.add( "-g" );
+        parameters.add( mui.getAbsolutePath() );
+        parameters.add( file.getAbsolutePath() );
+        parameters.add( mst.getAbsolutePath() );
+        exec( parameters );
+        file.delete(); // after creation of the mst file we does not need it anymore
+        return mst;
+    }
+
+    /**
+     * Add a transform file to the msi file
+     * @param mui the multilingual user interface (MUI) installer file
+     * @param mst the transform file
+     * @param language current language
+     */
+    private void addTranslation( File mui, File mst, MsiLanguages language ) {
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( "cscript" );
+        parameters.add( new File( buildDir, "sdk/wisubstg.vbs" ).getAbsolutePath() );
+        parameters.add( mui.getAbsolutePath() );
+        parameters.add( mst.getAbsolutePath() );
+        parameters.add( language.getLangID() );
+        exec( parameters );
+        mst.delete(); // after adding the mst file we does not need it anymore
     }
 
     /**
@@ -110,7 +204,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * @param tool the name of the tool file
      * @return the path
      */
-    private String getToolPath( String tool ) {
+    private static String getToolPath( String tool ) {
         String programFilesStr = System.getenv( "ProgramFiles(x86)" );
         if( programFilesStr == null ) {
             programFilesStr = System.getenv( "ProgramW6432" );
