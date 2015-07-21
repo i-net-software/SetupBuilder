@@ -19,9 +19,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -40,11 +37,11 @@ import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.ResourceUtils;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
@@ -89,7 +86,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( media, "EmbedCab", "yes" );
         Element packge = getOrCreateChild( product, "Package", false );
         addAttributeIfNotExists( packge, "Compressed", "yes" );
-        addAttributeIfNotExists( packge, "Languages", "1033,1031,1028,2052,1030,1043,1035,1036,1040,1041,1042,1044,1046,1034,1053,1049,1055,1045,2070" );
 
         // Directory
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR", true );
@@ -398,10 +394,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
 
-        File prunsrv = new File( buildDir, "prunsrv.exe" );
-        try( InputStream input = getClass().getResourceAsStream( task.getArch() + "/prunsrv.exe" ) ) {
-            Files.copy( input, prunsrv.toPath(), StandardCopyOption.REPLACE_EXISTING );
-        }
+        File prunsrv = ResourceUtils.extract( getClass(), task.getArch() + "/prunsrv.exe", buildDir );
 
         for( Service service : services ) {
             String name = service.getName();
