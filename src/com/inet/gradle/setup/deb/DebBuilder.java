@@ -114,10 +114,12 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             fw.write( "Template: " + templateAcceptName + "\n" );
             fw.write( "Type: boolean\n" );
             fw.write( "Description: Do you accept the license agreement?\n" );
+            fw.write( "Description-de.UTF-8: Akzeptieren Sie die Lizenzvereinbarung?\n" );
             fw.write( '\n' );
             fw.write( "Template: " + templateErrorName + "\n" );
             fw.write( "Type: error\n" );
             fw.write( "Description: It is required to accept the license to install this package.\n" );
+            fw.write( "Description-de.UTF-8: Zur Installation dieser Anwendung müssen Sie die Lizenz akzeptieren.\n" );
             fw.write( '\n' );
         }
         
