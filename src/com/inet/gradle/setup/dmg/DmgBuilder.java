@@ -70,7 +70,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      * Build the dmg file. 
      * @throws Throwable 
      */
-    public void build() {
+    public void build() throws RuntimeException {
 
         try {
         	Project project = task.getProject();
@@ -273,6 +273,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
         File xml = new File( tmp.toString() + "/distribution.xml" );
         URL url = xml.toURI().toURL();
+		@SuppressWarnings("rawtypes")
 		XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>(task, setup, xml, buildDir, url);
         
         Element distribution = (Element)xmlFile.doc.getFirstChild();
