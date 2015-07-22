@@ -14,13 +14,14 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="{{displayName}}"
 NAME={{name}}
 WAIT={{wait}}
-DAEMON={{mainJar}}
+DAEMON=/usr/bin/java
+MAINARCHIVE={{mainJar}}
 DAEMON_ARGS="{{startArguments}}"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
-[ -x "$DAEMON" ] || exit 0
+[ ! -f "$MAINARCHIVE" ] && exit 0
 
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
