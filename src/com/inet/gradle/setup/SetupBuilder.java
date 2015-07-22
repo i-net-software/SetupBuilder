@@ -63,10 +63,14 @@ public class SetupBuilder implements SetupSources {
 
     private String                 mainJar;
 
-    private List<DocumentType>     documentTypes = new ArrayList<>();
+    private String                 runAfter;
+
+    private List<DocumentType>     documentTypes   = new ArrayList<>();
+
     private List<Service>          services        = new ArrayList<>();
+
     private List<DesktopStarter>   desktopStarters = new ArrayList<>();
-    
+
     private boolean                failOnEmptyFrom = true;
 
     public SetupBuilder( Project project ) {
@@ -280,7 +284,8 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in the manifest.
+     * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in
+     * the manifest.
      * 
      * @param mainJar the main jar file
      */
@@ -289,7 +294,24 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
+     * A command run after the installer.
+     * @return the command or null
+     */
+    public String getRunAfter() {
+        return runAfter;
+    }
+
+    /**
+     * Set a command that run after the installer
+     * @param runAfter
+     */
+    public void setRunAfter( String runAfter ) {
+        this.runAfter = runAfter;
+    }
+
+    /**
      * Register a file extensions.
+     * 
      * @param closue document type
      */
     public void documentType( Closure closue ) {
@@ -303,43 +325,48 @@ public class SetupBuilder implements SetupSources {
     public List<DocumentType> getDocumentType() {
         return documentTypes;
     }
-    
+
     /**
      * Register a service.
+     * 
      * @param closue the closure of the service definition
      */
     public void service( Closure closue ) {
         Service service = ConfigureUtil.configure( closue, new Service( this ) );
         services.add( service );
     }
-    
+
     /**
      * Returns the registered services.
+     * 
      * @return the registered services
      */
     public List<Service> getServices() {
         return services;
     }
-    
+
     /**
      * Register a desktop starter.
+     * 
      * @param closue the closure of the desktop starter's definition
      */
     public void desktopStarter( Closure closue ) {
         DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
         desktopStarters.add( service );
     }
-    
+
     /**
      * Returns the registered desktop starters.
+     * 
      * @return the registered desktop starters
      */
     public List<DesktopStarter> getDesktopStarters() {
         return desktopStarters;
     }
-    
+
     /**
      * If enabled then an empty from definition is failing the build.
+     * 
      * @return true, if enabled
      */
     public boolean isFailOnEmptyFrom() {
@@ -348,6 +375,7 @@ public class SetupBuilder implements SetupSources {
 
     /**
      * Enable the check.
+     * 
      * @param failOnEmptyFrom true, check is enabled
      */
     public void setFailOnEmptyFrom( boolean failOnEmptyFrom ) {

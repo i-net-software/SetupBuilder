@@ -109,7 +109,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addBundleJre( installDir );
         addGUI( product );
         addIcon( product );
-        addServices( product, installDir );
+        addServices( installDir );
+        addRunAfter( product );
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication", true );
@@ -385,10 +386,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the windows services.
      * 
-     * @param product
      * @throws IOException if an I/O error occurs when reading or writing
      */
-    private void addServices( Element product, Element installDir ) throws IOException {
+    private void addServices( Element installDir ) throws IOException {
         List<Service> services = setup.getServices();
         if( services == null || services.isEmpty() ) {
             return;
@@ -444,6 +444,27 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addAttributeIfNotExists( start, "Remove", "uninstall" );
             }
         }
+    }
+
+    /**
+     * Add an action that is executed after the setup.
+     * @param product the product node in the XML.
+     */
+    private void addRunAfter( Element product ) {
+        if( setup.getRunAfter() == null ) {
+            return;
+        }
+        Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget", true );
+        addAttributeIfNotExists( target, "Value", "[INSTALLDIR]" + setup.getRunAfter() );
+
+        Element action = getOrCreateChildById( product, "CustomAction", "runAfter", true );
+        addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
+        addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
+
+        Element sequence = getOrCreateChild( product, "InstallExecuteSequence", true );
+        Element custom = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "runAfter", true );
+        addAttributeIfNotExists( custom, "After", "InstallFinalize" );
+        custom.setTextContent("NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE");
     }
 
     /**

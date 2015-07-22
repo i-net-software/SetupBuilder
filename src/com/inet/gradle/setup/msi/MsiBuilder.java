@@ -110,6 +110,8 @@ class MsiBuilder extends AbstractBuilder<Msi> {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-ext" );
         parameters.add( "WixUIExtension" );
+        parameters.add( "-ext" );
+        parameters.add( "WixUtilExtension" );
         parameters.add( "-out" );
         parameters.add( out.getAbsolutePath() );
         parameters.add( "-spdb" );
