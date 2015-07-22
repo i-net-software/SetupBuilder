@@ -71,6 +71,8 @@ public class SetupBuilder implements SetupSources {
 
     private List<DesktopStarter>   desktopStarters = new ArrayList<>();
 
+    private List<String>           deleteFiles = new ArrayList<>();
+
     private boolean                failOnEmptyFrom = true;
 
     public SetupBuilder( Project project ) {
@@ -362,6 +364,18 @@ public class SetupBuilder implements SetupSources {
      */
     public List<DesktopStarter> getDesktopStarters() {
         return desktopStarters;
+    }
+
+
+    public List<String> getDeleteFiles() {
+        return deleteFiles;
+    }
+
+    public void deleteFiles( String pattern ) {
+        if( pattern.isEmpty() ) {
+            return;
+        }
+        deleteFiles.add( pattern );
     }
 
     /**

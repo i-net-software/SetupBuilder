@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -51,9 +52,11 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  */
 class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
-    private HashSet<String>    components = new HashSet<>();
+    private HashSet<String>         components = new HashSet<>();
 
-    private String             jvmDll;
+    private HashMap<String, String> ids        = new HashMap<>();
+
+    private String                  jvmDll;
 
     WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) throws Exception {
         super( msi, setup, wxsFile, buildDir, WxsFileBuilder.class.getResource( "template.wxs" ) );
@@ -111,6 +114,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addIcon( product );
         addServices( installDir );
         addRunAfter( product );
+        addDeleteFiles( installDir );
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication", true );
@@ -132,7 +136,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element parent = installDir;
         for( int i = 0; i < segments.length - 1; i++ ) {
             String seg = segments[i];
-            parent = getOrCreateChildById( parent, "Directory", seg, true );
+            parent = getOrCreateChildById( parent, "Directory", id( seg ), true );
             addAttributeIfNotExists( parent, "Name", seg );
         }
         return parent;
@@ -448,6 +452,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add an action that is executed after the setup.
+     * 
      * @param product the product node in the XML.
      */
     private void addRunAfter( Element product ) {
@@ -464,7 +469,21 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element sequence = getOrCreateChild( product, "InstallExecuteSequence", true );
         Element custom = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "runAfter", true );
         addAttributeIfNotExists( custom, "After", "InstallFinalize" );
-        custom.setTextContent("NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE");
+        custom.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+    }
+
+    private void addDeleteFiles( Element installDir ) {
+        if( setup.getDeleteFiles().isEmpty() ) {
+            return;
+        }
+        for( String pattern : setup.getDeleteFiles() ) {
+            String[] segments = pattern.split( "[/\\\\]" );
+            Element dir = getDirectory( installDir, segments );
+            Element component = getComponent( dir, "deleteFiles" + id( segments ) );
+            Element remove = getOrCreateChildById( component, "RemoveFile", id( pattern ), true );
+            addAttributeIfNotExists( remove, "On", "install" );
+            addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
+        }
     }
 
     /**
@@ -542,6 +561,27 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
+     * Create a valid id from path segments.
+     * 
+     * @param segments the segments of the path in the target. The last segment contains the file name.
+     * @return
+     */
+    private String id( String[] segments ) {
+        if( segments.length <= 1 ) {
+            return "";
+        } else if( segments.length == 2 ) {
+            return id( segments[1] );
+        } else {
+            StringBuilder builder = new StringBuilder();
+            for( String seg : segments ) {
+                builder.append( '_' );
+                builder.append( seg );
+            }
+            return id( builder.toString() );
+        }
+    }
+
+    /**
      * Create a valid id from string for the wxs file.
      * 
      * @param str possible id but with possible invalid characters
@@ -549,9 +589,19 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private String id( String str ) {
         StringBuilder builder = null;
+        boolean needUnderscoreStart = false;
         for( int i = 0; i < str.length(); i++ ) {
             char ch = str.charAt( i );
-            if( (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || (ch == '_') || (ch == '.') ) {
+            if( (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch == '_') ) {
+                continue;
+            }
+            if( (ch >= '0' && ch <= '9') || (ch == '.') ) {
+                if( i > 0 ) {
+                    continue;
+                }
+                // id must begin with either a letter or an underscore.
+                needUnderscoreStart = true;
+                builder = new StringBuilder();
                 continue;
             }
             if( builder == null ) {
@@ -564,8 +614,20 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return str;
         }
         builder.append( str.substring( builder.length() ) );
+        if( needUnderscoreStart ) {
+            builder.insert( 0, '_' );
+        }
+        String id = builder.toString();
+        if( !ids.containsKey( id ) ) {
+            ids.put( id, str );
+            return id; // new pair
+        }
+        if( str.equals( ids.get( id ) ) ) {
+            return id; // identical pair already exists
+        }
+        // we have a collision, add a hashcode to prevent name collision
         builder.append( '_' );
-        builder.append( Math.abs( str.hashCode() ) );//add a hashcode to prevent name collision
+        builder.append( Math.abs( str.hashCode() ) );
         return builder.toString();
     }
 }
