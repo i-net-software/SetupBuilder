@@ -137,6 +137,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
             task.copyTo( new File( buildDir, applicationName + ".app/Contents/Java" ) );
             
+            setApplicationFilePermissions();
+            
             createBinary();
 
             // Remove temporary folder and content.
@@ -166,6 +168,30 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 	        ex.printStackTrace();
         }
     }
+
+	private void setApplicationFilePermissions() throws IOException {
+		
+		// Set Read on all files and folders
+		ArrayList<String> command = new ArrayList<>();
+        command.add( "chmod" );
+        command.add( "-R" );
+        command.add( "a+r" );
+        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+        exec( command );
+        
+		// Set execute on all folders.
+        command = new ArrayList<>();
+        command.add( "find" );
+        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+        command.add( "-type" );
+        command.add( "d" );
+        command.add( "-exec" );
+        command.add( "chmod" );
+        command.add( "a+x" );
+        command.add( "{}" );
+        command.add( ";" );
+        exec( command );
+	}
 
     /**
      * Bundle the Java VM if set.
