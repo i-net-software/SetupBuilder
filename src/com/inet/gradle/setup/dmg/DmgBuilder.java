@@ -18,8 +18,10 @@ package com.inet.gradle.setup.dmg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -251,6 +253,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createBinary() throws Throwable {
     	
     	if ( !setup.getServices().isEmpty() ) {
+    		createLaunchd();
     		createPackageFromApp();
     	}
     	
@@ -265,6 +268,23 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
+
+	private void createLaunchd() throws IOException {
+		File launchd = new File( buildDir, applicationName + ".app/Contents/LaunchDaemon" );
+		Files.createDirectories(launchd.toPath(), new FileAttribute[0]);
+		String launchdScriptName = setup.getMainClass();
+		
+        InputStream input = getClass().getResourceAsStream( "launchd.txt" );
+        byte[] bytes = new byte[input.available()];
+        input.read( bytes );
+        input.close();
+        String script = new String( bytes, StandardCharsets.UTF_8 );
+        script = script.replace( "${serviceName}", launchdScriptName );
+        script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + "/Contents/MacOS/" + setup.getBaseName() );
+        OutputStream output = new FileOutputStream( new File(launchd, launchdScriptName + ".plist") );
+        output.write( script.getBytes() );
+        output.close();
+	}
 
     private void createPackageFromApp() throws Throwable {
 
@@ -310,7 +330,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "--version" );
         command.add( setup.getVersion() );
         command.add( "--install-location" );
-        command.add( "/Applications" );
+        command.add( "/Library/" + applicationName );
         command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
     	exec( command );
     	
