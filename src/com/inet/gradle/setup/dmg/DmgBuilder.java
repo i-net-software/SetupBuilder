@@ -18,8 +18,10 @@ package com.inet.gradle.setup.dmg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -140,7 +142,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             setApplicationFilePermissions();
             
             createBinary();
-
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
@@ -156,7 +157,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
          	   }
 
             });
-            
+
             tmp = null;
         
         } catch( RuntimeException ex ) {
@@ -171,18 +172,20 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
 	private void setApplicationFilePermissions() throws IOException {
 		
+		String root = buildDir.toString() + "/" + applicationName + ".app";
+
 		// Set Read on all files and folders
 		ArrayList<String> command = new ArrayList<>();
         command.add( "chmod" );
         command.add( "-R" );
         command.add( "a+r" );
-        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+		command.add( root );
         exec( command );
         
 		// Set execute on all folders.
         command = new ArrayList<>();
         command.add( "find" );
-        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+        command.add( root );
         command.add( "-type" );
         command.add( "d" );
         command.add( "-exec" );
@@ -251,6 +254,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createBinary() throws Throwable {
     	
     	if ( !setup.getServices().isEmpty() ) {
+    		createLaunchd();
     		createPackageFromApp();
     	}
     	
@@ -265,6 +269,49 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
+    
+    private void patchServiceFiles( String resource, File destination ) {
+    	
+    	try {
+        	String launchdScriptName = setup.getMainClass();
+            InputStream input = getClass().getResourceAsStream( resource );
+            byte[] bytes = new byte[input.available()];
+            input.read( bytes );
+            input.close();
+            String script = new String( bytes, StandardCharsets.UTF_8 );
+            script = script.replace( "${serviceName}", launchdScriptName );
+            script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+            script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
+            
+            OutputStream output = new FileOutputStream( destination );
+            output.write( script.getBytes() );
+            output.close();
+
+    		// Set Read Execute on Destination File
+    		ArrayList<String> command = new ArrayList<>();
+            command.add( "chmod" );
+            command.add( "a+rx" );
+    		command.add( destination.toString() );
+            exec( command );
+            
+    	} catch (Throwable e) {
+    		System.err.println("Error while patching " + resource);
+    		e.printStackTrace();
+    	}
+    }
+
+	private void createLaunchd() throws IOException {
+
+		String launchdScriptName = setup.getMainClass();
+		File launchd = new File( buildDir, applicationName + ".app/Contents/LaunchDaemon" );
+		Files.createDirectories(launchd.toPath(), new FileAttribute[0]);
+		
+		patchServiceFiles( "launchd.plist", new File(launchd, launchdScriptName + ".plist"));
+
+		Files.createDirectories(new File(tmp.toFile(), "scripts").toPath(), new FileAttribute[0]);
+		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
+		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
+	}
 
     private void createPackageFromApp() throws Throwable {
 
@@ -280,12 +327,12 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "/usr/bin/productbuild" );
         command.add( "--distribution" );
         command.add( tmp.toString() + "/distribution.xml" );
-        /*command.add( "--resources" );
-        command.add( setup.get );*/
         command.add( "--package-path" );
         command.add( tmp.toString() + "/packages" );
         command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
     	exec( command );
+    	
+    	Files.copy( new File(imageSourceRoot + "/" + applicationName + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationName + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 	}
 
 	private void extractApplicationInformation() throws IOException {
@@ -309,11 +356,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( setup.getMainClass() );
         command.add( "--version" );
         command.add( setup.getVersion() );
+        command.add( "--scripts" );
+        command.add( tmp.toString() + "/scripts" );
         command.add( "--install-location" );
-        command.add( "/Applications" );
+        command.add( "/Library/" + applicationName + "/" );
         command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
     	exec( command );
     	
+    	Files.copy( new File(tmp.toFile(), "/packages/" + applicationName + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationName + ".pkgbuild.pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 	}
 
 	private void createAndPatchDistributionXML() throws Throwable {
@@ -355,7 +405,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         // License node
         Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
         xmlFile.addAttributeIfNotExists( license, "file", "license.txt" );
-
+    
         xmlFile.save();
 	}
 
