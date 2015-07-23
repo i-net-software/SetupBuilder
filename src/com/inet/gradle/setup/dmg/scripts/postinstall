@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e
+/usr/bin/ditto "${installName}/Contents/LaunchDaemon/${serviceName}.plist" "/Library/LaunchDaemons/${serviceName}.plist"
+/bin/launchctl load "/Library/LaunchDaemons/${serviceName}.plist"
