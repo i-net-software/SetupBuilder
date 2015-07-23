@@ -81,7 +81,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( product, "Manufacturer", setup.getVendor() );
         addAttributeIfNotExists( product, "Name", setup.getApplication() );
         addAttributeIfNotExists( product, "Version", setup.getVersion() );
-        addAttributeIfNotExists( product, "UpgradeCode", UUID.randomUUID().toString() );
+        addAttributeIfNotExists( product, "UpgradeCode", getGuid( "UpgradeCode" ) );
 
         // Package node
         Element media = getOrCreateChildById( product, "Media", "1", false );
@@ -152,7 +152,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     private Element getComponent( Element dir, String compID ) {
         components.add( compID );
         Element component = getOrCreateChildById( dir, "Component", compID, true );
-        addAttributeIfNotExists( component, "Guid", UUID.randomUUID().toString() );
+        addAttributeIfNotExists( component, "Guid", getGuid( compID ) );
         return component;
     }
 
@@ -629,5 +629,15 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         builder.append( '_' );
         builder.append( Math.abs( str.hashCode() ) );
         return builder.toString();
+    }
+
+    /**
+     * Create a reproducible GUID
+     * 
+     * @param id a parameter as random input
+     * @return
+     */
+    String getGuid( String id ) {
+        return UUID.nameUUIDFromBytes( (setup.getVendor().hashCode() + setup.getApplication() + id).getBytes() ).toString();
     }
 }
