@@ -142,7 +142,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             setApplicationFilePermissions();
             
             createBinary();
-
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
@@ -158,7 +157,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
          	   }
 
             });
-            
+
             tmp = null;
         
         } catch( RuntimeException ex ) {
@@ -173,18 +172,20 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
 	private void setApplicationFilePermissions() throws IOException {
 		
+		String root = buildDir.toString() + "/" + applicationName + ".app";
+
 		// Set Read on all files and folders
 		ArrayList<String> command = new ArrayList<>();
         command.add( "chmod" );
         command.add( "-R" );
         command.add( "a+r" );
-        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+		command.add( root );
         exec( command );
         
 		// Set execute on all folders.
         command = new ArrayList<>();
         command.add( "find" );
-        command.add( buildDir.toString() + "/" + applicationName + ".app" );
+        command.add( root );
         command.add( "-type" );
         command.add( "d" );
         command.add( "-exec" );
