@@ -104,7 +104,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         if( getSetupBuilder().isFailOnEmptyFrom() ) {
             for( CopySpecInternal cs : copySpec.getChildren() ) {
                 if( cs.buildRootResolver().getAllSource().isEmpty() ) {
-                    throw new IllegalArgumentException( "No files selected from: " + ((DefaultCopySpec)cs).getSourcePaths()  + "\nFix your From expression or disable the check with 'failOnEmptyFrom = false'" );
+                    throw new IllegalArgumentException( "No files selected by: " + ((DefaultCopySpec)cs).getSourcePaths()  + ". This means that there are files missing or your 'from' method in your gradle script is wrong. If an empty 'from' is valid then disable the check with 'setupBuilder.failOnEmptyFrom = false'" );
                 }
             }
         }

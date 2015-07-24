@@ -258,7 +258,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 }
             }
             if( versions.size() == 0 ) {
-                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java );
+                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java + " Its search for an folder that starts with: " + javaVersion );
             }
             Collections.sort( versions );
             jreDir = versions.get( versions.size() - 1 );
@@ -420,11 +420,18 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( install, "ErrorControl", "normal" );
             addAttributeIfNotExists( install, "Arguments", " //RS//" + name );
 
+            // add an empty parameters registry key
+            Element regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegParameters", true );
+            addAttributeIfNotExists( regkey, "Root", "HKLM" );
+            addAttributeIfNotExists( regkey, "Key", "SYSTEM\\CurrentControlSet\\Services\\" + name + "\\Parameters" );
+            addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
+            addAttributeIfNotExists( regkey, "ForceCreateOnInstall", "yes" );
+
             // Java parameter of the service
             String baseKey =
                             task.is64Bit() ? "SOFTWARE\\Wow6432Node\\Apache Software Foundation\\ProcRun 2.0\\"
                                             : "SOFTWARE\\Apache Software Foundation\\ProcRun 2.0\\";
-            Element regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegJava", true );
+            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegJava", true );
             addAttributeIfNotExists( regkey, "Root", "HKLM" );
             addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Java" );
             addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
