@@ -19,6 +19,7 @@ MAINARCHIVE={{mainJar}}
 DAEMON_ARGS="{{startArguments}}"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
+WORKINGDIR={{workdir}}
 
 # Exit if the package is not installed
 [ ! -f "$MAINARCHIVE" ] && exit 0
@@ -43,13 +44,13 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+	start-stop-daemon --start --chdir $WORKINGDIR --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon -b  --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
+	start-stop-daemon -b --chdir $WORKINGDIR --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
 		$DAEMON_ARGS \
 		|| return 2
 	sleep $WAIT
-	if start-stop-daemon --test --start --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+	if start-stop-daemon --test --start --chdir $WORKINGDIR --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
 		if [ -f "$CATALINA_PID" ]; then
 			rm -f "$CATALINA_PID"
 		fi

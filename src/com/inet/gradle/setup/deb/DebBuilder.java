@@ -165,6 +165,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
         initScript.setPlaceholder( "mainJar", mainJarPath );
+        initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
         initScript.setPlaceholder( "startArguments",
                                    "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
