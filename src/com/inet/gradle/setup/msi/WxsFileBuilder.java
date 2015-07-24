@@ -258,7 +258,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 }
             }
             if( versions.size() == 0 ) {
-                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java );
+                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java + " Its search for an folder that starts with: " + javaVersion );
             }
             Collections.sort( versions );
             jreDir = versions.get( versions.size() - 1 );
