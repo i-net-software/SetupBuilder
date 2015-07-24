@@ -18,6 +18,7 @@ package com.inet.gradle.setup;
 import groovy.lang.Closure;
 
 import java.io.File;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -103,8 +104,23 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
     private void processFiles( CopyActionProcessingStreamAction action, CopySpecInternal copySpec ) {
         if( getSetupBuilder().isFailOnEmptyFrom() ) {
             for( CopySpecInternal cs : copySpec.getChildren() ) {
-                if( cs.buildRootResolver().getAllSource().isEmpty() ) {
+                Set<File> files = cs.buildRootResolver().getAllSource().getFiles();
+                if( files.size() == 0 ) {
                     throw new IllegalArgumentException( "No files selected by: " + ((DefaultCopySpec)cs).getSourcePaths()  + ". This means that there are files missing or your 'from' method in your gradle script is wrong. If an empty 'from' is valid then disable the check with 'setupBuilder.failOnEmptyFrom = false'" );
+                }
+                int includeCount = copySpec.getIncludes().size();
+                if( files.size() < includeCount ) {
+                    StringBuilder msg = new StringBuilder( "Not every 'include' match a file by: " );
+                    msg.append( ((DefaultCopySpec)cs).getSourcePaths() );
+                    msg.append( "\n\tDeclared includes:");
+                    for( String include : copySpec.getIncludes() ) {
+                        msg.append( "\t\t" ).append( include );
+                    }
+                    msg.append( "\tMatching files:" );
+                    for( File file : files ) {
+                        msg.append( "\t\t" ).append( file );
+                    }
+                    throw new IllegalArgumentException( msg.toString()  );
                 }
             }
         }
