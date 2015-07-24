@@ -108,22 +108,23 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
                 if( files.size() == 0 ) {
                     throw new IllegalArgumentException( "No files selected by: " + ((DefaultCopySpec)cs).getSourcePaths()  + ". This means that there are files missing or your 'from' method in your gradle script is wrong. If an empty 'from' is valid then disable the check with 'setupBuilder.failOnEmptyFrom = false'" );
                 }
-                int includeCount = copySpec.getIncludes().size();
+                int includeCount = cs.getIncludes().size();
                 if( files.size() < includeCount ) {
                     StringBuilder msg = new StringBuilder( "Not every 'include' match a file by: " );
                     msg.append( ((DefaultCopySpec)cs).getSourcePaths() );
                     msg.append( "\n\tDeclared includes:");
-                    for( String include : copySpec.getIncludes() ) {
-                        msg.append( "\t\t" ).append( include );
+                    for( String include : cs.getIncludes() ) {
+                        msg.append( "\n\t\t" ).append( include );
                     }
-                    msg.append( "\tMatching files:" );
+                    msg.append( "\n\tMatching files:" );
                     for( File file : files ) {
-                        msg.append( "\t\t" ).append( file );
+                        msg.append( "\n\t\t" ).append( file );
                     }
                     throw new IllegalArgumentException( msg.toString()  );
                 }
             }
         }
+
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
         CopyAction copyAction = new CopyAction() {
             @Override
