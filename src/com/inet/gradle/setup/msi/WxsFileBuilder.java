@@ -473,10 +473,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
         addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
 
-        Element sequence = getOrCreateChild( product, "InstallExecuteSequence", true );
-        Element custom = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "runAfter", true );
-        addAttributeIfNotExists( custom, "After", "InstallFinalize" );
-        custom.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        Element ui = getOrCreateChild( product, "UI", true );
+        Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog", true );
+        addAttributeIfNotExists( exitDialog, "Control", "Finish" );
+        addAttributeIfNotExists( exitDialog, "Event", "DoAction" );
+        addAttributeIfNotExists( exitDialog, "Value", "runAfter" );
+        exitDialog.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
     }
 
     private void addDeleteFiles( Element installDir ) {
