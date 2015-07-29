@@ -142,6 +142,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             setApplicationFilePermissions();
             
             createBinary();
+
+/*
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
@@ -157,7 +159,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
          	   }
 
             });
-
+/*/
+//*/
             tmp = null;
         
         } catch( RuntimeException ex ) {
@@ -312,6 +315,12 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
 		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
 	}
+	
+	private void createPreferencePane() throws IOException {
+		
+		Files.copy(new File(getClass().getResource("service/SetupBuilderOSXPrefPane.prefPane").toString()).toPath(), new File(tmp.toFile(), "packages").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		
+	}
 
     private void createPackageFromApp() throws Throwable {
 
@@ -319,6 +328,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         Files.createDirectories(new File(tmp.toFile(), "packages").toPath(), new FileAttribute[0]);
     	imageSourceRoot = tmp.toString() + "/distribution";
     	
+		createPreferencePane();
         extractApplicationInformation();
     	createAndPatchDistributionXML();
 
