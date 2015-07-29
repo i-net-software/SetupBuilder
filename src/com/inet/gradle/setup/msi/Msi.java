@@ -15,10 +15,13 @@
  */
 package com.inet.gradle.setup.msi;
 
+import groovy.lang.Closure;
+
 import java.io.File;
 
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 
@@ -29,9 +32,11 @@ import com.inet.gradle.setup.AbstractSetupTask;
  */
 public class Msi extends AbstractSetupTask {
 
-    private String arch = "x64";
+    private String   arch = "x64";
 
-    private Object bannerBmp, dialogBmp;
+    private Object   bannerBmp, dialogBmp;
+
+    private SignTool signTool;
 
     public Msi() {
         super( "msi" );
@@ -91,6 +96,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Set a file with a banner BMP. The typical size is 493 x 58
+     * 
      * @param bannerBmp the file
      */
     public void setBannerBmp( Object bannerBmp ) {
@@ -99,6 +105,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the banner BMP.
+     * 
      * @return the BMP
      */
     public File getDialogBmp() {
@@ -110,9 +117,28 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Set a file with the dialog BMP. The typical size is 493 x 312
+     * 
      * @param dialogBmp the file
      */
     public void setDialogBmp( Object dialogBmp ) {
         this.dialogBmp = dialogBmp;
+    }
+
+    /**
+     * Set the needed information for signing the setup.
+     * 
+     * @param closue
+     */
+    public void signTool( Closure closue ) {
+        signTool = ConfigureUtil.configure( closue, new SignTool( this ) );
+    }
+
+    /**
+     * Get the SignTool configuration if set
+     * 
+     * @return the settings or null
+     */
+    public SignTool getSignTool() {
+        return signTool;
     }
 }

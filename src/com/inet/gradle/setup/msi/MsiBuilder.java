@@ -16,9 +16,12 @@
 package com.inet.gradle.setup.msi;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
@@ -51,7 +54,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
             new WxsFileBuilder( task, setup, wxsFile, buildDir ).build();
             candle();
 
-            ResourceUtils.extract( getClass(), "sdk/MsiTran.Exe", buildDir );
+            ResourceUtils.extract( getClass(), "sdk/MsiTran.exe", buildDir );
             ResourceUtils.extract( getClass(), "sdk/wilangid.vbs", buildDir );
             ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
 
@@ -69,6 +72,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
                 langIDs.append( ',' ).append( language.getLangID() );
             }
             patchLangID( mui, langIDs.toString() );
+            signTool( mui );
             Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getSetupName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
         } catch( RuntimeException ex ) {
             throw ex;
@@ -164,7 +168,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     private File msitran( File mui, File file, MsiLanguages language ) {
         File mst = new File( buildDir, language.getCulture() + ".mst" );
         ArrayList<String> parameters = new ArrayList<>();
-        parameters.add( new File( buildDir, "sdk/MsiTran.Exe" ).getAbsolutePath() );
+        parameters.add( new File( buildDir, "sdk/MsiTran.exe" ).getAbsolutePath() );
         parameters.add( "-g" );
         parameters.add( mui.getAbsolutePath() );
         parameters.add( file.getAbsolutePath() );
@@ -189,6 +193,67 @@ class MsiBuilder extends AbstractBuilder<Msi> {
         parameters.add( language.getLangID() );
         exec( parameters );
         mst.delete(); // after adding the mst file we does not need it anymore
+    }
+
+    /**
+     * Sign a file if the needed information are set.
+     * @param file
+     * @throws IOException
+     */
+    private void signTool( File file ) throws IOException {
+        SignTool sign = task.getSignTool();
+        if( sign == null ) {
+            return; // no sign information set
+        }
+        String tool = ResourceUtils.extract( getClass(), "sdk/signtool.exe", buildDir ).getAbsolutePath();
+
+        // signing the file
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( tool );
+        parameters.add( "sign" );
+        if( sign.getCertificate() != null ) {
+            parameters.add( "/f" );
+            parameters.add( task.getProject().file( sign.getCertificate() ).getAbsolutePath() );
+        }
+        if( sign.getPassword() != null ) {
+            parameters.add( "/p" );
+            parameters.add( sign.getPassword() );
+        }
+        if( sign.getSha1() != null ) {
+            parameters.add( "/sha1" );
+            parameters.add( sign.getSha1() );
+        }
+        parameters.add( file.getAbsolutePath() );
+        exec( parameters );
+
+        // timestamp the signing
+        List<String> servers = sign.getTimestamp();
+        if( servers != null ) {
+            RuntimeException allEx = null;
+            for( String server : servers ) {
+                parameters = new ArrayList<>();
+                parameters.add( tool );
+                parameters.add( "timestamp" );
+                parameters.add( "/t" );
+                parameters.add( server );
+                parameters.add( file.getAbsolutePath() );
+                try {
+                    exec( parameters );
+                    allEx = null;
+                    break; // timestamp is ok, if no exception occur
+                } catch( RuntimeException ex ) {
+                    if( allEx == null ) {
+                        allEx = ex;
+                    } else {
+                        allEx.addSuppressed( ex );
+                    }
+                    task.getProject().getLogger().lifecycle( "Timestamp failed: " + ex );
+                }
+            }
+            if( allEx != null ) {
+                throw allEx;
+            }
+        }
     }
 
     /**
