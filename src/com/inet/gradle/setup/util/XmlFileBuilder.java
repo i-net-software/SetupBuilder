@@ -86,6 +86,10 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         }
     }
 
+    public Element getOrCreateChild( Element parent, String name ) {
+        return getOrCreateChild( parent, name, true );
+    }
+
     public Element getOrCreateChild( Element parent, String name, boolean append ) {
         Node first = parent.getFirstChild();
         for( Node child = first; child != null; child = child.getNextSibling() ) {
@@ -103,8 +107,16 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         return child;
     }
 
+    public Element getOrCreateChildById( Element parent, String name, String id ) {
+        return getOrCreateChildByKeyValue( parent, name, "Id", id, true );
+    }
+
     public Element getOrCreateChildById( Element parent, String name, String id, boolean append ) {
         return getOrCreateChildByKeyValue( parent, name, "Id", id, append );
+    }
+
+    public Element getOrCreateChildByKeyValue( Element parent, String name, String key, String value ) {
+        return getOrCreateChildByKeyValue( parent, name, key, value, true );
     }
 
     public Element getOrCreateChildByKeyValue( Element parent, String name, String key, String value, boolean append ) {

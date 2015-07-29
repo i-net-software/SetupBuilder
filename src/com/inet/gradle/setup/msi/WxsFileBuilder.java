@@ -76,7 +76,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
 
         // Product node
-        Element product = getOrCreateChildById( wix, "Product", "*", false );
+        Element product = getOrCreateChildById( wix, "Product", "*" );
         addAttributeIfNotExists( product, "Language", "1033" );
         addAttributeIfNotExists( product, "Manufacturer", setup.getVendor() );
         addAttributeIfNotExists( product, "Name", setup.getApplication() );
@@ -84,21 +84,25 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( product, "UpgradeCode", getGuid( "UpgradeCode" ) );
 
         // Package node
-        Element media = getOrCreateChildById( product, "Media", "1", false );
+        Element media = getOrCreateChildById( product, "Media", "1", false ); // must be the second in Product
         addAttributeIfNotExists( media, "Cabinet", "media1.cab" );
         addAttributeIfNotExists( media, "EmbedCab", "yes" );
-        Element packge = getOrCreateChild( product, "Package", false );
+        Element packge = getOrCreateChild( product, "Package", false ); // must be the first in Product
         addAttributeIfNotExists( packge, "Compressed", "yes" );
 
+        // MajorUpgrade
+        Element update = getOrCreateChild( product, "MajorUpgrade" );
+        addAttributeIfNotExists( update, "AllowDowngrades", "yes" );
+
         // Directory
-        Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR", true );
+        Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR" );
         addAttributeIfNotExists( directory, "Name", "SourceDir" );
-        Element programFiles = getOrCreateChildById( directory, "Directory", task.is64Bit() ? "ProgramFiles64Folder" : "ProgramFilesFolder", true );
-        Element appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR", true );
+        Element programFiles = getOrCreateChildById( directory, "Directory", task.is64Bit() ? "ProgramFiles64Folder" : "ProgramFilesFolder" );
+        Element appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR" );
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
         //Files
-        Element installDir = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR", true );
+        Element installDir = getOrCreateChildById( product, "DirectoryRef", "INSTALLDIR" );
         task.processFiles( new CopyActionProcessingStreamAction() {
             @Override
             public void processFile( FileCopyDetailsInternal details ) {
@@ -117,9 +121,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addDeleteFiles( installDir );
 
         //Feature
-        Element feature = getOrCreateChildById( product, "Feature", "MainApplication", true );
+        Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
         for( String compID : components ) {
-            Element compRef = getOrCreateChildById( feature, "ComponentRef", compID, true );
+            Element compRef = getOrCreateChildById( feature, "ComponentRef", compID );
         }
 
         save();
@@ -136,7 +140,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element parent = installDir;
         for( int i = 0; i < segments.length - 1; i++ ) {
             String seg = segments[i];
-            parent = getOrCreateChildById( parent, "Directory", id( seg ), true );
+            parent = getOrCreateChildById( parent, "Directory", id( seg ) );
             addAttributeIfNotExists( parent, "Name", seg );
         }
         return parent;
@@ -151,7 +155,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private Element getComponent( Element dir, String compID ) {
         components.add( compID );
-        Element component = getOrCreateChildById( dir, "Component", compID, true );
+        Element component = getOrCreateChildById( dir, "Component", compID );
         addAttributeIfNotExists( component, "Guid", getGuid( compID ) );
         return component;
     }
@@ -282,16 +286,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws Exception if any exception occur
      */
     private void addGUI( Element product ) throws Exception {
-        Element installdir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR", true );
+        Element installdir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR" );
         addAttributeIfNotExists( installdir, "Value", "INSTALLDIR" );
-        Element uiRef = getOrCreateChild( product, "UIRef", true );
+        Element uiRef = getOrCreateChild( product, "UIRef" );
         addAttributeIfNotExists( uiRef, "Id", "WixUI_InstallDir" );
 
         boolean isLicense = addLicense( product );
         if( !isLicense ) {
             // skip license dialog because we does no hat a license text
             Document doc = product.getOwnerDocument();
-            Element ui = getOrCreateChild( product, "UI", true );
+            Element ui = getOrCreateChild( product, "UI" );
             Element child = doc.createElement( "Publish" );
             child.setAttribute( "Dialog", "WelcomeDlg" );
             child.setAttribute( "Control", "Next" );
@@ -313,12 +317,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         File file = task.getBannerBmp();
         if( file != null ) {
-            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIBannerBmp", true );
+            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIBannerBmp" );
             addAttributeIfNotExists( licenseNode, "Value", file.getAbsolutePath() );
         }
         file = task.getDialogBmp();
         if( file != null ) {
-            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIDialogBmp", true );
+            Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUIDialogBmp" );
             addAttributeIfNotExists( licenseNode, "Value", file.getAbsolutePath() );
         }
     }
@@ -336,9 +340,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             // no icon was set
             return;
         }
-        Element icon = getOrCreateChildById( product, "Icon", "icon.ico", true );
+        Element icon = getOrCreateChildById( product, "Icon", "icon.ico" );
         addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
-        Element appProduction = getOrCreateChildById( product, "Property", "ARPPRODUCTICON", true );
+        Element appProduction = getOrCreateChildById( product, "Property", "ARPPRODUCTICON" );
         addAttributeIfNotExists( appProduction, "Value", "icon.ico" );
     }
 
@@ -382,7 +386,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
         }
 
-        Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUILicenseRtf", true );
+        Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUILicenseRtf" );
         addAttributeIfNotExists( licenseNode, "Value", license.getAbsolutePath() );
         return true;
     }
@@ -411,7 +415,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addFile( component, prunsrv, id, exe );
 
             // install the windows service
-            Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install", true );
+            Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install" );
             addAttributeIfNotExists( install, "Name", name );
             addAttributeIfNotExists( install, "DisplayName", service.getDisplayName() );
             addAttributeIfNotExists( install, "Description", service.getDescription() );
@@ -421,7 +425,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( install, "Arguments", " //RS//" + name );
 
             // add an empty parameters registry key
-            Element regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegParameters", true );
+            Element regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegParameters" );
             addAttributeIfNotExists( regkey, "Root", "HKLM" );
             addAttributeIfNotExists( regkey, "Key", "SYSTEM\\CurrentControlSet\\Services\\" + name + "\\Parameters" );
             addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
@@ -431,14 +435,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             String baseKey =
                             task.is64Bit() ? "SOFTWARE\\Wow6432Node\\Apache Software Foundation\\ProcRun 2.0\\"
                                             : "SOFTWARE\\Apache Software Foundation\\ProcRun 2.0\\";
-            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegJava", true );
+            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegJava" );
             addAttributeIfNotExists( regkey, "Root", "HKLM" );
             addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Java" );
             addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
             addRegistryValue( regkey, "Classpath", "string", service.getMainJar() );
             addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
             addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
-            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegStart", true );
+            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegStart" );
             addAttributeIfNotExists( regkey, "Root", "HKLM" );
             addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Start" );
             addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
@@ -448,7 +452,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             // start the service
             if( service.isStartOnBoot() ) {
-                Element start = getOrCreateChildById( component, "ServiceControl", id + "_start", true );
+                Element start = getOrCreateChildById( component, "ServiceControl", id + "_start" );
                 addAttributeIfNotExists( start, "Name", name );
                 addAttributeIfNotExists( start, "Start", "install" );
                 addAttributeIfNotExists( start, "Stop", "both" );
@@ -466,17 +470,19 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( setup.getRunAfter() == null ) {
             return;
         }
-        Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget", true );
+        Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget" );
         addAttributeIfNotExists( target, "Value", "[INSTALLDIR]" + setup.getRunAfter() );
 
-        Element action = getOrCreateChildById( product, "CustomAction", "runAfter", true );
+        Element action = getOrCreateChildById( product, "CustomAction", "runAfter" );
         addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
         addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
 
-        Element sequence = getOrCreateChild( product, "InstallExecuteSequence", true );
-        Element custom = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "runAfter", true );
-        addAttributeIfNotExists( custom, "After", "InstallFinalize" );
-        custom.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        Element ui = getOrCreateChild( product, "UI" );
+        Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog" );
+        addAttributeIfNotExists( exitDialog, "Control", "Finish" );
+        addAttributeIfNotExists( exitDialog, "Event", "DoAction" );
+        addAttributeIfNotExists( exitDialog, "Value", "runAfter" );
+        exitDialog.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
     }
 
     private void addDeleteFiles( Element installDir ) {
@@ -487,7 +493,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             String[] segments = pattern.split( "[/\\\\]" );
             Element dir = getDirectory( installDir, segments );
             Element component = getComponent( dir, "deleteFiles" + id( segments ) );
-            Element remove = getOrCreateChildById( component, "RemoveFile", id( pattern ), true );
+            Element remove = getOrCreateChildById( component, "RemoveFile", id( pattern ) );
             addAttributeIfNotExists( remove, "On", "install" );
             addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
         }
@@ -502,7 +508,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param value the value
      */
     private void addRegistryValue( Element regkey, String name, String type, String value ) {
-        Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name, true );
+        Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name );
         addAttributeIfNotExists( regValue, "Type", type );
         addAttributeIfNotExists( regValue, "Value", value );
     }
@@ -556,11 +562,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 rest = '[' + propID + ']' + rest.substring( partValue.length() );
             }
             String actionID = "action." + propID;
-            Element action = getOrCreateChildById( product, "CustomAction", actionID, true );
+            Element action = getOrCreateChildById( product, "CustomAction", actionID );
             addAttributeIfNotExists( action, "Property", propID );
             addAttributeIfNotExists( action, "Value", partValue );
-            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence", true );
-            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", actionID, true );
+            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", actionID );
             addAttributeIfNotExists( custom, "After", after );
             after = actionID;
             count++;
