@@ -18,6 +18,10 @@ package com.inet.gradle.setup;
 import groovy.lang.Closure;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.StandardCopyOption;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -83,7 +87,18 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         processFiles( new CopyActionProcessingStreamAction() {
             @Override
             public void processFile( FileCopyDetailsInternal details ) {
-                details.copyTo( details.getRelativePath().getFile( target ) );
+//                details.copyTo( details.getRelativePath().getFile( target ) ); // didn't work with mounted smb devises under Unix
+                if( !details.isDirectory() ) {
+                    try {
+                    	File f = details.getRelativePath().getFile( target );
+                    	if(!f.getParentFile().exists()) {
+                    		f.getParentFile().mkdirs(); // the parent directory must be created, else the copy fails
+                    	}
+						Files.copy(details.getFile().toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING );
+					} catch (IOException ex) {
+						throw new RuntimeException(ex);
+					}
+                }
             }
         } );
     }
