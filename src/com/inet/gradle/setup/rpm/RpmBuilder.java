@@ -15,13 +15,19 @@
  */
 package com.inet.gradle.setup.rpm;
 
+import java.io.File;
+
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
+import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 
 public class RpmBuilder extends AbstractBuilder<Rpm> {
 
+	
+	private RpmControlFileBuilder  controlBuilder;
     /**
      * Create a new instance
      * 
@@ -34,7 +40,43 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     }
 
     public void build() {
-        throw new RuntimeException("Currently not implemented");
+    	try {
+            File filesPath = new File( buildDir, "/usr/share/" + setup.getBaseName() );
+            task.copyTo( filesPath );
+//            changeFilePermissionsTo644( filesPath );
+
+            // 	create the package config files in the DEBIAN subfolder
+
+            controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
+
+            for( Service service : setup.getServices() ) {
+//                setupService( service );
+            }
+            
+            for( DesktopStarter starter : setup.getDesktopStarters() ) {
+//                setupStarter( starter );
+            }
+            
+            if( setup.getLicenseFile() != null ) {
+//                setupEula();
+            }
+
+            controlBuilder.build();
+
+//            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getBaseName() ) );
+//            documentBuilder.build();
+
+//            changeDirectoryPermissionsTo755( buildDir );
+
+//            createDebianPackage();
+
+//            checkDebianPackage();
+
+        } catch( RuntimeException ex ) {
+            throw ex;
+        } catch( Exception ex ) {
+            throw new RuntimeException( ex );
+        }
     }
 
 }

@@ -20,6 +20,7 @@ import java.io.File;
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.deb.DebBuilder;
 
 /**
  * The rpm Gradle task. It build a rpm package for Linux.
@@ -27,6 +28,34 @@ import com.inet.gradle.setup.AbstractSetupTask;
  * @author Volker Berlin
  */
 public class Rpm extends AbstractSetupTask {
+	
+    private String                 section;
+
+//    private String                 priority;
+
+    private String                 architecture;
+
+//    private String                 installSize;
+    
+//    private String                 recommends;
+    
+    private String                 depends;
+    
+    private String                 homepage;
+    
+    private String				   maintainerEmail;
+    
+    private String				   changes;
+    
+    private String				   summary;
+    
+    private String				   release;
+    
+    private String				   license;
+    
+    private String				   url;
+
+	
 
     public Rpm() {
         super( "rpm" );
@@ -48,4 +77,127 @@ public class Rpm extends AbstractSetupTask {
     protected void copyTo(File target) {
     	super.copyTo(target);
     }
+      
+
+	public String getSection() {
+		return section;
+	}
+
+
+	public void setSection(String section) {
+		this.section = section;
+	}
+
+
+//	public String getPriority() {
+//		return priority;
+//	}
+//
+//
+//	public void setPriority(String priority) {
+//		this.priority = priority;
+//	}
+
+
+	public String getArchitecture() {
+		return architecture;
+	}
+
+
+	public void setArchitecture(String architecture) {
+		this.architecture = architecture;
+	}
+
+
+//	public String getInstallSize() {
+//		return installSize;
+//	}
+//
+//
+//	public void setInstallSize(String installSize) {
+//		this.installSize = installSize;
+//	}
+//
+//
+//	public String getRecommends() {
+//		return recommends;
+//	}
+//
+//
+//	public void setRecommends(String recommends) {
+//		this.recommends = recommends;
+//	}
+//
+//
+	public String getDepends() {
+		return depends;
+	}
+
+
+	public void setDepends(String depends) {
+		this.depends = depends;
+	}
+
+
+	public String getHomepage() {
+		return homepage;
+	}
+
+
+	public void setHomepage(String homepage) {
+		this.homepage = homepage;
+	}
+
+
+	public String getMaintainerEmail() {
+		return maintainerEmail;
+	}
+
+
+	public void setMaintainerEmail(String maintainerEmail) {
+		this.maintainerEmail = maintainerEmail;
+	}
+
+
+	public String getChanges() {
+		return changes;
+	}
+
+
+	public void setChanges(String changes) {
+		this.changes = changes;
+	}
+
+	public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public String getRelease() {
+		return release;
+	}
+
+	public void setRelease(String release) {
+		this.release = release;
+	}
+
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+    
 }
