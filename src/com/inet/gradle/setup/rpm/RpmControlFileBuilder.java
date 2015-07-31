@@ -17,20 +17,14 @@ package com.inet.gradle.setup.rpm;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.Template;
 
 /**
  * Builder for the control, postinst and prerm files, that are required for the Debian package tool.
@@ -164,7 +158,10 @@ class RpmControlFileBuilder {
 	 */
 	private void putPreun(OutputStreamWriter controlWriter)  throws IOException {
 		controlWriter.write(NEWLINE + "%preun" + NEWLINE);
-		
+		ArrayList<String> preuns = rpm.getPreun();
+		for (String preun : preuns) {
+			controlWriter.write(preun + NEWLINE);	
+		}
 	}
 
 	/**
@@ -174,7 +171,10 @@ class RpmControlFileBuilder {
 	 */
 	private void putPost(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%post" + NEWLINE);
-		
+		ArrayList<String> posts = rpm.getPost();
+		for (String post : posts) {
+			controlWriter.write(post + NEWLINE);	
+		}	
 	}
 	
 	/**
@@ -195,7 +195,10 @@ class RpmControlFileBuilder {
 	 */
 	private void putClean(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%clean" + NEWLINE);
-		
+		ArrayList<String> cleans = rpm.getClean();
+		for (String clean : cleans) {
+			controlWriter.write(clean + NEWLINE);	
+		}
 	}
 
 	/**
@@ -205,7 +208,10 @@ class RpmControlFileBuilder {
 	 */
 	private void putInstall(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%install" + NEWLINE);
-		
+		ArrayList<String> installs = rpm.getInstall();
+		for (String install : installs) {
+			controlWriter.write(install + NEWLINE);	
+		}
 	}
 
 	/**
@@ -215,16 +221,23 @@ class RpmControlFileBuilder {
 	 */
 	private void putBuild(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%build" + NEWLINE);
-		
+		ArrayList<String> builds = rpm.getBuild();
+		for (String build : builds) {
+			controlWriter.write(build + NEWLINE);	
+		}
 	}
 
 	/**
-	 * This is the first script RPM executes during a bild.
+	 * This is the first script RPM executes during a build.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putPrep(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%preup" + NEWLINE);
+		ArrayList<String> preps = rpm.getPrep();
+		for (String prep : preps) {
+			controlWriter.write(prep + NEWLINE);	
+		}
 		
 	}
 

@@ -16,11 +16,11 @@
 package com.inet.gradle.setup.rpm;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.deb.DebBuilder;
 
 /**
  * The rpm Gradle task. It build a rpm package for Linux.
@@ -39,21 +39,33 @@ public class Rpm extends AbstractSetupTask {
     
 //    private String                 recommends;
     
-    private String                 depends;
+    private String                 	depends;
     
-    private String                 homepage;
+    private String                 	homepage;
     
-    private String				   maintainerEmail;
+    private String				   	maintainerEmail;
     
-    private String				   changes;
+    private String				   	changes;
     
-    private String				   summary;
+    private String				   	summary;
     
-    private String				   release;
+    private String				   	release;
     
-    private String				   license;
+    private String				   	license;
     
-    private String				   url;
+    private String				   	url;
+    
+    private ArrayList<String>	   	prep = new ArrayList<String>();
+
+	private ArrayList<String> 	   	build = new ArrayList<String>();
+
+	private ArrayList<String> 	   	install = new ArrayList<String>();
+
+	private ArrayList<String> 	  	clean = new ArrayList<String>();
+
+	private ArrayList<String> 		post = new ArrayList<String>();
+
+	private ArrayList<String> 		preun = new ArrayList<String>();
 
 	
 
@@ -198,6 +210,55 @@ public class Rpm extends AbstractSetupTask {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public ArrayList<String> getPrep() {
+		return prep;
+	}
+
+	public void setPrep(String prep) {
+		this.prep.add( prep );
+	}
+
+	public ArrayList<String> getPreun() {
+		return preun;
+	}
+	
+	public void setPreun(String preun) {
+		this.preun.add( preun );
+	}
+
+	public ArrayList<String> getPost() {
+		return post;
+	}
+	
+	public void setPost(String post) {
+		this.post.add( post );
+	}
+	
+
+	public ArrayList<String> getClean() {
+		return clean;
+	}
+	
+	public void setClean(String clean) {
+		this.clean.add( clean );
+	}
+
+	public ArrayList<String> getInstall() {
+		return install;
+	}
+	
+	public void setInstall(String install) {
+		this.install.add( install );
+	}
+
+	public ArrayList<String> getBuild() {
+		return build;
+	}
+	
+	public void setBuild(String build) {
+		this.build.add( build );
 	}
     
 }

@@ -16,6 +16,13 @@
 package com.inet.gradle.setup.rpm;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -23,6 +30,8 @@ import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.image.ImageFactory;
 
 public class RpmBuilder extends AbstractBuilder<Rpm> {
 
@@ -43,40 +52,201 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     	try {
             File filesPath = new File( buildDir, "/usr/share/" + setup.getBaseName() );
             task.copyTo( filesPath );
-//            changeFilePermissionsTo644( filesPath );
+            changeFilePermissionsTo644( filesPath );
 
             // 	create the package config files in the DEBIAN subfolder
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
 
             for( Service service : setup.getServices() ) {
-//                setupService( service );
+                setupService( service );
             }
             
             for( DesktopStarter starter : setup.getDesktopStarters() ) {
-//                setupStarter( starter );
+                setupStarter( starter );
             }
             
-            if( setup.getLicenseFile() != null ) {
-//                setupEula();
-            }
 
             controlBuilder.build();
 
 //            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getBaseName() ) );
 //            documentBuilder.build();
 
-//            changeDirectoryPermissionsTo755( buildDir );
+            changeDirectoryPermissionsTo755( buildDir );
 
-//            createDebianPackage();
+            createRpmPackage();
 
-//            checkDebianPackage();
 
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
         }
+    }
+    
+    
+    /**
+     * Creates the files and the corresponding script section for the specified service.
+     * @param service the service
+     * @throws IOException on errors during creating or writing a file
+     */
+    private void setupService( Service service ) throws IOException {
+        String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
+        String mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
+        Template initScript = new Template( "rpm/template/init-service.sh" );
+        initScript.setPlaceholder( "name", serviceUnixName );
+        initScript.setPlaceholder( "displayName", setup.getApplication() );
+        initScript.setPlaceholder( "description", service.getDescription() );
+        initScript.setPlaceholder( "wait", "2" );
+        initScript.setPlaceholder( "mainJar", mainJarPath );
+        initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
+        initScript.setPlaceholder( "startArguments",
+                                   "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
+        String initScriptFile = "etc/init.d/" + serviceUnixName;
+        initScript.writeTo( createFile( initScriptFile, true ) );
+//        controlBuilder.addConfFile( initScriptFile );
+//        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
+//        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " start >/dev/null\nfi");
+//        controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " stop >/dev/null\nfi");
+//        controlBuilder.addTailScriptFragment( Script.POSTRM,   "if [ \"$1\" = \"purge\" ] ; then\n" + 
+//            "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
+//            "fi" );
+    }
+    
+    /**
+     * Changes the permissions of all directories recursively inside the specified path to 755.
+     * @param path the path
+     * @throws IOException on I/O failures
+     */
+    // share
+    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
+     	setPermissions( path, true );
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeDirectoryPermissionsTo755( file );
+            }
+        }
+    }
+
+    /**
+     * Changes the permissions of all files recursively inside the specified path to 644.
+     * @param path the path
+     * @throws IOException on I/O failures
+     */
+    // share
+    private void changeFilePermissionsTo644( File path ) throws IOException {
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeFilePermissionsTo644( file );
+            } else {
+                setPermissions( file, false );
+            }
+        }
+    }
+    
+    /**
+     * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
+     * @param file the file 
+     * @param executable if set to <tt>true</tt> the executable bit will be set
+     * @throws IOException on errors when setting the permissions
+     */
+    // share
+    static void setPermissions( File file, boolean executable ) throws IOException {
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        if( executable ) {
+            perms.add( PosixFilePermission.OWNER_EXECUTE );
+            perms.add( PosixFilePermission.GROUP_EXECUTE );
+            perms.add( PosixFilePermission.OTHERS_EXECUTE );
+        }
+        Files.setPosixFilePermissions( file.toPath(), perms );
+    }
+    
+    
+    /**
+     * Creates the files and the corresponding scripts for the specified desktop starter.
+     * @param starter the desktop starter
+     * @throws IOException on errors during creating or writing a file
+     */
+    // share
+    private void setupStarter( DesktopStarter starter ) throws IOException {
+        String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
+        String consoleStarterPath = "usr/bin/" + unixName;
+        try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
+            fw.write( "#!/bin/bash\n" );
+            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+                + starter.getStartArguments() + " \"$@\"" );
+        }
+        int[] iconSizes = { 16, 32, 48, 64, 128 };
+
+        for( int size : iconSizes ) {
+            File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
+            iconDir.mkdirs();
+            File scaledFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), iconDir, "png" + size );
+            if( scaledFile != null ) {
+                File iconFile = new File( iconDir, unixName + ".png" );
+                scaledFile.renameTo( iconFile );
+                setPermissions( iconFile, false );
+            }
+        }
+        try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
+            fw.write( "[Desktop Entry]\n" );
+            fw.write( "Name=" + starter.getName() + "\n" );
+            fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
+            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
+            fw.write( "Icon=" + unixName + "\n" );
+            fw.write( "Terminal=false\n" );
+            fw.write( "StartupNotify=true\n" );
+            fw.write( "Type=Application\n" );
+            if( starter.getMimeTypes() != null ) {
+                fw.write( "MimeType=" + starter.getMimeTypes() + "\n" );
+            }
+            if( starter.getCategories() != null ) {
+                fw.write( "Categories=" + starter.getCategories() + "\n" );
+            }
+        }
+        
+    }
+    
+    /**
+     * Creates a file in the build path structure.
+     * @param path the path relative to the root of the build path
+     * @param executable if set to <tt>true</tt> the executable bit will be set in the permission flags
+     * @return the created file
+     * @throws IOException on errors during creating the file or setting the permissions
+     */
+    // share
+    private File createFile( String path, boolean executable ) throws IOException {
+        File file = new File( buildDir, path );
+        if( !file.getParentFile().exists() ) {
+            file.getParentFile().mkdirs();
+        }
+        file.createNewFile();
+
+        setPermissions( file, executable );
+        return file;
+    }
+    
+    /**
+     * execute the command to generate the RPM package
+     * 
+     * rpmbuild -ba -clean --define="_topdir buildDir(rpm)" --define="_tmppath tmp" rpm/SPECS/package.spec
+     * 
+     */
+    private void createRpmPackage() {
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "rpmbuild" );
+        command.add( "-ba" );
+        command.add( "-v" );
+        command.add( "--clean" );
+        command.add( "--define=\"_topdir " + buildDir.getAbsolutePath() + "\"" );
+        command.add( "--define=\"_tmppath tmp\"" );
+        command.add( "SPECS/" + setup.getBaseName() + ".spec" );
+        System.out.println(command);
+        exec( command );
     }
 
 }
