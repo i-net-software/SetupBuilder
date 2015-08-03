@@ -224,7 +224,7 @@ public class SetupBuilder implements SetupSources {
      * Add a Java VM into your setup. The resulting behavior depends on the platform. This can be a version or a
      * directory to a installed Java VM.
      * 
-     * @param bundleJre
+     * @param bundleJre version or path
      * @see #setBundleJreTarget(String)
      */
     public void setBundleJre( Object bundleJre ) {
@@ -305,7 +305,7 @@ public class SetupBuilder implements SetupSources {
 
     /**
      * Set a command that run after the installer
-     * @param runAfter
+     * @param runAfter the command
      */
     public void setRunAfter( String runAfter ) {
         this.runAfter = runAfter;

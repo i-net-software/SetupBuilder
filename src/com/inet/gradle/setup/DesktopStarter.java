@@ -117,16 +117,16 @@ public class DesktopStarter {
     public void setMainClass( String mainClass ) {
         this.mainClass = mainClass;
     }
-    
+
     /**
      * Sets the mime type is application is associated with. Multiple mime types are separated 
      * by semicolons.
-     * @param mimeTypes
+     * @param mimeTypes the mime type
      */
     public void setMimeTypes( String mimeTypes ) {
         this.mimeTypes = mimeTypes;
     }
-    
+
     /**
      * Returns the mime types separated by semicolon.
      * @return the mime types or <tt>null</tt> if not set
@@ -134,12 +134,12 @@ public class DesktopStarter {
     public String getMimeTypes() {
         return mimeTypes;
     }
-    
+
     /**
      * Sets the categories as defined by Freedesktop. Multiple categories are separated
      * by semicolons.
-     * @see http://standards.freedesktop.org/menu-spec/latest/apa.html
-     * @param categories
+     * @see <a href="http://standards.freedesktop.org/menu-spec/latest/apa.html">http://standards.freedesktop.org/menu-spec/latest/apa.html</a>
+     * @param categories the categories
      */
     public void setCategories( String categories ) {
         this.categories = categories;

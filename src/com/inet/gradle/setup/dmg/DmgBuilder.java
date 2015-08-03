@@ -73,7 +73,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     /**
      * Build the dmg file. 
-     * @throws Throwable 
+     * @throws RuntimeException if any error occur 
      */
     public void build() throws RuntimeException {
 

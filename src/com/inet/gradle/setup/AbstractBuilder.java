@@ -50,7 +50,6 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
     /**
      * Call a program from the WIX installation.
      * 
-     * @param tool the program name
      * @param parameters the parameters
      */
     protected void exec( ArrayList<String> parameters ) {

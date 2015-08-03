@@ -12,7 +12,7 @@ package com.inet.gradle.setup.image.image4j.codec.bmp;
 import java.io.IOException;
 
 /**
- * Represents an RGB colour entry used in the palette of an indexed image (colour depth <= 8).
+ * Represents an RGB colour entry used in the palette of an indexed image (colour depth &lt;= 8).
  * @author Ian McDonagh
  */
 public class ColorEntry {

@@ -82,7 +82,7 @@ public class Dmg extends AbstractSetupTask {
 
     /**
      * Set height of Finder view
-     * @param height of Finder view
+     * @param windowHeight of Finder view
      */
 	public void setWindowHeight(Integer windowHeight) {
 		this.windowHeight = windowHeight;
@@ -98,7 +98,7 @@ public class Dmg extends AbstractSetupTask {
 
     /**
      * Set size of icons in Finder view
-     * @param size of icons in Finder view
+     * @param iconSize of icons in Finder view
      */
 	public void setIconSize(Integer iconSize) {
 		this.iconSize = iconSize;
@@ -114,7 +114,7 @@ public class Dmg extends AbstractSetupTask {
 
     /**
      * Set background Image for Finder View
-     * @param background Image for Finder View
+     * @param backgroundFile Image for Finder View
      */
 	public void setBackgroundImage(File backgroundFile) {
 		this.backgroundImage = backgroundFile;
@@ -130,7 +130,7 @@ public class Dmg extends AbstractSetupTask {
 
 	/**
      * Set font size for Finder View
-     * @param font size for Finder View
+     * @param fontSize size for Finder View
      */
 	public void setFontSize(Integer fontSize) {
 		this.fontSize = fontSize;

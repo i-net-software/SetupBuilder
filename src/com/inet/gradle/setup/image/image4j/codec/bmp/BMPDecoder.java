@@ -21,7 +21,7 @@ public class BMPDecoder {
   private InfoHeader infoHeader;
   
   /** Creates a new instance of BMPDecoder and reads the BMP data from the source.
-   * @param in the source <tt>InputStream<tt> from which to read the BMP data
+   * @param in the source <tt>InputStream</tt> from which to read the BMP data
    * @throws java.io.IOException if an error occurs
    */
   public BMPDecoder(java.io.InputStream in) throws IOException {

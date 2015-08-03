@@ -64,7 +64,8 @@ public class Msi extends AbstractSetupTask {
     }
 
     /**
-     * Set the architecture of the setup. The default is x64. Possible values are: <li>x86 <li>x64 <li>ia64
+     * Set the architecture of the setup. The default is x64. Possible values are: 
+     * <ul><li>x86 <li>x64 <li>ia64</ul>
      * 
      * @param arch the architecture
      */

@@ -21,7 +21,7 @@ public class IconEntry {
   public int bHeight;
   /**
    * The number of colours, calculated from {@link #sBitCount sBitCount}.
-   * <tt>0</tt> specifies a colour count of >= 256.
+   * <tt>0</tt> specifies a colour count of &gt;= 256.
    */
   public int bColorCount;
   /**
