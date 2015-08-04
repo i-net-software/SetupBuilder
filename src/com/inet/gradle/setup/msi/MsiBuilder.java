@@ -156,6 +156,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     private void patchLangID( File file, MsiLanguages language ) {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "cscript" );
+        parameters.add( "//Nologo" );
         parameters.add( new File( buildDir, "sdk/wilangid.vbs" ).getAbsolutePath() );
         parameters.add( file.getAbsolutePath() );
         parameters.add( "Product" );
@@ -172,6 +173,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     private void patchLangID( File mui, String langIDs ) {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "cscript" );
+        parameters.add( "//Nologo" );
         parameters.add( new File( buildDir, "sdk/wilangid.vbs" ).getAbsolutePath() );
         parameters.add( mui.getAbsolutePath() );
         parameters.add( "Package" );
@@ -209,6 +211,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     private void addTranslation( File mui, File mst, MsiLanguages language ) {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "cscript" );
+        parameters.add( "//Nologo" );
         parameters.add( new File( buildDir, "sdk/wisubstg.vbs" ).getAbsolutePath() );
         parameters.add( mui.getAbsolutePath() );
         parameters.add( mst.getAbsolutePath() );
