@@ -115,14 +115,15 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * Call the candle.exe tool.
      */
     private void candle() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "-arch" );
-        command.add( task.getArch() );
-        command.add( "-out" );
-        command.add( buildDir.getAbsolutePath() + '\\' );
-        command.add( getWxsFile().getAbsolutePath() );
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( "-nologo" );
+        parameters.add( "-arch" );
+        parameters.add( task.getArch() );
+        parameters.add( "-out" );
+        parameters.add( buildDir.getAbsolutePath() + '\\' );
+        parameters.add( getWxsFile().getAbsolutePath() );
 
-        callWixTool( "candle.exe", command );
+        callWixTool( "candle.exe", parameters );
     }
 
     /**
@@ -131,6 +132,8 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     private File light( MsiLanguages language ) {
         File out = new File( buildDir, setup.getSetupName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( "-nologo" );
+        parameters.add( "-sice:ICE60" ); // accept *.ttf files to install in the install directory
         parameters.add( "-ext" );
         parameters.add( "WixUIExtension" );
         parameters.add( "-ext" );
