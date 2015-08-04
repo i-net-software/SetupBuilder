@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.process.internal.DefaultExecAction;
 
+import com.inet.gradle.setup.util.IndentationOutputStream;
+
 /**
  * Some basic builder functionally.
  * 
@@ -82,7 +84,7 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         if( output != null ) {
             action.setStandardOutput( output );
         } else {
-        	action.setStandardOutput( System.out );
+            action.setStandardOutput( new IndentationOutputStream( System.out ) );
         }
         try {
             action.execute();
