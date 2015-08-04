@@ -17,11 +17,13 @@ package com.inet.gradle.setup.msi;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
@@ -51,7 +53,9 @@ class MsiBuilder extends AbstractBuilder<Msi> {
     void build() {
         try {
             File wxsFile = getWxsFile();
-            new WxsFileBuilder( task, setup, wxsFile, buildDir ).build();
+            URL template = task.getWxsTemplate();
+            new WxsFileBuilder( task, setup, wxsFile, buildDir, template, false ).build();
+            template = wxsFile.toURI().toURL();
             candle();
 
             ResourceUtils.extract( getClass(), "sdk/MsiTran.exe", buildDir );
@@ -62,16 +66,31 @@ class MsiBuilder extends AbstractBuilder<Msi> {
             MsiLanguages[] languages = { MsiLanguages.en_us, MsiLanguages.de_de };
 
             File mui = light( languages[0] );
-            StringBuilder langIDs = new StringBuilder( languages[0].getLangID() );
+            HashMap<MsiLanguages,File> translations = new HashMap<>();
             for( int i = 1; i < languages.length; i++ ) {
                 MsiLanguages language = languages[i];
-                File file = light( languages[i] );
+                File file = light( language );
                 patchLangID( file, language );
                 File mst = msitran( mui, file, language );
+                translations.put( language, mst );
+            }
+
+            // Now create a msi with all files
+            new WxsFileBuilder( task, setup, wxsFile, buildDir, template, true ).build();
+            candle();
+            mui = light( languages[0] );
+
+            // Add the translations to the msi with all files
+            StringBuilder langIDs = new StringBuilder( languages[0].getLangID() );
+            for( Entry<MsiLanguages, File> entry : translations.entrySet() ) {
+                MsiLanguages language = entry.getKey();
+                File mst = entry.getValue();
                 addTranslation( mui, mst, language );
                 langIDs.append( ',' ).append( language.getLangID() );
             }
             patchLangID( mui, langIDs.toString() );
+
+            // signing and moving the final msi file
             signTool( mui );
             Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getSetupName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
         } catch( RuntimeException ex ) {

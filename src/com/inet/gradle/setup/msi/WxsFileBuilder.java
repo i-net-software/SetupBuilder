@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,8 +59,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     private String                  jvmDll;
 
-    WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir ) throws Exception {
-        super( msi, setup, wxsFile, buildDir, WxsFileBuilder.class.getResource( "template.wxs" ) );
+    private boolean                 isAddFiles;
+
+    WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir, URL template, boolean addFiles ) throws Exception {
+        super( msi, setup, wxsFile, buildDir, template );
+        this.isAddFiles = addFiles;
     }
 
     /**
@@ -199,13 +203,26 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param name the target file name
      */
     private void addFile( Element component, File file, String pathID, String name ) {
-        Document doc = component.getOwnerDocument();
-        Element fileEl = doc.createElement( "File" );
-        String id = pathID + '_' + id( name );
-        fileEl.setAttribute( "Id", id );
-        fileEl.setAttribute( "Source", file.getAbsolutePath() );
-        fileEl.setAttribute( "Name", name );
-        component.appendChild( fileEl );
+        addFile( component, file, pathID, name, isAddFiles );
+    }
+
+    /**
+     * Add a file.
+     * 
+     * @param component the parent component node
+     * @param file the source file
+     * @param pathID an ID of the parent path
+     * @param name the target file name
+     */
+    private void addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
+        if( isAddFiles ) {
+            String id = pathID + '_' + id( name );
+            Element fileEl = getOrCreateChildById( component, "File", id );
+            addAttributeIfNotExists( fileEl, "Source", file.getAbsolutePath() );
+            addAttributeIfNotExists( fileEl, "Name", name );
+        } else {
+            getOrCreateChild( component, "CreateFolder" );
+        }
     }
 
     /**
@@ -412,7 +429,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             // add the service file
             Element directory = getDirectory( installDir, new String[] { exe } );
             Element component = getComponent( directory, id );
-            addFile( component, prunsrv, id, exe );
+            addFile( component, prunsrv, id, exe, true );
 
             // install the windows service
             Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install" );

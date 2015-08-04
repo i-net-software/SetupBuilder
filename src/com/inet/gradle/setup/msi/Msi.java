@@ -18,6 +18,8 @@ package com.inet.gradle.setup.msi;
 import groovy.lang.Closure;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -34,7 +36,7 @@ public class Msi extends AbstractSetupTask {
 
     private String   arch = "x64";
 
-    private Object   bannerBmp, dialogBmp;
+    private Object   bannerBmp, dialogBmp, wxsTemplate;
 
     private SignTool signTool;
 
@@ -128,7 +130,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set the needed information for signing the setup.
      * 
-     * @param closue
+     * @param closue the data for signing
      */
     public void signTool( Closure closue ) {
         signTool = ConfigureUtil.configure( closue, new SignTool( this ) );
@@ -141,5 +143,28 @@ public class Msi extends AbstractSetupTask {
      */
     public SignTool getSignTool() {
         return signTool;
+    }
+
+    /**
+     * Get a URL to a *.wxs file for the WIX Toolset
+     * 
+     * @return the template
+     * @throws MalformedURLException if any error occur
+     */
+    public URL getWxsTemplate() throws MalformedURLException {
+        if( wxsTemplate != null ) {
+            return getProject().file( wxsTemplate ).toURI().toURL();
+        }
+        return getClass().getResource( "template.wxs" );
+    }
+
+    /**
+     * Set an optional *.wxs file as template for building the final file with the settings of the gradle task. This
+     * template give you the option to set things that are not available via the gradle task.
+     * 
+     * @param wxsTemplate the file location
+     */
+    public void setWxsTemplate( Object wxsTemplate ) {
+        this.wxsTemplate = wxsTemplate;
     }
 }
