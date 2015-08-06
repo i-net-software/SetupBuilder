@@ -15,11 +15,12 @@
  */
 package com.inet.gradle.setup;
 
+import java.util.HashMap;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePlugin;
 
-import com.google.common.collect.ImmutableMap;
 import com.inet.gradle.setup.deb.Deb;
 import com.inet.gradle.setup.dmg.Dmg;
 import com.inet.gradle.setup.msi.Msi;
@@ -34,15 +35,17 @@ public class SetupBuilderPlugin implements Plugin<Project> {
 
     @Override
     public void apply( Project project ) {
-        project.apply(ImmutableMap.of("type", BasePlugin.class)); // apply the BasePlugin to make the base features like "clean" avaialabe by default.
-//        project.getPluginManager().apply( BasePlugin.class ); // API since Gradle 2.3
+        // apply the BasePlugin to make the base features like "clean" available by default.
+        HashMap<String, Class<?>> plugin = new HashMap<>();
+        plugin.put( "plugin", BasePlugin.class );
+        project.apply( plugin );
+        //        project.getPluginManager().apply( BasePlugin.class ); // API since Gradle 2.3
+
         project.getExtensions().create( "setupBuilder", SetupBuilder.class, project );
         project.getTasks().create( "deb", Deb.class );
         project.getTasks().create( "dmg", Dmg.class );
         project.getTasks().create( "msi", Msi.class );
         project.getTasks().create( "rpm", Rpm.class );
-
-        //        project.afterEvaluate( arg0 );
     }
 
 }
