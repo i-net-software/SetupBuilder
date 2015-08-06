@@ -62,13 +62,11 @@ class MsiBuilder extends AbstractBuilder<Msi> {
             ResourceUtils.extract( getClass(), "sdk/wilangid.vbs", buildDir );
             ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
 
-            //TODO 2 languages for testing only
-            MsiLanguages[] languages = { MsiLanguages.en_us, MsiLanguages.de_de };
-
-            File mui = light( languages[0] );
-            HashMap<MsiLanguages,File> translations = new HashMap<>();
-            for( int i = 1; i < languages.length; i++ ) {
-                MsiLanguages language = languages[i];
+            List<MsiLanguages> languages = task.getLanguages();
+            File mui = light( languages.get( 0 ) );
+            HashMap<MsiLanguages, File> translations = new HashMap<>();
+            for( int i = 1; i < languages.size(); i++ ) {
+                MsiLanguages language = languages.get( i );
                 File file = light( language );
                 patchLangID( file, language );
                 File mst = msitran( mui, file, language );
@@ -78,10 +76,10 @@ class MsiBuilder extends AbstractBuilder<Msi> {
             // Now create a msi with all files
             new WxsFileBuilder( task, setup, wxsFile, buildDir, template, true ).build();
             candle();
-            mui = light( languages[0] );
+            mui = light( languages.get( 0 ) );
 
             // Add the translations to the msi with all files
-            StringBuilder langIDs = new StringBuilder( languages[0].getLangID() );
+            StringBuilder langIDs = new StringBuilder( languages.get( 0 ).getLangID() );
             for( Entry<MsiLanguages, File> entry : translations.entrySet() ) {
                 MsiLanguages language = entry.getKey();
                 File mst = entry.getValue();
