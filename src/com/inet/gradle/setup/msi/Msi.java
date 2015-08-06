@@ -20,6 +20,10 @@ import groovy.lang.Closure;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -37,6 +41,8 @@ public class Msi extends AbstractSetupTask {
     private String   arch = "x64";
 
     private Object   bannerBmp, dialogBmp, wxsTemplate;
+
+    private List<String> languages;
 
     private SignTool signTool;
 
@@ -66,8 +72,12 @@ public class Msi extends AbstractSetupTask {
     }
 
     /**
-     * Set the architecture of the setup. The default is x64. Possible values are: 
-     * <ul><li>x86 <li>x64 <li>ia64</ul>
+     * Set the architecture of the setup. The default is x64. Possible values are:
+     * <ul>
+     * <li>x86
+     * <li>x64
+     * <li>ia64
+     * </ul>
      * 
      * @param arch the architecture
      */
@@ -166,5 +176,63 @@ public class Msi extends AbstractSetupTask {
      */
     public void setWxsTemplate( Object wxsTemplate ) {
         this.wxsTemplate = wxsTemplate;
+    }
+
+    /**
+     * Get the languages that the setup should be support. The list must at minimum one element.
+     * @return a list of languages
+     */
+    public List<MsiLanguages> getLanguages() {
+        ArrayList<MsiLanguages> result = new ArrayList<>();
+        if( languages == null ) {
+            Collections.addAll( result, MsiLanguages.values() );
+            return result;
+        }
+
+        for( String lang : languages ) {
+            String key = lang.replace( '-', '_' ).toLowerCase();
+            MsiLanguages value = null;
+            try {
+                value = MsiLanguages.valueOf( key );
+            } catch( IllegalArgumentException ex ) {
+                // The completely name was not found.
+                // now we check if this is only a language without a country 
+                for( MsiLanguages msiLanguage : MsiLanguages.values() ) {
+                    if( msiLanguage.toString().startsWith( key ) ) {
+                        value = msiLanguage;
+                        break;
+                    }
+                }
+                if( value == null ) {
+                    throw ex; // not supported language
+                }
+            }
+            result.add( value );
+        }
+
+        if( result.isEmpty() ) {
+            result.add( MsiLanguages.en_us );
+        }
+        return result;
+    }
+
+    /**
+     * Set a list of languages for the setup GUI. For example "en-us". By default all available languages will be added to the setup. This can need some time on creation.
+     * @param languages the languages
+     */
+    public void setLanguages( Object languages ) {
+        List<String> list;
+        if( languages == null ) {
+            list = null;
+        } else if( languages instanceof Iterable ) {
+            list = new ArrayList<>();
+            for( Object str : (Iterable<?>)languages ) {
+                list.add( str.toString() );
+            }
+        } else {
+            list = Arrays.asList( languages.toString() );
+        }
+
+        this.languages = list;
     }
 }
