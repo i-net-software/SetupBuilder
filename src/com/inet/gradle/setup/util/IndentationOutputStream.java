@@ -34,11 +34,20 @@ public class IndentationOutputStream extends FilterOutputStream {
         if( needIndentation ) {
             super.write( '\t' );
             super.write( '\t' );
-            needIndentation = false;
         }
         super.write( b );
-        if( b == '\n' ) {
+        needIndentation = b == '\n';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        if( !needIndentation ) {
+            super.write( '\n' );
             needIndentation = true;
         }
+        super.close();
     }
 }

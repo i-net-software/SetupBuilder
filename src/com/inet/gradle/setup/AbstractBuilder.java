@@ -81,13 +81,13 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         if( input != null ) {
             action.setStandardInput( input );
         }
-        if( output != null ) {
-            action.setStandardOutput( output );
-        } else {
-            action.setStandardOutput( new IndentationOutputStream( System.out ) );
+        if( output == null ) {
+            output = new IndentationOutputStream( System.out );
         }
+        action.setStandardOutput( output );
         try {
             action.execute();
+            output.close();
         } catch( Throwable th ) {
             throw new RuntimeException( th );
         }
