@@ -341,6 +341,21 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
 		// Rename to app-name
         File prefPaneLocation = new File(resourcesOutput, applicationName + ".prefPane");
+
+        // rename helper Tool
+        File prefPaneContents = new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane/Contents");
+		Files.copy(iconFile.toPath(), new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app/Contents/Resources/applet.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		Files.move(new File(prefPaneContents, "MacOS/SetupBuilderOSXPrefPane").toPath(), new File( prefPaneContents, "MacOS/"+ applicationName ).toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.move(new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app").toPath(), new File(prefPaneContents, "Resources/"+ applicationName +".app").toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+
+		// Make executable
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "chmod" );
+        command.add( "a+x" );
+        command.add(  new File(prefPaneContents, "Resources/"+ applicationName +".app/Contents/MacOS/applet").getAbsolutePath() );
+    	exec( command );
+    	
+		// Rename prefPane
 		Files.move(new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane").toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Files.delete(setPrefpane.toPath());
 
@@ -348,15 +363,20 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 		Files.copy(iconFile.toPath(), new File(prefPaneLocation, "Contents/Resources/ProductIcon.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 		
 		// Patch Info.plist
-		setPlistProperty( new File(prefPaneLocation, "Contents/Info.plist"), ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
-		setPlistProperty( new File(prefPaneLocation, "Contents/Info.plist"), ":CFBundleName", title + " Preference Pane" );
-		setPlistProperty( new File(prefPaneLocation, "Contents/Info.plist"), ":NSPrefPaneIconLabel", title );
+		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleName", title + " Preference Pane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", title );
 
-		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Name", title );
-		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Label", setup.getMainClass() );
-		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Program", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
-		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Description", task.getDescription() );
-		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Version", setup.getVersion() );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		
+		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
+		setPlistProperty( servicePLIST, ":Name", title );
+		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
+		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
 	}
 	
 	private void setPlistProperty(File plist, String property, String value) {
