@@ -1,5 +1,14 @@
 #!/bin/sh
 
 set -e
-/usr/bin/ditto "${installName}/Contents/LaunchDaemon/${serviceName}.plist" "/Library/LaunchDaemons/${serviceName}.plist"
+
+# Link prefpane
+if [ -L "/Library/PreferencePanes/${applicationName}.prefPane" ]; then
+	rm "/Library/PreferencePanes/${applicationName}.prefPane"
+fi
+
+ln -s "${installName}/Contents/Resources/${applicationName}.prefPane" "/Library/PreferencePanes"
+
+# copy default launchd file and start daemon
+/usr/bin/ditto "${installName}/Contents/Resources/${applicationName}.prefPane/Contents/Resources/service.plist" "/Library/LaunchDaemons/${serviceName}.plist"
 /bin/launchctl load "/Library/LaunchDaemons/${serviceName}.plist"

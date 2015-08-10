@@ -18,7 +18,6 @@ package com.inet.gradle.setup.dmg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
@@ -259,7 +257,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createBinary() throws Throwable {
     	
     	if ( !setup.getServices().isEmpty() ) {
-    		createLaunchd();
     		createPackageFromApp();
     	}
     	
@@ -286,6 +283,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
             String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
             script = script.replace( "${serviceName}", launchdScriptName );
+            script = script.replace( "${applicationName}", applicationName );
             script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
             script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
             
@@ -319,31 +317,58 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             output.write(buf, 0, len);
         }
     }
-    
-	private void createLaunchd() throws IOException {
-
-		String launchdScriptName = setup.getMainClass();
-		File launchd = new File( buildDir, applicationName + ".app/Contents/LaunchDaemon" );
-		Files.createDirectories(launchd.toPath(), new FileAttribute[0]);
-		
-		patchServiceFiles( "launchd.plist", new File(launchd, launchdScriptName + ".plist"));
-
-		Files.createDirectories(new File(tmp.toFile(), "scripts").toPath(), new FileAttribute[0]);
-		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
-		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
-	}
 	
+	/**
+	 * * Unpack the preference pane from the SetupBuilder,
+	 * * Modify the icon and text
+	 * * Put into the main application bundle
+	 * 
+	 * @throws Throwable
+	 */
 	private void createPreferencePane() throws Throwable {
 
+		// Unpack
 		File setPrefpane = new File(tmp.toFile(), "packages/SetupBuilderOSXPrefPane.prefPane.zip");
 
 		InputStream input = getClass().getResourceAsStream("service/SetupBuilderOSXPrefPane.prefPane.zip");
-		FileOutputStream output = new FileOutputStream( setPrefpane);
+		FileOutputStream output = new FileOutputStream( setPrefpane );
         copyData(input, output);
         input.close();
         output.close();
 
-        unZipIt(setPrefpane, tmp.toFile());
+        File resourcesOutput = new File(buildDir, applicationName + ".app/Contents/Resources");
+		unZipIt(setPrefpane, resourcesOutput);
+
+		// Rename to app-name
+        File prefPaneLocation = new File(resourcesOutput, applicationName + ".prefPane");
+		Files.move(new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane").toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.delete(setPrefpane.toPath());
+
+		// Copy Icon
+		Files.copy(iconFile.toPath(), new File(prefPaneLocation, "Contents/Resources/ProductIcon.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		
+		// Patch Info.plist
+		setPlistProperty( new File(prefPaneLocation, "Contents/Info.plist"), ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
+		setPlistProperty( new File(prefPaneLocation, "Contents/Info.plist"), ":CFBundleName", title + " Preference Pane" );
+		setPlistProperty( new File(prefPaneLocation, "Contents/Info.plist"), ":NSPrefPaneIconLabel", title );
+
+		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Name", title );
+		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Label", setup.getMainClass() );
+		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Program", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Description", task.getDescription() );
+		setPlistProperty( new File(prefPaneLocation, "Contents/Resources/service.plist"), ":Version", setup.getVersion() );
+	}
+	
+	private void setPlistProperty(File plist, String property, String value) {
+		
+		// Set Property in plist file
+		// /usr/libexec/PlistBuddy -c "Set PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/libexec/PlistBuddy" );
+        command.add( "-c" );
+        command.add( "Set " + property +  " " + value );
+        command.add( plist.getAbsolutePath() );
+    	exec( command );
 	}
 
     private void createPackageFromApp() throws Throwable {
@@ -352,6 +377,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         Files.createDirectories(new File(tmp.toFile(), "packages").toPath(), new FileAttribute[0]);
     	imageSourceRoot = tmp.toString() + "/distribution";
     	
+		Files.createDirectories(new File(tmp.toFile(), "scripts").toPath(), new FileAttribute[0]);
+		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
+		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
+
 		createPreferencePane();
         extractApplicationInformation();
     	createAndPatchDistributionXML();
