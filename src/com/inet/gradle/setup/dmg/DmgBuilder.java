@@ -25,13 +25,13 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
@@ -142,6 +142,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             setApplicationFilePermissions();
             
             createBinary();
+
+/*
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
@@ -157,7 +159,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
          	   }
 
             });
-
+/*/
+//*/
             tmp = null;
         
         } catch( RuntimeException ex ) {
@@ -254,7 +257,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createBinary() throws Throwable {
     	
     	if ( !setup.getServices().isEmpty() ) {
-    		createLaunchd();
     		createPackageFromApp();
     	}
     	
@@ -275,11 +277,13 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     	try {
         	String launchdScriptName = setup.getMainClass();
             InputStream input = getClass().getResourceAsStream( resource );
-            byte[] bytes = new byte[input.available()];
-            input.read( bytes );
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            copyData(input, bos);
             input.close();
-            String script = new String( bytes, StandardCharsets.UTF_8 );
+
+            String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
             script = script.replace( "${serviceName}", launchdScriptName );
+            script = script.replace( "${applicationName}", applicationName );
             script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
             script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
             
@@ -299,18 +303,92 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     		e.printStackTrace();
     	}
     }
+    
+    /**
+     * Copy the data from the input to the output
+     * @param input the input data
+     * @param output the target
+     * @throws IOException if IO issues
+     */
+    public static void copyData( InputStream input, OutputStream output ) throws IOException{
+        byte[] buf = new byte[4096];
+        int len;
+        while ((len = input.read(buf)) > 0) {
+            output.write(buf, 0, len);
+        }
+    }
+	
+	/**
+	 * * Unpack the preference pane from the SetupBuilder,
+	 * * Modify the icon and text
+	 * * Put into the main application bundle
+	 * 
+	 * @throws Throwable
+	 */
+	private void createPreferencePane() throws Throwable {
 
-	private void createLaunchd() throws IOException {
+		// Unpack
+		File setPrefpane = new File(tmp.toFile(), "packages/SetupBuilderOSXPrefPane.prefPane.zip");
 
-		String launchdScriptName = setup.getMainClass();
-		File launchd = new File( buildDir, applicationName + ".app/Contents/LaunchDaemon" );
-		Files.createDirectories(launchd.toPath(), new FileAttribute[0]);
+		InputStream input = getClass().getResourceAsStream("service/SetupBuilderOSXPrefPane.prefPane.zip");
+		FileOutputStream output = new FileOutputStream( setPrefpane );
+        copyData(input, output);
+        input.close();
+        output.close();
+
+        File resourcesOutput = new File(buildDir, applicationName + ".app/Contents/Resources");
+		unZipIt(setPrefpane, resourcesOutput);
+
+		// Rename to app-name
+        File prefPaneLocation = new File(resourcesOutput, applicationName + ".prefPane");
+
+        // rename helper Tool
+        File prefPaneContents = new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane/Contents");
+		Files.copy(iconFile.toPath(), new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app/Contents/Resources/applet.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		Files.move(new File(prefPaneContents, "MacOS/SetupBuilderOSXPrefPane").toPath(), new File( prefPaneContents, "MacOS/"+ applicationName ).toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.move(new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app").toPath(), new File(prefPaneContents, "Resources/"+ applicationName +".app").toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+
+		// Make executable
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "chmod" );
+        command.add( "a+x" );
+        command.add(  new File(prefPaneContents, "Resources/"+ applicationName +".app/Contents/MacOS/applet").getAbsolutePath() );
+    	exec( command );
+    	
+		// Rename prefPane
+		Files.move(new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane").toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.delete(setPrefpane.toPath());
+
+		// Copy Icon
+		Files.copy(iconFile.toPath(), new File(prefPaneLocation, "Contents/Resources/ProductIcon.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 		
-		patchServiceFiles( "launchd.plist", new File(launchd, launchdScriptName + ".plist"));
+		// Patch Info.plist
+		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleName", title + " Preference Pane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", title );
 
-		Files.createDirectories(new File(tmp.toFile(), "scripts").toPath(), new FileAttribute[0]);
-		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
-		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		
+		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
+		setPlistProperty( servicePLIST, ":Name", title );
+		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
+		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
+	}
+	
+	private void setPlistProperty(File plist, String property, String value) {
+		
+		// Set Property in plist file
+		// /usr/libexec/PlistBuddy -c "Set PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/libexec/PlistBuddy" );
+        command.add( "-c" );
+        command.add( "Set " + property +  " " + value );
+        command.add( plist.getAbsolutePath() );
+    	exec( command );
 	}
 
     private void createPackageFromApp() throws Throwable {
@@ -319,6 +397,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         Files.createDirectories(new File(tmp.toFile(), "packages").toPath(), new FileAttribute[0]);
     	imageSourceRoot = tmp.toString() + "/distribution";
     	
+		Files.createDirectories(new File(tmp.toFile(), "scripts").toPath(), new FileAttribute[0]);
+		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
+		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
+
+		createPreferencePane();
         extractApplicationInformation();
     	createAndPatchDistributionXML();
 
@@ -483,10 +566,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     private void applescript() throws IOException {
         InputStream input = getClass().getResourceAsStream( "applescript.txt" );
-        byte[] bytes = new byte[input.available()];
-        input.read( bytes );
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        copyData(input, bos);
         input.close();
-        String script = new String( bytes, StandardCharsets.UTF_8 );
+
+        String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
         script = script.replace( "${title}", title );
         script = script.replace( "${executable}", applicationName );
         script = script.replace( "${windowWidth}", task.getWindowWidth().toString() );
@@ -520,4 +604,46 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( task.getSetupFile().toString() );
         exec( command );
     }
+
+	/**
+	 * Unzip it
+	 * 
+	 * @param file input zip file
+	 * @param output zip file output folder
+	 */
+	private void unZipIt(File file, File folder) {
+
+		try {
+
+			// create output directory is not exists
+			if (!folder.exists()) {
+				folder.mkdir();
+			}
+
+			// get the zip file content
+			ZipFile zipFile = new ZipFile(file);
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry zipEntry = (ZipEntry) entries.nextElement();
+				
+				String fileName = zipEntry.getName();
+				if (zipEntry.isDirectory() ) {
+					new File( folder, fileName).mkdir();
+				} else {
+					
+					File target = new File(folder, fileName);
+					InputStream inputStream = zipFile.getInputStream(zipEntry);
+					FileOutputStream output = new FileOutputStream(target);
+					copyData(inputStream, output);
+					output.close();
+					inputStream.close();
+				}
+			}
+			
+			zipFile.close();
+
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
 }

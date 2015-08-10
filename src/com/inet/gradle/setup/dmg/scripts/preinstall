@@ -3,4 +3,5 @@
 set -e
 if /bin/launchctl list "${serviceName}" &> /dev/null; then
     /bin/launchctl unload "/Library/LaunchDaemons/${serviceName}.plist"
+    rm "/Library/LaunchDaemons/${serviceName}.plist"
 fi
