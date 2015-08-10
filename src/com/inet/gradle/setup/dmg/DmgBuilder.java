@@ -18,6 +18,7 @@ package com.inet.gradle.setup.dmg;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,13 +26,14 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
@@ -278,10 +280,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     	try {
         	String launchdScriptName = setup.getMainClass();
             InputStream input = getClass().getResourceAsStream( resource );
-            byte[] bytes = new byte[input.available()];
-            input.read( bytes );
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            copyData(input, bos);
             input.close();
-            String script = new String( bytes, StandardCharsets.UTF_8 );
+
+            String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
             script = script.replace( "${serviceName}", launchdScriptName );
             script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
             script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
@@ -302,7 +305,21 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     		e.printStackTrace();
     	}
     }
-
+    
+    /**
+     * Copy the data from the input to the output
+     * @param input the input data
+     * @param output the target
+     * @throws IOException if IO issues
+     */
+    public static void copyData( InputStream input, OutputStream output ) throws IOException{
+        byte[] buf = new byte[4096];
+        int len;
+        while ((len = input.read(buf)) > 0) {
+            output.write(buf, 0, len);
+        }
+    }
+    
 	private void createLaunchd() throws IOException {
 
 		String launchdScriptName = setup.getMainClass();
@@ -316,10 +333,17 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
 	}
 	
-	private void createPreferencePane() throws IOException {
-		
-		Files.copy(new File(getClass().getResource("service/SetupBuilderOSXPrefPane.prefPane").toString()).toPath(), new File(tmp.toFile(), "packages").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-		
+	private void createPreferencePane() throws Throwable {
+
+		File setPrefpane = new File(tmp.toFile(), "packages/SetupBuilderOSXPrefPane.prefPane.zip");
+
+		InputStream input = getClass().getResourceAsStream("service/SetupBuilderOSXPrefPane.prefPane.zip");
+		FileOutputStream output = new FileOutputStream( setPrefpane);
+        copyData(input, output);
+        input.close();
+        output.close();
+
+        unZipIt(setPrefpane, tmp.toFile());
 	}
 
     private void createPackageFromApp() throws Throwable {
@@ -493,10 +517,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     private void applescript() throws IOException {
         InputStream input = getClass().getResourceAsStream( "applescript.txt" );
-        byte[] bytes = new byte[input.available()];
-        input.read( bytes );
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        copyData(input, bos);
         input.close();
-        String script = new String( bytes, StandardCharsets.UTF_8 );
+
+        String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
         script = script.replace( "${title}", title );
         script = script.replace( "${executable}", applicationName );
         script = script.replace( "${windowWidth}", task.getWindowWidth().toString() );
@@ -530,4 +555,46 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( task.getSetupFile().toString() );
         exec( command );
     }
+
+	/**
+	 * Unzip it
+	 * 
+	 * @param file input zip file
+	 * @param output zip file output folder
+	 */
+	private void unZipIt(File file, File folder) {
+
+		try {
+
+			// create output directory is not exists
+			if (!folder.exists()) {
+				folder.mkdir();
+			}
+
+			// get the zip file content
+			ZipFile zipFile = new ZipFile(file);
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+			while (entries.hasMoreElements()) {
+				ZipEntry zipEntry = (ZipEntry) entries.nextElement();
+				
+				String fileName = zipEntry.getName();
+				if (zipEntry.isDirectory() ) {
+					new File( folder, fileName).mkdir();
+				} else {
+					
+					File target = new File(folder, fileName);
+					InputStream inputStream = zipFile.getInputStream(zipEntry);
+					FileOutputStream output = new FileOutputStream(target);
+					copyData(inputStream, output);
+					output.close();
+					inputStream.close();
+				}
+			}
+			
+			zipFile.close();
+
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
 }
