@@ -184,7 +184,7 @@ class RpmControlFileBuilder {
 	 */
 	private void putFiles(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%files" + NEWLINE);
-		controlWriter.write("/usr/share/**/*" + NEWLINE);
+		controlWriter.write("/usr/**/*" + NEWLINE);
 		
 	}
 
@@ -195,6 +195,12 @@ class RpmControlFileBuilder {
 	 */
 	private void putClean(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%clean" + NEWLINE);
+		String release = rpm.getRelease();
+		if(release == null || release.length() == 0) {
+			release = "1";
+		}
+		controlWriter.write("cp ../SRPMS/" + setup.getBaseName() + "-" + setup.getVersion() + "-" + release + ".src.rpm " + setup.getDestinationDir().getAbsolutePath() + NEWLINE);
+		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getBaseName() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + setup.getDestinationDir().getAbsolutePath() + "/" + setup.getBaseName() + "-" + setup.getVersion() + ".rpm" + NEWLINE);
 		ArrayList<String> cleans = rpm.getClean();
 		for (String clean : cleans) {
 			controlWriter.write(clean + NEWLINE);	
@@ -208,6 +214,7 @@ class RpmControlFileBuilder {
 	 */
 	private void putInstall(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%install" + NEWLINE);
+		controlWriter.write("cp -R usr %{buildroot}" + NEWLINE);
 		ArrayList<String> installs = rpm.getInstall();
 		for (String install : installs) {
 			controlWriter.write(install + NEWLINE);	
@@ -233,7 +240,7 @@ class RpmControlFileBuilder {
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putPrep(OutputStreamWriter controlWriter) throws IOException {
-		controlWriter.write(NEWLINE + "%preup" + NEWLINE);
+		controlWriter.write(NEWLINE + "%prep" + NEWLINE);
 		ArrayList<String> preps = rpm.getPrep();
 		for (String prep : preps) {
 			controlWriter.write(prep + NEWLINE);	
@@ -324,6 +331,7 @@ class RpmControlFileBuilder {
 		if(description == null || description.length() == 0) {
 			throw new RuntimeException("No description declared in the setup configuration.");
 		} else {
+			controlWriter.write(NEWLINE + "%define __jar_repack %{nil}"+ NEWLINE);
 			controlWriter.write(NEWLINE + "%description" + NEWLINE + description + NEWLINE);
 		}
 	}

@@ -50,7 +50,11 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
 
     public void build() {
     	try {
-            File filesPath = new File( buildDir, "/usr/share/" + setup.getBaseName() );
+    		String release = task.getRelease();
+    		if(release == null || release.length() == 0) {
+    			release = "1";
+    		}
+            File filesPath = new File( buildDir.getAbsolutePath() + "/BUILD/usr/share/" + setup.getBaseName());
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
@@ -66,11 +70,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
                 setupStarter( starter );
             }
             
-
             controlBuilder.build();
-
-//            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getBaseName() ) );
-//            documentBuilder.build();
 
             changeDirectoryPermissionsTo755( buildDir );
 
@@ -174,7 +174,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     // share
     private void setupStarter( DesktopStarter starter ) throws IOException {
         String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
-        String consoleStarterPath = "usr/bin/" + unixName;
+        String consoleStarterPath = "BUILD/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
             fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
@@ -183,7 +183,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         int[] iconSizes = { 16, 32, 48, 64, 128 };
 
         for( int size : iconSizes ) {
-            File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
+            File iconDir = new File( buildDir, "BUILD/usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
             iconDir.mkdirs();
             File scaledFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), iconDir, "png" + size );
             if( scaledFile != null ) {
@@ -192,7 +192,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
                 setPermissions( iconFile, false );
             }
         }
-        try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
+        try (FileWriter fw = new FileWriter( createFile( "BUILD/usr/share/applications/" + unixName + ".desktop", false ) )) {
             fw.write( "[Desktop Entry]\n" );
             fw.write( "Name=" + starter.getName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
@@ -233,19 +233,18 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     /**
      * execute the command to generate the RPM package
      * 
-     * rpmbuild -ba -clean --define="_topdir buildDir(rpm)" --define="_tmppath tmp" rpm/SPECS/package.spec
+     * rpmbuild -ba -clean "--define=_topdir buildDir(rpm)" "--define=_tmppath temp" SPECS/package.spec
      * 
      */
     private void createRpmPackage() {
-        ArrayList<String> command = new ArrayList<>();
+    	
+    	ArrayList<String> command = new ArrayList<>();
         command.add( "rpmbuild" );
         command.add( "-ba" );
         command.add( "-v" );
         command.add( "--clean" );
-        command.add( "--define=\"_topdir " + buildDir.getAbsolutePath() + "\"" );
-        command.add( "--define=\"_tmppath tmp\"" );
+        command.add( "--define=_topdir " + buildDir.getAbsolutePath() );
         command.add( "SPECS/" + setup.getBaseName() + ".spec" );
-        System.out.println(command);
         exec( command );
     }
 
