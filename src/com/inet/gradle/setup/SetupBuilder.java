@@ -69,7 +69,7 @@ public class SetupBuilder implements SetupSources {
 
     private List<Service>          services        = new ArrayList<>();
 
-    private List<DesktopStarter>   desktopStarters = new ArrayList<>();
+    private final List<DesktopStarter> desktopStarters = new ArrayList<>();
 
     private List<String>           deleteFiles = new ArrayList<>();
 
@@ -360,7 +360,7 @@ public class SetupBuilder implements SetupSources {
     /**
      * Returns the registered desktop starters.
      * 
-     * @return the registered desktop starters
+     * @return the registered desktop starters, never null, can be empty.
      */
     public List<DesktopStarter> getDesktopStarters() {
         return desktopStarters;
