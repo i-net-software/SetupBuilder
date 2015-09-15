@@ -20,7 +20,7 @@ package com.inet.gradle.setup;
  */
 public class DesktopStarter {
     private final SetupBuilder setup;
-    private String             name, mainJar, mainClass;
+    private String             name, mainJar, mainClass, executable;
     private String             startArguments;
     private String             description;
     private String             mimeTypes;
@@ -70,6 +70,22 @@ public class DesktopStarter {
      */
     public void setDescription( String description ) {
         this.description = description;
+    }
+
+    /**
+     * Get an executable
+     * @return the executable
+     */
+    public String getExecutable() {
+        return executable;
+    }
+
+    /**
+     * Set the executable file. If this is a relative pfad then it is relative to the install directory.
+     * @param executable Set the executable file.
+     */
+    public void setExecutable( String executable ) {
+        this.executable = executable;
     }
  
     /**

@@ -40,6 +40,7 @@ import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
@@ -121,6 +122,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addGUI( product );
         addIcon( product );
         addServices( installDir );
+        addShortCuts( product );
         addRunAfter( product );
         addDeleteFiles( installDir );
 
@@ -452,17 +454,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             String baseKey =
                             task.is64Bit() ? "SOFTWARE\\Wow6432Node\\Apache Software Foundation\\ProcRun 2.0\\"
                                             : "SOFTWARE\\Apache Software Foundation\\ProcRun 2.0\\";
-            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegJava" );
-            addAttributeIfNotExists( regkey, "Root", "HKLM" );
-            addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Java" );
-            addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
+            regkey = addRegistryKey( component, "HKLM", id + "_RegJava", baseKey + name + "\\Parameters\\Java" );
             addRegistryValue( regkey, "Classpath", "string", service.getMainJar() );
             addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
             addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
-            regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegStart" );
-            addAttributeIfNotExists( regkey, "Root", "HKLM" );
-            addAttributeIfNotExists( regkey, "Key", baseKey + name + "\\Parameters\\Start" );
-            addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
+            regkey = addRegistryKey( component, "HKLM", id + "_RegStart", baseKey + name + "\\Parameters\\Start" );
             addRegistryValue( regkey, "Class", "string", service.getMainClass() );
             addRegistryValue( regkey, "Mode", "string", "Java" );
             addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" );
@@ -476,6 +472,49 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addAttributeIfNotExists( start, "Remove", "uninstall" );
             }
         }
+    }
+
+    /**
+     * Add the shortcuts if which was define.
+     * @param product the node of the product
+     */
+    private void addShortCuts( Element product ) {
+        List<DesktopStarter> starters = setup.getDesktopStarters();
+        if( starters.isEmpty() ) {
+            return;
+        }
+
+        Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR" );
+        Element menuFolders = getOrCreateChildById( directory, "Directory", "ProgramMenuFolder" );
+        Element appProgrammsFolder = getOrCreateChildById( menuFolders, "Directory", "ApplicationProgramsFolder" );
+        addAttributeIfNotExists( appProgrammsFolder, "Name", setup.getApplication() );
+        Element dirRef = getOrCreateChildById( product, "DirectoryRef", "ApplicationProgramsFolder" );
+
+        Element component = getComponent( dirRef, "shortcuts" );
+        Element removeFolder = getOrCreateChildById( component, "RemoveFolder", "ApplicationProgramsFolder" );
+        addAttributeIfNotExists( removeFolder, "On", "uninstall" );
+        Element reg = addRegistryKey( component, "HKCU", "shortcuts_reg", "Software\\" + setup.getVendor() + "\\" + setup.getApplication() );
+        reg = addRegistryValue( reg, "shortcut", "string", "" );
+        addAttributeIfNotExists( reg, "KeyPath", "yes" );
+
+        for( DesktopStarter starter : starters ) {
+            String id = id( starter.getName() );
+            Element shortcut = getOrCreateChildById( component, "Shortcut", id );
+            addAttributeIfNotExists( shortcut, "Name", starter.getName() );
+            addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
+            addAttributeIfNotExists( shortcut, "WorkingDirectory", "INSTALLDIR" );
+            String target = starter.getExecutable();
+            if( target == null || target.isEmpty() ) {
+                target = "java.exe";
+            } else {
+                target = "[INSTALLDIR]" + target;
+            }
+            addAttributeIfNotExists( shortcut, "Target", target );
+            if( !starter.getStartArguments().isEmpty() ) {
+                addAttributeIfNotExists( shortcut, "Arguments", starter.getStartArguments() );
+            }
+        }
+        
     }
 
     /**
@@ -517,17 +556,35 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
+     * Add a registry key.
+     * @param component parent component
+     * @param root The root of the key like HKLM, HKCU, HKMU
+     * @param id the id for the key
+     * @param key the key
+     * @return the element to add values
+     */
+    private Element addRegistryKey( Element component, String root, String id, String key ){
+        Element regkey = getOrCreateChildById( component, "RegistryKey", id );
+        addAttributeIfNotExists( regkey, "Root", root );
+        addAttributeIfNotExists( regkey, "Key", key );
+        addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
+        return regkey;
+    }
+
+    /**
      * Add a registry value.
      * 
      * @param regkey the parent registry key
      * @param name the value name
      * @param type the type
      * @param value the value
+     * @return the value node
      */
-    private void addRegistryValue( Element regkey, String name, String type, String value ) {
+    private Element addRegistryValue( Element regkey, String name, String type, String value ) {
         Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name );
         addAttributeIfNotExists( regValue, "Type", type );
         addAttributeIfNotExists( regValue, "Value", value );
+        return regValue;
     }
 
     /**
@@ -594,7 +651,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Create a valid id from path segments.
      * 
      * @param segments the segments of the path in the target. The last segment contains the file name.
-     * @return
+     * @return a valid id
      */
     private String id( String[] segments ) {
         if( segments.length <= 1 ) {
