@@ -66,6 +66,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     private boolean                 isAddFiles;
 
+    /**
+     * Create a new instance.
+     * @param msi the MSI task
+     * @param setup the SetupBuilder extension
+     * @param wxsFile the file name
+     * @param buildDir the temporary directory of the task
+     * @param template a template file
+     * @param addFiles if files shouls be added in this phase
+     * @throws Exception if any error occur
+     */
     WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir, URL template, boolean addFiles ) throws Exception {
         super( msi, setup, wxsFile, buildDir, template );
         this.isAddFiles = addFiles;
@@ -75,7 +85,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Create *.wxs file based on the settings in the task.
      * 
      * @throws ParserConfigurationException
-     * @throws Exception
+     * @throws Exception if any error occur
      */
     void build() throws Exception {
         // Wix node
@@ -133,7 +143,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
         for( String compID : components ) {
-            Element compRef = getOrCreateChildById( feature, "ComponentRef", compID );
+            getOrCreateChildById( feature, "ComponentRef", compID );
         }
 
         save();
@@ -219,6 +229,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param file the source file
      * @param pathID an ID of the parent path
      * @param name the target file name
+     * @param isAddFiles if the file should added or not. On creating the multi language translations the files will not
+     *            added to improve the performance.
      */
     private void addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
         if( isAddFiles ) {
@@ -253,7 +265,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Bundle a JRE if setup.
      * 
-     * @param appDirRef the
+     * @param installDir referent to INSTALLDIR
      */
     private void addBundleJre( Element installDir ) {
         Object jre = setup.getBundleJre();
@@ -417,6 +429,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the windows services.
      * 
+     * @param installDir referent to INSTALLDIR
      * @throws IOException if an I/O error occurs when reading or writing
      */
     private void addServices( Element installDir ) throws IOException {
@@ -565,6 +578,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         exitDialog.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
     }
 
+    /**
+     * Add files to delete if there any define.
+     * @param installDir referent to INSTALLDIR
+     */
     private void addDeleteFiles( Element installDir ) {
         if( setup.getDeleteFiles().isEmpty() ) {
             return;
@@ -618,58 +635,58 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param id the if of the property
      * @param value the value of the property
      */
-    private void addLargeProperty( Element product, String id, final String value ) {
-        int count = 0;
-        String rest = value;
-        String partValue;
-        String after = "InstallFiles";
-        do {
-            String propID;
-            if( rest.length() < 200 ) {
-                propID = id;
-                partValue = rest;
-            } else {
-                propID = id + count;
-                partValue = rest.substring( 0, 200 );
-                int brackets = 0;
-                int lastSeroPosition = 0;
-                // search for place holder
-                for( int i = 0; i < partValue.length(); i++ ) {
-                    char ch = partValue.charAt( i );
-                    switch( ch ) {
-                        case '[':
-                            if( brackets == 0 ) {
-                                lastSeroPosition = i;
-                            }
-                            brackets++;
-                            break;
-                        case ']':
-                            brackets--;
-                            if( brackets == 0 ) {
-                                lastSeroPosition = i + 1;
-                            }
-                            break;
-                    }
-                }
-                if( brackets != 0 ) {
-                    partValue = partValue.substring( 0, lastSeroPosition );
-                }
-                if( partValue.length() == 0 ) {
-                    throw new GradleException( "Invalid property value: " + value );
-                }
-                rest = '[' + propID + ']' + rest.substring( partValue.length() );
-            }
-            String actionID = "action." + propID;
-            Element action = getOrCreateChildById( product, "CustomAction", actionID );
-            addAttributeIfNotExists( action, "Property", propID );
-            addAttributeIfNotExists( action, "Value", partValue );
-            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", actionID );
-            addAttributeIfNotExists( custom, "After", after );
-            after = actionID;
-            count++;
-        } while( partValue != rest );
-    }
+//    private void addLargeProperty( Element product, String id, final String value ) {
+//        int count = 0;
+//        String rest = value;
+//        String partValue;
+//        String after = "InstallFiles";
+//        do {
+//            String propID;
+//            if( rest.length() < 200 ) {
+//                propID = id;
+//                partValue = rest;
+//            } else {
+//                propID = id + count;
+//                partValue = rest.substring( 0, 200 );
+//                int brackets = 0;
+//                int lastSeroPosition = 0;
+//                // search for place holder
+//                for( int i = 0; i < partValue.length(); i++ ) {
+//                    char ch = partValue.charAt( i );
+//                    switch( ch ) {
+//                        case '[':
+//                            if( brackets == 0 ) {
+//                                lastSeroPosition = i;
+//                            }
+//                            brackets++;
+//                            break;
+//                        case ']':
+//                            brackets--;
+//                            if( brackets == 0 ) {
+//                                lastSeroPosition = i + 1;
+//                            }
+//                            break;
+//                    }
+//                }
+//                if( brackets != 0 ) {
+//                    partValue = partValue.substring( 0, lastSeroPosition );
+//                }
+//                if( partValue.length() == 0 ) {
+//                    throw new GradleException( "Invalid property value: " + value );
+//                }
+//                rest = '[' + propID + ']' + rest.substring( partValue.length() );
+//            }
+//            String actionID = "action." + propID;
+//            Element action = getOrCreateChildById( product, "CustomAction", actionID );
+//            addAttributeIfNotExists( action, "Property", propID );
+//            addAttributeIfNotExists( action, "Value", partValue );
+//            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+//            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", actionID );
+//            addAttributeIfNotExists( custom, "After", after );
+//            after = actionID;
+//            count++;
+//        } while( partValue != rest );
+//    }
 
     /**
      * Create a valid id from path segments.
@@ -746,7 +763,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Create a reproducible GUID
      * 
      * @param id a parameter as random input
-     * @return
+     * @return the GUID
      */
     String getGuid( String id ) {
         return UUID.nameUUIDFromBytes( (setup.getVendor().hashCode() + setup.getApplication() + id).getBytes() ).toString();
