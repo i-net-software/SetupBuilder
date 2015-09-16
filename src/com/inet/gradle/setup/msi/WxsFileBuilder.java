@@ -54,11 +54,15 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  */
 class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
+    private static final String     ICON_ID = "icon.ico";
+
     private HashSet<String>         components = new HashSet<>();
 
     private HashMap<String, String> ids        = new HashMap<>();
 
     private String                  jvmDll;
+
+    private String                  javaDir;
 
     private boolean                 isAddFiles;
 
@@ -122,7 +126,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addGUI( product );
         addIcon( product );
         addServices( installDir );
-        addShortCuts( product );
+        addShortcuts( product );
         addRunAfter( product );
         addDeleteFiles( installDir );
 
@@ -290,12 +294,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         task.getProject().getLogger().lifecycle( "\tbundle jre: " + jreDir );
 
         int baseLength = jreDir.getAbsolutePath().length();
-        String target = setup.getBundleJreTarget().replace( '/', '\\' );
-        if( target.endsWith( "\\" ) ) {
+        javaDir = setup.getBundleJreTarget().replace( '/', '\\' );
+        if( javaDir.endsWith( "\\" ) ) {
             baseLength++;
         }
 
-        addDirectory( installDir, jreDir, baseLength, target );
+        addDirectory( installDir, jreDir, baseLength, javaDir );
     }
 
     /**
@@ -359,10 +363,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             // no icon was set
             return;
         }
-        Element icon = getOrCreateChildById( product, "Icon", "icon.ico" );
+        Element icon = getOrCreateChildById( product, "Icon", ICON_ID );
         addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
         Element appProduction = getOrCreateChildById( product, "Property", "ARPPRODUCTICON" );
-        addAttributeIfNotExists( appProduction, "Value", "icon.ico" );
+        addAttributeIfNotExists( appProduction, "Value", ICON_ID );
     }
 
     /**
@@ -477,8 +481,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the shortcuts if which was define.
      * @param product the node of the product
+     * @throws IOException If any I/O exception occur on icon loading
      */
-    private void addShortCuts( Element product ) {
+    private void addShortcuts( Element product ) throws IOException {
         List<DesktopStarter> starters = setup.getDesktopStarters();
         if( starters.isEmpty() ) {
             return;
@@ -504,8 +509,25 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
             addAttributeIfNotExists( shortcut, "WorkingDirectory", "INSTALLDIR" );
             String target = starter.getExecutable();
+            String iconID;
+            if( starter.getIcons() != null ) {
+                if( starter.getIcons().equals( setup.getIcons() ) ) {
+                    iconID = ICON_ID;
+                } else {
+                    File iconFile = ImageFactory.getImageFile( task.getProject(), starter.getIcons(), buildDir, "ico" );
+                    iconID = id( starter.getName() + ".ico" );
+                    Element icon = getOrCreateChildById( product, "Icon", iconID );
+                    addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
+                }
+            } else {
+                iconID = null;
+            }
             if( target == null || target.isEmpty() ) {
-                target = "java.exe";
+                // if target is empty then it must be a Java application
+                target = "[INSTALLDIR]" + javaDir + "bin\\javaw.exe";
+                if( iconID == null ) {
+                    iconID = ICON_ID;
+                }
             } else {
                 target = "[INSTALLDIR]" + target;
             }
@@ -513,8 +535,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             if( !starter.getStartArguments().isEmpty() ) {
                 addAttributeIfNotExists( shortcut, "Arguments", starter.getStartArguments() );
             }
+            if( iconID != null ) {
+                addAttributeIfNotExists( shortcut, "Icon", iconID );
+            }
         }
-        
     }
 
     /**

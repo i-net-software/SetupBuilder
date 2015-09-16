@@ -25,6 +25,7 @@ public class DesktopStarter {
     private String             description;
     private String             mimeTypes;
     private String             categories;
+    private Object             icons;
 
     /**
      * Create a new DesktopStarter
@@ -183,4 +184,23 @@ public class DesktopStarter {
     public String getCategories() {
         return categories;
     }
+
+    /**
+     * Get the icons for this desktop/shortcut entry.
+     * @return the icons
+     */
+    public Object getIcons() {
+        return icons;
+    }
+
+    /**
+     * Set the icons for desktop/shortcut entry. This can be one or multiple images in different size. The usage depends on the
+     * platform. This can be an *.ico file, *.icns file or an list of Java readable image files like *.png or *.jpeg.
+     * 
+     * @param icons the icons
+     */
+    public void setIcons( Object icons ) {
+        this.icons = icons;
+    }
+
 }
