@@ -197,6 +197,10 @@ public class SetupBuilder implements SetupSources {
         this.licenseFile = licenseFile;
     }
 
+    /**
+     * Get the icons for the setup.
+     * @return the icons
+     */
     public Object getIcons() {
         return icons;
     }
