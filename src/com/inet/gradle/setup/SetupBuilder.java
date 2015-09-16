@@ -139,6 +139,10 @@ public class SetupBuilder implements SetupSources {
         this.application = application;
     }
 
+    /**
+     * Get the version of the setup. If not set a version of 1.0 is returned
+     * @return the version
+     */
     public String getVersion() {
         if( version != null ) {
             return version;
@@ -150,12 +154,16 @@ public class SetupBuilder implements SetupSources {
         return "1.0";
     }
 
+    /**
+     * Set the version of the setup.
+     * @param version the version
+     */
     public void setVersion( String version ) {
         this.version = version;
     }
 
     /**
-     * Get the base name of the setup file. If not set then the project name is used.
+     * Get the base name of the setup file. If not set then the project.archivesBaseName is used.
      * 
      * @return the base name
      */
@@ -163,9 +171,17 @@ public class SetupBuilder implements SetupSources {
         if( baseName != null ) {
             return baseName;
         }
+        Object name = project.getProperties().get( "archivesBaseName" );
+        if( name != null ) {
+            return name.toString();
+        }
         return project.getName();
     }
 
+    /**
+     * Set the base name for the setup file.
+     * @param baseName new base name
+     */
     public void setBaseName( String baseName ) {
         this.baseName = baseName;
     }
