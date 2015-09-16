@@ -19,9 +19,18 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**
+ * A OutputStream that add an indentation on efery line for formatting.
+ * 
+ * @author Volker Berlin
+ */
 public class IndentationOutputStream extends FilterOutputStream {
     private boolean needIndentation = true;
 
+    /**
+     * Create a instance.
+     * @param out underling stream.
+     */
     public IndentationOutputStream( OutputStream out ) {
         super( out );
     }
@@ -43,11 +52,11 @@ public class IndentationOutputStream extends FilterOutputStream {
      * {@inheritDoc}
      */
     @Override
-    public void close() throws IOException {
+    public void flush() throws IOException {
         if( !needIndentation ) {
             super.write( '\n' );
             needIndentation = true;
         }
-        super.close();
+        super.flush();
     }
 }

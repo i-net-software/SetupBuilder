@@ -62,6 +62,15 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
     	exec( parameters, input, output, false);
     }
 
+    /**
+     * Execute an external process.
+     * 
+     * @param parameters command line
+     * @param input optional InputStream for the process
+     * @param output optional OutputStream for the process
+     * @param ignoreExitValue true, does not throw an exception if the return code is not equals sero.
+     */
+    @SuppressWarnings( "resource" )
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, boolean ignoreExitValue ) {
         // print command line to the log
         StringBuilder log = new StringBuilder( "\t" );
@@ -87,7 +96,7 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         action.setStandardOutput( output );
         try {
             action.execute();
-            output.close();
+            output.flush();
         } catch( Throwable th ) {
             throw new RuntimeException( th );
         }
