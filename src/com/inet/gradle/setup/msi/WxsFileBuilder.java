@@ -620,7 +620,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element dir = getDirectory( installDir, segments );
             Element component = getComponent( dir, "deleteFiles" + id( segments ) );
             Element remove = getOrCreateChildById( component, "RemoveFile", id( pattern ) );
-            addAttributeIfNotExists( remove, "On", "install" );
+            addAttributeIfNotExists( remove, "On", "both" );
             addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
         }
     }
