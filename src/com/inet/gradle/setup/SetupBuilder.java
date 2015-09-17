@@ -63,7 +63,7 @@ public class SetupBuilder implements SetupSources {
 
     private String                 mainJar;
 
-    private String                 runAfter;
+    private DesktopStarter         runAfter;
 
     private List<DocumentType>     documentTypes   = new ArrayList<>();
 
@@ -319,7 +319,7 @@ public class SetupBuilder implements SetupSources {
      * A command run after the installer.
      * @return the command or null
      */
-    public String getRunAfter() {
+    public DesktopStarter getRunAfter() {
         return runAfter;
     }
 
@@ -328,7 +328,16 @@ public class SetupBuilder implements SetupSources {
      * @param runAfter the command
      */
     public void setRunAfter( String runAfter ) {
-        this.runAfter = runAfter;
+        this.runAfter = new DesktopStarter( this );
+        this.runAfter.setExecutable( runAfter );
+    }
+
+    /**
+     * Set a command that run after the installer
+     * @param closue the command
+     */
+    public void runAfter( Closure<?> closue ) {
+        runAfter = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
     }
 
     /**
@@ -336,7 +345,7 @@ public class SetupBuilder implements SetupSources {
      * 
      * @param closue document type
      */
-    public void documentType( Closure closue ) {
+    public void documentType( Closure<?> closue ) {
         DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( this ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
             throw new GradleException( "documentType must contains minimum one fileExtension." );

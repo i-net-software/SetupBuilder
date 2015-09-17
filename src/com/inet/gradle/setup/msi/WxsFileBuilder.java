@@ -537,21 +537,44 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
             if( target == null || target.isEmpty() ) {
                 // if target is empty then it must be a Java application
-                target = "[INSTALLDIR]" + javaDir + "bin\\javaw.exe";
                 if( iconID == null ) {
                     iconID = ICON_ID;
                 }
-            } else {
-                target = "[INSTALLDIR]" + target;
             }
+            String[] cmd = getCommandLine( starter );
+            target = cmd[0];
+            String arguments = cmd[1];
             addAttributeIfNotExists( shortcut, "Target", target );
-            if( !starter.getStartArguments().isEmpty() ) {
-                addAttributeIfNotExists( shortcut, "Arguments", starter.getStartArguments() );
+            if( !arguments.isEmpty() ) {
+                addAttributeIfNotExists( shortcut, "Arguments", arguments );
             }
             if( iconID != null ) {
                 addAttributeIfNotExists( shortcut, "Icon", iconID );
             }
         }
+    }
+
+    /**
+     * Get the command of the starter without arguments
+     * 
+     * @param starter the DesktopStarter
+     * @return [0] - target; [1] - arguments; [2] - both
+     */
+    private String[] getCommandLine( DesktopStarter starter ) {
+        String target = starter.getExecutable();
+        String arguments = starter.getStartArguments();
+        if( target == null || target.isEmpty() ) {
+            if( javaDir != null ) {
+                target = "[INSTALLDIR]" + javaDir + "\\bin\\javaw.exe";
+                arguments = "-cp " + starter.getMainJar() + " " + starter.getMainClass() + " " + arguments;
+            } else {
+                target = "cmd.exe";
+                arguments = "/C javaw.exe -cp \"[INSTALLDIR]" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
+            }
+        } else {
+            target = "[INSTALLDIR]" + target;
+        }
+        return new String[] { target, arguments, target + " " + arguments };
     }
 
     /**
@@ -564,7 +587,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
         Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget" );
-        addAttributeIfNotExists( target, "Value", "[INSTALLDIR]" + setup.getRunAfter() );
+        addAttributeIfNotExists( target, "Value", getCommandLine( setup.getRunAfter() )[2] );
 
         Element action = getOrCreateChildById( product, "CustomAction", "runAfter" );
         addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
