@@ -574,7 +574,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         } else {
             target = "[INSTALLDIR]" + target;
         }
-        return new String[] { target, arguments, target + " " + arguments };
+        return new String[] { target, arguments, '\"' +target + "\" " + arguments };
     }
 
     /**
@@ -586,12 +586,18 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( setup.getRunAfter() == null ) {
             return;
         }
-        Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget" );
-        addAttributeIfNotExists( target, "Value", getCommandLine( setup.getRunAfter() )[2] );
-
+        String[] cmd = getCommandLine( setup.getRunAfter() );
         Element action = getOrCreateChildById( product, "CustomAction", "runAfter" );
-        addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
-        addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
+        if( cmd[1].isEmpty() ) {
+            Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget" );
+            addAttributeIfNotExists( target, "Value", cmd[0] );
+            addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
+            addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
+        } else {
+            addAttributeIfNotExists( action, "Directory", "INSTALLDIR" );
+            addAttributeIfNotExists( action, "ExeCommand", cmd[2] );
+            addAttributeIfNotExists( action, "Return", "asyncNoWait" );
+        }
 
         Element ui = getOrCreateChild( product, "UI" );
         Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog" );
