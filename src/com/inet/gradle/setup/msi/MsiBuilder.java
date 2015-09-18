@@ -50,6 +50,9 @@ class MsiBuilder extends AbstractBuilder<Msi> {
         super( msi, setup, fileResolver );
     }
 
+    /**
+     * Build the MSI installer.
+     */
     void build() {
         try {
             File wxsFile = getWxsFile();
@@ -126,6 +129,9 @@ class MsiBuilder extends AbstractBuilder<Msi> {
 
     /**
      * Call the light.exe tool.
+     * 
+     * @param language the target language
+     * @return the generated msi file
      */
     private File light( MsiLanguages language ) {
         File out = new File( buildDir, setup.getSetupName() + '_' + language.getCulture() + ".msi" );
@@ -184,7 +190,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * 
      * @param mui the multilingual user interface (MUI) installer file
      * @param file the current msi file
-     * @param current language
+     * @param language current language
      * @return the *.mst file
      */
     private File msitran( File mui, File file, MsiLanguages language ) {
@@ -220,8 +226,9 @@ class MsiBuilder extends AbstractBuilder<Msi> {
 
     /**
      * Sign a file if the needed information are set.
-     * @param file
-     * @throws IOException
+     * 
+     * @param file file to sign
+     * @throws IOException If any I/O error occur on loading of the sign tool
      */
     private void signTool( File file ) throws IOException {
         SignTool sign = task.getSignTool();
@@ -295,6 +302,17 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * @return the path
      */
     private static String getToolPath( String tool ) {
+        // first check the environ variable WIX
+        String wix = System.getenv( "WIX" );
+        if( wix != null ) {
+            File file = new File( wix );
+            file = new File( file, "bin\\" + tool );
+            if( file.exists() ) {
+                return file.getAbsolutePath();
+            }
+        }
+
+        // search on well known folders
         String programFilesStr = System.getenv( "ProgramFiles(x86)" );
         if( programFilesStr == null ) {
             programFilesStr = System.getenv( "ProgramW6432" );
