@@ -457,6 +457,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
 
         File prunsrv = ResourceUtils.extract( getClass(), task.getArch() + "/prunsrv.exe", buildDir );
+        File prunmgr = ResourceUtils.extract( getClass(), "x86/prunmgr.exe", buildDir );
 
         for( Service service : services ) {
             String name = service.getName();
@@ -506,6 +507,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addAttributeIfNotExists( start, "Stop", "both" );
                 addAttributeIfNotExists( start, "Remove", "uninstall" );
             }
+
+            addFile( component, prunmgr, id + "GUI", name + ".exe", true );
         }
     }
 
