@@ -289,15 +289,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             if( !java.isDirectory() ) {
                 throw new GradleException( "No installed Java VMs found: " + java );
             }
-            ArrayList<File> versions = new ArrayList<File>();
-            String javaVersion = "jre" + jre;
-            for( File file : java.listFiles() ) {
-                if( file.isDirectory() && file.getName().startsWith( javaVersion ) ) {
-                    versions.add( file );
-                }
-            }
+            List<File> versions = getDirectories( java, "jre" + jre );
             if( versions.size() == 0 ) {
-                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + java + " Its search for an folder that starts with: " + javaVersion );
+                // if the java version is like "1.8" then search also for "jre8"
+                String jreStr = jre.toString();
+                if( jreStr.length() > 2 && jreStr.startsWith( "1." ) ) {
+                    versions = getDirectories( java, "jre" + jreStr.substring( 2 ) );
+                }
+                if( versions.size() == 0 ) {
+                    throw new GradleException( "bundleJre version " + jre + " can not be found in: '" + java + "' Its search for an folder that starts with: jre" + jre );
+                }
             }
             Collections.sort( versions );
             jreDir = versions.get( versions.size() - 1 );
@@ -312,6 +313,23 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
 
         addDirectory( installDir, jreDir, baseLength, javaDir );
+    }
+
+    /**
+     * Add all directories from the directory that start with the prefix.
+     * 
+     * @param parent parent directory
+     * @param prefix the searching prefix
+     * @return list of directories
+     */
+    private static List<File> getDirectories( File parent, String prefix ) {
+        ArrayList<File> files = new ArrayList<File>();
+        for( File file : parent.listFiles() ) {
+            if( file.isDirectory() && file.getName().startsWith( prefix ) ) {
+                files.add( file );
+            }
+        }
+        return files;
     }
 
     /**
