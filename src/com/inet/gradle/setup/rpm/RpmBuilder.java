@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.gradle.api.internal.file.FileResolver;
@@ -32,9 +34,10 @@ import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.rpm.RpmControlFileBuilder.Script;
 
 public class RpmBuilder extends AbstractBuilder<Rpm> {
-
+	
 	
 	private RpmControlFileBuilder  controlBuilder;
     /**
@@ -102,15 +105,13 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
         initScript.setPlaceholder( "startArguments",
                                    "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
-        String initScriptFile = "etc/init.d/" + serviceUnixName;
+        String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
-//        controlBuilder.addConfFile( initScriptFile );
-//        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
-//        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " start >/dev/null\nfi");
-//        controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " stop >/dev/null\nfi");
-//        controlBuilder.addTailScriptFragment( Script.POSTRM,   "if [ \"$1\" = \"purge\" ] ; then\n" + 
-//            "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
-//            "fi" );
+        controlBuilder.addConfFile( initScriptFile );
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start >/dev/null\nfi");
+        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
+        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --del "+serviceUnixName+ "\nfi");
     }
     
     /**
@@ -174,8 +175,8 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     // share
     private void setupStarter( DesktopStarter starter ) throws IOException {
         String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
-        String consoleStarterPath = "BUILD/usr/bin/" + unixName;
-        try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
+        String consoleStarterPath = "/usr/bin/" + unixName;
+        try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
             fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
                 + starter.getStartArguments() + " \"$@\"" );
@@ -196,7 +197,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
             fw.write( "[Desktop Entry]\n" );
             fw.write( "Name=" + starter.getName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
-            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
+            fw.write( "Exec=" + consoleStarterPath + " %F\n" );
             fw.write( "Icon=" + unixName + "\n" );
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
@@ -247,5 +248,6 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         command.add( "SPECS/" + setup.getBaseName() + ".spec" );
         exec( command );
     }
+
 
 }

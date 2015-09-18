@@ -66,6 +66,8 @@ public class Rpm extends AbstractSetupTask {
 	private ArrayList<String> 		post = new ArrayList<String>();
 
 	private ArrayList<String> 		preun = new ArrayList<String>();
+	
+	private ArrayList<String> 		postun = new ArrayList<String>();
 
 	
 
@@ -236,6 +238,13 @@ public class Rpm extends AbstractSetupTask {
 		this.post.add( post );
 	}
 	
+	public ArrayList<String> getPostun() {
+		return postun;
+	}
+	
+	public void setPostun(String post) {
+		this.postun.add( post );
+	}
 
 	public ArrayList<String> getClean() {
 		return clean;

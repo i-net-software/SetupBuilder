@@ -55,8 +55,8 @@ class RpmControlFileBuilder {
         PREINST, POSTINST, PRERM, POSTRM
     }
     
-    Map<Script, StringBuilder> scriptHeadMap = new HashMap<>();
-    Map<Script, StringBuilder> scriptTailMap = new HashMap<>();
+//    Map<Script, StringBuilder> scriptHeadMap = new HashMap<>();
+    Map<Script, StringBuilder> scriptMap = new HashMap<>();
     
     
     /**
@@ -131,6 +131,8 @@ class RpmControlFileBuilder {
 
 			putPreun(controlWriter);
 
+			putPostun(controlWriter);
+			
 			controlWriter.flush();
 			
 		} finally {
@@ -162,6 +164,10 @@ class RpmControlFileBuilder {
 		for (String preun : preuns) {
 			controlWriter.write(preun + NEWLINE);	
 		}
+		StringBuilder prep_script = scriptMap.get( Script.PRERM );
+		if(prep_script != null) {
+			controlWriter.write(prep_script.toString() + NEWLINE);
+		}
 	}
 
 	/**
@@ -175,6 +181,27 @@ class RpmControlFileBuilder {
 		for (String post : posts) {
 			controlWriter.write(post + NEWLINE);	
 		}	
+		StringBuilder prep_script = scriptMap.get( Script.POSTINST );
+		if(prep_script != null) {
+			controlWriter.write(prep_script.toString() + NEWLINE);
+		}
+	}
+	
+	/**
+	 * This scripts is executes after the package has been installed.
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putPostun(OutputStreamWriter controlWriter) throws IOException {
+		controlWriter.write(NEWLINE + "%postun" + NEWLINE);
+		ArrayList<String> posts = rpm.getPostun();
+		for (String post : posts) {
+			controlWriter.write(post + NEWLINE);	
+		}	
+		StringBuilder prep_script = scriptMap.get( Script.POSTRM );
+		if(prep_script != null) {
+			controlWriter.write(prep_script.toString() + NEWLINE);
+		}
 	}
 	
 	/**
@@ -185,6 +212,9 @@ class RpmControlFileBuilder {
 	private void putFiles(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%files" + NEWLINE);
 		controlWriter.write("/usr/**/*" + NEWLINE);
+		if(setup.getServices() != null && setup.getServices().size() > 0) {
+			controlWriter.write("%config /etc/init.d/*" + NEWLINE);	
+		}
 		
 	}
 
@@ -215,6 +245,7 @@ class RpmControlFileBuilder {
 	private void putInstall(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%install" + NEWLINE);
 		controlWriter.write("cp -R usr %{buildroot}" + NEWLINE);
+		controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);
 		ArrayList<String> installs = rpm.getInstall();
 		for (String install : installs) {
 			controlWriter.write(install + NEWLINE);	
@@ -244,6 +275,11 @@ class RpmControlFileBuilder {
 		ArrayList<String> preps = rpm.getPrep();
 		for (String prep : preps) {
 			controlWriter.write(prep + NEWLINE);	
+		}
+		
+		StringBuilder prep_script = scriptMap.get( Script.PREINST );
+		if(prep_script != null) {
+			controlWriter.write(prep_script.toString() + NEWLINE);
 		}
 		
 	}
@@ -359,7 +395,7 @@ class RpmControlFileBuilder {
 	                throws IOException {
 	    String depends = rpm.getDepends();
 	    if(depends == null || depends.length() == 0 ) {
-	        depends = "jdk >= 1.8";
+	        depends = "java-devel >= 1.8";
 	    }
 	    controlWriter.write("Requires: " + depends + NEWLINE);
 	}
@@ -450,11 +486,29 @@ class RpmControlFileBuilder {
 	 * @param script the install script
 	 * @param scriptFragment the fragment to add
 	 */
-	public void addTailScriptFragment(Script script, String scriptFragment) {
-	    StringBuilder sb = scriptTailMap.get( script );
+//	public void addTailScriptFragment(Script script, String scriptFragment) {
+//	    StringBuilder sb = scriptTailMap.get( script );
+//	    if ( sb == null ) {
+//	        sb = new StringBuilder();
+//	        scriptTailMap.put( script, sb );
+//	    } else {
+//	        sb.append( "\n\n" );
+//	    }
+//	    sb.append( scriptFragment );
+//	}
+	
+	
+	 
+    /**
+	 * Adds a fragment to the install script at the specified section.
+	 * @param script the install script section
+	 * @param scriptFragment the fragment to add
+	 */
+	public void addScriptFragment(Script script, String scriptFragment) {
+	    StringBuilder sb = scriptMap.get( script );
 	    if ( sb == null ) {
 	        sb = new StringBuilder();
-	        scriptTailMap.put( script, sb );
+	        scriptMap.put( script, sb );
 	    } else {
 	        sb.append( "\n\n" );
 	    }
@@ -466,16 +520,16 @@ class RpmControlFileBuilder {
 	 * @param script the install script
 	 * @param scriptFragment the fragment to add
 	 */
-	public void addHeadScriptFragment(Script script, String scriptFragment) {
-	    StringBuilder sb = scriptHeadMap.get( script );
-	    if ( sb == null ) {
-	        sb = new StringBuilder();
-	        scriptHeadMap.put( script, sb );
-	    } else {
-	        sb.append( "\n\n" );
-	    }
-	    sb.append( scriptFragment );
-	}
+//	public void addHeadScriptFragment(Script script, String scriptFragment) {
+//	    StringBuilder sb = scriptHeadMap.get( script );
+//	    if ( sb == null ) {
+//	        sb = new StringBuilder();
+//	        scriptHeadMap.put( script, sb );
+//	    } else {
+//	        sb.append( "\n\n" );
+//	    }
+//	    sb.append( scriptFragment );
+//	}
 	
 	/**
 	 * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
