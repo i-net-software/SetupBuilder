@@ -190,7 +190,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     private void addFile( Element installDir, File file, String[] segments ) {
         Element parent = getDirectory( installDir, segments );
 
-        String pathID = segments.length > 1 ? segments[segments.length - 2] : "";
+        String pathID = id( segments, segments.length - 1 );
         String compID = "application_" + pathID;
         Element component = getComponent( parent, compID );
 
