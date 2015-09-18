@@ -350,6 +350,6 @@ class MsiBuilder extends AbstractBuilder<Msi> {
             }
         }
 
-        return tool;
+        throw new GradleException( tool + " was not found. You need to install the WiX Toolset or set the environment variable WIX. You can download the WiX Toolset from http://wixtoolset.org/" );
     }
 }
