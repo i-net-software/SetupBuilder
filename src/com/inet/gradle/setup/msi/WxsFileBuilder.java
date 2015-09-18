@@ -160,7 +160,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element parent = installDir;
         for( int i = 0; i < segments.length - 1; i++ ) {
             String seg = segments[i];
-            parent = getOrCreateChildById( parent, "Directory", id( seg ) );
+            parent = getOrCreateChildById( parent, "Directory", id( segments, i + 1 ) );
             addAttributeIfNotExists( parent, "Name", seg );
         }
         return parent;
@@ -636,8 +636,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         for( String pattern : setup.getDeleteFiles() ) {
             String[] segments = pattern.split( "[/\\\\]" );
             Element dir = getDirectory( installDir, segments );
-            Element component = getComponent( dir, "deleteFiles" + id( segments ) );
-            Element remove = getOrCreateChildById( component, "RemoveFile", id( pattern ) );
+            String id = id( pattern );
+            Element component = getComponent( dir, "deleteFiles" + id );
+            Element remove = getOrCreateChildById( component, "RemoveFile", "removeFile" + id );
             addAttributeIfNotExists( remove, "On", "both" );
             addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
         }
@@ -736,21 +737,24 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 //    }
 
     /**
-     * Create a valid id from path segments.
+     * Create a valid id for a directory from path segments.
      * 
      * @param segments the segments of the path in the target. The last segment contains the file name.
+     * @param length the length of the segments that should be used for the id
      * @return a valid id
      */
-    private String id( String[] segments ) {
-        if( segments.length <= 1 ) {
+    private String id( String[] segments, int length ) {
+        if( length <= 0 ) {
             return "";
-        } else if( segments.length == 2 ) {
-            return id( segments[1] );
+        } else if( length == 1 ) {
+            return id( segments[0] );
         } else {
             StringBuilder builder = new StringBuilder();
-            for( String seg : segments ) {
-                builder.append( '_' );
-                builder.append( seg );
+            for( int i = 0; i < length; i++ ) {
+                if( i > 0 ) {
+                    builder.append( '_' );
+                }
+                builder.append( segments[i] );
             }
             return id( builder.toString() );
         }
