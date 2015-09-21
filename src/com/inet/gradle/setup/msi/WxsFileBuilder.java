@@ -820,6 +820,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @return the GUID
      */
     String getGuid( String id ) {
-        return UUID.nameUUIDFromBytes( (setup.getVendor().hashCode() + setup.getApplication() + id).getBytes() ).toString();
+        return UUID.nameUUIDFromBytes( (setup.getVendor() + setup.getApplication() + id).getBytes() ).toString();
     }
 }
