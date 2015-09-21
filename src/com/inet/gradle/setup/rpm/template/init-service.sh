@@ -27,14 +27,8 @@ WORKINGDIR={{workdir}}
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-# Load the VERBOSE setting and other rcS variables
-. /lib/init/vars.sh
-
-# Define LSB log_* functions.
-# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
-# and status_of_proc is working.
-. /lib/lsb/init-functions
-
+# Source function library
+. /etc/init.d/functions
 
 # Function that starts the daemon/service
 #
@@ -43,19 +37,14 @@ do_start()
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
-	#   2 if daemon could not be started
-	start-stop-daemon --start --chdir $WORKINGDIR --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
-		|| return 1
-	start-stop-daemon -b --chdir $WORKINGDIR --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
-		$DAEMON_ARGS \
-		|| return 2
-	sleep $WAIT
-	if start-stop-daemon --test --start --chdir $WORKINGDIR --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
-		if [ -f "$CATALINA_PID" ]; then
-			rm -f "$CATALINA_PID"
-		fi
+	echo_passed "Starting $NAME: ";
+	if [ -f "$PIDFILE" ]
+	then
+		PID='cat $PIDFILE'
+		echo_passed $NAME already running: $PID
 		return 1
 	else
+		daemonize -c $WORKINGDIR -p $PIDFILE -l $PIDFILE -o $WORKINGDIR/log.txt $DAEMON $DAEMON_ARGS
 		return 0
 	fi
 }
@@ -70,57 +59,58 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE 
-	RETVAL="$?"
-	[ "$RETVAL" = 2 ] && return 2
-	rm -f $PIDFILE
-	return "$RETVAL"
+	killproc -p $PIDFILE $NAME
+	
+	echo " Ausgabe $?"
+	case "$?" in
+		0) echo_success "$NAME was stopped"; rm -f $PIDFILE ;;
+		1) echo_passed "(already running)";;
+		7) echo_warning "$NAME was not running";;
+		*) echo_warning "$NAME could not be stopped "
+	esac
+	
+	return "$?"
 }
  
 case "$1" in
   start)
-	log_daemon_msg "Starting" "$NAME"
+	echo "Starting" "$NAME"
 	do_start
 	case "$?" in
-		0) log_end_msg 0 ;;
-		1) log_success_msg "(already running)"; log_end_msg 0 ;;
-		2) log_end_msg 1 ;;
+		0) exit 0 ;;
+		1) echo_warning "(already running)"; exit 0 ;;
+		2) exit 1 ;;
 	esac
 	;;
   stop)
-	log_daemon_msg "Stopping" "$NAME"
+	echo "Stopping" "$NAME"
 	do_stop
 	case "$?" in
-		0|1) log_end_msg 0 ;;
-		2) log_end_msg 1 ;;
+		0|1) exit 0 ;;
+		2) exit 1 ;;
 	esac
 	;;
   status)
-	if start-stop-daemon --test --start --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
-	    log_success_msg "$NAME is not running."
-	else
-	    log_success_msg "$NAME is running."
-	fi
+	status -p $PIDFILE
 	;;
   restart|force-reload)
 	#
 	# If the "reload" option is implemented then remove the
 	# 'force-reload' alias
 	#
-	log_daemon_msg "Restarting" "$NAME"
 	do_stop
 	case "$?" in
 	  0|1)
 		do_start
 		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
+			0) exit 0 ;;
+			1) echo_warning "(already running)"; exit 0 ;;
+			2) exit 1 ;;
 		esac
 		;;
 	  *)
 		# Failed to stop
-		log_end_msg 1
+		exit 1
 		;;
 	esac
 	;;
