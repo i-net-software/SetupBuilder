@@ -28,15 +28,10 @@ import java.util.Map;
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
- * Builder for the control, postinst and prerm files, that are required for the Debian package tool.
- * <dl>
- * 		<dt>control</dt>
- * 			<dd>contains settings for the package like dependencies, architecture, description</dd>
- * 		<dt>postinst</dt>
- * 			<dd>contains scripts and commands that are executed after the files are copied</dd>
- * 		<dt>prerm</dt>
- * 			<dd>contains scripts and commands that are executed before the files are removed</dd>
- * </dl>init.d
+ * Builder for the SPEC file, that is required for the Redhat package tool.
+ * <br>
+ * This file contains settings for the package like dependencies, architecture, description and 
+ * scripts and commands that are executed before, during and after the installation.
  * 
  * @author Stefan Heidrich
  */
@@ -56,13 +51,12 @@ class RpmControlFileBuilder {
         PREINST, POSTINST, PRERM, POSTRM
     }
     
-//    Map<Script, StringBuilder> scriptHeadMap = new HashMap<>();
     Map<Script, StringBuilder> scriptMap = new HashMap<>();
     
     
     /**
      * the constructor setting the fields
-     * @param deb the task for the debian package
+     * @param rpm the task for the redhat package
      * @param setup the generic task for all setups
      * @param buildDir the directory to build the package in
      */
@@ -73,18 +67,17 @@ class RpmControlFileBuilder {
     }
 
     /**
-     * Create the configuration files for the Debian package based on the settings in the task.
+     * Create the configuration files for the RedHat package based on the settings in the task.
      * 
      * @throws Exception
      */
     void build() throws Exception {
     	
     	createControlFile();
-//      	createScripts();
     }
 
     /**
-     * Creates the 'control' file for the Debian package
+     * Creates the SPEC file for the package
      * @throws IOException if something could not be written to the file
      */
 	private void createControlFile() throws IOException {
@@ -174,7 +167,7 @@ class RpmControlFileBuilder {
 	}
 
 	/**
-	 * This scripts is executes before the package has been installed.
+	 * This script is executed before the package has been installed.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -190,6 +183,7 @@ class RpmControlFileBuilder {
 			controlWriter.write(pre_script.toString() + NEWLINE);
 		}
 		
+		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
 			controlWriter.write("rm -f /usr/share/" + setup.getBaseName() + "/" + file + NEWLINE);	
@@ -198,7 +192,7 @@ class RpmControlFileBuilder {
 	}
 	
 	/**
-	 * This scripts is executes after the package has been installed.
+	 * This script is executed after the package has been installed.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -215,7 +209,7 @@ class RpmControlFileBuilder {
 	}
 	
 	/**
-	 * This scripts is executes after the package has been installed.
+	 * This script is executed after the package has been removed.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -232,7 +226,8 @@ class RpmControlFileBuilder {
 	}
 	
 	/**
-	 * Specifies the files that should be installed
+	 * Specifies the files that should be installed. The files will be installed under /usr in the system.
+	 * If files need to be installed somewhere else these files need to be copied via the post step. 
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -247,6 +242,7 @@ class RpmControlFileBuilder {
 
 	/**
 	 * This is used to clean up the build directory tree. Normally RPM does this for you.
+	 * During the clean step the created package will be copied to the distribution directory. 
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -266,6 +262,8 @@ class RpmControlFileBuilder {
 
 	/**
 	 * Contains the necessary steps to install the build software
+	 * The files in the BUILD directory needs to be copied into the BUILDROOT directory so that the install step 
+	 * finds the files.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -280,7 +278,7 @@ class RpmControlFileBuilder {
 	}
 
 	/**
-	 * This will be executed after the prep scripts
+	 * This will be executed during the building of the package
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -343,6 +341,11 @@ class RpmControlFileBuilder {
 		}
 	}
 
+	/**
+	 * Write the BuildRoot entry to the file. 
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
 	private void putBuildRoot(OutputStreamWriter controlWriter)
 			throws IOException {
 		controlWriter.write("BuildRoot: ${_builddir}/%{name}-root" + NEWLINE);
@@ -378,7 +381,7 @@ class RpmControlFileBuilder {
 	}
 
 	/**
-	 * Write the description to the file. The description is mandatory. If no description is declared a runtime exception will be thrown.
+	 * Write the description to the file. The description is created from the application name and the description entry.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -403,7 +406,8 @@ class RpmControlFileBuilder {
 		}
 	}
 	/**
-	 * Write the dependencies to the file. If no dependencies are specified, the jdk >= 1.8 dependencies will be used.
+	 * Write the dependencies to the file. If no dependencies are specified, the 'java-devel >= 1.8' dependencies will be used.
+	 * If a service is specified the 'daemonize' dependency will also be added.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -434,7 +438,7 @@ class RpmControlFileBuilder {
 	}
 
 	/**
-	 * Write the section to the file. If no section is specified then 'java' will be used.
+	 * Write the section to the file.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -499,27 +503,10 @@ class RpmControlFileBuilder {
 	    confFiles.add( file );
 	}
 	
-
-	/**
-	 * Adds a fragment to the specified install script at the tail section.
-	 * @param script the install script
-	 * @param scriptFragment the fragment to add
-	 */
-//	public void addTailScriptFragment(Script script, String scriptFragment) {
-//	    StringBuilder sb = scriptTailMap.get( script );
-//	    if ( sb == null ) {
-//	        sb = new StringBuilder();
-//	        scriptTailMap.put( script, sb );
-//	    } else {
-//	        sb.append( "\n\n" );
-//	    }
-//	    sb.append( scriptFragment );
-//	}
-	
-	
 	 
     /**
 	 * Adds a fragment to the install script at the specified section.
+	 * These sections are the pre, post, preun and the postun sections.
 	 * @param script the install script section
 	 * @param scriptFragment the fragment to add
 	 */
@@ -528,67 +515,10 @@ class RpmControlFileBuilder {
 	    if ( sb == null ) {
 	        sb = new StringBuilder();
 	        scriptMap.put( script, sb );
-	    } else {
+		    } else {
 	        sb.append( "\n\n" );
 	    }
 	    sb.append( scriptFragment );
 	}
-
-	/**
-	 * Adds a fragment to the specified install script at the head section.
-	 * @param script the install script
-	 * @param scriptFragment the fragment to add
-	 */
-//	public void addHeadScriptFragment(Script script, String scriptFragment) {
-//	    StringBuilder sb = scriptHeadMap.get( script );
-//	    if ( sb == null ) {
-//	        sb = new StringBuilder();
-//	        scriptHeadMap.put( script, sb );
-//	    } else {
-//	        sb.append( "\n\n" );
-//	    }
-//	    sb.append( scriptFragment );
-//	}
 	
-	/**
-	 * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
-	 * they are required.
-	 * @throws IOException on I/O failures
-	 */
-//    private void createScripts() throws IOException {
-//        for(Script script: Script.values()) {
-//        	String scriptName = script.toString().toLowerCase();
-//            Template tmpl = new Template( "deb/template/"+ scriptName+".sh" );
-//            StringBuilder head = scriptHeadMap.get( script );
-//            StringBuilder tail = scriptTailMap.get( script );
-//            
-//            if (head == null && tail == null) {
-//                continue;
-//            }
-//            
-//            if (head != null) {
-//                tmpl.setPlaceholder( "head", head.toString() );
-//            } else {
-//            	tmpl.setPlaceholder( "head", "" );
-//            }
-//            
-//            if (tail != null) {
-//            	tmpl.setPlaceholder( "tail", tail.toString() );
-//            } else {
-//            	tmpl.setPlaceholder( "tail", "" );
-//            }
-//            
-//            File file = new File(buildDir, scriptName);
-//            tmpl.writeTo( file );
-//            Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-//            perms.add( PosixFilePermission.OWNER_READ );
-//            perms.add( PosixFilePermission.OWNER_WRITE );
-//            perms.add( PosixFilePermission.GROUP_READ );
-//            perms.add( PosixFilePermission.OTHERS_READ );
-//            perms.add( PosixFilePermission.OWNER_EXECUTE );
-//            perms.add( PosixFilePermission.GROUP_EXECUTE );
-//            perms.add( PosixFilePermission.OTHERS_EXECUTE );
-//            Files.setPosixFilePermissions( file.toPath(), perms );
-//        }
-//    }
 }
