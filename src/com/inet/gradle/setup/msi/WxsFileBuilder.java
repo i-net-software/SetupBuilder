@@ -136,7 +136,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addGUI( product );
         addIcon( product );
         addServices( installDir );
-        addShortcuts( product );
+        addShortcuts( product, installDir );
         addRunAfter( product );
         addDeleteFiles( installDir );
 
@@ -157,8 +157,20 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @return the directory node
      */
     private Element getDirectory( Element installDir, String[] segments ) {
+        return getDirectory( installDir, segments, segments.length - 1 );
+    }
+
+    /**
+     * Get or create a directory node.
+     * 
+     * @param installDir The XML element of the install directory.
+     * @param segments the segments of the path in the target. The last segment contains the file name.
+     * @param length the used length from the segments
+     * @return the directory node
+     */
+    private Element getDirectory( Element installDir, String[] segments, int length ) {
         Element parent = installDir;
-        for( int i = 0; i < segments.length - 1; i++ ) {
+        for( int i = 0; i < length; i++ ) {
             String seg = segments[i];
             parent = getOrCreateChildById( parent, "Directory", id( segments, i + 1 ) );
             addAttributeIfNotExists( parent, "Name", seg );
@@ -316,7 +328,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
-     * Add all directories from the directory that start with the prefix.
+     * Get all directories from the directory that start with the prefix.
      * 
      * @param parent parent directory
      * @param prefix the searching prefix
@@ -558,9 +570,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the shortcuts if which was define.
      * @param product the node of the product
+     * @param installDir referent to INSTALLDIR
      * @throws IOException If any I/O exception occur on icon loading
      */
-    private void addShortcuts( Element product ) throws IOException {
+    private void addShortcuts( Element product, Element installDir ) throws IOException {
         List<DesktopStarter> starters = setup.getDesktopStarters();
         if( starters.isEmpty() ) {
             return;
@@ -568,11 +581,24 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         for( DesktopStarter starter : starters ) {
             Element component = getShortcutComponent( starter, product );
-            String id = id( starter.getName() );
+            String id = id( starter.getLocation() + "_" + starter.getName() );
             Element shortcut = getOrCreateChildById( component, "Shortcut", id );
             addAttributeIfNotExists( shortcut, "Name", starter.getName() );
             addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
-            addAttributeIfNotExists( shortcut, "WorkingDirectory", "INSTALLDIR" );
+
+            // find the ID of the working directory
+            String workDir = starter.getWorkDir();
+            if( workDir != null && !workDir.isEmpty() ) {
+                String[] segments = workDir.split( "[/\\\\]" );
+                Element dir = getDirectory( installDir, segments, segments.length );
+                workDir = dir.getAttribute( "Id" );
+            } else {
+                workDir = "INSTALLDIR";
+            }
+
+            addAttributeIfNotExists( shortcut, "WorkingDirectory", workDir );
+
+            // find the optional id for an icon
             String target = starter.getExecutable();
             String iconID;
             if( starter.getIcons() != null ) {
@@ -593,6 +619,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     iconID = ICON_ID;
                 }
             }
+
             String[] cmd = getCommandLine( starter );
             target = cmd[0];
             String arguments = cmd[1];
