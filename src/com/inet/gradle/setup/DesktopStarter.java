@@ -27,6 +27,7 @@ public class DesktopStarter {
     private String             categories;
     private Object             icons;
     private Location           location;
+    private String             workDir;
 
     /**
      * Create a new DesktopStarter
@@ -202,6 +203,22 @@ public class DesktopStarter {
      */
     public void setIcons( Object icons ) {
         this.icons = icons;
+    }
+
+    /**
+     * Get the working directory of this desktop/shortcut entry.
+     * @return the working directory
+     */
+    public String getWorkDir() {
+        return workDir;
+    }
+
+    /**
+     * Set the working directory. If not set then the installation directory is used.
+     * @param workDir the work directory.
+     */
+    public void setWorkDir( String workDir ) {
+        this.workDir = workDir;
     }
 
     /**
