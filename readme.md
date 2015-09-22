@@ -24,8 +24,9 @@ The plugin add the follow tasks:
 
 Sample Usage
 ----
+### Base Sample
     plugins {
-        id "de.inetsoftware.setupbuilder"
+        id "de.inetsoftware.setupbuilder" version "1.1.1"
     }
     
     setupBuilder {
@@ -34,7 +35,9 @@ Sample Usage
         baseName = "SetupBuilder"
         version = '1.0'
         licenseFile = 'license.txt'
+        // icons in different sizes for different usage. you can also use a single *.ico or *.icns file
         icons = ['icon16.png', 'icon32.png', 'icon48.png', 'icon128.png']
+        // all files for all platforms
         from( 'source' ) {
             include 'files/*.jar'
         }
@@ -42,6 +45,7 @@ Sample Usage
     }
     
     msi {
+        // files only for the Windows platform
         from( 'windows' ) {
             include 'foo.exe'
             rename { 'bar.exe' }
@@ -49,6 +53,23 @@ Sample Usage
     }
 
 More properties can be found in the sources of [setupBuilder][setupBuilder], [msi][msi], [deb][deb], [rpm][rpm] and [dmg][dmg].
+
+### Zip Sample
+Create a zip file with the same files define in setupBuilder extension.
+
+    ...
+    setupBuilder {
+        ...
+    }
+    task zip(type: Zip) {
+        with setupBuilder
+        doLast {
+            artifacts {
+                archives zip
+            }
+        }
+    }
+
 
 License
 ----
