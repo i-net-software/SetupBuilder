@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -206,6 +207,29 @@ class RpmControlFileBuilder {
 		if(post_script != null) {
 			controlWriter.write(post_script.toString() + NEWLINE);
 		}
+		
+		
+		DesktopStarter starter = setup.getRunAfter();
+		if(starter != null ) {
+			String executable = starter.getExecutable();
+			String mainClass = starter.getMainClass();
+			String workingDir = starter.getWorkDir();
+			if( executable != null ) {
+				if( workingDir != null ) {
+					controlWriter.write("( cd " + workingDir + " && " + executable + " )" + NEWLINE);
+				} else {
+					controlWriter.write(executable + NEWLINE);	
+				}
+				
+			} else if( mainClass != null ) {
+				if( workingDir != null ) {
+					controlWriter.write("( cd " + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + " )" + NEWLINE);
+				} else {
+					controlWriter.write("java -cp " + starter.getMainJar()  + " " +  mainClass + NEWLINE);	
+				}
+			}
+		}
+		
 	}
 	
 	/**
