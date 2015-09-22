@@ -26,6 +26,7 @@ public class DesktopStarter {
     private String             mimeTypes;
     private String             categories;
     private Object             icons;
+    private Location           location;
 
     /**
      * Create a new DesktopStarter
@@ -203,4 +204,29 @@ public class DesktopStarter {
         this.icons = icons;
     }
 
+    /**
+     * Get the location of this desktop/shortcut entry.
+     * @return the location
+     */
+    public Location getLocation() {
+        if( location != null ) {
+            return location;
+        }
+        return Location.StartMenu;
+    }
+
+    /**
+     * Set the location of this desktop/shortcut entry.
+     * @param location new location
+     */
+    public void setLocation( Location location ) {
+        this.location = location;
+    }
+
+    /**
+     * Possible locations for desktop/shortcut entries.
+     */
+    public static enum Location {
+        StartMenu, ApplicationMenu, InstallDir;
+    }
 }

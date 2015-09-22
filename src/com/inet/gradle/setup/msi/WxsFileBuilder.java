@@ -513,6 +513,49 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
+     * Get the parent Component for a shortcut.
+     * 
+     * @param starter the shortcut description
+     * @param product the node of the product
+     * @return the component node
+     */
+    private Element getShortcutComponent( DesktopStarter starter, Element product ) {
+        Element targetDir = getOrCreateChildById( product, "Directory", "TARGETDIR" );
+        String refDirID;
+        boolean removeOnUninstall = false;
+        switch( starter.getLocation() ) {
+            default:
+            case StartMenu:
+                refDirID = "ProgramMenuFolder";
+                getOrCreateChildById( targetDir, "Directory", refDirID );
+                getOrCreateChildById( product, "DirectoryRef", refDirID );
+                break;
+            case ApplicationMenu:
+                refDirID = "ApplicationProgramsFolder";
+                Element menuFolders = getOrCreateChildById( targetDir, "Directory", "ProgramMenuFolder" );
+                Element appProgrammsFolder = getOrCreateChildById( menuFolders, "Directory", "ApplicationProgramsFolder" );
+                addAttributeIfNotExists( appProgrammsFolder, "Name", setup.getApplication() );
+                removeOnUninstall = true;
+                break;
+            case InstallDir:
+                refDirID = "INSTALLDIR";
+                break;
+        }
+        Element dirRef = getOrCreateChildById( product, "DirectoryRef", refDirID );
+
+        Element component = getComponent( dirRef, "shortcuts_" + refDirID );
+        if( removeOnUninstall ) {
+            Element removeFolder = getOrCreateChildById( component, "RemoveFolder", "ApplicationProgramsFolder" );
+            addAttributeIfNotExists( removeFolder, "On", "uninstall" );
+        }
+        Element reg = addRegistryKey( component, "HKCU", "shortcuts_reg_" + refDirID, "Software\\" + setup.getVendor() + "\\" + setup.getApplication() );
+        reg = addRegistryValue( reg, "shortcut_" + refDirID, "string", "" );
+        addAttributeIfNotExists( reg, "KeyPath", "yes" );
+
+        return component;
+    }
+
+    /**
      * Add the shortcuts if which was define.
      * @param product the node of the product
      * @throws IOException If any I/O exception occur on icon loading
@@ -523,20 +566,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
 
-        Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR" );
-        Element menuFolders = getOrCreateChildById( directory, "Directory", "ProgramMenuFolder" );
-        Element appProgrammsFolder = getOrCreateChildById( menuFolders, "Directory", "ApplicationProgramsFolder" );
-        addAttributeIfNotExists( appProgrammsFolder, "Name", setup.getApplication() );
-        Element dirRef = getOrCreateChildById( product, "DirectoryRef", "ApplicationProgramsFolder" );
-
-        Element component = getComponent( dirRef, "shortcuts" );
-        Element removeFolder = getOrCreateChildById( component, "RemoveFolder", "ApplicationProgramsFolder" );
-        addAttributeIfNotExists( removeFolder, "On", "uninstall" );
-        Element reg = addRegistryKey( component, "HKCU", "shortcuts_reg", "Software\\" + setup.getVendor() + "\\" + setup.getApplication() );
-        reg = addRegistryValue( reg, "shortcut", "string", "" );
-        addAttributeIfNotExists( reg, "KeyPath", "yes" );
-
         for( DesktopStarter starter : starters ) {
+            Element component = getShortcutComponent( starter, product );
             String id = id( starter.getName() );
             Element shortcut = getOrCreateChildById( component, "Shortcut", id );
             addAttributeIfNotExists( shortcut, "Name", starter.getName() );
