@@ -392,6 +392,9 @@ class RpmControlFileBuilder {
 	    if(depends == null || depends.length() == 0 ) {
 	        depends = "java-devel >= 1.8";
 	    }
+	    if(setup.getServices() != null && setup.getServices().size() > 0) {
+	    	depends = depends + ", daemonize";
+	    }
 	    controlWriter.write("Requires: " + depends + NEWLINE);
 	}
 
