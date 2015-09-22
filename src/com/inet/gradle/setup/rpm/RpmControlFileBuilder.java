@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -127,6 +128,8 @@ class RpmControlFileBuilder {
 			
 			putFiles(controlWriter);
 			
+			putPre(controlWriter);
+			
 			putPost(controlWriter);
 
 			putPreun(controlWriter);
@@ -171,6 +174,30 @@ class RpmControlFileBuilder {
 	}
 
 	/**
+	 * This scripts is executes before the package has been installed.
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putPre(OutputStreamWriter controlWriter) throws IOException {
+		controlWriter.write(NEWLINE + "%pre" + NEWLINE);
+		ArrayList<String> pres = rpm.getPre();
+		for (String pre : pres) {
+			controlWriter.write(pre + NEWLINE);	
+		}
+		
+		StringBuilder pre_script = scriptMap.get( Script.PREINST );
+		if(pre_script != null) {
+			controlWriter.write(pre_script.toString() + NEWLINE);
+		}
+		
+		List<String> del_files = setup.getDeleteFiles();
+		for (String file : del_files) {
+			controlWriter.write("rm -f /usr/share/" + setup.getBaseName() + "/" + file + NEWLINE);	
+		}
+		
+	}
+	
+	/**
 	 * This scripts is executes after the package has been installed.
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
@@ -181,9 +208,9 @@ class RpmControlFileBuilder {
 		for (String post : posts) {
 			controlWriter.write(post + NEWLINE);	
 		}	
-		StringBuilder prep_script = scriptMap.get( Script.POSTINST );
-		if(prep_script != null) {
-			controlWriter.write(prep_script.toString() + NEWLINE);
+		StringBuilder post_script = scriptMap.get( Script.POSTINST );
+		if(post_script != null) {
+			controlWriter.write(post_script.toString() + NEWLINE);
 		}
 	}
 	
@@ -198,9 +225,9 @@ class RpmControlFileBuilder {
 		for (String post : posts) {
 			controlWriter.write(post + NEWLINE);	
 		}	
-		StringBuilder prep_script = scriptMap.get( Script.POSTRM );
-		if(prep_script != null) {
-			controlWriter.write(prep_script.toString() + NEWLINE);
+		StringBuilder postun_script = scriptMap.get( Script.POSTRM );
+		if(postun_script != null) {
+			controlWriter.write(postun_script.toString() + NEWLINE);
 		}
 	}
 	
@@ -276,12 +303,6 @@ class RpmControlFileBuilder {
 		for (String prep : preps) {
 			controlWriter.write(prep + NEWLINE);	
 		}
-		
-		StringBuilder prep_script = scriptMap.get( Script.PREINST );
-		if(prep_script != null) {
-			controlWriter.write(prep_script.toString() + NEWLINE);
-		}
-		
 	}
 
 	/**

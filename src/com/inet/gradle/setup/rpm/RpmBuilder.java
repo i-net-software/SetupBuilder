@@ -108,6 +108,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
+        controlBuilder.addScriptFragment( Script.PREINST,  "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start >/dev/null\nfi");
         controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");

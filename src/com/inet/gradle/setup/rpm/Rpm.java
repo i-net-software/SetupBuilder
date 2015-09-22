@@ -63,6 +63,8 @@ public class Rpm extends AbstractSetupTask {
 
 	private ArrayList<String> 	  	clean = new ArrayList<String>();
 
+	private ArrayList<String> 		pre = new ArrayList<String>();
+	
 	private ArrayList<String> 		post = new ArrayList<String>();
 
 	private ArrayList<String> 		preun = new ArrayList<String>();
@@ -268,6 +270,14 @@ public class Rpm extends AbstractSetupTask {
 	
 	public void setBuild(String build) {
 		this.build.add( build );
+	}
+
+	public ArrayList<String> getPre() {
+		return pre;
+	}
+
+	public void setPre(ArrayList<String> pre) {
+		this.pre = pre;
 	}
     
 }
