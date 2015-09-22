@@ -54,7 +54,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
      * 
      *  <dl>
      * 		<dt>copy files</dt>
- 	 * 			<dd>copy the files specified in the gradle script to the BUILD/usr/share/<archivesBaseName> directory.</dd>
+ 	 * 			<dd>copy the files specified in the gradle script to the BUILD/usr/share/archivesBaseName directory.</dd>
  	 * 			<dd>The files must be in the BUILD directory because the 'prep' step will copy all the files from there to the BUILDROOT directory.</dd>
  	 * 			<dd>The 'rpmbuild' deletes the BUILDROOT directory before building the package. Thats why we need to copy the files into it. </dd>
  	 * 		<dt>SPEC file creation</dt>
