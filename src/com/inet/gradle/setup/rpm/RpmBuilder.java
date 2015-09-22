@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.gradle.api.internal.file.FileResolver;
@@ -51,6 +49,24 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         super( rpm, setup, fileResolver );
     }
 
+    /**
+     * Build the RedHat package in different steps with the 'rpmbuild'.
+     * 
+     *  <dl>
+     * 		<dt>copy files</dt>
+ 	 * 			<dd>copy the files specified in the gradle script to the BUILD/usr/share/<archivesBaseName> directory.</dd>
+ 	 * 			<dd>The files must be in the BUILD directory because the 'prep' step will copy all the files from there to the BUILDROOT directory.</dd>
+ 	 * 			<dd>The 'rpmbuild' deletes the BUILDROOT directory before building the package. Thats why we need to copy the files into it. </dd>
+ 	 * 		<dt>SPEC file creation</dt>
+ 	 * 			<dd>The 'rpmbuild' requires a configuration files ending with .spec.</dd>
+ 	 * 			<dd>This spec file contains all required informations (like name, version, dependencies) and scripts that are executed during the creation and installing of the package.</dd>
+  	 * 		<dt>change file permissions</dt>
+ 	 * 			<dd>Before the package is created the permissions of all files need to be set correctly.</dd>
+ 	 * 			<dd>All directories and executables will be changed to 755 permission and other files to 644.</dd>
+  	 * 		<dt>create the package</dt>
+ 	 * 			<dd>Creates the package with 'rpmbuild'</dd>
+  	 * </dl>
+     */
     public void build() {
     	try {
     		String release = task.getRelease();
@@ -61,7 +77,6 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
-            // 	create the package config files in the DEBIAN subfolder
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
 
@@ -235,7 +250,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     /**
      * execute the command to generate the RPM package
      * 
-     * rpmbuild -ba -clean "--define=_topdir buildDir(rpm)" "--define=_tmppath temp" SPECS/package.spec
+     * rpmbuild -ba -clean "--define=_topdir buildDir(rpm)" SPECS/basename.spec
      * 
      */
     private void createRpmPackage() {

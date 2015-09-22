@@ -41,7 +41,7 @@ import com.inet.gradle.setup.Template;
  * 			<dd>contains scripts and commands that are executed after the files are copied</dd>
  * 		<dt>prerm</dt>
  * 			<dd>contains scripts and commands that are executed before the files are removed</dd>
- * </dl>init.d
+ * </dl>
  * 
  * @author Stefan Heidrich
  */
