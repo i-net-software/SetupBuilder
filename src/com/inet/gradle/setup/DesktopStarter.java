@@ -59,10 +59,10 @@ public class DesktopStarter {
      * @return the description
      */
     public String getDescription() {
-        if( description == null ) {
-            return "";
+        if( description != null ) {
+            return description;
         }
-        return description;
+        return setup.getDescription();
     }
 
     /**

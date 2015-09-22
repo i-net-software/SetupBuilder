@@ -20,7 +20,6 @@ import groovy.lang.Closure;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.StandardCopyOption;
 import java.util.Set;
 
@@ -215,5 +214,17 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
 
     public void setExtension( String extension ) {
         this.extension = extension;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getDescription() {
+        String desc = super.getDescription();
+        if( desc != null && !desc.isEmpty() ) {
+            return desc;
+        }
+        return setupBuilder.getDescription();
     }
 }

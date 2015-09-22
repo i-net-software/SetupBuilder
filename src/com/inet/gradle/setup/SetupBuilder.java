@@ -47,6 +47,8 @@ public class SetupBuilder implements SetupSources {
 
     private String                 version;
 
+    private String                 description;
+
     private String                 baseName;
 
     private String                 setupName;
@@ -75,6 +77,10 @@ public class SetupBuilder implements SetupSources {
 
     private boolean                failOnEmptyFrom = true;
 
+    /**
+     * Create a new instance.
+     * @param project current project
+     */
     public SetupBuilder( Project project ) {
         this.project = project;
         this.rootSpec = (CopySpecInternal)project.copySpec( (Closure<CopySpec>)null );
@@ -160,6 +166,25 @@ public class SetupBuilder implements SetupSources {
      */
     public void setVersion( String version ) {
         this.version = version;
+    }
+
+    /**
+     * Get a global description. Never null.
+     * @return the description
+     */
+    public String getDescription() {
+        if( description == null ) {
+            return "";
+        }
+        return description;
+    }
+
+    /**
+     * Set a description for the installer. This is used for the packages but also as default for shortcuts, service, etc.
+     * @param description new description
+     */
+    public void setDescription( String description ) {
+        this.description = description;
     }
 
     /**

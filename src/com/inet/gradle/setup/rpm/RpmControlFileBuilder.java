@@ -361,16 +361,11 @@ class RpmControlFileBuilder {
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
-	private void putDescription(OutputStreamWriter controlWriter)
-			throws IOException {
-		String description = rpm.getDescription();
-		if(description == null || description.length() == 0) {
-			throw new RuntimeException("No description declared in the setup configuration.");
-		} else {
-			controlWriter.write(NEWLINE + "%define __jar_repack %{nil}"+ NEWLINE);
-			controlWriter.write(NEWLINE + "%description" + NEWLINE + description + NEWLINE);
-		}
-	}
+    private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
+        String description = setup.getApplication() + "\n " + rpm.getDescription();
+        controlWriter.write( NEWLINE + "%define __jar_repack %{nil}" + NEWLINE );
+        controlWriter.write( NEWLINE + "%description" + NEWLINE + description + NEWLINE );
+    }
 
 	/**
 	 * Write the vendor to the file. The vendor is mandatory. If no vendor is declared a runtime exception will be thrown.

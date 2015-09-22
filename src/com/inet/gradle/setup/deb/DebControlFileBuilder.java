@@ -148,15 +148,10 @@ class DebControlFileBuilder {
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
-	private void putDescription(OutputStreamWriter controlWriter)
-			throws IOException {
-		String description = deb.getDescription();
-		if(description == null || description.length() == 0) {
-			throw new RuntimeException("No description declared in the setup configuration.");
-		} else {
-			controlWriter.write("Description: " + description + NEWLINE);
-		}
-	}
+    private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
+        String description = setup.getApplication() + "\n " + deb.getDescription();
+        controlWriter.write( "Description: " + description + NEWLINE );
+    }
 
 	/**
 	 * Write the maintainer to the file. The maintainer is mandatory. If no maintainer is declared a runtime exception will be thrown.
