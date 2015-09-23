@@ -208,10 +208,20 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         return new File( setup.getDestinationDir(), setup.getSetupName() + "." + getExtension() );
     }
 
+    /**
+     * Get the file extension.
+     * 
+     * @return the extension
+     */
     public String getExtension() {
         return extension;
     }
 
+    /**
+     * Set the file extension of the installer. The default is equals the task name.
+     * 
+     * @param extension the file extension
+     */
     public void setExtension( String extension ) {
         this.extension = extension;
     }
@@ -225,6 +235,6 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         if( desc != null && !desc.isEmpty() ) {
             return desc;
         }
-        return setupBuilder.getDescription();
+        return getSetupBuilder().getDescription();
     }
 }
