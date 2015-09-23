@@ -294,7 +294,9 @@ class RpmControlFileBuilder {
 	private void putInstall(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%install" + NEWLINE);
 		controlWriter.write("cp -R usr %{buildroot}" + NEWLINE);
-		controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);
+		if(setup.getServices() != null && setup.getServices().size() > 0) {
+			controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);	
+		}
 		ArrayList<String> installs = rpm.getInstall();
 		for (String install : installs) {
 			controlWriter.write(install + NEWLINE);	
