@@ -477,9 +477,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             String id = id( name.replace( '-', '_' ) ) + "_service";
 
             // add the service file
-            Element directory = getDirectory( installDir, segments( exe ) );
+            String[] segments = segments( exe );
+            Element directory = getDirectory( installDir, segments );
             Element component = getComponent( directory, id );
-            addFile( component, prunsrv, id, exe, true );
+            addFile( component, prunsrv, id, segments[segments.length - 1], true );
 
             // install the windows service
             Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install" );
