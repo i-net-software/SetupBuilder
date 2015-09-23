@@ -269,7 +269,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addDirectory( installDir, file, baseLength, target );
             } else {
                 String name = file.getAbsolutePath().substring( baseLength );
-                addFile( installDir, file, (target + name).split( "\\\\" ) );
+                addFile( installDir, file, segments( (target + name) ) );
             }
         }
     }
@@ -473,11 +473,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         for( Service service : services ) {
             String name = service.getName();
-            String exe = name + "Service.exe";
+            String exe = service.getBaseName() + ".exe";
             String id = id( name.replace( '-', '_' ) ) + "_service";
 
             // add the service file
-            Element directory = getDirectory( installDir, new String[] { exe } );
+            Element directory = getDirectory( installDir, segments( exe ) );
             Element component = getComponent( directory, id );
             addFile( component, prunsrv, id, exe, true );
 
@@ -589,7 +589,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             // find the ID of the working directory
             String workDir = starter.getWorkDir();
             if( workDir != null && !workDir.isEmpty() ) {
-                String[] segments = workDir.split( "[/\\\\]" );
+                String[] segments = segments( workDir );
                 Element dir = getDirectory( installDir, segments, segments.length );
                 workDir = dir.getAttribute( "Id" );
             } else {
@@ -695,7 +695,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
         for( String pattern : setup.getDeleteFiles() ) {
-            String[] segments = pattern.split( "[/\\\\]" );
+            String[] segments = segments( pattern );
             Element dir = getDirectory( installDir, segments );
             String id = id( pattern );
             Element component = getComponent( dir, "deleteFiles" + id );
@@ -796,6 +796,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 //            count++;
 //        } while( partValue != rest );
 //    }
+
+    /**
+     * Split a path in segments.
+     * 
+     * @param path the path to split
+     * @return the segments of the path
+     */
+    String[] segments( String path ) {
+        return path.split( "[/\\\\]" );
+    }
 
     /**
      * Create a valid id for a directory from path segments.

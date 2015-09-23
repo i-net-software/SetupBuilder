@@ -5,7 +5,7 @@ package com.inet.gradle.setup;
  */
 public class Service {
     private final SetupBuilder setup;
-    private String  name, displayName, description, mainJar, mainClass;
+    private String  name, baseName, displayName, description, mainJar, mainClass;
     private boolean startOnBoot = true;
     private String  startArguments;
 
@@ -34,6 +34,27 @@ public class Service {
      */
     public void setName( String name ) {
         this.name = name;
+    }
+
+    /**
+     * Get the base name of the service file. The default is name + "Service".
+     * @return the base name
+     */
+    public String getBaseName() {
+        if( baseName != null ) {
+            return baseName;
+        }
+        return getName() + "Service";
+    }
+
+    /**
+     * Set the base name of the service name. Can contains slashes if it should be in a sub directory. This change the
+     * working directory of the service. On Windows ".exe" is added for the file name of the service.
+     * 
+     * @param baseName the new baseName
+     */
+    public void setBaseName( String baseName ) {
+        this.baseName = baseName;
     }
 
     /**
