@@ -156,8 +156,8 @@ public class Msi extends AbstractSetupTask {
      * 
      * @param closue the data for signing
      */
-    public void signTool( Closure closue ) {
-        signTool = ConfigureUtil.configure( closue, new SignTool( this ) );
+    public void signTool( Closure<SignTool> closue ) {
+        signTool = ConfigureUtil.configure( closue, new SignTool() );
     }
 
     /**

@@ -26,18 +26,14 @@ import java.util.List;
  */
 class SignTool {
 
-    private final Msi    task;
-
     private Object       certificate;
 
     private String       password, sha1;
 
-    private List<String> timestamps =
-                                                    Arrays.asList( "http://timestamp.comodoca.com/authenticode", "http://timestamp.verisign.com/scripts/timstamp.dll", "http://timestamp.globalsign.com/scripts/timestamp.dll", "http://tsa.starfieldtech.com" ); ;
-
-    SignTool( Msi task ) {
-        this.task = task;
-    }
+    private List<String> timestamps = Arrays.asList( "http://timestamp.comodoca.com/authenticode", //
+                                                    "http://timestamp.verisign.com/scripts/timstamp.dll", //
+                                                    "http://timestamp.globalsign.com/scripts/timestamp.dll", //
+                                                    "http://tsa.starfieldtech.com" );
 
     /**
      * Get a certificate file.
@@ -69,7 +65,7 @@ class SignTool {
     /**
      * Set the password for a certificate file. This is used for the /p option of signtool.
      * 
-     * @param password
+     * @param password the password
      */
     public void setPassword( String password ) {
         this.password = password;
@@ -87,7 +83,7 @@ class SignTool {
     /**
      * Set the SHA1 thumbprint of the signing cert. This is used for the /sha1 option of signtool.
      * 
-     * @param sha1
+     * @param sha1 the thumbprint
      */
     public void setSha1( String sha1 ) {
         this.sha1 = sha1;
