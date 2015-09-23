@@ -216,16 +216,16 @@ class RpmControlFileBuilder {
 			String workingDir = starter.getWorkDir();
 			if( executable != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd " + workingDir + " && " + executable + " )" + NEWLINE);
+					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && " + executable + "& )" + NEWLINE);
 				} else {
-					controlWriter.write(executable + NEWLINE);	
+					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + " && " + executable + "& )" + NEWLINE);	
 				}
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd " + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + " )" + NEWLINE);
+					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )" + NEWLINE);
 				} else {
-					controlWriter.write("java -cp " + starter.getMainJar()  + " " +  mainClass + NEWLINE);	
+					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )"  + NEWLINE);	
 				}
 			}
 		}
