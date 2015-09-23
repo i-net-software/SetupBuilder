@@ -475,6 +475,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             String name = service.getName();
             String exe = service.getBaseName() + ".exe";
             String id = id( name.replace( '-', '_' ) ) + "_service";
+            int idx = exe.replace( '\\', '/' ).lastIndexOf( '/' );
+            String subdir = exe.substring( 0, idx + 1 );
 
             // add the service file
             String[] segments = segments( exe );
@@ -510,7 +512,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             regkey = addRegistryKey( component, "HKLM", id + "_RegStart", baseKey + name + "\\Parameters\\Start" );
             addRegistryValue( regkey, "Class", "string", service.getMainClass() );
             addRegistryValue( regkey, "Mode", "string", "Java" );
-            addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" );
+            addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" + subdir );
 
             // start the service
             if( service.isStartOnBoot() ) {
@@ -524,8 +526,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addFile( component, prunmgr, id + "GUI", name + ".exe", true );
 
             // delete log files on uninstall
-            int idx = exe.replace( '\\', '/' ).lastIndexOf( '/' );
-            addDeleteFiles( exe.substring( 0, idx + 1 ) + "commons-daemon.*.log", installDir );
+            addDeleteFiles( subdir + "commons-daemon.*.log", installDir );
         }
     }
 
