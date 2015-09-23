@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -72,6 +73,35 @@ public class DebBuilder extends AbstractBuilder<Deb> {
                 setupEula();
             }
 
+            
+            // removes only the files in the installation path
+    		List<String> del_files = setup.getDeleteFiles();
+    		for (String file : del_files) {
+    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -f /usr/share/" + setup.getBaseName() + "/" + file + "\n" );
+    			controlBuilder.addTailScriptFragment( Script.POSTRM, "rm -f /usr/share/" + setup.getBaseName() + "/" + file + "\n" );
+    		}
+    		
+    		DesktopStarter starter = setup.getRunAfter();
+    		if(starter != null ) {
+    			String executable = starter.getExecutable();
+    			String mainClass = starter.getMainClass();
+    			String workingDir = starter.getWorkDir();
+    			if( executable != null ) {
+    				if( workingDir != null ) {
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && " + executable + "& )\n" );
+    				} else {
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + " && " + executable + "& )\n" );	
+    				}
+    				
+    			} else if( mainClass != null ) {
+    				if( workingDir != null ) {
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");
+    				} else {
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");	
+    				}
+    			}
+    		}
+            
             controlBuilder.build();
 
             documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getBaseName() ) );
@@ -292,7 +322,11 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             if( file.isDirectory() ) {
                 changeFilePermissionsTo644( file );
             } else {
-                DebUtils.setPermissions( file, false );
+            	if( file.getName().endsWith(".sh")  ) {
+            		DebUtils.setPermissions( file, true );
+            	} else {
+            		DebUtils.setPermissions( file, false );
+            	}
             }
         }
     }
