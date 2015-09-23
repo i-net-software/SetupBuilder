@@ -156,7 +156,11 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
             if( file.isDirectory() ) {
                 changeFilePermissionsTo644( file );
             } else {
-                setPermissions( file, false );
+            	if( file.getName().endsWith(".sh")  ) {
+            		setPermissions( file, true );
+            	} else {
+            		setPermissions( file, false );
+            	}
             }
         }
     }
