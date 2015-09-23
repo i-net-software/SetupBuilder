@@ -203,7 +203,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element parent = getDirectory( installDir, segments );
 
         String pathID = id( segments, segments.length - 1 );
-        String compID = "application_" + pathID;
+        String compID = id( pathID + "_Comp");
         Element component = getComponent( parent, compID );
 
         String name = segments[segments.length - 1];
@@ -246,7 +246,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private void addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
         if( isAddFiles ) {
-            String id = pathID + '_' + id( name );
+            String id = id( pathID + '_' + name );
             Element fileEl = getOrCreateChildById( component, "File", id );
             addAttributeIfNotExists( fileEl, "Source", file.getAbsolutePath() );
             addAttributeIfNotExists( fileEl, "Name", name );
@@ -862,9 +862,19 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             builder.append( '_' );
         }
         if( builder == null ) {
-            return str;
+            if( str.length() > 72 ) {
+                builder = new StringBuilder();
+            } else {
+                return str;
+            }
         }
         builder.append( str.substring( builder.length() ) );
+        if( builder.length() > 62 ) {
+            // 72 is the max id length, we remove the starting part because this occurs only with files and there is the max important part at the end.
+            builder.delete( 0, builder.length() - 62 );
+            char ch = builder.charAt( 0 );
+            needUnderscoreStart = (ch >= '0' && ch <= '9') || (ch == '.');
+        }
         if( needUnderscoreStart ) {
             builder.insert( 0, '_' );
         }
@@ -878,7 +888,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
         // we have a collision, add a hashcode to prevent name collision
         builder.append( '_' );
-        builder.append( Math.abs( str.hashCode() ) );
+        builder.append( Integer.toHexString( str.hashCode() ) );
         return builder.toString();
     }
 
