@@ -70,20 +70,27 @@ enum MsiLanguages {
 
     private final int    langID;
 
-    MsiLanguages( int langID ) {
+    /**
+     * Create a instance of the enum.
+     * @param langID the numeric lanaguage ID.
+     */
+    private MsiLanguages( int langID ) {
         this.culture = name().replace( '_', '-' );
         this.langID = langID;
     }
 
-    MsiLanguages( String culture, int langID ) {
-        this.culture = culture;
-        this.langID = langID;
-    }
-
+    /**
+     * The culture like en-us.
+     * @return the culture
+     */
     String getCulture() {
         return culture;
     }
 
+    /**
+     * The numeric language ID. 
+     * @return the id
+     */
     String getLangID() {
         return Integer.toString( langID );
     }
