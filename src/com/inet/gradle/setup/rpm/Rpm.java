@@ -255,10 +255,10 @@ public class Rpm extends AbstractSetupTask {
 	
 	/**
 	 * Sets the value for the '%postun' entry in the SPEC file.
-	 * @param post the value for the entry
+	 * @param postun the value for the entry
 	 */
-	public void setPostun(String post) {
-		this.postun.add( post );
+	public void setPostun(String postun) {
+		this.postun.add( postun );
 	}
 
 	/**
