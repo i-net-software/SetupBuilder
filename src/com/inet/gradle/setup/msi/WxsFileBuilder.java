@@ -473,9 +473,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         for( Service service : services ) {
             String name = service.getName();
-            String exe = service.getBaseName() + ".exe";
             String id = id( name.replace( '-', '_' ) ) + "_service";
-            int idx = exe.replace( '\\', '/' ).lastIndexOf( '/' );
+            String exe = service.getBaseName().replace( '\\', '/' ) + ".exe";
+            int idx = exe.lastIndexOf( '/' );
             String subdir = exe.substring( 0, idx + 1 );
 
             // add the service file
