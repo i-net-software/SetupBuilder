@@ -38,7 +38,7 @@ import com.inet.gradle.setup.AbstractSetupTask;
  */
 public class Msi extends AbstractSetupTask {
 
-    private String   arch = "x64";
+    private String   arch;
 
     private Object   bannerBmp, dialogBmp, wxsTemplate;
 
@@ -46,6 +46,9 @@ public class Msi extends AbstractSetupTask {
 
     private SignTool signTool;
 
+    /**
+     * Create a new instance.
+     */
     public Msi() {
         super( "msi" );
     }
@@ -67,8 +70,15 @@ public class Msi extends AbstractSetupTask {
         super.processFiles( action );
     }
 
+    /**
+     * Get the architecture of the installer.
+     * @return the architecture
+     */
     public String getArch() {
-        return arch;
+        if( arch != null ) {
+            return arch;
+        }
+        return "x64";
     }
 
     /**
@@ -100,6 +110,10 @@ public class Msi extends AbstractSetupTask {
         }
     }
 
+    /**
+     * Get the file of the banner or null
+     * @return the file
+     */
     public File getBannerBmp() {
         if( bannerBmp != null ) {
             return getProject().file( bannerBmp );
