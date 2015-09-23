@@ -522,6 +522,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
 
             addFile( component, prunmgr, id + "GUI", name + ".exe", true );
+
+            // delete log files on uninstall
+            int idx = exe.replace( '\\', '/' ).lastIndexOf( '/' );
+            addDeleteFiles( exe.substring( 0, idx + 1 ) + "commons-daemon.*.log", installDir );
         }
     }
 
@@ -688,7 +692,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
-     * Add files to delete if there any define.
+     * Add files to delete if there any define in SetupBuilder.
+     * 
      * @param installDir referent to INSTALLDIR
      */
     private void addDeleteFiles( Element installDir ) {
@@ -696,14 +701,24 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
         for( String pattern : setup.getDeleteFiles() ) {
-            String[] segments = segments( pattern );
-            Element dir = getDirectory( installDir, segments );
-            String id = id( pattern );
-            Element component = getComponent( dir, "deleteFiles" + id );
-            Element remove = getOrCreateChildById( component, "RemoveFile", "removeFile" + id );
-            addAttributeIfNotExists( remove, "On", "both" );
-            addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
+            addDeleteFiles( pattern, installDir );
         }
+    }
+
+    /**
+     * Add files to delete.
+     * 
+     * @param pattern the pattern to delete
+     * @param installDir referent to INSTALLDIR
+     */
+    private void addDeleteFiles( String pattern, Element installDir ) {
+        String[] segments = segments( pattern );
+        Element dir = getDirectory( installDir, segments );
+        String id = id( pattern );
+        Element component = getComponent( dir, "deleteFiles" + id );
+        Element remove = getOrCreateChildById( component, "RemoveFile", "removeFile" + id );
+        addAttributeIfNotExists( remove, "On", "both" );
+        addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
     }
 
     /**
