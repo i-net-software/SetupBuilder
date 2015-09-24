@@ -75,6 +75,8 @@ public class SetupBuilder implements SetupSources {
 
     private List<String>           deleteFiles = new ArrayList<>();
 
+    private List<String>           deleteFolders = new ArrayList<>();
+
     private boolean                failOnEmptyFrom = true;
 
     /**
@@ -420,16 +422,39 @@ public class SetupBuilder implements SetupSources {
         return desktopStarters;
     }
 
-
+    /**
+     * Get the list pattern for files that should be deleted. 
+     * @return the list
+     */
     public List<String> getDeleteFiles() {
         return deleteFiles;
     }
 
+    /**
+     * Add a file pattern to delete files before install and after uninstall.
+     * @param pattern the patter. Can contains * and ? characters
+     */
     public void deleteFiles( String pattern ) {
         if( pattern.isEmpty() ) {
             return;
         }
         deleteFiles.add( pattern );
+    }
+
+    /**
+     * Get the list of folders to delete.
+     * @return the list
+     */
+    public List<String> getDeleteFolders() {
+        return deleteFolders;
+    }
+
+    /**
+     * Add a folder to delete before install and after uninstall.
+     * @param folder the folder
+     */
+    public void deleteFolder( String folder ) {
+        this.deleteFolders.add( folder );
     }
 
     /**
