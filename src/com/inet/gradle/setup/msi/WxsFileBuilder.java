@@ -151,7 +151,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addServices( installDir );
         addShortcuts( product, installDir );
         addRunAfter( product, installDir );
-        addDeleteFiles( installDir );
+        addDeleteFiles( product, installDir );
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
@@ -675,7 +675,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 target = "[INSTALLDIR]" + javaDir + "\\bin\\javaw.exe";
                 arguments = "-cp " + starter.getMainJar() + " " + starter.getMainClass() + " " + arguments;
             } else {
-                target = "cmd.exe";
+                target = "[SystemFolder]cmd.exe";
                 arguments = "/C javaw.exe -cp \"[INSTALLDIR]" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
             }
         } else {
@@ -719,14 +719,25 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add files to delete if there any define in SetupBuilder.
      * 
+     * @param product the product node in the XML.
      * @param installDir referent to INSTALLDIR
      */
-    private void addDeleteFiles( Element installDir ) {
-        if( setup.getDeleteFiles().isEmpty() ) {
-            return;
-        }
+    private void addDeleteFiles( Element product, Element installDir ) {
         for( String pattern : setup.getDeleteFiles() ) {
             addDeleteFiles( pattern, installDir );
+        }
+        for( String folder : setup.getDeleteFolders() ) {
+            folder = folder.replace( '/', '\\' );
+            String id = id( folder );
+            Element action = getOrCreateChildById( product, "CustomAction", id );
+            addAttributeIfNotExists( action, "Directory", "INSTALLDIR" );
+            addAttributeIfNotExists( action, "ExeCommand", "[SystemFolder]cmd.exe /C rmdir /S /Q " + folder );
+            addAttributeIfNotExists( action, "Return", "ignore" );
+            addAttributeIfNotExists( action, "Execute", "deferred" );
+            addAttributeIfNotExists( action, "Impersonate", "no" );
+            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
+            addAttributeIfNotExists( custom, "After", "RemoveFiles" );
         }
     }
 
