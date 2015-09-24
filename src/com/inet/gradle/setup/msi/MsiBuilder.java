@@ -123,6 +123,8 @@ class MsiBuilder extends AbstractBuilder<Msi> {
         parameters.add( "-out" );
         parameters.add( buildDir.getAbsolutePath() + '\\' );
         parameters.add( getWxsFile().getAbsolutePath() );
+        parameters.add( "-ext" );
+        parameters.add( "WixUtilExtension" );
 
         callWixTool( "candle.exe", parameters );
     }
