@@ -137,7 +137,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addIcon( product );
         addServices( installDir );
         addShortcuts( product, installDir );
-        addRunAfter( product );
+        addRunAfter( product, installDir );
         addDeleteFiles( installDir );
 
         //Feature
@@ -521,6 +521,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addAttributeIfNotExists( start, "Start", "install" );
                 addAttributeIfNotExists( start, "Stop", "both" );
                 addAttributeIfNotExists( start, "Remove", "uninstall" );
+                addAttributeIfNotExists( start, "Wait", "yes" );
             }
 
             addFile( component, prunmgr, id + "GUI", name + ".exe", true );
@@ -592,17 +593,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( shortcut, "Name", starter.getName() );
             addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
 
-            // find the ID of the working directory
-            String workDir = starter.getWorkDir();
-            if( workDir != null && !workDir.isEmpty() ) {
-                String[] segments = segments( workDir );
-                Element dir = getDirectory( installDir, segments, segments.length );
-                workDir = dir.getAttribute( "Id" );
-            } else {
-                workDir = "INSTALLDIR";
-            }
-
-            addAttributeIfNotExists( shortcut, "WorkingDirectory", workDir );
+            addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter, installDir ) );
 
             // find the optional id for an icon
             String target = starter.getExecutable();
@@ -640,6 +631,24 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
+     * Get the ID of the working directory.
+     * 
+     * @param starter the shortcut definition
+     * @param installDir referent to INSTALLDIR
+     * @return the id
+     */
+    private String getWoringDirID( DesktopStarter starter, Element installDir ) {
+        String workDir = starter.getWorkDir();
+        if( workDir != null && !workDir.isEmpty() ) {
+            String[] segments = segments( workDir );
+            Element dir = getDirectory( installDir, segments, segments.length );
+            return dir.getAttribute( "Id" );
+        } else {
+            return "INSTALLDIR";
+        }
+    }
+
+    /**
      * Get the command of the starter without arguments
      * 
      * @param starter the DesktopStarter
@@ -666,12 +675,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Add an action that is executed after the setup.
      * 
      * @param product the product node in the XML.
+     * @param installDir referent to INSTALLDIR
      */
-    private void addRunAfter( Element product ) {
-        if( setup.getRunAfter() == null ) {
+    private void addRunAfter( Element product, Element installDir ) {
+        DesktopStarter runAfter = setup.getRunAfter();
+        if( runAfter == null ) {
             return;
         }
-        String[] cmd = getCommandLine( setup.getRunAfter() );
+        String[] cmd = getCommandLine( runAfter );
         Element action = getOrCreateChildById( product, "CustomAction", "runAfter" );
         if( cmd[1].isEmpty() ) {
             Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget" );
@@ -679,7 +690,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
             addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
         } else {
-            addAttributeIfNotExists( action, "Directory", "INSTALLDIR" );
+            addAttributeIfNotExists( action, "Directory", getWoringDirID( runAfter, installDir ) );
             addAttributeIfNotExists( action, "ExeCommand", cmd[2] );
             addAttributeIfNotExists( action, "Return", "asyncNoWait" );
         }
