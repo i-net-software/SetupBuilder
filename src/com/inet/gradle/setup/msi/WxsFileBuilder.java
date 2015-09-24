@@ -125,9 +125,22 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         task.processFiles( new CopyActionProcessingStreamAction() {
             @Override
             public void processFile( FileCopyDetailsInternal details ) {
-                if( !details.isDirectory() ) {
-                    String[] segments = details.getRelativePath().getSegments();
-                    addFile( installDir, details.getFile(), segments );
+                try {
+                    if( !details.isDirectory() ) {
+                        String[] segments = details.getRelativePath().getSegments();
+                        File file;
+                        try {
+                            file = details.getFile();
+                        } catch( UnsupportedOperationException ex ) {
+                            // if there is set an filter then we need to copy it
+                            File buildDir = task.getTemporaryDir();
+                            file = new File( buildDir, details.getRelativePath().getPathString() );
+                            details.copyTo( file );
+                        }
+                        addFile( installDir, file, segments );
+                    }
+                } catch( Exception ex ) {
+                    throw new GradleException( "Can't add file: " + details, ex );
                 }
             }
         } );
