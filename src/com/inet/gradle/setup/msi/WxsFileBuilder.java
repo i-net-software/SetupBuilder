@@ -524,7 +524,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
             regkey = addRegistryKey( component, "HKLM", id + "_RegStart", baseKey + name + "\\Parameters\\Start" );
             addRegistryValue( regkey, "Class", "string", service.getMainClass() );
-            addRegistryValue( regkey, "Mode", "string", "Java" );
+            addRegistryValue( regkey, "Mode", "string", "jvm" );
             addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" + subdir );
             regkey = addRegistryKey( component, "HKLM", id + "_RegLog", baseKey + name + "\\Parameters\\Log" );
             addRegistryValue( regkey, "Path", "string", "[INSTALLDIR]" + subdir );
