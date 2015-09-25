@@ -109,15 +109,33 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupService( Service service ) throws IOException {
-        String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
-        String mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
+    	String workingDir = null;
+    	DesktopStarter starter = setup.getRunAfter();
+        if(starter != null ) {
+        	workingDir = starter.getWorkDir();
+        }	
+    	String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
+        String mainJarPath;
+        
+        		
         Template initScript = new Template( "rpm/template/init-service.sh" );
+        
+        if( workingDir != null ) {
+    		initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() + "/" + workingDir );
+    		mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + workingDir + "/" + service.getMainJar();
+    	} else {	
+    		initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
+    		mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
+    	}
+        
         initScript.setPlaceholder( "name", serviceUnixName );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
         initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
+        
+        	
+        
         initScript.setPlaceholder( "startArguments",
                                    "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;

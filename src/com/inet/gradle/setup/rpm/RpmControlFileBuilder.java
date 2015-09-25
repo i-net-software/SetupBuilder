@@ -165,6 +165,18 @@ class RpmControlFileBuilder {
 		if(prep_script != null) {
 			controlWriter.write(prep_script.toString() + NEWLINE);
 		}
+		
+		// removes only the files in the installation path
+		List<String> del_files = setup.getDeleteFiles();
+		for (String file : del_files) {
+			controlWriter.write("rm -f /usr/share/" + setup.getBaseName() + "/" + file + NEWLINE);	
+		}
+		// removes only the dirs in the installation path
+		List<String> del_dirs = setup.getDeleteFolders();
+		for (String dirs : del_dirs) {
+			controlWriter.write("rm -R -f /usr/share/" + setup.getBaseName() + "/" + dirs + NEWLINE);	
+		}
+		
 	}
 
 	/**
@@ -188,6 +200,11 @@ class RpmControlFileBuilder {
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
 			controlWriter.write("rm -f /usr/share/" + setup.getBaseName() + "/" + file + NEWLINE);	
+		}
+		// removes only the dirs in the installation path
+		List<String> del_dirs = setup.getDeleteFolders();
+		for (String dirs : del_dirs) {
+			controlWriter.write("rm -R -f /usr/share/" + setup.getBaseName() + "/" + dirs + NEWLINE);	
 		}
 		
 	}
