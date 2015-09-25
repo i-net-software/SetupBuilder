@@ -729,15 +729,21 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         for( String folder : setup.getDeleteFolders() ) {
             folder = folder.replace( '/', '\\' );
             String id = id( folder );
-            Element action = getOrCreateChildById( product, "CustomAction", id );
-            addAttributeIfNotExists( action, "Directory", "INSTALLDIR" );
-            addAttributeIfNotExists( action, "ExeCommand", "[SystemFolder]cmd.exe /C rmdir /S /Q " + folder );
-            addAttributeIfNotExists( action, "Return", "ignore" );
-            addAttributeIfNotExists( action, "Execute", "deferred" );
-            addAttributeIfNotExists( action, "Impersonate", "no" );
-            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
-            addAttributeIfNotExists( custom, "After", "RemoveFiles" );
+
+            Element component = addDeleteFiles( folder + (folder.endsWith( "\\" ) ? "*.*" : "\\*.*" ), installDir );
+            Element remove = getOrCreateChildById( component, "RemoveFolder", "removeFolder" + id );
+            addAttributeIfNotExists( remove, "On", "both" );
+
+//          This delete also the sub tree but it popup shortly a command line at setup time 
+//            Element action = getOrCreateChildById( product, "CustomAction", id );
+//            addAttributeIfNotExists( action, "Directory", "INSTALLDIR" );
+//            addAttributeIfNotExists( action, "ExeCommand", "\"[SystemFolder]cmd.exe\" /C rmdir /S /Q " + folder );
+//            addAttributeIfNotExists( action, "Return", "ignore" );
+//            addAttributeIfNotExists( action, "Execute", "deferred" );
+//            addAttributeIfNotExists( action, "Impersonate", "no" );
+//            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+//            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
+//            addAttributeIfNotExists( custom, "After", "RemoveFiles" );
         }
     }
 
@@ -746,8 +752,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * 
      * @param pattern the pattern to delete
      * @param installDir referent to INSTALLDIR
+     * @return the component
      */
-    private void addDeleteFiles( String pattern, Element installDir ) {
+    private Element addDeleteFiles( String pattern, Element installDir ) {
         String[] segments = segments( pattern );
         Element dir = getDirectory( installDir, segments );
         String id = id( pattern );
@@ -755,6 +762,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element remove = getOrCreateChildById( component, "RemoveFile", "removeFile" + id );
         addAttributeIfNotExists( remove, "On", "both" );
         addAttributeIfNotExists( remove, "Name", segments[segments.length - 1] );
+        return component;
     }
 
     /**
