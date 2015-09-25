@@ -351,8 +351,8 @@ public class Rpm extends AbstractSetupTask {
 	 * Sets the installation rood directory where the program directory should be located. 
 	 * @param installationRoot the installation root directory
 	 */
-	public void setInstallationRoot(String installationRoot) {
-		this.installationRoot = installationRoot;
+	public void setInstallationRoot(String installationRoot) {		
+		this.installationRoot = installationRoot.endsWith("/") ? installationRoot : installationRoot + "/";
 	}
     
 }
