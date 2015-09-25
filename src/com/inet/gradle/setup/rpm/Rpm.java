@@ -43,6 +43,8 @@ public class Rpm extends AbstractSetupTask {
     
     private String				   	url;
     
+    private String				   	installationRoot;
+    
     private ArrayList<String>	   	prep = new ArrayList<String>();
 
 	private ArrayList<String> 	   	build = new ArrayList<String>();
@@ -331,6 +333,26 @@ public class Rpm extends AbstractSetupTask {
 	 */
 	public void setPre(ArrayList<String> pre) {
 		this.pre = pre;
+	}
+
+	/**
+	 * Returns the installation root where the program directory should be located. Default is /usr/share
+	 * @return the installation root directory
+	 */
+	public String getInstallationRoot() {
+		if(installationRoot == null) {
+			return "/usr/share/";
+		} else {
+			return installationRoot;
+		}
+	}
+
+	/**
+	 * Sets the installation rood directory where the program directory should be located. 
+	 * @param installationRoot the installation root directory
+	 */
+	public void setInstallationRoot(String installationRoot) {
+		this.installationRoot = installationRoot;
 	}
     
 }

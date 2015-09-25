@@ -73,7 +73,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
     		if(release == null || release.length() == 0) {
     			release = "1";
     		}
-            File filesPath = new File( buildDir.getAbsolutePath() + "/BUILD/usr/share/" + setup.getBaseName());
+            File filesPath = new File( buildDir.getAbsolutePath() + "/BUILD" + task.getInstallationRoot() + setup.getBaseName());
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
@@ -119,13 +119,14 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         
         		
         Template initScript = new Template( "rpm/template/init-service.sh" );
+        String installationRoot = task.getInstallationRoot();
         
         if( workingDir != null ) {
-    		initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() + "/" + workingDir );
-    		mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + workingDir + "/" + service.getMainJar();
+			initScript.setPlaceholder( "workdir", installationRoot + setup.getBaseName() + "/" + workingDir );
+    		mainJarPath = installationRoot + setup.getBaseName() + "/" + workingDir + "/" + service.getMainJar();
     	} else {	
-    		initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
-    		mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
+    		initScript.setPlaceholder( "workdir", installationRoot + setup.getBaseName() );
+    		mainJarPath = installationRoot + setup.getBaseName() + "/" + service.getMainJar();
     	}
         
         initScript.setPlaceholder( "name", serviceUnixName );
@@ -216,7 +217,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         String consoleStarterPath = "/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
-            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+            fw.write( "java -cp " + task.getInstallationRoot() + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
                 + starter.getStartArguments() + " \"$@\"" );
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
