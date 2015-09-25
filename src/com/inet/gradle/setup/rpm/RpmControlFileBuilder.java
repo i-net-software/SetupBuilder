@@ -169,12 +169,12 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f /usr/share/" + setup.getBaseName() + "/" + file + NEWLINE);	
+			controlWriter.write("rm -f " + rpm.getInstallationRoot() + setup.getBaseName() + "/" + file + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
 		for (String dirs : del_dirs) {
-			controlWriter.write("rm -R -f /usr/share/" + setup.getBaseName() + "/" + dirs + NEWLINE);	
+			controlWriter.write("rm -R -f " + rpm.getInstallationRoot() + setup.getBaseName() + "/" + dirs + NEWLINE);	
 		}
 		
 	}
@@ -199,12 +199,12 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f /usr/share/" + setup.getBaseName() + "/" + file + NEWLINE);	
+			controlWriter.write("rm -f "  + rpm.getInstallationRoot() + setup.getBaseName() + "/" + file + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
 		for (String dirs : del_dirs) {
-			controlWriter.write("rm -R -f /usr/share/" + setup.getBaseName() + "/" + dirs + NEWLINE);	
+			controlWriter.write("rm -R -f " +  rpm.getInstallationRoot() + setup.getBaseName() + "/" + dirs + NEWLINE);	
 		}
 		
 	}
@@ -233,16 +233,16 @@ class RpmControlFileBuilder {
 			String workingDir = starter.getWorkDir();
 			if( executable != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && " + executable + "& )" + NEWLINE);
+					controlWriter.write("( cd "  + rpm.getInstallationRoot() + setup.getBaseName() + "/" + workingDir + " && " + executable + "& )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + " && " + executable + "& )" + NEWLINE);	
+					controlWriter.write("( cd "  + rpm.getInstallationRoot() + setup.getBaseName() + " && " + executable + "& )" + NEWLINE);	
 				}
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )" + NEWLINE);
+					controlWriter.write("( cd " + rpm.getInstallationRoot() + setup.getBaseName() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd /usr/share/" + setup.getBaseName() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )"  + NEWLINE);	
+					controlWriter.write("( cd " + rpm.getInstallationRoot() + setup.getBaseName() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )"  + NEWLINE);	
 				}
 			}
 		}
@@ -267,14 +267,20 @@ class RpmControlFileBuilder {
 	}
 	
 	/**
-	 * Specifies the files that should be installed. The files will be installed under /usr in the system.
+	 * Specifies the files that should be installed. The files will be installed under the installationRoot in the system.
 	 * If files need to be installed somewhere else these files need to be copied via the post step. 
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
 	private void putFiles(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%files" + NEWLINE);
-		controlWriter.write("/usr/**/*" + NEWLINE);
+		
+		controlWriter.write( rpm.getInstallationRoot()+ "**/*" + NEWLINE);
+		
+		if(setup.getDesktopStarters() != null && setup.getDesktopStarters().size() > 0) {
+			controlWriter.write( "/usr/**/*" + NEWLINE);	
+		}
+		
 		if(setup.getServices() != null && setup.getServices().size() > 0) {
 			controlWriter.write("%config /etc/init.d/*" + NEWLINE);	
 		}
@@ -310,10 +316,10 @@ class RpmControlFileBuilder {
 	 */
 	private void putInstall(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%install" + NEWLINE);
-		controlWriter.write("cp -R usr %{buildroot}" + NEWLINE);
-		if(setup.getServices() != null && setup.getServices().size() > 0) {
-			controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);	
-		}
+		controlWriter.write("cp -R . %{buildroot}" + NEWLINE);
+//		if(setup.getServices() != null && setup.getServices().size() > 0) {
+//			controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);	
+//		}
 		ArrayList<String> installs = rpm.getInstall();
 		for (String install : installs) {
 			controlWriter.write(install + NEWLINE);	
@@ -353,7 +359,10 @@ class RpmControlFileBuilder {
 	 */
 	private void putPrefix(OutputStreamWriter controlWriter) 
 			throws IOException {
-		controlWriter.write("Prefix: /usr/share" + NEWLINE);
+		String prefix = rpm.getInstallationRoot();
+		prefix = prefix.substring(0, prefix.length()-1 );
+		
+		controlWriter.write("Prefix: " + prefix + NEWLINE);
 		
 	}
 
