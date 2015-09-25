@@ -86,12 +86,16 @@ public class Rpm extends AbstractSetupTask {
     }
       
     /**
-     * Returns the section that specifies the 'Group' entry in the SPEC file.
+     * Returns the section that specifies the 'Group' entry in the SPEC file. Default is Applications/Productivity
+     * 
      * @return the section
      */
-	public String getSection() {
-		return section;
-	}
+    public String getSection() {
+        if( section != null ) {
+            return section;
+        }
+        return "Applications/Productivity";
+    }
 
 	/**
 	 * Sets the value for the 'Group' entry in the SPEC file.
@@ -133,14 +137,18 @@ public class Rpm extends AbstractSetupTask {
 		this.depends = depends;
 	}
 
-	/**
-	 * Returns the summary that should be used in the 'Summary' entry in the SPEC file.
-	 * @return the summary specified in the gradle script
-	 */
-	public String getSummary() {
-		return summary;
-	}
-	
+    /**
+     * Returns the summary that should be used in the 'Summary' entry in the SPEC file.
+     * 
+     * @return the summary specified in the gradle script
+     */
+    public String getSummary() {
+        if( summary != null ) {
+            return summary;
+        }
+        return getSetupBuilder().getApplication();
+    }
+
 	/**
 	 * Sets the value for the 'Summary' entry in the SPEC file.
 	 * @param summary the value for the entry
