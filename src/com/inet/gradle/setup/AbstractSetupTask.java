@@ -19,6 +19,7 @@ import groovy.lang.Closure;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Set;
@@ -93,7 +94,9 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
                     	if(!f.getParentFile().exists()) {
                     		f.getParentFile().mkdirs(); // the parent directory must be created, else the copy fails
                     	}
-						Files.copy(details.getFile().toPath(), f.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                        try( InputStream input = details.open() ) {
+                            Files.copy( input, f.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                        }
 					} catch (IOException ex) {
 						throw new RuntimeException(ex);
 					}
