@@ -277,7 +277,6 @@ class RpmControlFileBuilder {
 		controlWriter.write(NEWLINE + "%files" + NEWLINE);
 		
 		controlWriter.write( rpm.getInstallationRoot()+ "**/*" + NEWLINE); // nimmt anscheinend nicht die Files in der Root
-//		controlWriter.write( rpm.getInstallationRoot()+ "/*" + NEWLINE);
 		
 		if(setup.getDesktopStarters() != null && setup.getDesktopStarters().size() > 0) {
 			controlWriter.write( "/usr/**/*" + NEWLINE);	
