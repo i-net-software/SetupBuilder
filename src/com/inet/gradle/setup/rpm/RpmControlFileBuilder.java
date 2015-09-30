@@ -169,12 +169,12 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f " + rpm.getInstallationRoot() + setup.getBaseName() + "/" + file + NEWLINE);	
+			controlWriter.write("rm -f ${RPM_INSTALL_PREFIX}/" + file + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
 		for (String dirs : del_dirs) {
-			controlWriter.write("rm -R -f " + rpm.getInstallationRoot() + setup.getBaseName() + "/" + dirs + NEWLINE);	
+			controlWriter.write("rm -R -f ${RPM_INSTALL_PREFIX}/" + dirs + NEWLINE);	
 		}
 		
 	}
@@ -199,12 +199,12 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f "  + rpm.getInstallationRoot() + setup.getBaseName() + "/" + file + NEWLINE);	
+			controlWriter.write("rm -f ${RPM_INSTALL_PREFIX}/" + file + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
 		for (String dirs : del_dirs) {
-			controlWriter.write("rm -R -f " +  rpm.getInstallationRoot() + setup.getBaseName() + "/" + dirs + NEWLINE);	
+			controlWriter.write("rm -R -f ${RPM_INSTALL_PREFIX}/" + dirs + NEWLINE);	
 		}
 		
 	}
@@ -220,6 +220,7 @@ class RpmControlFileBuilder {
 		for (String post : posts) {
 			controlWriter.write(post + NEWLINE);	
 		}	
+		
 		StringBuilder post_script = scriptMap.get( Script.POSTINST );
 		if(post_script != null) {
 			controlWriter.write(post_script.toString() + NEWLINE);
@@ -233,16 +234,16 @@ class RpmControlFileBuilder {
 			String workingDir = starter.getWorkDir();
 			if( executable != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd "  + rpm.getInstallationRoot() + setup.getBaseName() + "/" + workingDir + " && " + executable + "& )" + NEWLINE);
+					controlWriter.write("( cd ${RPM_INSTALL_PREFIX}/" + workingDir + " && " + executable + " & )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd "  + rpm.getInstallationRoot() + setup.getBaseName() + " && " + executable + "& )" + NEWLINE);	
+					controlWriter.write("( cd ${RPM_INSTALL_PREFIX} && " + executable + " & )" + NEWLINE);	
 				}
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd " + rpm.getInstallationRoot() + setup.getBaseName() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )" + NEWLINE);
+					controlWriter.write("( cd ${RPM_INSTALL_PREFIX}/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd " + rpm.getInstallationRoot() + setup.getBaseName() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )"  + NEWLINE);	
+					controlWriter.write("( cd ${RPM_INSTALL_PREFIX} && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )"  + NEWLINE);	
 				}
 			}
 		}
@@ -275,7 +276,8 @@ class RpmControlFileBuilder {
 	private void putFiles(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%files" + NEWLINE);
 		
-		controlWriter.write( rpm.getInstallationRoot()+ "**/*" + NEWLINE);
+		controlWriter.write( rpm.getInstallationRoot()+ "**/*" + NEWLINE); // nimmt anscheinend nicht die Files in der Root
+//		controlWriter.write( rpm.getInstallationRoot()+ "/*" + NEWLINE);
 		
 		if(setup.getDesktopStarters() != null && setup.getDesktopStarters().size() > 0) {
 			controlWriter.write( "/usr/**/*" + NEWLINE);	
@@ -360,7 +362,6 @@ class RpmControlFileBuilder {
 	private void putPrefix(OutputStreamWriter controlWriter) 
 			throws IOException {
 		String prefix = rpm.getInstallationRoot();
-		prefix = prefix.substring(0, prefix.length()-1 );
 		
 		controlWriter.write("Prefix: " + prefix + NEWLINE);
 		

@@ -341,18 +341,19 @@ public class Rpm extends AbstractSetupTask {
 	 */
 	public String getInstallationRoot() {
 		if(installationRoot == null) {
-			return "/usr/share/";
+			return "/usr/share/" + getSetupBuilder().getBaseName();
 		} else {
 			return installationRoot;
 		}
 	}
 
 	/**
-	 * Sets the installation rood directory where the program directory should be located. 
+	 * Sets the installation root directory where the main files should be located.
+	 * If the directory ends with a / it will be removed. 
 	 * @param installationRoot the installation root directory
 	 */
 	public void setInstallationRoot(String installationRoot) {		
-		this.installationRoot = installationRoot.endsWith("/") ? installationRoot : installationRoot + "/";
+		this.installationRoot = installationRoot.endsWith("/") ? installationRoot.substring(0, installationRoot.length()-1) : installationRoot;
 	}
     
 }
