@@ -336,7 +336,7 @@ public class Rpm extends AbstractSetupTask {
 	}
 
 	/**
-	 * Returns the installation root where the program directory should be located. Default is /usr/share
+	 * Returns the installation root where the program directory should be located. Default is /usr/share +  basename
 	 * @return the installation root directory
 	 */
 	public String getInstallationRoot() {

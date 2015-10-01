@@ -48,6 +48,8 @@ public class Deb extends AbstractSetupTask {
     
     private String				   changes;
     
+    private String				   installationRoot;
+    
 	
     public Deb() {
         super( "deb" );
@@ -170,6 +172,27 @@ public class Deb extends AbstractSetupTask {
 		this.changes = changes;
 	}
 	
+	/**
+	 * Returns the installation root where the program directory should be located. Default is /usr/share +  basename
+	 * @return the installation root directory
+	 */
+	public String getInstallationRoot() {
+		if(installationRoot == null) {
+			return "/usr/share/" + getSetupBuilder().getBaseName();
+		} else {
+			return installationRoot;
+		}
+	}
+
+	/**
+	 * Sets the installation root directory where the main files should be located.
+	 * If the directory ends with a / it will be removed. 
+	 * @param installationRoot the installation root directory
+	 */
+	public void setInstallationRoot(String installationRoot) {		
+		this.installationRoot = installationRoot.endsWith("/") ? installationRoot.substring(0, installationRoot.length()-1) : installationRoot;
+	}
+
 
 	
 }

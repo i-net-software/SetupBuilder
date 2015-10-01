@@ -53,7 +53,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      */
     public void build() {
         try {
-            File filesPath = new File( buildDir, "/usr/share/" + setup.getBaseName() );
+            File filesPath = new File( buildDir, task.getInstallationRoot() );
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
@@ -77,8 +77,8 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             // removes only the files in the installation path
     		List<String> del_files = setup.getDeleteFiles();
     		for (String file : del_files) {
-    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -f /usr/share/" + setup.getBaseName() + "/" + file + "\n" );
-    			controlBuilder.addTailScriptFragment( Script.POSTRM, "rm -f /usr/share/" + setup.getBaseName() + "/" + file + "\n" );
+    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -f "+ task.getInstallationRoot() + "/" + file + "\n" );
+    			controlBuilder.addTailScriptFragment( Script.POSTRM, "rm -f " + task.getInstallationRoot() + "/" + file + "\n" );
     		}
     		
     		DesktopStarter starter = setup.getRunAfter();
@@ -88,16 +88,16 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     			String workingDir = starter.getWorkDir();
     			if( executable != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && " + executable + "& )\n" );
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd " + task.getInstallationRoot() + "/" + workingDir + " && " + executable + "& )\n" );
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + " && " + executable + "& )\n" );	
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd " + task.getInstallationRoot() + " && " + executable + "& )\n" );	
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd " + task.getInstallationRoot() + "/" + workingDir + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd /usr/share/" + setup.getBaseName() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");	
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd " + task.getInstallationRoot() + " && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");	
     				}
     			}
     		}
@@ -187,15 +187,29 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupService( Service service ) throws IOException {
+    	String workingDir = null;
+    	DesktopStarter starter = setup.getRunAfter();
+        if(starter != null ) {
+        	workingDir = starter.getWorkDir();
+        }
         String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
-        String mainJarPath = "/usr/share/" + setup.getBaseName() + "/" + service.getMainJar();
+        String installationRoot = task.getInstallationRoot();
+        String mainJarPath;
         Template initScript = new Template( "deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
+        
+        if( workingDir != null ) {
+			initScript.setPlaceholder( "workdir", installationRoot + "/" + workingDir );
+    		mainJarPath = installationRoot + "/" + workingDir + "/" + service.getMainJar();
+    	} else {	
+    		initScript.setPlaceholder( "workdir", installationRoot );
+    		mainJarPath = installationRoot + "/" + service.getMainJar();
+    	}
+                
         initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "workdir", "/usr/share/" + setup.getBaseName() );
         initScript.setPlaceholder( "startArguments",
                                    "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
@@ -219,7 +233,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         String consoleStarterPath = "usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
-            fw.write( "java -cp /usr/share/" + setup.getBaseName() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+            fw.write( "java -cp " + task.getInstallationRoot() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
                 + starter.getStartArguments() + " \"$@\"" );
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
