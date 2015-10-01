@@ -15,6 +15,7 @@
  */
 package com.inet.gradle.setup.dmg;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import javax.imageio.ImageIO;
 
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
@@ -561,6 +564,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             File backgroundDestination = new File( tmp.toFile() , "/" + title + "/.resources/background" + name.substring(name.lastIndexOf('.')) );
             Files.createDirectories(backgroundDestination.getParentFile().toPath(), new FileAttribute[0]);
         	Files.copy(task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        	BufferedImage image = ImageIO.read( backgroundDestination );
+        	
+        	// Override the values to use the acutal image size
+        	task.setWindowWidth(image.getWidth());
+        	task.setWindowHeight(image.getHeight());
         }
     }
 
