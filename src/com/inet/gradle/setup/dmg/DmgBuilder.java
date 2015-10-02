@@ -88,7 +88,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 			}
 
             title = setup.getSetupName();
-            applicationName = setup.getApplication();
+            applicationName = setup.getBaseName();
+            // applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
             iconFile = applicationBuilder.getApplicationIcon();
 
