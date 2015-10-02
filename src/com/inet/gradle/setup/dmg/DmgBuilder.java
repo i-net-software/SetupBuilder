@@ -45,6 +45,7 @@ import org.w3c.dom.Element;
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.DocumentType;
+import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.XmlFileBuilder;
@@ -82,65 +83,23 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     public void build() throws RuntimeException {
 
         try {
-        	Project project = task.getProject();
-
         	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
+        	OSXApplicationBuilder applicationBuilder = new OSXApplicationBuilder( task, setup, fileResolver );
+        	
+        	// Build all services 
+        	for (Service service : setup.getServices() ) {
+        		applicationBuilder.buildService( service );
+			}
+        	
+        	// Build all standalone applications
+        	for (DesktopStarter application : setup.getDesktopStarters() ) {
+        		applicationBuilder.buildApplication( application );
+			}
+
             title = setup.getSetupName();
-            applicationName = setup.getBaseName();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
 
-            AppBundlerTask appBundler = new AppBundlerTask();
-            appBundler.setOutputDirectory( buildDir );
-            appBundler.setName( applicationName );
-            appBundler.setDisplayName( setup.getApplication() );
-
-            String version = setup.getVersion();
-            appBundler.setVersion( version );
-            int idx = version.indexOf( '.' );
-            if( idx >= 0 ) {
-                idx = version.indexOf( '.', idx + 1 );
-                if( idx >= 0 ) {
-                    version = version.substring( 0, idx );
-                }
-            }
-            appBundler.setShortVersion( version );
-
-            appBundler.setExecutableName( setup.getBaseName() );
-            appBundler.setIdentifier( setup.getMainClass() );
-            appBundler.setMainClassName( setup.getMainClass() );
-            appBundler.setJarLauncherName( setup.getMainJar() );
-            appBundler.setCopyright( setup.getVendor() );
-
-            Object iconData = setup.getIcons();
-            iconFile = ImageFactory.getImageFile( project, iconData, buildDir, "icns" );
-            appBundler.setIcon( iconFile );
-            Architecture x86_64 = new Architecture();
-            x86_64.setName( "x86_64" );
-            appBundler.addConfiguredArch( x86_64 );
-
-            // add file extensions
-            for( DocumentType doc : setup.getDocumentType() ) {
-                BundleDocument bundle = new BundleDocument();
-                bundle.setExtensions( String.join( ",", doc.getFileExtension() ) );
-                bundle.setName( doc.getName() );
-                bundle.setRole( doc.getRole() ); //Viewer or Editor
-                Object icons = doc.getIcons();
-                if( icons == null ) {
-                    // nothing
-                } else if( icons == iconData ) {
-                    bundle.setIcon( iconFile.toString() );
-                } else {
-                    bundle.setIcon( ImageFactory.getImageFile( project, icons, buildDir, "icns" ).toString() );
-                }
-                appBundler.addConfiguredBundleDocument( bundle );
-            }
-
-            bundleJre( appBundler );
-
-            org.apache.tools.ant.Project antProject = new org.apache.tools.ant.Project();
-            appBundler.setProject( antProject );
-            appBundler.execute();
-
+            applicationName = setup.getApplication();
             task.copyTo( new File( buildDir, applicationName + ".app/Contents/Java" ) );
             
             setApplicationFilePermissions();
@@ -202,57 +161,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( ";" );
         exec( command );
 	}
-
-    /**
-     * Bundle the Java VM if set.
-     * @param appBundler the ANT Task
-     */
-    private void bundleJre( AppBundlerTask appBundler ) {
-        Object jre = setup.getBundleJre();
-        if( jre == null ) {
-            return;
-        }
-        File jreDir;
-        try {
-            jreDir = task.getProject().file( jre );
-        } catch( Exception e ) {
-            jreDir = null;
-        }
-        if( jreDir == null || !jreDir.isDirectory() ) {
-            ArrayList<String> command = new ArrayList<>();
-            command.add( "/usr/libexec/java_home" );
-            command.add( "-v" );
-            command.add( jre.toString() );
-            command.add( "-F" );
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            exec( command, null, baos );
-            jreDir = new File( baos.toString().trim() );
-            if( !jreDir.isDirectory() ) {
-                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + jreDir );
-            }
-        }
-        task.getProject().getLogger().lifecycle( "\tbundle JRE: " + jreDir );
-        FileSet fileSet = new FileSet();
-        fileSet.setDir( jreDir );
-        
-        fileSet.appendIncludes(new String[] {
-                "jre/*",
-                "jre/lib/",
-                "jre/bin/java"
-        });
-
-        fileSet.appendExcludes(new String[] {
-            "jre/lib/deploy/",
-            "jre/lib/deploy.jar",
-            "jre/lib/javaws.jar",
-            "jre/lib/libdeploy.dylib",
-            "jre/lib/libnpjp2.dylib",
-            "jre/lib/plugin.jar",
-            "jre/lib/security/javaws.policy"
-        });
-
-        appBundler.addConfiguredRuntime( fileSet );
-    }
 
     /**
      * Create the binary with native tools.

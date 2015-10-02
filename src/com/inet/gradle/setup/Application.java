@@ -1,13 +1,12 @@
 package com.inet.gradle.setup;
 
-public class Application {
-    protected final SetupBuilder setup;
-    private String             name, displayName, mainJar, mainClass, executable;
-    private String             description;
-    private Object             icons;
-    private String             workDir;
 
-    /**
+public class Application {
+	protected final SetupBuilder			setup;
+	private String 							name, baseName, displayName, mainJar, mainClass, executable, description, workDir;
+	private Object icons;
+
+	/**
      * Create a new DesktopStarter
      * @param setup current SetupBuilder
      */
@@ -34,6 +33,27 @@ public class Application {
         this.name = name;
     }
     
+    /**
+     * Get the baseName for the application
+     * @return
+     */
+    public String getBaseName() {
+        if( baseName != null ) {
+            return baseName;
+        }
+        return getName();
+    }
+
+    /**
+     * Set the base name of the service name. Can contains slashes if it should be in a sub directory. This change the
+     * working directory of the service. On Windows ".exe" is added for the file name of the service.
+     * 
+     * @param baseName the new baseName
+     */
+    public void setBaseName( String baseName ) {
+        this.baseName = baseName;
+    }
+
     /**
      * get the displayName of the application.
      * @param name the name to set

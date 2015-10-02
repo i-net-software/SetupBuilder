@@ -5,7 +5,7 @@ package com.inet.gradle.setup;
  */
 public class Service extends Application {
     private boolean startOnBoot = true;
-    private String  startArguments, baseName;
+    private String  startArguments;
 
     /**
      * Create a new Service
@@ -15,21 +15,15 @@ public class Service extends Application {
         super( setup );
     }
 
-    public String getBaseName() {
-        if( baseName != null ) {
-            return baseName;
-        }
-        return getName() + "Service";
-    }
-
     /**
-     * Set the base name of the service name. Can contains slashes if it should be in a sub directory. This change the
-     * working directory of the service. On Windows ".exe" is added for the file name of the service.
-     * 
-     * @param baseName the new baseName
+     * Get the baseName for the service
+     * @return
      */
-    public void setBaseName( String baseName ) {
-        this.baseName = baseName;
+    public String getBaseName() {
+        if( !super.getBaseName().equals( getName() ) ) {
+            return super.getBaseName();
+        }
+        return getName() + " Service";
     }
 
     /**

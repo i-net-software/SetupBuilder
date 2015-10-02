@@ -15,14 +15,21 @@
  */
 package com.inet.gradle.setup;
 
+import groovy.lang.Closure;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.gradle.api.GradleException;
+import org.gradle.util.ConfigureUtil;
+
 /**
  * Definition of an executable which can be started on the desktop (e.g. an entry in the start menu on Windows)
  */
 public class DesktopStarter extends Application {
-    private String             startArguments;
-    private String             mimeTypes;
-    private String             categories;
-    private Location           location;
+    private String             	startArguments, mimeTypes, categories;
+    private Location			location;
+	private List<DocumentType>	documentTypes = new ArrayList<>();
 
     /**
      * Create a new DesktopStarter
@@ -31,7 +38,7 @@ public class DesktopStarter extends Application {
     public DesktopStarter( SetupBuilder setup ) {
         super( setup );
     }
- 
+
     /**
      * Returns the command-line arguments for starting.
      * @return the command-line arguments for starting
@@ -110,5 +117,30 @@ public class DesktopStarter extends Application {
      */
     public static enum Location {
         StartMenu, ApplicationMenu, InstallDir;
+    }
+
+
+    /**
+     * Register a file extensions.
+     * 
+     * @param closue document type
+     */
+    public void documentType( Closure<?> closue ) {
+        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( setup ) );
+        if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
+            throw new GradleException( "documentType must contains minimum one fileExtension." );
+        }
+        documentTypes.add( doc );
+    }
+
+    /**
+     * Return the registered file extensions or the ones defined by the main setup
+     * @return list of document types.
+     */
+    public List<DocumentType> getDocumentType() {
+    	if ( documentTypes.isEmpty() ) {
+    		return setup.getDocumentType();
+    	}
+        return documentTypes;
     }
 }
