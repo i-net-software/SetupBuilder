@@ -22,8 +22,7 @@ import com.oracle.appbundler.BundleDocument;
 
 public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 
-	protected OSXApplicationBuilder(Dmg task, SetupBuilder setup,
-			FileResolver fileResolver) {
+	protected OSXApplicationBuilder(Dmg task, SetupBuilder setup, FileResolver fileResolver) {
 		super(task, setup, fileResolver);
 	}
 
@@ -187,10 +186,9 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	 * @return Icon file
 	 * @throws IOException
 	 */
-	private File getApplicationIcon() throws IOException {
+	public File getApplicationIcon() throws IOException {
 		Object iconData = setup.getIcons();
-		return ImageFactory.getImageFile(task.getProject(), iconData, buildDir,
-				"icns");
+		return ImageFactory.getImageFile(task.getProject(), iconData, buildDir, "icns");
 	}
 
 }
