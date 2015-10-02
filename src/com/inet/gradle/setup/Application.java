@@ -41,7 +41,7 @@ public class Application {
         if( baseName != null ) {
             return baseName;
         }
-        return getName();
+        return setup.getBaseName();
     }
 
     /**
