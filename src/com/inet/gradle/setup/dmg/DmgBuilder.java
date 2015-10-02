@@ -99,9 +99,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             title = setup.getSetupName();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
 
-            
             /*
-            setApplicationFilePermissions();
             
             createBinary();
 
@@ -133,32 +131,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 	        ex.printStackTrace();
         }
     }
-
-	private void setApplicationFilePermissions() throws IOException {
-		
-		String root = buildDir.toString() + "/" + applicationName + ".app";
-
-		// Set Read on all files and folders
-		ArrayList<String> command = new ArrayList<>();
-        command.add( "chmod" );
-        command.add( "-R" );
-        command.add( "a+r" );
-		command.add( root );
-        exec( command );
-        
-		// Set execute on all folders.
-        command = new ArrayList<>();
-        command.add( "find" );
-        command.add( root );
-        command.add( "-type" );
-        command.add( "d" );
-        command.add( "-exec" );
-        command.add( "chmod" );
-        command.add( "a+x" );
-        command.add( "{}" );
-        command.add( ";" );
-        exec( command );
-	}
 
     /**
      * Create the binary with native tools.

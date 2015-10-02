@@ -91,16 +91,16 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			return this;
 		}
 
-		public PreparedAppBundlerTask finish() {
+		public PreparedAppBundlerTask finish() throws Exception {
 			bundleJre();
 
 			org.apache.tools.ant.Project antProject = new org.apache.tools.ant.Project();
 			appBundler.setProject(antProject);
 			appBundler.execute();
 
-			task.copyTo(new File(buildDir, application.getDisplayName()
-					+ ".app/Contents/Java"));
+			task.copyTo(new File(buildDir, application.getDisplayName() + ".app/Contents/Java"));
 
+			setApplicationFilePermissions();
 			return this;
 		}
 
@@ -148,6 +148,36 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 					"jre/lib/plugin.jar", "jre/lib/security/javaws.policy" });
 
 			appBundler.addConfiguredRuntime(fileSet);
+		}
+
+		/**
+		 * Set File permissions to the resulting application
+		 * @throws IOException
+		 */
+		private void setApplicationFilePermissions() throws IOException {
+			
+			String root = buildDir.toString() + "/" + application.getDisplayName() + ".app";
+
+			// Set Read on all files and folders
+			ArrayList<String> command = new ArrayList<>();
+	        command.add( "chmod" );
+	        command.add( "-R" );
+	        command.add( "a+r" );
+			command.add( root );
+	        exec( command );
+	        
+			// Set execute on all folders.
+	        command = new ArrayList<>();
+	        command.add( "find" );
+	        command.add( root );
+	        command.add( "-type" );
+	        command.add( "d" );
+	        command.add( "-exec" );
+	        command.add( "chmod" );
+	        command.add( "a+x" );
+	        command.add( "{}" );
+	        command.add( ";" );
+	        exec( command );
 		}
 	}
 
