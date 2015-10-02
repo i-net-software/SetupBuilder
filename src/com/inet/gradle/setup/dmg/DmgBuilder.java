@@ -90,6 +90,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             title = setup.getSetupName();
             applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
+            iconFile = applicationBuilder.getApplicationIcon();
 
         	if ( !setup.getServices().isEmpty() ) {
         		// Create installer package
@@ -98,8 +99,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
             createBinary();
 
-            /*
-            
+/*
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
