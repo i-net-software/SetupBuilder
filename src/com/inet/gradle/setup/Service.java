@@ -17,7 +17,7 @@ public class Service extends Application {
 
     /**
      * Get the baseName for the service
-     * @return
+     * @return the base name
      */
     public String getBaseName() {
         if( !super.getBaseName().equals( getName() ) ) {

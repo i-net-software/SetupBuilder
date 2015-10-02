@@ -35,7 +35,7 @@ public class Application {
     
     /**
      * Get the baseName for the application
-     * @return
+     * @return the base name
      */
     public String getBaseName() {
         if( baseName != null ) {
@@ -56,7 +56,7 @@ public class Application {
 
     /**
      * get the displayName of the application.
-     * @param name the name to set
+     * @return the display name
      */
     public String getDisplayName() {
         if( displayName != null ) {
@@ -67,7 +67,7 @@ public class Application {
 
     /**
      * Set the displayName of the application.
-     * @param name the name to set
+     * @param displayName the name to set
      */
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;

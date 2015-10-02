@@ -99,14 +99,12 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             title = setup.getSetupName();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
 
-            applicationName = setup.getApplication();
-            task.copyTo( new File( buildDir, applicationName + ".app/Contents/Java" ) );
             
+            /*
             setApplicationFilePermissions();
             
             createBinary();
 
-/*
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
