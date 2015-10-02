@@ -15,6 +15,7 @@
  */
 package com.inet.gradle.setup.dmg;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,20 +34,16 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.tools.ant.types.FileSet;
-import org.gradle.api.GradleException;
-import org.gradle.api.Project;
+import javax.imageio.ImageIO;
+
 import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.DocumentType;
+import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.XmlFileBuilder;
-import com.oracle.appbundler.AppBundlerTask;
-import com.oracle.appbundler.Architecture;
-import com.oracle.appbundler.BundleDocument;
 
 /**
  * Build a DMG image for OSX.
@@ -55,10 +52,9 @@ import com.oracle.appbundler.BundleDocument;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg> {
 
-    private String title, applicationName;
+    private String title, applicationName, imageSourceRoot;
 	private Path tmp;
 	private File iconFile;
-	private String imageSourceRoot;
 
     /**
      * Create a new instance
@@ -78,72 +74,32 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     public void build() throws RuntimeException {
 
         try {
-        	Project project = task.getProject();
-
         	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
+        	OSXApplicationBuilder applicationBuilder = new OSXApplicationBuilder( task, setup, fileResolver );
+        	
+        	// Build all services 
+        	for (Service service : setup.getServices() ) {
+        		applicationBuilder.buildService( service );
+			}
+        	
+        	// Build all standalone applications
+        	for (DesktopStarter application : setup.getDesktopStarters() ) {
+        		applicationBuilder.buildApplication( application );
+			}
+
             title = setup.getSetupName();
-            applicationName = setup.getBaseName();
+            applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
 
-            AppBundlerTask appBundler = new AppBundlerTask();
-            appBundler.setOutputDirectory( buildDir );
-            appBundler.setName( applicationName );
-            appBundler.setDisplayName( setup.getApplication() );
+        	if ( !setup.getServices().isEmpty() ) {
+        		// Create installer package
+        		createPackageFromApp();
+        	}
 
-            String version = setup.getVersion();
-            appBundler.setVersion( version );
-            int idx = version.indexOf( '.' );
-            if( idx >= 0 ) {
-                idx = version.indexOf( '.', idx + 1 );
-                if( idx >= 0 ) {
-                    version = version.substring( 0, idx );
-                }
-            }
-            appBundler.setShortVersion( version );
-
-            appBundler.setExecutableName( setup.getBaseName() );
-            appBundler.setIdentifier( setup.getMainClass() );
-            appBundler.setMainClassName( setup.getMainClass() );
-            appBundler.setJarLauncherName( setup.getMainJar() );
-            appBundler.setCopyright( setup.getVendor() );
-
-            Object iconData = setup.getIcons();
-            iconFile = ImageFactory.getImageFile( project, iconData, buildDir, "icns" );
-            appBundler.setIcon( iconFile );
-            Architecture x86_64 = new Architecture();
-            x86_64.setName( "x86_64" );
-            appBundler.addConfiguredArch( x86_64 );
-
-            // add file extensions
-            for( DocumentType doc : setup.getDocumentType() ) {
-                BundleDocument bundle = new BundleDocument();
-                bundle.setExtensions( String.join( ",", doc.getFileExtension() ) );
-                bundle.setName( doc.getName() );
-                bundle.setRole( doc.getRole() ); //Viewer or Editor
-                Object icons = doc.getIcons();
-                if( icons == null ) {
-                    // nothing
-                } else if( icons == iconData ) {
-                    bundle.setIcon( iconFile.toString() );
-                } else {
-                    bundle.setIcon( ImageFactory.getImageFile( project, icons, buildDir, "icns" ).toString() );
-                }
-                appBundler.addConfiguredBundleDocument( bundle );
-            }
-
-            bundleJre( appBundler );
-
-            org.apache.tools.ant.Project antProject = new org.apache.tools.ant.Project();
-            appBundler.setProject( antProject );
-            appBundler.execute();
-
-            task.copyTo( new File( buildDir, applicationName + ".app/Contents/Java" ) );
-            
-            setApplicationFilePermissions();
-            
             createBinary();
 
-/*
+            /*
+            
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
@@ -173,92 +129,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         }
     }
 
-	private void setApplicationFilePermissions() throws IOException {
-		
-		String root = buildDir.toString() + "/" + applicationName + ".app";
-
-		// Set Read on all files and folders
-		ArrayList<String> command = new ArrayList<>();
-        command.add( "chmod" );
-        command.add( "-R" );
-        command.add( "a+r" );
-		command.add( root );
-        exec( command );
-        
-		// Set execute on all folders.
-        command = new ArrayList<>();
-        command.add( "find" );
-        command.add( root );
-        command.add( "-type" );
-        command.add( "d" );
-        command.add( "-exec" );
-        command.add( "chmod" );
-        command.add( "a+x" );
-        command.add( "{}" );
-        command.add( ";" );
-        exec( command );
-	}
-
-    /**
-     * Bundle the Java VM if set.
-     * @param appBundler the ANT Task
-     */
-    private void bundleJre( AppBundlerTask appBundler ) {
-        Object jre = setup.getBundleJre();
-        if( jre == null ) {
-            return;
-        }
-        File jreDir;
-        try {
-            jreDir = task.getProject().file( jre );
-        } catch( Exception e ) {
-            jreDir = null;
-        }
-        if( jreDir == null || !jreDir.isDirectory() ) {
-            ArrayList<String> command = new ArrayList<>();
-            command.add( "/usr/libexec/java_home" );
-            command.add( "-v" );
-            command.add( jre.toString() );
-            command.add( "-F" );
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            exec( command, null, baos );
-            jreDir = new File( baos.toString().trim() );
-            if( !jreDir.isDirectory() ) {
-                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + jreDir );
-            }
-        }
-        task.getProject().getLogger().lifecycle( "\tbundle JRE: " + jreDir );
-        FileSet fileSet = new FileSet();
-        fileSet.setDir( jreDir );
-        
-        fileSet.appendIncludes(new String[] {
-                "jre/*",
-                "jre/lib/",
-                "jre/bin/java"
-        });
-
-        fileSet.appendExcludes(new String[] {
-            "jre/lib/deploy/",
-            "jre/lib/deploy.jar",
-            "jre/lib/javaws.jar",
-            "jre/lib/libdeploy.dylib",
-            "jre/lib/libnpjp2.dylib",
-            "jre/lib/plugin.jar",
-            "jre/lib/security/javaws.policy"
-        });
-
-        appBundler.addConfiguredRuntime( fileSet );
-    }
-
     /**
      * Create the binary with native tools.
      * @throws Throwable 
      */
     private void createBinary() throws Throwable {
-    	
-    	if ( !setup.getServices().isEmpty() ) {
-    		createPackageFromApp();
-    	}
     	
         createTempImage();
         attach();
@@ -286,6 +161,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             script = script.replace( "${applicationName}", applicationName );
             script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
             script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
+
+            DesktopStarter runAfter = setup.getRunAfter();
+            script = script.replace( "${runAfterMainJar}", runAfter != null  && runAfter.getMainJar() != null ? runAfter.getMainJar() : "" );
+            script = script.replace( "${runAfterMainClass}", runAfter != null  && runAfter.getMainClass() != null ? runAfter.getMainClass() : "" );
+            script = script.replace( "${runAfterWorkingDir}", runAfter != null  && runAfter.getWorkDir() != null ? runAfter.getWorkDir() : "" );
             
             OutputStream output = new FileOutputStream( destination );
             output.write( script.getBytes() );
@@ -561,6 +441,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             File backgroundDestination = new File( tmp.toFile() , "/" + title + "/.resources/background" + name.substring(name.lastIndexOf('.')) );
             Files.createDirectories(backgroundDestination.getParentFile().toPath(), new FileAttribute[0]);
         	Files.copy(task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        	BufferedImage image = ImageIO.read( backgroundDestination );
+        	
+        	// Override the values to use the acutal image size
+        	task.setWindowWidth(image.getWidth());
+        	task.setWindowHeight(image.getHeight());
         }
     }
 
