@@ -3,43 +3,18 @@ package com.inet.gradle.setup;
 /**
  * Definition of a service to be installed on the target system.
  */
-public class Service {
-    private final SetupBuilder setup;
-    private String  name, baseName, displayName, description, mainJar, mainClass;
+public class Service extends Application {
     private boolean startOnBoot = true;
-    private String  startArguments;
+    private String  startArguments, baseName;
 
     /**
      * Create a new Service
      * @param setup current SetupBuilder
      */
     public Service( SetupBuilder setup ) {
-        this.setup = setup;
+        super( setup );
     }
 
-    /**
-     * Returns the name of this service.
-     * @return the name of this service
-     */
-    public String getName() {
-        if( name != null ) {
-            return name;
-        }
-        return setup.getBaseName();
-    }
-
-    /**
-     * Set the name of the service.
-     * @param name the name to set
-     */
-    public void setName( String name ) {
-        this.name = name;
-    }
-
-    /**
-     * Get the base name of the service file. The default is name + "Service".
-     * @return the base name
-     */
     public String getBaseName() {
         if( baseName != null ) {
             return baseName;
@@ -55,44 +30,6 @@ public class Service {
      */
     public void setBaseName( String baseName ) {
         this.baseName = baseName;
-    }
-
-    /**
-     * Get the display name
-     * @return the display name
-     */
-    public String getDisplayName() {
-        if( displayName != null ) {
-            return displayName;
-        }
-        return setup.getApplication();
-    }
-
-    /**
-     * Set the display name
-     * @param displayName the display name
-     */
-    public void setDisplayName( String displayName ) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Returns the description
-     * @return the description
-     */
-    public String getDescription() {
-        if( description != null ) {
-            return description;
-        }
-        return setup.getDescription();
-    }
-
-    /**
-     * Sets the description.
-     * @param description the description to set
-     */
-    public void setDescription( String description ) {
-        this.description = description;
     }
 
     /**
@@ -128,47 +65,5 @@ public class Service {
      */
     public void setStartArguments( String startArguments ) {
         this.startArguments = startArguments;
-    }
-
-    /**
-     * Get the main jar file.
-     * 
-     * @return the main jar
-     */
-    public String getMainJar() {
-        if( mainJar != null ) {
-            return mainJar;
-        }
-        return setup.getMainJar();
-    }
-
-    /**
-     * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in the manifest.
-     * 
-     * @param mainJar the main jar file
-     */
-    public void setMainJar( String mainJar ) {
-        this.mainJar = mainJar;
-    }
-
-    /**
-     * Get the main class.
-     * 
-     * @return the class name
-     */
-    public String getMainClass() {
-        if( mainClass != null ) {
-            return mainClass;
-        }
-        return setup.getMainClass();
-    }
-
-    /**
-     * Set the main class of the Java application.
-     * 
-     * @param mainClass the class name
-     */
-    public void setMainClass( String mainClass ) {
-        this.mainClass = mainClass;
     }
 }
