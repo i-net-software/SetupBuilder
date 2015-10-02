@@ -43,6 +43,7 @@ import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
+import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
@@ -289,6 +290,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             script = script.replace( "${applicationName}", applicationName );
             script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
             script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
+
+            DesktopStarter runAfter = setup.getRunAfter();
+            script = script.replace( "${runAfterMainJar}", runAfter != null  && runAfter.getMainJar() != null ? runAfter.getMainJar() : "" );
+            script = script.replace( "${runAfterMainClass}", runAfter != null  && runAfter.getMainClass() != null ? runAfter.getMainClass() : "" );
+            script = script.replace( "${runAfterWorkingDir}", runAfter != null  && runAfter.getWorkDir() != null ? runAfter.getWorkDir() : "" );
             
             OutputStream output = new FileOutputStream( destination );
             output.write( script.getBytes() );
