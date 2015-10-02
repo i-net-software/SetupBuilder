@@ -36,22 +36,14 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
-import org.apache.tools.ant.types.FileSet;
-import org.gradle.api.GradleException;
-import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.XmlFileBuilder;
-import com.oracle.appbundler.AppBundlerTask;
-import com.oracle.appbundler.Architecture;
-import com.oracle.appbundler.BundleDocument;
 
 /**
  * Build a DMG image for OSX.
@@ -60,10 +52,9 @@ import com.oracle.appbundler.BundleDocument;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg> {
 
-    private String title, applicationName;
+    private String title, applicationName, imageSourceRoot;
 	private Path tmp;
 	private File iconFile;
-	private String imageSourceRoot;
 
     /**
      * Create a new instance
@@ -97,12 +88,18 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 			}
 
             title = setup.getSetupName();
+            applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + applicationName + ".app";
+
+        	if ( !setup.getServices().isEmpty() ) {
+        		// Create installer package
+        		createPackageFromApp();
+        	}
+
+            createBinary();
 
             /*
             
-            createBinary();
-
             // Remove temporary folder and content.
             Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
          	   @Override
@@ -137,10 +134,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      * @throws Throwable 
      */
     private void createBinary() throws Throwable {
-    	
-    	if ( !setup.getServices().isEmpty() ) {
-    		createPackageFromApp();
-    	}
     	
         createTempImage();
         attach();
