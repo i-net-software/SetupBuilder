@@ -178,7 +178,7 @@ public class Deb extends AbstractSetupTask {
 	 */
 	public String getInstallationRoot() {
 		if(installationRoot == null) {
-			return "/usr/share/" + getSetupBuilder().getBaseName();
+			return "/usr/share/" + getSetupBuilder().getApplication();
 		} else {
 			return installationRoot;
 		}
