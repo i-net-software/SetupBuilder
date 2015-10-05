@@ -53,7 +53,7 @@ public class ResourceUtils {
 	 * Unzip it
 	 * 
 	 * @param file input zip file
-	 * @param output zip file output folder
+	 * @param folder zip file output folder
 	 */
 	public static void unZipIt(File file, File folder) {
 
