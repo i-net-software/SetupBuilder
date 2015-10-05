@@ -208,7 +208,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
     @OutputFile
     public File getSetupFile() {
         SetupBuilder setup = getSetupBuilder();
-        return new File( setup.getDestinationDir(), setup.getSetupName() + "." + getExtension() );
+        return new File( setup.getDestinationDir(), setup.getDownloadFileName() + "." + getExtension() );
     }
 
     /**

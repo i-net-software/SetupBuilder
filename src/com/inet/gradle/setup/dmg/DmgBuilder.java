@@ -86,8 +86,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         		applicationBuilder.buildApplication( application );
 			}
 
-            title = setup.getSetupName();
-            applicationName = setup.getBaseName();
+            title = setup.getDownloadFileName();
+            applicationName = setup.getAppIdentifier();
             // applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + setup.getApplication() + ".app";
             iconFile = applicationBuilder.getApplicationIcon();
@@ -159,7 +159,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
             String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
             script = script.replace( "${serviceName}", launchdScriptName );
             script = script.replace( "${applicationName}", applicationName );
-            script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+            script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getAppIdentifier() );
             script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
 
             DesktopStarter runAfter = setup.getRunAfter();

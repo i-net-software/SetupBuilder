@@ -88,7 +88,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 
 		public PreparedAppBundlerTask prepare() throws Exception {
 			appBundler.setOutputDirectory(buildDir);
-			appBundler.setName(application.getName());
+			appBundler.setName(application.getDisplayName());
 			appBundler.setDisplayName(application.getDisplayName());
 
 			String version = setup.getVersion();
@@ -102,7 +102,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			}
 			appBundler.setShortVersion(version);
 
-			appBundler.setExecutableName(application.getBaseName());
+			appBundler.setExecutableName(application.getExecutable());
 			appBundler.setIdentifier(application.getMainClass());
 			appBundler.setMainClassName(application.getMainClass());
 			appBundler.setJarLauncherName(application.getMainJar());
@@ -198,7 +198,6 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	 */
 	private void createPreferencePane( Service service ) throws Throwable {
 
-		String applicationName = service.getName();
 		String displayName = service.getDisplayName();
 
 		// Unpack
@@ -209,23 +208,23 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
         input.close();
         output.close();
 
-		File resourcesOutput = new File(buildDir, applicationName  + ".app/Contents/Resources");
+		File resourcesOutput = new File(buildDir, displayName  + ".app/Contents/Resources");
         ResourceUtils.unZipIt(setPrefpane, resourcesOutput);
 
 		// Rename to app-name
-        File prefPaneLocation = new File(resourcesOutput, applicationName + ".prefPane");
+        File prefPaneLocation = new File(resourcesOutput, displayName + ".prefPane");
 
         // rename helper Tool
         File prefPaneContents = new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane/Contents");
 		Path iconPath = getApplicationIcon().toPath();
 
 		Files.copy(iconPath, new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app/Contents/Resources/applet.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-		Files.move(new File(prefPaneContents, "MacOS/SetupBuilderOSXPrefPane").toPath(), new File( prefPaneContents, "MacOS/"+ applicationName ).toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-		Files.move(new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app").toPath(), new File(prefPaneContents, "Resources/"+ applicationName +".app").toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.move(new File(prefPaneContents, "MacOS/SetupBuilderOSXPrefPane").toPath(), new File( prefPaneContents, "MacOS/"+ displayName ).toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.move(new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app").toPath(), new File(prefPaneContents, "Resources/"+ displayName +".app").toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 		System.out.println("Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
 		// Make executable
-		setApplicationFilePermissions( new File(prefPaneContents, "Resources/"+ applicationName +".app/Contents/MacOS/applet") );
+		setApplicationFilePermissions( new File(prefPaneContents, "Resources/"+ displayName +".app/Contents/MacOS/applet") );
     	
 		// Rename prefPane
 		Files.move(new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane").toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
@@ -238,15 +237,15 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
 		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
-		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
 		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
 
-		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
 		
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
 		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() );
-		setPlistProperty( servicePLIST, ":Program", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + displayName + "/" + displayName + ".app/Contents/MacOS/" + setup.getAppIdentifier() );
 		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
 	}

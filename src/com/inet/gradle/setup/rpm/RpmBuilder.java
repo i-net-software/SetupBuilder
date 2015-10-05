@@ -114,7 +114,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         if(starter != null ) {
         	workingDir = starter.getWorkDir();
         }	
-    	String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
+    	String serviceUnixName = service.getServiceID();
         String mainJarPath;
         
         		
@@ -220,7 +220,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
      */
     // share
     private void setupStarter( DesktopStarter starter ) throws IOException {
-        String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
+        String unixName = starter.getExecutable();
         String consoleStarterPath = "/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
@@ -241,7 +241,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         }
         try (FileWriter fw = new FileWriter( createFile( "BUILD/usr/share/applications/" + unixName + ".desktop", false ) )) {
             fw.write( "[Desktop Entry]\n" );
-            fw.write( "Name=" + starter.getName() + "\n" );
+            fw.write( "Name=" + starter.getDisplayName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
             fw.write( "Exec=" + consoleStarterPath + " %F\n" );
             fw.write( "Icon=" + unixName + "\n" );
@@ -291,7 +291,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         command.add( "-v" );
         command.add( "--clean" );
         command.add( "--define=_topdir " + buildDir.getAbsolutePath() );
-        command.add( "SPECS/" + setup.getBaseName() + ".spec" );
+        command.add( "SPECS/" + setup.getAppIdentifier() + ".spec" );
         exec( command );
     }
 

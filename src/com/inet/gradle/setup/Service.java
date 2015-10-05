@@ -5,7 +5,7 @@ package com.inet.gradle.setup;
  */
 public class Service extends Application {
     private boolean startOnBoot = true;
-    private String  startArguments;
+    private String  startArguments, serviceID;
 
     /**
      * Create a new Service
@@ -13,17 +13,6 @@ public class Service extends Application {
      */
     public Service( SetupBuilder setup ) {
         super( setup );
-    }
-
-    /**
-     * Get the baseName for the service
-     * @return the base name
-     */
-    public String getBaseName() {
-        if( !super.getBaseName().equals( getName() ) ) {
-            return super.getBaseName();
-        }
-        return getName() + " Service";
     }
 
     /**
@@ -60,4 +49,26 @@ public class Service extends Application {
     public void setStartArguments( String startArguments ) {
         this.startArguments = startArguments;
     }
+
+    /**
+     * Returns the serviceID which should be a short version of the application name 
+     * @return the serviceID
+     */
+	public String getServiceID() {
+		String id = serviceID;
+        if( id == null ) {
+			id = setup.getAppIdentifier() + "-service";
+        }
+        
+        return id.toLowerCase().replace( ' ', '-' );
+	}
+
+	/**
+	 * Set the serviceID which should be a short version of the application name
+	 * It must not contain spaces.
+	 * @param serviceID
+	 */
+	public void setServiceID(String serviceID) {
+		this.serviceID = serviceID;
+	}
 }

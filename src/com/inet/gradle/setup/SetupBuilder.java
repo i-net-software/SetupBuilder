@@ -49,9 +49,9 @@ public class SetupBuilder implements SetupSources {
 
     private String                 description;
 
-    private String                 baseName;
+    private String                 appIdentifier;
 
-    private String                 setupName;
+    private String                 downloadFileName;
 
     private Object                 licenseFile;
 
@@ -190,13 +190,14 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Get the base name of the setup file. If not set then the project.archivesBaseName is used.
+     * Get the short application identifier of the setup file. If not set then the project.archivesBaseName is used.
+     * Should not contain spaces if possible.
      * 
-     * @return the base name
+     * @return the application identifier
      */
-    public String getBaseName() {
-        if( baseName != null ) {
-            return baseName;
+    public String getAppIdentifier() {
+        if( appIdentifier != null ) {
+            return appIdentifier;
         }
         Object name = project.getProperties().get( "archivesBaseName" );
         if( name != null ) {
@@ -206,11 +207,11 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Set the base name for the setup file.
-     * @param baseName new base name
+     * Set the short application identifier for the setup file.
+     * @param identifier new base name
      */
-    public void setBaseName( String baseName ) {
-        this.baseName = baseName;
+    public void setAppIdentifier( String identifier ) {
+        this.appIdentifier = identifier;
     }
 
     /**
@@ -218,15 +219,19 @@ public class SetupBuilder implements SetupSources {
      * 
      * @return the setup file name
      */
-    public String getSetupName() {
-        if( setupName != null ) {
-            return setupName;
+    public String getDownloadFileName() {
+        if( downloadFileName != null ) {
+            return downloadFileName;
         }
-        return getBaseName() + '-' + getVersion();
+        return getAppIdentifier() + '-' + getVersion();
     }
 
-    public void setSetupName( String setupName ) {
-        this.setupName = setupName;
+    /**
+     * Set the name of the download file for the setup. This should contain the version if needed
+     * @param setupName name of the setup
+     */
+    public void setDownloadFileName( String setupName ) {
+        this.downloadFileName = setupName;
     }
 
     public File getLicenseFile() {

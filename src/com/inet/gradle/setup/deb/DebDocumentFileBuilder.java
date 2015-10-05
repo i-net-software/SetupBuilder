@@ -126,7 +126,7 @@ class DebDocumentFileBuilder {
 			
 			controlWriter = new OutputStreamWriter(gzipstream, "UTF-8");
 		 
-			controlWriter.write( setup.getBaseName() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE);
+			controlWriter.write( setup.getAppIdentifier() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE);
 			
 			
 			String changes = deb.getChanges();
