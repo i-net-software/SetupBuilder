@@ -104,7 +104,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             
             controlBuilder.build();
 
-            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getBaseName() ) );
+            documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getAppIdentifier() ) );
             documentBuilder.build();
 
             changeDirectoryPermissionsTo755( buildDir );
@@ -122,9 +122,9 @@ public class DebBuilder extends AbstractBuilder<Deb> {
 
 
     private void setupEula() throws IOException {
-        String templateLicenseName = setup.getBaseName()+"/license";
-        String templateAcceptName = setup.getBaseName()+"/accept-license";
-        String templateErrorName = setup.getBaseName()+"/error-license";
+        String templateLicenseName = setup.getAppIdentifier()+"/license";
+        String templateAcceptName = setup.getAppIdentifier()+"/accept-license";
+        String templateErrorName = setup.getAppIdentifier()+"/error-license";
         try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) );
              BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile() ) )) {
             fw.write( "Template: " + templateLicenseName + "\n" );
@@ -192,7 +192,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         if(starter != null ) {
         	workingDir = starter.getWorkDir();
         }
-        String serviceUnixName = service.getName().toLowerCase().replace( ' ', '-' );
+        String serviceUnixName = service.getServiceID();
         String installationRoot = task.getInstallationRoot();
         String mainJarPath;
         Template initScript = new Template( "deb/template/init-service.sh" );
@@ -229,7 +229,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupStarter( DesktopStarter starter ) throws IOException {
-        String unixName = starter.getName().toLowerCase().replace( ' ', '-' );
+        String unixName = starter.getExecutable();
         String consoleStarterPath = "usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
@@ -250,7 +250,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         }
         try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
             fw.write( "[Desktop Entry]\n" );
-            fw.write( "Name=" + starter.getName() + "\n" );
+            fw.write( "Name=" + starter.getDisplayName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
             fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
             fw.write( "Icon=" + unixName + "\n" );
@@ -264,7 +264,6 @@ public class DebBuilder extends AbstractBuilder<Deb> {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
         }
-        
     }
 
     /**
@@ -294,7 +293,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
             //    		command.add( "-d" );
-            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getSetupName() + "." + task.getExtension() );
+            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getDownloadFileName() + "." + task.getExtension() );
             exec( command );
         }
     }
@@ -308,7 +307,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         command.add( "dpkg-deb" );
         command.add( "--build" );
         command.add( buildDir.getAbsolutePath() );
-        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getSetupName() + "." + task.getExtension() );
+        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getDownloadFileName() + "." + task.getExtension() );
         exec( command );
     }
 

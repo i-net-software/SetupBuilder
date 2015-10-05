@@ -485,9 +485,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         File prunmgr = ResourceUtils.extract( getClass(), "x86/prunmgr.exe", buildDir );
 
         for( Service service : services ) {
-            String name = service.getName();
+            String name = service.getDisplayName();
             String id = id( name.replace( '-', '_' ) ) + "_service";
-            String exe = service.getBaseName().replace( '\\', '/' ) + ".exe";
+            String exe = service.getServiceID().replace( '\\', '/' ) + ".exe";
             int idx = exe.lastIndexOf( '/' );
             String subdir = exe.substring( 0, idx + 1 );
 
@@ -604,9 +604,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         for( DesktopStarter starter : starters ) {
             Element component = getShortcutComponent( starter, product );
-            String id = id( starter.getLocation() + "_" + starter.getName() );
+            String id = id( starter.getLocation() + "_" + starter.getDisplayName() );
             Element shortcut = getOrCreateChildById( component, "Shortcut", id );
-            addAttributeIfNotExists( shortcut, "Name", starter.getName() );
+            addAttributeIfNotExists( shortcut, "Name", starter.getDisplayName() );
             addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
 
             addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter, installDir ) );
@@ -619,7 +619,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     iconID = ICON_ID;
                 } else {
                     File iconFile = ImageFactory.getImageFile( task.getProject(), starter.getIcons(), buildDir, "ico" );
-                    iconID = id( starter.getName() + ".ico" );
+                    iconID = id( starter.getDisplayName() + ".ico" );
                     Element icon = getOrCreateChildById( product, "Icon", iconID );
                     addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
                 }
