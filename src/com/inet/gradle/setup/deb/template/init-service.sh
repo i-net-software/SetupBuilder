@@ -16,10 +16,9 @@ NAME={{name}}
 WAIT={{wait}}
 DAEMON=/usr/bin/java
 MAINARCHIVE={{mainJar}}
-DAEMON_ARGS="{{startArguments}}"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
-WORKINGDIR={{workdir}}
+WORKINGDIR='{{workdir}}'
 
 # Exit if the package is not installed
 [ ! -f "$MAINARCHIVE" ] && exit 0
@@ -44,13 +43,13 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --chdir $WORKINGDIR --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+	start-stop-daemon --start --chdir "$WORKINGDIR" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon -b --chdir $WORKINGDIR --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
-		$DAEMON_ARGS \
+	start-stop-daemon -b --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
+		{{startArguments}} \
 		|| return 2
 	sleep $WAIT
-	if start-stop-daemon --test --start --chdir $WORKINGDIR --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+	if start-stop-daemon --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
 		if [ -f "$CATALINA_PID" ]; then
 			rm -f "$CATALINA_PID"
 		fi
@@ -96,7 +95,7 @@ case "$1" in
 	esac
 	;;
   status)
-	if start-stop-daemon --test --start --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+	if start-stop-daemon --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
 	    log_success_msg "$NAME is not running."
 	else
 	    log_success_msg "$NAME is running."
