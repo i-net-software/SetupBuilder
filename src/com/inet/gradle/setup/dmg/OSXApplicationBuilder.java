@@ -2,7 +2,11 @@ package com.inet.gradle.setup.dmg;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import org.apache.tools.ant.types.FileSet;
@@ -16,25 +20,47 @@ import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.ResourceUtils;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
 
 public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 
-	protected OSXApplicationBuilder(Dmg task, SetupBuilder setup, FileResolver fileResolver) {
+	private Path tmp;
+
+	/**
+	 * Setup this builder.
+	 * @param task - original task
+	 * @param setup - original setup
+	 * @param fileResolver - original fileResolver
+	 * @param tmp - temporary directory, has to exists. I do not check anything.
+	 */
+	protected OSXApplicationBuilder(Dmg task, SetupBuilder setup, FileResolver fileResolver, Path tmp) {
 		super(task, setup, fileResolver);
+		this.tmp = tmp;
 	}
 
-	public void buildService(Service service) throws Exception {
+	/**
+	 * Create Application from service provided. Also create the preference panel
+	 * and put it into the application. Will also create the installer wrapper package of this application
+	 * @param service the service
+	 * @throws Throwable error.
+	 */
+	public void buildService(Service service) throws Throwable {
 
 		new PreparedAppBundlerTask(service).prepare().finish();
+		createPreferencePane( service );
 	}
 
+	/**
+	 * Create Application from the desktop starter provided
+	 * @param application
+	 * @throws Exception
+	 */
 	public void buildApplication(DesktopStarter application) throws Exception {
 
-		PreparedAppBundlerTask bundlerTask = new PreparedAppBundlerTask(
-				application);
+		PreparedAppBundlerTask bundlerTask = new PreparedAppBundlerTask( application );
 		bundlerTask.prepare();
 
 		// add file extensions
@@ -97,9 +123,10 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			appBundler.setProject(antProject);
 			appBundler.execute();
 
-			task.copyTo(new File(buildDir, application.getDisplayName() + ".app/Contents/Java"));
+			File destiantion = new File(buildDir, application.getDisplayName() + ".app");
+			task.copyTo( new File(destiantion, "Contents/Java") );
 
-			setApplicationFilePermissions();
+			setApplicationFilePermissions( destiantion );
 			return this;
 		}
 
@@ -148,36 +175,6 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 
 			appBundler.addConfiguredRuntime(fileSet);
 		}
-
-		/**
-		 * Set File permissions to the resulting application
-		 * @throws IOException
-		 */
-		private void setApplicationFilePermissions() throws IOException {
-			
-			String root = buildDir.toString() + "/" + application.getDisplayName() + ".app";
-
-			// Set Read on all files and folders
-			ArrayList<String> command = new ArrayList<>();
-	        command.add( "chmod" );
-	        command.add( "-R" );
-	        command.add( "a+r" );
-			command.add( root );
-	        exec( command );
-	        
-			// Set execute on all folders.
-	        command = new ArrayList<>();
-	        command.add( "find" );
-	        command.add( root );
-	        command.add( "-type" );
-	        command.add( "d" );
-	        command.add( "-exec" );
-	        command.add( "chmod" );
-	        command.add( "a+x" );
-	        command.add( "{}" );
-	        command.add( ";" );
-	        exec( command );
-		}
 	}
 
 	/**
@@ -191,4 +188,113 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		return ImageFactory.getImageFile(task.getProject(), iconData, buildDir, "icns");
 	}
 
+	
+	/**
+	 * * Unpack the preference pane from the SetupBuilder,
+	 * * Modify the icon and text
+	 * * Put into the main application bundle
+	 * 
+	 * @throws Throwable
+	 */
+	private void createPreferencePane( Service service ) throws Throwable {
+
+		String applicationName = service.getName();
+		String displayName = service.getDisplayName();
+
+		// Unpack
+		File setPrefpane = new File(tmp.toFile(), "packages/SetupBuilderOSXPrefPane.prefPane.zip");
+		InputStream input = getClass().getResourceAsStream("service/SetupBuilderOSXPrefPane.prefPane.zip");
+		FileOutputStream output = new FileOutputStream( setPrefpane );
+        ResourceUtils.copyData(input, output);
+        input.close();
+        output.close();
+
+		File resourcesOutput = new File(buildDir, applicationName  + ".app/Contents/Resources");
+        ResourceUtils.unZipIt(setPrefpane, resourcesOutput);
+
+		// Rename to app-name
+        File prefPaneLocation = new File(resourcesOutput, applicationName + ".prefPane");
+
+        // rename helper Tool
+        File prefPaneContents = new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane/Contents");
+		Path iconPath = getApplicationIcon().toPath();
+
+		Files.copy(iconPath, new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app/Contents/Resources/applet.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		Files.move(new File(prefPaneContents, "MacOS/SetupBuilderOSXPrefPane").toPath(), new File( prefPaneContents, "MacOS/"+ applicationName ).toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.move(new File(prefPaneContents, "Resources/SetupBuilderOSXPrefPane.app").toPath(), new File(prefPaneContents, "Resources/"+ applicationName +".app").toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		System.out.println("Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
+
+		// Make executable
+		setApplicationFilePermissions( new File(prefPaneContents, "Resources/"+ applicationName +".app/Contents/MacOS/applet") );
+    	
+		// Rename prefPane
+		Files.move(new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane").toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.delete(setPrefpane.toPath());
+
+		// Copy Icon
+		Files.copy(iconPath, new File(prefPaneLocation, "Contents/Resources/ProductIcon.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		
+		// Patch Info.plist
+		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
+
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", applicationName );
+		
+		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
+		setPlistProperty( servicePLIST, ":Name", displayName );
+		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getBaseName() );
+		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
+		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
+	}
+
+	/**
+	 * Modify a plist file
+	 * @param plist file to modify
+	 * @param property property to set
+	 * @param value of property
+	 */
+	public void setPlistProperty(File plist, String property, String value) {
+		
+		// Set Property in plist file
+		// /usr/libexec/PlistBuddy -c "Set PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/libexec/PlistBuddy" );
+        command.add( "-c" );
+        command.add( "Set " + property +  " " + value );
+        command.add( plist.getAbsolutePath() );
+    	exec( command );
+	}
+
+
+	/**
+	 * Set File permissions to the resulting application
+	 * @throws IOException
+	 */
+	private void setApplicationFilePermissions( File destiantion ) throws IOException {
+		
+		// Set Read on all files and folders
+		ArrayList<String> command = new ArrayList<>();
+        command.add( "chmod" );
+        command.add( "-R" );
+        command.add( "a+r" );
+		command.add( destiantion.getAbsolutePath() );
+        exec( command );
+        
+		// Set execute on all folders.
+        command = new ArrayList<>();
+        command.add( "find" );
+        command.add( destiantion.getAbsolutePath() );
+        command.add( "-type" );
+        command.add( "d" );
+        command.add( "-exec" );
+        command.add( "chmod" );
+        command.add( "a+x" );
+        command.add( "{}" );
+        command.add( ";" );
+        exec( command );
+	}
 }
