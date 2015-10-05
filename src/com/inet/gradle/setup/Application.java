@@ -3,7 +3,7 @@ package com.inet.gradle.setup;
 
 public class Application {
 	protected final SetupBuilder			setup;
-	private String 							name, baseName, displayName, mainJar, mainClass, executable, description, workDir;
+	private String 							displayName, mainJar, mainClass, executable, description, workDir;
 	private Object icons;
 
 	/**
@@ -15,46 +15,6 @@ public class Application {
     }
 
     /**
-     * Returns the name of this starter.
-     * @return the name of this starter
-     */
-    public String getName() {
-        if( name != null ) {
-            return name;
-        }
-        return setup.getBaseName();
-    }
-
-    /**
-     * Set the name of the application.
-     * @param name the name to set
-     */
-    public void setName( String name ) {
-        this.name = name;
-    }
-    
-    /**
-     * Get the baseName for the application
-     * @return the base name
-     */
-    public String getBaseName() {
-        if( baseName != null ) {
-            return baseName;
-        }
-        return setup.getBaseName();
-    }
-
-    /**
-     * Set the base name of the service name. Can contains slashes if it should be in a sub directory. This change the
-     * working directory of the service. On Windows ".exe" is added for the file name of the service.
-     * 
-     * @param baseName the new baseName
-     */
-    public void setBaseName( String baseName ) {
-        this.baseName = baseName;
-    }
-
-    /**
      * get the displayName of the application.
      * @return the display name
      */
@@ -62,7 +22,7 @@ public class Application {
         if( displayName != null ) {
             return displayName;
         }
-        return getName();
+        return setup.getApplication();
 	}
 
     /**
@@ -97,7 +57,10 @@ public class Application {
      * @return the executable
      */
     public String getExecutable() {
-        return executable;
+    	if ( executable != null ) {
+    		return executable;
+    	}
+    	return setup.getAppIdentifier();
     }
 
     /**

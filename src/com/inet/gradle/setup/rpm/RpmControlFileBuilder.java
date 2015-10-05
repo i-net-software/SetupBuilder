@@ -92,7 +92,7 @@ class RpmControlFileBuilder {
 		OutputStreamWriter controlWriter = null;
 
 		try {
-			File spec = new File(buildDir, setup.getBaseName() + ".spec");
+			File spec = new File(buildDir, setup.getAppIdentifier() + ".spec");
 			fileoutput = new FileOutputStream(spec);
 			controlWriter = new OutputStreamWriter(fileoutput, "UTF-8");
 			
@@ -300,8 +300,8 @@ class RpmControlFileBuilder {
 		if(release == null || release.length() == 0) {
 			release = "1";
 		}
-		controlWriter.write("cp ../SRPMS/" + setup.getBaseName() + "-" + setup.getVersion() + "-" + release + ".src.rpm " + setup.getDestinationDir().getAbsolutePath() + NEWLINE);
-		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getBaseName() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + setup.getDestinationDir().getAbsolutePath() + "/" + setup.getBaseName() + "-" + setup.getVersion() + ".rpm" + NEWLINE);
+		controlWriter.write("cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm " + setup.getDestinationDir().getAbsolutePath() + NEWLINE);
+		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + setup.getDestinationDir().getAbsolutePath() + "/" + setup.getAppIdentifier() + "-" + setup.getVersion() + ".rpm" + NEWLINE);
 		ArrayList<String> cleans = rpm.getClean();
 		for (String clean : cleans) {
 			controlWriter.write(clean + NEWLINE);	
@@ -539,7 +539,7 @@ class RpmControlFileBuilder {
 	 */
 	private void putName(OutputStreamWriter controlWriter)
 			throws IOException {
-		String packages = setup.getBaseName();
+		String packages = setup.getAppIdentifier();
 		if(packages == null || packages.length() == 0) {
 			throw new RuntimeException("No package declared in the setup configuration.");
 		} else {
