@@ -175,34 +175,6 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 
 			appBundler.addConfiguredRuntime(fileSet);
 		}
-
-		/**
-		 * Set File permissions to the resulting application
-		 * @throws IOException
-		 */
-		private void setApplicationFilePermissions( File destiantion ) throws IOException {
-			
-			// Set Read on all files and folders
-			ArrayList<String> command = new ArrayList<>();
-	        command.add( "chmod" );
-	        command.add( "-R" );
-	        command.add( "a+r" );
-			command.add( destiantion.getAbsolutePath() );
-	        exec( command );
-	        
-			// Set execute on all folders.
-	        command = new ArrayList<>();
-	        command.add( "find" );
-	        command.add( destiantion.getAbsolutePath() );
-	        command.add( "-type" );
-	        command.add( "d" );
-	        command.add( "-exec" );
-	        command.add( "chmod" );
-	        command.add( "a+x" );
-	        command.add( "{}" );
-	        command.add( ";" );
-	        exec( command );
-		}
 	}
 
 	/**
@@ -253,11 +225,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		System.out.println("Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
 		// Make executable
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "chmod" );
-        command.add( "a+x" );
-        command.add(  new File(prefPaneContents, "Resources/"+ applicationName +".app/Contents/MacOS/applet").getAbsolutePath() );
-    	exec( command );
+		setApplicationFilePermissions( new File(prefPaneContents, "Resources/"+ applicationName +".app/Contents/MacOS/applet") );
     	
 		// Rename prefPane
 		Files.move(new File(resourcesOutput, "SetupBuilderOSXPrefPane.prefPane").toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
@@ -299,5 +267,34 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
         command.add( "Set " + property +  " " + value );
         command.add( plist.getAbsolutePath() );
     	exec( command );
+	}
+
+
+	/**
+	 * Set File permissions to the resulting application
+	 * @throws IOException
+	 */
+	private void setApplicationFilePermissions( File destiantion ) throws IOException {
+		
+		// Set Read on all files and folders
+		ArrayList<String> command = new ArrayList<>();
+        command.add( "chmod" );
+        command.add( "-R" );
+        command.add( "a+r" );
+		command.add( destiantion.getAbsolutePath() );
+        exec( command );
+        
+		// Set execute on all folders.
+        command = new ArrayList<>();
+        command.add( "find" );
+        command.add( destiantion.getAbsolutePath() );
+        command.add( "-type" );
+        command.add( "d" );
+        command.add( "-exec" );
+        command.add( "chmod" );
+        command.add( "a+x" );
+        command.add( "{}" );
+        command.add( ";" );
+        exec( command );
 	}
 }
