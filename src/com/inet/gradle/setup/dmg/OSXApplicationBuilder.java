@@ -241,7 +241,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
 		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() );
-		setPlistProperty( servicePLIST, ":Program", "/Library/" + displayName + "/" + displayName + ".app/Contents/MacOS/" + setup.getAppIdentifier() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getExecutable() );
 		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
 	}
