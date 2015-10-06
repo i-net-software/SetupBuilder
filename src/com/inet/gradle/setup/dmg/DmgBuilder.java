@@ -19,22 +19,18 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.file.TmpDirTemporaryFileProvider;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
@@ -86,7 +82,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
             title = setup.getDownloadFileName();
             applicationName = setup.getAppIdentifier();
-            // applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + setup.getApplication() + ".app";
             iconFile = applicationBuilder.getApplicationIcon();
 
@@ -125,60 +120,41 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
     
-    private void patchServiceFiles( String resource, File destination ) {
+    private void createServiceFiles( ) throws IOException {
     	
-    	try {
-        	String launchdScriptName = setup.getMainClass();
-            InputStream input = getClass().getResourceAsStream( resource );
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ResourceUtils.copyData(input, bos);
-            input.close();
+    	// Create Pre and Post install scripts
+		OSXScriptBuilder preinstall = new OSXScriptBuilder( getClass().getResource( "template/preinstall" ).toString() );
+		OSXScriptBuilder postinstall = new OSXScriptBuilder( getClass().getResource( "template/postinstall" ).toString() );
+		for (Service service : setup.getServices() ) {
+			
+			preinstall.addScript(new OSXScriptBuilder(service, getClass().getResource( "template/preinstall.install-service.txt" ).toString() ));
+			postinstall.addScript(new OSXScriptBuilder(service, getClass().getResource( "template/postinstall.remove-service.txt" ).toString() ));
+		}
+		
+		if ( setup.getRunAfter() != null ) {
+			postinstall.addScript(new OSXScriptBuilder(setup.getRunAfter(), getClass().getResource( "template/postinstall.runafter.txt" ).toString() ));
+		}
 
-            String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
-            script = script.replace( "${serviceName}", launchdScriptName );
-            script = script.replace( "${applicationName}", applicationName );
-            script = script.replace( "${programName}", "/Library/" + applicationName + "/" + applicationName + ".app/Contents/MacOS/" + setup.getAppIdentifier() );
-            script = script.replace( "${installName}", "/Library/" + applicationName + "/" + applicationName + ".app" );
-
-            DesktopStarter runAfter = setup.getRunAfter();
-            script = script.replace( "${runAfterMainJar}", runAfter != null  && runAfter.getMainJar() != null ? runAfter.getMainJar() : "" );
-            script = script.replace( "${runAfterMainClass}", runAfter != null  && runAfter.getMainClass() != null ? runAfter.getMainClass() : "" );
-            script = script.replace( "${runAfterWorkingDir}", runAfter != null  && runAfter.getWorkDir() != null ? runAfter.getWorkDir() : "" );
-            
-            OutputStream output = new FileOutputStream( destination );
-            output.write( script.getBytes() );
-            output.close();
-
-    		// Set Read Execute on Destination File
-    		ArrayList<String> command = new ArrayList<>();
-            command.add( "chmod" );
-            command.add( "a+rx" );
-    		command.add( destination.toString() );
-            exec( command );
-            
-    	} catch (Throwable e) {
-    		System.err.println("Error while patching " + resource);
-    		e.printStackTrace();
-    	}
+    	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));
+    	postinstall.writeTo( TempPath.getTempFile("scripts", "postinstall"));
     }
     
 
     private void createPackageFromApp() throws Throwable {
-/*
-    	imageSourceRoot = tmp.toString() + "/distribution";
-		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
-		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
-
+		
+    	createServiceFiles();
         extractApplicationInformation();
-    	createAndPatchDistributionXML();
+        createAndPatchDistributionXML();
+    	
+        imageSourceRoot = TempPath.get( "distribution" ).toString();
 
 		// Build Product for packaging
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/productbuild" );
         command.add( "--distribution" );
-        command.add( tmp.toString() + "/distribution.xml" );
+        command.add( TempPath.getTempString( "distribution.xml" ) );
         command.add( "--package-path" );
-        command.add( tmp.toString() + "/packages" );
+        command.add( TempPath.get( "packages" ).toString() );
         command.add( imageSourceRoot + "/" + applicationName + ".pkg" );
     	exec( command );
     	
