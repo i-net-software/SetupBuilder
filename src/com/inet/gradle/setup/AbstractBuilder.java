@@ -75,6 +75,11 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask> {
         // print command line to the log
         StringBuilder log = new StringBuilder( "\t" );
         for( String para : parameters ) {
+        	
+        	if ( para == null ) {
+        		task.getProject().getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
+        	}
+        	
             log.append( '\"' ).append( para );
             if( para.endsWith( "\\" ) ) {
                 log.append( '\\' );

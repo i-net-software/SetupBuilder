@@ -177,7 +177,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "--component-plist" );
         command.add( TempPath.getTempString( applicationName + ".plist" ) );
         command.add( "--identifier" );
-        command.add( setup.getMainClass() );
+        command.add( setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() );
         command.add( "--version" );
         command.add( setup.getVersion() );
         command.add( "--scripts" );
