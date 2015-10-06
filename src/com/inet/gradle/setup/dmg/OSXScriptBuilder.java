@@ -1,10 +1,8 @@
 package com.inet.gradle.setup.dmg;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
@@ -31,6 +29,7 @@ public class OSXScriptBuilder extends Template {
 	public OSXScriptBuilder(Application application, String template) throws IOException {
 		super( template );
 
+		setPlaceholder("executable", 	application.getExecutable());
 		setPlaceholder("displayName", 	application.getDisplayName());
 		setPlaceholder("serviceName", 	application.getMainClass());
 
@@ -65,9 +64,13 @@ public class OSXScriptBuilder extends Template {
 	/**
 	 * Write file and set permissions
 	 */
-	public void writeTo( File destination ) throws IOException {
+	public void writeTo( File file ) throws IOException {
         
-        super.writeTo( destination );
+        try(FileWriter writer = new FileWriter( file )) {
+            writer.write( toString() );
+        }
+		
+        super.writeTo( file );
         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
         perms.add( PosixFilePermission.OWNER_READ );
         perms.add( PosixFilePermission.OWNER_WRITE );
@@ -76,6 +79,6 @@ public class OSXScriptBuilder extends Template {
         perms.add( PosixFilePermission.OWNER_EXECUTE );
         perms.add( PosixFilePermission.GROUP_EXECUTE );
         perms.add( PosixFilePermission.OTHERS_EXECUTE );
-        Files.setPosixFilePermissions( destination.toPath(), perms );
+        Files.setPosixFilePermissions( file.toPath(), perms );
 	}
 }
