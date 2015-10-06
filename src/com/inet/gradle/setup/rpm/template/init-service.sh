@@ -16,10 +16,9 @@ NAME={{name}}
 WAIT={{wait}}
 DAEMON=/usr/bin/java
 MAINARCHIVE={{mainJar}}
-DAEMON_ARGS="{{startArguments}}"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
-WORKINGDIR={{workdir}}
+WORKINGDIR='{{workdir}}'
 
 # Exit if the package is not installed
 [ ! -f "$MAINARCHIVE" ] && exit 0
@@ -44,7 +43,7 @@ do_start()
 		echo_passed $NAME already running: $PID
 		return 1
 	else
-		daemonize -c $WORKINGDIR -p $PIDFILE -l $PIDFILE -o $WORKINGDIR/log.txt $DAEMON $DAEMON_ARGS
+		daemonize -c "$WORKINGDIR" -p $PIDFILE -l $PIDFILE -o "$WORKINGDIR/log.txt" -e "$WORKINGDIR/error.txt"  $DAEMON {{startArguments}}
 		return 0
 	fi
 }

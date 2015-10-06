@@ -123,10 +123,10 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         
         if( workingDir != null ) {
 			initScript.setPlaceholder( "workdir", installationRoot + "/" + workingDir );
-    		mainJarPath = installationRoot + "/" + workingDir + "/" + service.getMainJar();
+    		mainJarPath = "'" + installationRoot + "/" + workingDir + "/" + service.getMainJar() + "'";
     	} else {	
     		initScript.setPlaceholder( "workdir", installationRoot );
-    		mainJarPath = installationRoot + "/" + service.getMainJar();
+    		mainJarPath = "'" + installationRoot + "/" + service.getMainJar() + "'";
     	}
         
         initScript.setPlaceholder( "name", serviceUnixName );
@@ -224,7 +224,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         String consoleStarterPath = "/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
-            fw.write( "java -cp " + task.getInstallationRoot() + "/" + starter.getMainJar() + " " + starter.getMainClass() + " "
+            fw.write( "java -cp \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
                 + starter.getStartArguments() + " \"$@\"" );
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
