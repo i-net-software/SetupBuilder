@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.file.TmpDirTemporaryFileProvider;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
@@ -51,7 +52,6 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
 public class DmgBuilder extends AbstractBuilder<Dmg> {
 
     private String title, applicationName, imageSourceRoot;
-	private Path tmp;
 	private File iconFile;
 
     /**
@@ -72,9 +72,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     public void build() throws RuntimeException {
 
         try {
-        	tmp = Files.createTempDirectory("SetupBuilder", new FileAttribute[0]);
-        	System.out.println( "created temporary directory: " + tmp);
-        	OSXApplicationBuilder applicationBuilder = new OSXApplicationBuilder( task, setup, fileResolver, tmp );
+        	OSXApplicationBuilder applicationBuilder = new OSXApplicationBuilder( task, setup, fileResolver );
         	
         	// Build all services 
         	for (Service service : setup.getServices() ) {
@@ -98,26 +96,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         	}
 
             createBinary();
-
-/*
-            // Remove temporary folder and content.
-            Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
-         	   @Override
-         	   public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-         		   Files.delete(file);
-         		   return FileVisitResult.CONTINUE;
-         	   }
-
-         	   @Override
-         	   public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-         		   Files.delete(dir);
-         		   return FileVisitResult.CONTINUE;
-         	   }
-
-            });
-/*/
-//*/
-            tmp = null;
         
         } catch( RuntimeException ex ) {
             ex.printStackTrace();
@@ -186,12 +164,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     
 
     private void createPackageFromApp() throws Throwable {
-
-        Files.createDirectories(new File(tmp.toFile(), "distribution").toPath(), new FileAttribute[0]);
-        Files.createDirectories(new File(tmp.toFile(), "packages").toPath(), new FileAttribute[0]);
+/*
     	imageSourceRoot = tmp.toString() + "/distribution";
-    	
-		Files.createDirectories(new File(tmp.toFile(), "scripts").toPath(), new FileAttribute[0]);
 		patchServiceFiles( "scripts/preinstall", new File(tmp.toFile(), "scripts/preinstall") );
 		patchServiceFiles( "scripts/postinstall", new File(tmp.toFile(), "scripts/postinstall") );
 
@@ -209,7 +183,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     	exec( command );
     	
     	Files.copy( new File(imageSourceRoot + "/" + applicationName + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationName + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-	}
+*/
+    }
 
 	private void extractApplicationInformation() throws IOException {
 		// Create application information plist
@@ -218,7 +193,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "--analyze" );
         command.add( "--root" );
         command.add( buildDir.toString() );
-        command.add( tmp.toString() + "/" + applicationName + ".plist" );
+        command.add( TempPath.getTempString( applicationName + ".plist" ) );
     	exec( command );
     	
     	// set identifier, create package
@@ -227,19 +202,19 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "--root" );
         command.add( buildDir.toString() );
         command.add( "--component-plist" );
-        command.add( tmp.toString() + "/" + applicationName + ".plist" );
+        command.add( TempPath.getTempString( applicationName + ".plist" ) );
         command.add( "--identifier" );
         command.add( setup.getMainClass() );
         command.add( "--version" );
         command.add( setup.getVersion() );
         command.add( "--scripts" );
-        command.add( tmp.toString() + "/scripts" );
+        command.add( TempPath.get( "scripts" ).toString() );
         command.add( "--install-location" );
         command.add( "/Library/" + applicationName + "/" );
-        command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
+        command.add(  TempPath.getTempString( "packages", applicationName + ".pkg" ) );
     	exec( command );
     	
-    	Files.copy( new File(tmp.toFile(), "/packages/" + applicationName + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationName + ".pkgbuild.pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+    	Files.copy( TempPath.getTempFile( "packages", applicationName + ".pkg" ).toPath() , new File(setup.getDestinationDir(), "/" + applicationName + ".pkgbuild.pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 	}
 
 	private void createAndPatchDistributionXML() throws Throwable {
@@ -249,8 +224,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( tmp.toString() + "/packages/" + applicationName + ".pkg" );
-        command.add( tmp.toString() + "/distribution.xml" );
+        command.add( TempPath.getTempFile( "packages", applicationName + ".pkg").toString() );
+        command.add( TempPath.getTempFile( "distribution.xml" ).toString() );
     	exec( command );
 
         patchDistributionXML();
@@ -258,7 +233,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
 
 	private void patchDistributionXML() throws Throwable {
 
-        File xml = new File( tmp.toString() + "/distribution.xml" );
+        File xml = TempPath.getTempFile( "distribution.xml" );
         URL url = xml.toURI().toURL();
 		@SuppressWarnings("rawtypes")
 		XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>(task, setup, xml, buildDir, url);
@@ -316,7 +291,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "-noautoopen" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
         command.add( "-mountroot" );
-        command.add( tmp.toString() );
+        command.add( TempPath.get() );
 
         exec( command );
     }
@@ -328,7 +303,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "detach" );
-        command.add( tmp.toString() + "/" + title );
+        command.add( TempPath.get() + "/" + title );
         exec( command );
     }
 
@@ -339,7 +314,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void setVolumeIcon() throws IOException {
         
     	// Copy Icon as file icon into attached container 
-        File iconDestination = new File( tmp.toFile() , "/" + title + "/.VolumeIcon.icns" );
+        File iconDestination = TempPath.getTempFile(title, ".VolumeIcon.icns" );
 		Files.copy( iconFile.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     	
     	ArrayList<String> command = new ArrayList<>();
@@ -351,7 +326,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         
         if ( task.getBackgroundImage() != null ) {
         	String name = task.getBackgroundImage().getName();
-            File backgroundDestination = new File( tmp.toFile() , "/" + title + "/.resources/background" + name.substring(name.lastIndexOf('.')) );
+            File backgroundDestination = TempPath.getTempFile(title, "/.resources/background" + name.substring(name.lastIndexOf('.')) );
             Files.createDirectories(backgroundDestination.getParentFile().toPath(), new FileAttribute[0]);
         	Files.copy(task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         	BufferedImage image = ImageIO.read( backgroundDestination );

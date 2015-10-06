@@ -27,18 +27,14 @@ import com.oracle.appbundler.BundleDocument;
 
 public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 
-	private Path tmp;
-
 	/**
 	 * Setup this builder.
 	 * @param task - original task
 	 * @param setup - original setup
 	 * @param fileResolver - original fileResolver
-	 * @param tmp - temporary directory, has to exists. I do not check anything.
 	 */
-	protected OSXApplicationBuilder(Dmg task, SetupBuilder setup, FileResolver fileResolver, Path tmp) {
+	protected OSXApplicationBuilder(Dmg task, SetupBuilder setup, FileResolver fileResolver) {
 		super(task, setup, fileResolver);
-		this.tmp = tmp;
 	}
 
 	/**
@@ -201,7 +197,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		String displayName = service.getDisplayName();
 
 		// Unpack
-		File setPrefpane = new File(tmp.toFile(), "packages/SetupBuilderOSXPrefPane.prefPane.zip");
+		File setPrefpane = TempPath.getTempFile("packages", "SetupBuilderOSXPrefPane.prefPane.zip");
 		InputStream input = getClass().getResourceAsStream("service/SetupBuilderOSXPrefPane.prefPane.zip");
 		FileOutputStream output = new FileOutputStream( setPrefpane );
         ResourceUtils.copyData(input, output);
