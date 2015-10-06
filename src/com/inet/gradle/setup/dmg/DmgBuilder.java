@@ -183,7 +183,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( "--scripts" );
         command.add( TempPath.get( "scripts" ).toString() );
         command.add( "--install-location" );
-        command.add( "/Library/" + applicationName + "/" );
+        command.add( "/Library/" + setup.getApplication() + "/" );
         command.add(  TempPath.getTempString( "packages", applicationName + ".pkg" ) );
     	exec( command );
     	
