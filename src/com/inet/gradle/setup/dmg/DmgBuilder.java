@@ -17,10 +17,8 @@ package com.inet.gradle.setup.dmg;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +35,7 @@ import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.util.ResourceUtils;
+import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
@@ -123,16 +121,16 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createServiceFiles( ) throws IOException {
     	
     	// Create Pre and Post install scripts
-		OSXScriptBuilder preinstall = new OSXScriptBuilder( getClass().getResource( "template/preinstall" ).toString() );
-		OSXScriptBuilder postinstall = new OSXScriptBuilder( getClass().getResource( "template/postinstall" ).toString() );
+		OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
+		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
 		for (Service service : setup.getServices() ) {
 			
-			preinstall.addScript(new OSXScriptBuilder(service, getClass().getResource( "template/preinstall.install-service.txt" ).toString() ));
-			postinstall.addScript(new OSXScriptBuilder(service, getClass().getResource( "template/postinstall.remove-service.txt" ).toString() ));
+			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
+			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" ));
 		}
 		
 		if ( setup.getRunAfter() != null ) {
-			postinstall.addScript(new OSXScriptBuilder(setup.getRunAfter(), getClass().getResource( "template/postinstall.runafter.txt" ).toString() ));
+			postinstall.addScript(new OSXScriptBuilder(setup.getRunAfter(), "template/postinstall.runafter.txt" ));
 		}
 
     	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));
@@ -159,7 +157,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     	exec( command );
     	
     	Files.copy( new File(imageSourceRoot + "/" + applicationName + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationName + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-*/
     }
 
 	private void extractApplicationInformation() throws IOException {
@@ -314,27 +311,24 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     }
 
     private void applescript() throws IOException {
-        InputStream input = getClass().getResourceAsStream( "applescript.txt" );
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ResourceUtils.copyData(input, bos);
-        input.close();
+    	
+    	Template applescript = new Template( "dmg/template/applescript.txt" );
+    	applescript.setPlaceholder("displayName", setup.getApplication() );
+    	applescript.setPlaceholder("executable", setup.getApplication() );
 
-        String script = new String( bos.toByteArray(), StandardCharsets.UTF_8 );
-        script = script.replace( "${title}", title );
-        script = script.replace( "${executable}", applicationName );
-        script = script.replace( "${windowWidth}", task.getWindowWidth().toString() );
-        script = script.replace( "${windowHeight}", task.getWindowHeight().toString() );
-        script = script.replace( "${iconSize}", task.getIconSize().toString() );
-        script = script.replace( "${fontSize}", task.getFontSize().toString() );
-        
+    	applescript.setPlaceholder("windowWidth", task.getWindowWidth().toString() );
+    	applescript.setPlaceholder("windowHeight", task.getWindowHeight().toString() );
+    	applescript.setPlaceholder("iconSize",  task.getIconSize().toString() );
+    	applescript.setPlaceholder("fontSize", task.getFontSize().toString() );
+    	
         if ( task.getBackgroundImage() != null ) {
         	String name = task.getBackgroundImage().getName();
-			script = script.replace( "${backgroundExt}", name.substring(name.lastIndexOf('.'))  );
+        	applescript.setPlaceholder("backgroundExt", name.substring(name.lastIndexOf('.')) );
         }
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
-        exec( command, new ByteArrayInputStream( script.getBytes( StandardCharsets.UTF_8 ) ), null, true );
+        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
 
     /**
@@ -353,5 +347,4 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         command.add( task.getSetupFile().toString() );
         exec( command );
     }
-
 }
