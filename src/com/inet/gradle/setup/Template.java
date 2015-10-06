@@ -67,4 +67,9 @@ public class Template {
             writer.write( template );
         }
     }
+    
+    @Override
+    public String toString() {
+    	return template;
+    }
 }
