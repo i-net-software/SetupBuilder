@@ -60,7 +60,8 @@ public class Application {
     	if ( executable != null ) {
     		return executable;
     	}
-    	return setup.getAppIdentifier();
+    	
+  		return null;
     }
 
     /**
