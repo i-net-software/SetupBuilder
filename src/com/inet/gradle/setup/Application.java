@@ -57,11 +57,7 @@ public class Application {
      * @return the executable
      */
     public String getExecutable() {
-    	if ( executable != null ) {
-    		return executable;
-    	}
-    	
-  		return null;
+    	return executable;
     }
 
     /**
