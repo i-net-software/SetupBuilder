@@ -1,0 +1,19 @@
+# Link prefpane
+if [ -L "/Library/PreferencePanes/{{displayName}}.prefPane" ]; then
+	rm "/Library/PreferencePanes/{{displayName}}.prefPane"
+fi
+
+ln -s "$TARGET_LOCATION/{{displayName}}.app/Contents/Resources/{{displayName}}.prefPane" "/Library/PreferencePanes"
+
+PLIST="$TARGET_LOCATION/{{displayName}}.app/Contents/Resources/{{displayName}}.prefPane/Contents/Resources/service.plist"
+COMMAND="$TARGET_LOCATION/{{displayName}}.app/Contents/MacOS/{{executable}}"
+
+# modify plist to reflect current installation
+if [ -f "/usr/libexec/PlistBuddy" ]; then
+	/usr/libexec/PlistBuddy -c "Set :Program $COMMAND" "$PLIST"
+fi
+
+# copy default launchd file and start daemon
+/usr/bin/ditto "$PLIST" "/Library/LaunchDaemons/{{serviceName}}.plist"
+
+/bin/launchctl load "/Library/LaunchDaemons/{{serviceName}}.plist"

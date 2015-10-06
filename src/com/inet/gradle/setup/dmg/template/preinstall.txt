@@ -1,0 +1,5 @@
+#!/bin/sh
+# pre-installation script
+
+set -e
+{{script}}

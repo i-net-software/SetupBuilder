@@ -1,0 +1,8 @@
+#!/bin/sh
+# pre-installation script
+
+TARGET_LOCATION="$2"
+
+set -e
+
+{{script}}

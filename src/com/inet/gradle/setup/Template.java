@@ -51,6 +51,9 @@ public class Template {
      * @param content the content to which to placeholder will be replaces
      */
     public void setPlaceholder(String placeholder, String content) {
+    	if ( content == null ) {
+    		content = ""; // Remove if not set.
+    	}
         template = template.replace( "{{" + placeholder + "}}", content );
     }
     
@@ -63,5 +66,10 @@ public class Template {
         try(FileWriter writer = new FileWriter( file )) {
             writer.write( template );
         }
+    }
+    
+    @Override
+    public String toString() {
+    	return template;
     }
 }
