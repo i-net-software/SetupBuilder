@@ -231,7 +231,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		
 		// Patch Info.plist
 		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
-		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() + ".prefPane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
 		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
@@ -240,7 +240,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
-		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() );
+		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() );
 		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getServiceID() );
 		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
