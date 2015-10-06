@@ -1,9 +1,17 @@
 package com.inet.gradle.setup.dmg;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.inet.gradle.setup.Service;
+import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.Template;
 
 /**
@@ -20,15 +28,15 @@ public class OSXScriptBuilder extends Template {
 		super( template );
 	}
 	
-	public OSXScriptBuilder(Service service, String template) throws IOException {
+	public OSXScriptBuilder(Application application, String template) throws IOException {
 		super( template );
 
-		setPlaceholder("displayName", 	service.getDisplayName());
-		setPlaceholder("serviceName", 	service.getExecutable());
+		setPlaceholder("displayName", 	application.getDisplayName());
+		setPlaceholder("serviceName", 	application.getMainClass());
 
-		setPlaceholder("mainClass",		service.getMainClass());
-		setPlaceholder("mainJar",		service.getMainJar());
-		setPlaceholder("workingDir",	service.getWorkDir());
+		setPlaceholder("mainClass",		application.getMainClass());
+		setPlaceholder("mainJar",		application.getMainJar());
+		setPlaceholder("workingDir",	application.getWorkDir());
 	}
 	
 	/**
@@ -52,5 +60,22 @@ public class OSXScriptBuilder extends Template {
 		
 		setPlaceholder("script", sb.toString());
 		return super.toString();
+	}
+	
+	/**
+	 * Write file and set permissions
+	 */
+	public void writeTo( File destination ) throws IOException {
+        
+        super.writeTo( destination );
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        perms.add( PosixFilePermission.OWNER_EXECUTE );
+        perms.add( PosixFilePermission.GROUP_EXECUTE );
+        perms.add( PosixFilePermission.OTHERS_EXECUTE );
+        Files.setPosixFilePermissions( destination.toPath(), perms );
 	}
 }
