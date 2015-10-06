@@ -341,7 +341,7 @@ public class Rpm extends AbstractSetupTask {
 	 */
 	public String getInstallationRoot() {
 		if(installationRoot == null) {
-			return "\"/usr/share/" + getSetupBuilder().getApplication() + "\"";
+			return "/usr/share/" + getSetupBuilder().getApplication();
 		} else {
 			return "\"" + installationRoot + "\"";
 		}
