@@ -1,5 +1,5 @@
 #!/bin/sh
-# pre-installation script for {{baseName}}
+# pre-installation script
 
 set -e
 {{script}}

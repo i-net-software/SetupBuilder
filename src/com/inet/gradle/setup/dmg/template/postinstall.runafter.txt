@@ -1,14 +1,14 @@
 # if there is a setup or something else to be started, do so now
-JAVAEXECUTABLE=`find "{{installName}}/Contents" -name "java" -type f`
-RUNAFTER_MAINJAR="{{runAfterMainJar}}"
-RUNAFTER_MAINCLASS="{{runAfterMainClass}}"
-RUNAFTER_WORKINGDIR="{{runAfterWorkingDir}}"
+JAVAEXECUTABLE=`find "$TARGET_LOCATION/{{displayName}}.app/Contents" -name "java" -type f`
+RUNAFTER_MAINJAR="{{mainJar}}"
+RUNAFTER_MAINCLASS="{{mainClass}}"
+RUNAFTER_WORKINGDIR="{{workingDir}}"
 
 # this is to be inteded with an embedded JRE and existing jars only
 if [ ! -z "$JAVAEXECUTABLE" ]; then
 	
 	if [ -z "$RUNAFTER_WORKINGDIR" ]; then
-		RUNAFTER_WORKINGDIR="{{installName}}/Contents/Java"
+		RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{displayName}}.app/Contents/Java"
 	fi
 	
 	if [ -z "$RUNAFTER_MAINCLASS" ]; then

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+TARGET_LOCATION="$2"
+
 set -e
 
 {{script}}

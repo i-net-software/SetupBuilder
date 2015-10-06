@@ -1,10 +1,10 @@
 # Link prefpane
-if [ -L "/Library/PreferencePanes/{{applicationName}}.prefPane" ]; then
-	rm "/Library/PreferencePanes/{{applicationName}}.prefPane"
+if [ -L "/Library/PreferencePanes/{{displayName}}.prefPane" ]; then
+	rm "/Library/PreferencePanes/{{displayName}}.prefPane"
 fi
 
-ln -s "${installName}/Contents/Resources/{{applicationName}}.prefPane" "/Library/PreferencePanes"
+ln -s "$TARGET_LOCATION/{{displayName}}.app/Contents/Resources/{{displayName}}.prefPane" "/Library/PreferencePanes"
 
 # copy default launchd file and start daemon
-/usr/bin/ditto "${installName}/Contents/Resources/{{applicationName}}.prefPane/Contents/Resources/service.plist" "/Library/LaunchDaemons/{{serviceName}}.plist"
+/usr/bin/ditto "$TARGET_LOCATION/{{displayName}}.app/Contents/Resources/{{displayName}}.prefPane/Contents/Resources/service.plist" "/Library/LaunchDaemons/{{serviceName}}.plist"
 /bin/launchctl load "/Library/LaunchDaemons/{{serviceName}}.plist"
