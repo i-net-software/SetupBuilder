@@ -491,7 +491,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             String subdir = service.getWorkDir();
             if ( subdir != null && !subdir.isEmpty() ) {
-            	exe = new File( new File( subdir ), exe ).getPath(); 
+                exe = new File( new File( subdir ), exe ).getPath(); 
+            } else {
+                subdir = "";
             }
 
             // add the service file
