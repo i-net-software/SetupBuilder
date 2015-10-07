@@ -114,7 +114,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm> {
         if(starter != null ) {
         	workingDir = starter.getWorkDir();
         }	
-    	String serviceUnixName = service.getServiceID();
+    	String serviceUnixName = service.getId();
         String mainJarPath;
         
         		

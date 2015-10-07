@@ -5,7 +5,7 @@ package com.inet.gradle.setup;
  */
 public class Service extends Application {
     private boolean startOnBoot = true;
-    private String  startArguments, serviceID;
+    private String  startArguments, id, wrapper;
 
     /**
      * Create a new Service
@@ -54,13 +54,13 @@ public class Service extends Application {
      * Returns the serviceID which should be a short version of the application name 
      * @return the serviceID
      */
-	public String getServiceID() {
-		String id = serviceID;
-        if( id == null ) {
-			id = setup.getAppIdentifier() + "-service";
+	public String getId() {
+		String returnID = id;
+        if( returnID == null ) {
+        	returnID = setup.getAppIdentifier() + "-service";
         }
         
-        return id.toLowerCase().replace( ' ', '-' );
+        return returnID.toLowerCase().replace( ' ', '-' );
 	}
 
 	/**
@@ -68,7 +68,23 @@ public class Service extends Application {
 	 * It must not contain spaces.
 	 * @param serviceID
 	 */
-	public void setServiceID(String serviceID) {
-		this.serviceID = serviceID;
+	public void setId(String serviceID) {
+		this.id = serviceID;
+	}
+
+	/**
+	 * Name of the daemon wrapper, or the program that should be run as daemon 
+	 * @return daemon wrapper
+	 */
+	public String getWrapper() {
+		return wrapper;
+	}
+
+	/**
+	 * Name of the daemon wrapper, or the program that should be run as daemon
+	 * @param wrapper daemon name
+	 */
+	public void setWrapper(String wrapper) {
+		this.wrapper = wrapper;
 	}
 }

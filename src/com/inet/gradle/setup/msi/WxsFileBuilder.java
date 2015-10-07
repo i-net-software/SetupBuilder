@@ -485,11 +485,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         File prunmgr = ResourceUtils.extract( getClass(), "x86/prunmgr.exe", buildDir );
 
         for( Service service : services ) {
-            String name = service.getDisplayName();
+            String name = service.getId();
             String id = id( name.replace( '-', '_' ) ) + "_service";
-            String exe = service.getServiceID().replace( '\\', '/' ) + ".exe";
-            int idx = exe.lastIndexOf( '/' );
-            String subdir = exe.substring( 0, idx + 1 );
+            String exe = service.getWrapper().replace( '\\', '/' ) + ".exe";
+            String subdir = service.getWorkDir();
+            exe = new File( new File("subdir"), exe ).getPath(); 
 
             // add the service file
             String[] segments = segments( exe );

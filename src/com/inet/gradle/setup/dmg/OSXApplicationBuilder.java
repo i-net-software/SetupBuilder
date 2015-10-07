@@ -98,7 +98,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			}
 			appBundler.setShortVersion(version);
 
-			appBundler.setExecutableName(application.getClass().equals(Service.class) ? ((Service)application).getServiceID() : setup.getAppIdentifier() );
+			appBundler.setExecutableName(application.getClass().equals(Service.class) ? ((Service)application).getId() : setup.getAppIdentifier() );
 			appBundler.setIdentifier(application.getMainClass());
 			appBundler.setMainClassName(application.getMainClass());
 			appBundler.setJarLauncherName(application.getMainJar());
@@ -241,7 +241,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
 		setPlistProperty( servicePLIST, ":Label", setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() );
-		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getServiceID() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
 		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
 	}

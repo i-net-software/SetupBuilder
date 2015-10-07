@@ -192,7 +192,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         if(starter != null ) {
         	workingDir = starter.getWorkDir();
         }
-        String serviceUnixName = service.getServiceID();
+        String serviceUnixName = service.getId();
         String installationRoot = task.getInstallationRoot();
         String mainJarPath;
         Template initScript = new Template( "deb/template/init-service.sh" );
