@@ -121,16 +121,19 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createServiceFiles( ) throws IOException {
     	
     	// Create Pre and Post install scripts
+    	DesktopStarter runAfter = setup.getRunAfter();
 		OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
 		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
 		for (Service service : setup.getServices() ) {
 			
 			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
 			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" ));
-		}
-		
-		if ( setup.getRunAfter() != null ) {
-			postinstall.addScript(new OSXScriptBuilder(setup.getRunAfter(), "template/postinstall.runafter.txt" ));
+			
+			// patch runafter
+			if ( runAfter != null ) {
+				service.setDisplayName(service.getDisplayName());
+				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/postinstall.runafter.txt" ));
+			}
 		}
 
     	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));

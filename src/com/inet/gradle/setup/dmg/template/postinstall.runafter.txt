@@ -11,9 +11,12 @@ if [ ! -z "$JAVAEXECUTABLE" ]; then
 		RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{displayName}}.app/Contents/Java"
 	fi
 	
-	if [ -z "$RUNAFTER_MAINCLASS" ]; then
-		$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -jar "$RUNAFTER_MAINJAR" )&
-	else
-		$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" )&
+	# if the directory exists, start the run after
+	if [ -e "$RUNAFTER_WORKINGDIR" ]; then
+		if [ -z "$RUNAFTER_MAINCLASS" ]; then
+			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -jar "$RUNAFTER_MAINJAR" )&
+		else
+			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" )&
+		fi
 	fi
 fi
