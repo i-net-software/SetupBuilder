@@ -51,7 +51,7 @@ public class SetupBuilder implements SetupSources {
 
     private String                 appIdentifier;
 
-    private String                 downloadFileName;
+    private String                 archiveName;
 
     private Object                 licenseFile;
 
@@ -219,9 +219,9 @@ public class SetupBuilder implements SetupSources {
      * 
      * @return the setup file name
      */
-    public String getDownloadFileName() {
-        if( downloadFileName != null ) {
-            return downloadFileName;
+    public String getArchiveName() {
+        if( archiveName != null ) {
+            return archiveName;
         }
         return getAppIdentifier() + '-' + getVersion();
     }
@@ -230,8 +230,8 @@ public class SetupBuilder implements SetupSources {
      * Set the name of the download file for the setup. This should contain the version if needed
      * @param setupName name of the setup
      */
-    public void setDownloadFileName( String setupName ) {
-        this.downloadFileName = setupName;
+    public void setArchiveName( String setupName ) {
+        this.archiveName = setupName;
     }
 
     public File getLicenseFile() {

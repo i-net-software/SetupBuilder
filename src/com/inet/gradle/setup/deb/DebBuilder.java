@@ -293,7 +293,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
             //    		command.add( "-d" );
-            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getDownloadFileName() + "." + task.getExtension() );
+            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getArchiveName() + "." + task.getExtension() );
             exec( command );
         }
     }
@@ -307,7 +307,7 @@ public class DebBuilder extends AbstractBuilder<Deb> {
         command.add( "dpkg-deb" );
         command.add( "--build" );
         command.add( buildDir.getAbsolutePath() );
-        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getDownloadFileName() + "." + task.getExtension() );
+        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getArchiveName() + "." + task.getExtension() );
         exec( command );
     }
 

@@ -93,7 +93,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
 
             // signing and moving the final msi file
             signTool( mui );
-            Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getDownloadFileName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
+            Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getArchiveName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
@@ -136,7 +136,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * @return the generated msi file
      */
     private File light( MsiLanguages language ) {
-        File out = new File( buildDir, setup.getDownloadFileName() + '_' + language.getCulture() + ".msi" );
+        File out = new File( buildDir, setup.getArchiveName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
         parameters.add( "-sice:ICE60" ); // accept *.ttf files to install in the install directory
@@ -294,7 +294,7 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * @return the xml file
      */
     private File getWxsFile() {
-        return new File( buildDir, setup.getDownloadFileName() + ".wxs" );
+        return new File( buildDir, setup.getArchiveName() + ".wxs" );
     }
 
     /**

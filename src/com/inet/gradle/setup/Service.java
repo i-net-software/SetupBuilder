@@ -55,12 +55,11 @@ public class Service extends Application {
      * @return the serviceID
      */
 	public String getId() {
-		String returnID = id;
-        if( returnID == null ) {
-        	returnID = setup.getAppIdentifier() + "-service";
+        if( id == null ) {
+        	return setup.getAppIdentifier();
         }
         
-        return returnID.toLowerCase().replace( ' ', '-' );
+        return id;
 	}
 
 	/**
@@ -77,7 +76,12 @@ public class Service extends Application {
 	 * @return daemon wrapper
 	 */
 	public String getWrapper() {
-		return wrapper;
+		String newWrapper = wrapper;
+		if( newWrapper == null ) {
+			newWrapper = setup.getAppIdentifier() + "-service";
+        }
+        
+        return newWrapper.toLowerCase().replace( ' ', '-' );
 	}
 
 	/**
