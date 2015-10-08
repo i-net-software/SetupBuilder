@@ -2,14 +2,10 @@
 JAVAEXECUTABLE=`find "$TARGET_LOCATION/{{displayName}}.app/Contents" -name "java" -type f`
 RUNAFTER_MAINJAR="{{mainJar}}"
 RUNAFTER_MAINCLASS="{{mainClass}}"
-RUNAFTER_WORKINGDIR="{{workingDir}}"
+RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{displayName}}.app/Contents/Java/{{workingDir}}"
 
 # this is to be inteded with an embedded JRE and existing jars only
 if [ ! -z "$JAVAEXECUTABLE" ]; then
-	
-	if [ -z "$RUNAFTER_WORKINGDIR" ]; then
-		RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{displayName}}.app/Contents/Java"
-	fi
 	
 	# if the directory exists, start the run after
 	if [ -e "$RUNAFTER_WORKINGDIR" ]; then
@@ -18,5 +14,7 @@ if [ ! -z "$JAVAEXECUTABLE" ]; then
 		else
 			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" )&
 		fi
+	else
+		echo "Could not fine working direcoty at: '$RUNAFTER_WORKINGDIR'"
 	fi
 fi

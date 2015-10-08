@@ -1,4 +1,7 @@
 if /bin/launchctl list "{{serviceName}}" &> /dev/null; then
     /bin/launchctl unload "/Library/LaunchDaemons/{{serviceName}}.plist"
-    rm "/Library/LaunchDaemons/{{serviceName}}.plist"
+fi
+
+if test -e "/Library/LaunchDaemons/{{serviceName}}.plist"; then
+	rm "/Library/LaunchDaemons/{{serviceName}}.plist"
 fi
