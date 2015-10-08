@@ -43,8 +43,13 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	 * @param service the service
 	 * @throws Throwable error.
 	 */
-	public void buildService(Service service) throws Throwable {
+	void buildService(Service service) throws Throwable {
 
+		// We need the executable. It has a different meaning than on other systems.
+		if ( service.getExecutable() == null || service.getExecutable().isEmpty() ) {
+			service.setExecutable( service.getId() );
+		}
+		
 		new PreparedAppBundlerTask(service).prepare().finish();
 		createPreferencePane( service );
 	}
@@ -54,8 +59,13 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	 * @param application
 	 * @throws Exception
 	 */
-	public void buildApplication(DesktopStarter application) throws Exception {
+	void buildApplication(DesktopStarter application) throws Exception {
 
+		// We need the executable. It has a different meaning than on other systems.
+		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
+			application.setExecutable( setup.getAppIdentifier() );
+		}
+		
 		PreparedAppBundlerTask bundlerTask = new PreparedAppBundlerTask( application );
 		bundlerTask.prepare();
 
@@ -75,14 +85,15 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	private class PreparedAppBundlerTask {
 
 		private Application application;
-		public AppBundlerTask appBundler;
+		private AppBundlerTask appBundler;
 
-		public PreparedAppBundlerTask(Application application) {
+		private PreparedAppBundlerTask(Application application) {
+
 			this.application = application;
 			appBundler = new AppBundlerTask();
 		}
 
-		public PreparedAppBundlerTask prepare() throws Exception {
+		private PreparedAppBundlerTask prepare() throws Exception {
 			appBundler.setOutputDirectory(buildDir);
 			appBundler.setName(application.getDisplayName());
 			appBundler.setDisplayName(application.getDisplayName());
@@ -98,7 +109,8 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			}
 			appBundler.setShortVersion(version);
 
-			appBundler.setExecutableName(application.getClass().equals(Service.class) ? ((Service)application).getId() : setup.getAppIdentifier() );
+			System.out.println( "Executable: " + application.getExecutable() );
+			appBundler.setExecutableName( application.getExecutable() );
 			appBundler.setIdentifier(application.getMainClass());
 			appBundler.setMainClassName(application.getMainClass());
 			appBundler.setJarLauncherName(application.getMainJar());
@@ -112,7 +124,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			return this;
 		}
 
-		public PreparedAppBundlerTask finish() throws Exception {
+		private PreparedAppBundlerTask finish() throws Exception {
 			bundleJre();
 
 			org.apache.tools.ant.Project antProject = new org.apache.tools.ant.Project();
@@ -179,7 +191,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	 * @return Icon file
 	 * @throws IOException
 	 */
-	public File getApplicationIcon() throws IOException {
+	File getApplicationIcon() throws IOException {
 		Object iconData = setup.getIcons();
 		return ImageFactory.getImageFile(task.getProject(), iconData, buildDir, "icns");
 	}
@@ -252,7 +264,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 	 * @param property property to set
 	 * @param value of property
 	 */
-	public void setPlistProperty(File plist, String property, String value) {
+	void setPlistProperty(File plist, String property, String value) {
 		
 		// Set Property in plist file
 		// /usr/libexec/PlistBuddy -c "Set PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
