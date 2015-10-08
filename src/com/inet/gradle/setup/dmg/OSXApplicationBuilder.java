@@ -107,15 +107,20 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 					version = version.substring(0, idx);
 				}
 			}
-			appBundler.setShortVersion(version);
 
-			System.out.println( "Executable: " + application.getExecutable() );
+			// Get the working directory and patch the main jar with it.
+			String mainJar = application.getMainJar();
+			if ( application.getWorkDir() != null ) {
+				appBundler.setWorkingDirectory(new File( new File("$APP_ROOT/Contents/Java"), application.getWorkDir()).toString());
+				mainJar = new File( new File(application.getWorkDir()), mainJar).toString();
+			}
+			
+			appBundler.setShortVersion(version);
 			appBundler.setExecutableName( application.getExecutable() );
 			appBundler.setIdentifier(application.getMainClass());
 			appBundler.setMainClassName(application.getMainClass());
-			appBundler.setJarLauncherName(application.getMainJar());
+			appBundler.setJarLauncherName(mainJar);
 			appBundler.setCopyright(setup.getVendor());
-
 			appBundler.setIcon(getApplicationIcon());
 			Architecture x86_64 = new Architecture();
 			x86_64.setName("x86_64");
