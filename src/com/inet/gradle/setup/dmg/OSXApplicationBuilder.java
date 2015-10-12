@@ -263,6 +263,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
 		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
 		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
+		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
 	}
 
 	/**
