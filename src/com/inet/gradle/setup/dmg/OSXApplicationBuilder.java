@@ -261,6 +261,8 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
 		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
+		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
+		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
 	}
 
 	/**

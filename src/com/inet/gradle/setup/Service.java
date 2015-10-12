@@ -4,7 +4,7 @@ package com.inet.gradle.setup;
  * Definition of a service to be installed on the target system.
  */
 public class Service extends Application {
-    private boolean startOnBoot = true;
+    private boolean startOnBoot = true, keepAlive = true;
     private String  startArguments, id, wrapper;
 
     /**
@@ -90,5 +90,21 @@ public class Service extends Application {
 	 */
 	public void setWrapper(String wrapper) {
 		this.wrapper = wrapper;
+	}
+
+	/**
+	 * Return true the job should always be running
+	 * @return true the job should always be running
+	 */
+	public boolean isKeepAlive() {
+		return keepAlive;
+	}
+
+	/**
+	 * Set if the job should always be running, even if it crashes
+	 * @param keepAlive if the job should always be running, even if it crashes
+	 */
+	public void setKeepAlive(boolean keepAlive) {
+		this.keepAlive = keepAlive;
 	}
 }
