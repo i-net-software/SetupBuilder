@@ -61,6 +61,9 @@ public class DebBuilder extends AbstractBuilder<Deb> {
 
             controlBuilder = new DebControlFileBuilder( super.task, setup, new File( buildDir, "DEBIAN" ) );
 
+            
+            addScriptsToControlFiles();
+            
             for( Service service : setup.getServices() ) {
                 setupService( service );
             }
@@ -102,6 +105,8 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     			}
     		}
             
+    		
+    		
             controlBuilder.build();
 
             documentBuilder = new DebDocumentFileBuilder( super.task, setup, new File( buildDir, "/usr/share/doc/" + setup.getAppIdentifier() ) );
@@ -121,7 +126,31 @@ public class DebBuilder extends AbstractBuilder<Deb> {
     }
 
 
-    private void setupEula() throws IOException {
+    /**
+     * adds the pre and post step entries to the pre and post config files
+     */
+    private void addScriptsToControlFiles() {
+    	
+    	ArrayList<String> preinsts = task.getPreinst();
+    	for (String preinst : preinsts) {
+    		controlBuilder.addTailScriptFragment( Script.PREINST, preinst );	
+    	}
+    	ArrayList<String> postinsts = task.getPostinst();
+		for (String postinst : postinsts) {
+			controlBuilder.addTailScriptFragment( Script.POSTINST, postinst );	
+		}
+    	
+		ArrayList<String> prerms = task.getPrerm();
+		for (String prerm : prerms) {
+			controlBuilder.addTailScriptFragment( Script.PRERM, prerm );	
+		}
+		ArrayList<String> postrms = task.getPostrm();
+		for (String postrm : postrms) {
+			controlBuilder.addTailScriptFragment( Script.POSTRM, postrm );	
+		}
+	}
+
+	private void setupEula() throws IOException {
         String templateLicenseName = setup.getAppIdentifier()+"/license";
         String templateAcceptName = setup.getAppIdentifier()+"/accept-license";
         String templateErrorName = setup.getAppIdentifier()+"/error-license";
