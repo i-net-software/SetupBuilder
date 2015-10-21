@@ -376,7 +376,7 @@ public class SetupBuilder implements SetupSources {
      * A command that run before the uninstaller.
      * @return the command or null
      */
-    public DesktopStarter getBeforeUninstall() {
+    public DesktopStarter getRunBeforeUninstall() {
         return runBeforeUninstall;
     }
 
@@ -384,7 +384,7 @@ public class SetupBuilder implements SetupSources {
      * Set a command that run before the uninstaller.
      * @param runAfter the command
      */
-    public void setBeforeUninstall( String runAfter ) {
+    public void setRunBeforeUninstall( String runAfter ) {
         this.runBeforeUninstall = new DesktopStarter( this );
         this.runBeforeUninstall.setExecutable( runAfter );
     }
