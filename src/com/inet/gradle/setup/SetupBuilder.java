@@ -65,7 +65,7 @@ public class SetupBuilder implements SetupSources {
 
     private String                 mainJar;
 
-    private DesktopStarter         runAfter;
+    private DesktopStarter         runAfter, runBeforeUninstall;
 
     private List<DocumentType>     documentTypes   = new ArrayList<>();
 
@@ -348,7 +348,7 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * A command run after the installer.
+     * A command that run after the installer.
      * @return the command or null
      */
     public DesktopStarter getRunAfter() {
@@ -356,7 +356,7 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Set a command that run after the installer
+     * Set a command that run after the installer.
      * @param runAfter the command
      */
     public void setRunAfter( String runAfter ) {
@@ -365,11 +365,36 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Set a command that run after the installer
+     * Set a command that run after the installer.
      * @param closue the command
      */
     public void runAfter( Closure<?> closue ) {
         runAfter = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
+    }
+
+    /**
+     * A command that run before the uninstaller.
+     * @return the command or null
+     */
+    public DesktopStarter getBeforeUninstall() {
+        return runBeforeUninstall;
+    }
+
+    /**
+     * Set a command that run before the uninstaller.
+     * @param runAfter the command
+     */
+    public void setBeforeUninstall( String runAfter ) {
+        this.runBeforeUninstall = new DesktopStarter( this );
+        this.runBeforeUninstall.setExecutable( runAfter );
+    }
+
+    /**
+     * Set a command that run run before the uninstaller.
+     * @param closue the command
+     */
+    public void runBeforeUninstall( Closure<?> closue ) {
+        runBeforeUninstall = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
     }
 
     /**
@@ -385,6 +410,10 @@ public class SetupBuilder implements SetupSources {
         documentTypes.add( doc );
     }
 
+    /**
+     * Get the list of document types.
+     * @return the list
+     */
     public List<DocumentType> getDocumentType() {
         return documentTypes;
     }
