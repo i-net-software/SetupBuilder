@@ -150,6 +150,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addIcon( product );
         addServices( installDir );
         addShortcuts( product, installDir );
+        addRunBeforeUninstall( product, installDir );
         addRunAfter( product, installDir );
         addDeleteFiles( product, installDir );
 
@@ -693,6 +694,55 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
+     * Add a runner without command line window.
+     * 
+     * @param run the runner
+     * @param id the id that should be used
+     * @param product the product node in the XML.
+     * @param installDir referent to INSTALLDIR
+     * @return the CustomAction
+     */
+    private Element addRun( DesktopStarter run, String id, Element product, Element installDir ) {
+        String[] cmd = getCommandLine( run );
+        Element action = getOrCreateChildById( product, "CustomAction", id );
+        if( cmd[1].isEmpty() ) {
+            Element target = getOrCreateChildByKeyValue( product, "SetProperty", "Action", id + "_target" );
+            addAttributeIfNotExists( target, "Id", "WixShellExecTarget" );
+            addAttributeIfNotExists( target, "Before", id );
+            addAttributeIfNotExists( target, "Sequence", "execute" );
+            addAttributeIfNotExists( target, "Value", cmd[0] );
+
+            addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
+            addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
+        } else {
+            addAttributeIfNotExists( action, "Directory", getWoringDirID( run, installDir ) );
+            addAttributeIfNotExists( action, "ExeCommand", cmd[2] );
+        }
+        return action;
+    }
+
+    /**
+     * Add an action that is executed before uninstall.
+     * 
+     * @param product the product node in the XML.
+     * @param installDir referent to INSTALLDIR
+     */
+    private void addRunBeforeUninstall( Element product, Element installDir ) {
+        DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
+        if( runBeforeUninstall == null ) {
+            return;
+        }
+        String id = "runBeforeUninstall";
+        Element action = addRun( runBeforeUninstall, id, product, installDir );
+
+        Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+        Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", "runBeforeUninstall" );
+        addAttributeIfNotExists( custom, "After", "InstallInitialize" );
+        // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
+        custom.setTextContent( "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
+    }
+
+    /**
      * Add an action that is executed after the setup.
      * 
      * @param product the product node in the XML.
@@ -703,24 +753,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( runAfter == null ) {
             return;
         }
-        String[] cmd = getCommandLine( runAfter );
-        Element action = getOrCreateChildById( product, "CustomAction", "runAfter" );
-        if( cmd[1].isEmpty() ) {
-            Element target = getOrCreateChildById( product, "Property", "WixShellExecTarget" );
-            addAttributeIfNotExists( target, "Value", cmd[0] );
-            addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
-            addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
-        } else {
-            addAttributeIfNotExists( action, "Directory", getWoringDirID( runAfter, installDir ) );
-            addAttributeIfNotExists( action, "ExeCommand", cmd[2] );
-            addAttributeIfNotExists( action, "Return", "asyncNoWait" );
-        }
+        String id = "runAfter";
+        Element action = addRun( runAfter, id, product, installDir );
+        addAttributeIfNotExists( action, "Return", "asyncNoWait" );
 
         Element ui = getOrCreateChild( product, "UI" );
         Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog" );
         addAttributeIfNotExists( exitDialog, "Control", "Finish" );
         addAttributeIfNotExists( exitDialog, "Event", "DoAction" );
-        addAttributeIfNotExists( exitDialog, "Value", "runAfter" );
+        addAttributeIfNotExists( exitDialog, "Value", id );
+        // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
         exitDialog.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
     }
 
