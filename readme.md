@@ -26,7 +26,7 @@ Sample Usage
 ----
 ### Base Sample
     plugins {
-        id "de.inetsoftware.setupbuilder" version "1.3.0"
+        id "de.inetsoftware.setupbuilder" version "1.4.7"
     }
     
     setupBuilder {
