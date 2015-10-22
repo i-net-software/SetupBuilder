@@ -373,25 +373,20 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         boolean isLicense = addLicense( product );
         if( !isLicense ) {
             // skip license dialog because we does no hat a license text
-            Document doc = product.getOwnerDocument();
             Element ui = getOrCreateChild( product, "UI" );
-            Element child = doc.createElement( "Publish" );
-            child.setAttribute( "Dialog", "WelcomeDlg" );
+            Element child = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "WelcomeDlg" );
             child.setAttribute( "Control", "Next" );
             child.setAttribute( "Event", "NewDialog" );
             child.setAttribute( "Value", "InstallDirDlg" );
             child.setAttribute( "Order", "2" );
             child.setTextContent( "1" );
-            ui.appendChild( child );
 
-            child = doc.createElement( "Publish" );
-            child.setAttribute( "Dialog", "InstallDirDlg" );
+            child = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "InstallDirDlg" );
             child.setAttribute( "Control", "Back" );
             child.setAttribute( "Event", "NewDialog" );
             child.setAttribute( "Value", "WelcomeDlg" );
             child.setAttribute( "Order", "2" );
             child.setTextContent( "1" );
-            ui.appendChild( child );
         }
 
         File file = task.getBannerBmp();
