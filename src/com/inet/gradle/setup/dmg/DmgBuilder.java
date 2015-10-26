@@ -88,8 +88,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         		createPackageFromApp();
         	}
 
-            createBinary();
-        
+/*
+        	new File ( task.getSetupFile().toString() ).createNewFile();
+/*/
+        	createBinary();
+//*/        
         } catch( RuntimeException ex ) {
             ex.printStackTrace();
             throw ex;
