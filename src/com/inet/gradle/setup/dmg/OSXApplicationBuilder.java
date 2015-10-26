@@ -50,6 +50,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 			service.setExecutable( service.getId() );
 		}
 		
+		System.err.println("Having executable of: '" + service.getExecutable() +"'" );
 		new PreparedAppBundlerTask(service).prepare().finish();
 		createPreferencePane( service );
 	}
@@ -248,7 +249,7 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		
 		// Patch Info.plist
 		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
-		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier()) + ".prefPane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
 		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
@@ -303,8 +304,12 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
         command = new ArrayList<>();
         command.add( "find" );
         command.add( destiantion.getAbsolutePath() );
-        command.add( "-type" );
-        command.add( "d" );
+        
+        if ( destiantion.isDirectory() ) {
+	        command.add( "-type" );
+	        command.add( "d" );
+        }
+	        
         command.add( "-exec" );
         command.add( "chmod" );
         command.add( "a+x" );
