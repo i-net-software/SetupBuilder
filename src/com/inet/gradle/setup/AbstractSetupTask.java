@@ -37,6 +37,7 @@ import org.gradle.api.internal.file.copy.CopyAction;
 import org.gradle.api.internal.file.copy.CopyActionExecuter;
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
+import org.gradle.api.internal.file.copy.CopySpecResolver;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -121,9 +122,10 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
     private void processFiles( CopyActionProcessingStreamAction action, CopySpecInternal copySpec ) {
         if( getSetupBuilder().isFailOnEmptyFrom() ) {
             for( CopySpecInternal cs : copySpec.getChildren() ) {
-                Set<File> files = cs.buildRootResolver().getAllSource().getFiles();
+                CopySpecResolver rootResolver = cs.buildRootResolver();
+                Set<File> files = rootResolver.getAllSource().getFiles();
                 if( files.size() == 0 ) {
-                    throw new IllegalArgumentException( "No files selected by: " + ((DefaultCopySpec)cs).getSourcePaths()  + ". This means that there are files missing or your 'from' method in your gradle script is wrong. If an empty 'from' is valid then disable the check with 'setupBuilder.failOnEmptyFrom = false'" );
+                    throw new IllegalArgumentException( "No files selected by: " + ((DefaultCopySpec)cs).getSourcePaths() + " --> " + rootResolver.getDestPath() + ". This means that there are files missing or your 'from' method in your gradle script is wrong. If an empty 'from' is valid then disable the check with 'setupBuilder.failOnEmptyFrom = false'" );
                 }
                 int includeCount = cs.getIncludes().size();
                 if( files.size() < includeCount ) {
