@@ -23,8 +23,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JEditorPane;
@@ -55,7 +56,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     private static final String     ICON_ID = "icon.ico";
 
-    private HashSet<String>         components = new HashSet<>();
+    private Set<String>             components = new LinkedHashSet<>();
 
     private HashMap<String, String> ids        = new HashMap<>();
 
