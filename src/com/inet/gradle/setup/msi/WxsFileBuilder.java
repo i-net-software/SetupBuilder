@@ -37,7 +37,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.DesktopStarter;
@@ -674,18 +673,31 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     private String[] getCommandLine( DesktopStarter starter ) {
         String target = starter.getExecutable();
         String arguments = starter.getStartArguments();
+        String dir;
         if( target == null || target.isEmpty() ) {
             if( javaDir != null ) {
-                target = "[INSTALLDIR]" + javaDir + "\\bin\\javaw.exe";
+                dir = "[INSTALLDIR]";
+                target =  javaDir + "\\bin\\javaw.exe";
                 arguments = "-cp " + starter.getMainJar() + " " + starter.getMainClass() + " " + arguments;
             } else {
-                target = "[SystemFolder]cmd.exe";
-                arguments = "/C javaw.exe -cp \"[INSTALLDIR]" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
+                dir = "";
+                target = "javaw.exe";
+                arguments = "-cp \"[INSTALLDIR]" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
             }
         } else {
-            target = "[INSTALLDIR]" + target;
+            if( !target.startsWith( "[" ) ) {
+                dir = "[INSTALLDIR]";
+            } else {
+                dir = "";
+            }
         }
-        return new String[] { target, arguments, '\"' +target + "\" " + arguments };
+        String both;
+        if( target.indexOf( ' ' ) >  0 || target.indexOf( '[' ) >  0 ) {
+            both = '\"' + target + "\" " + arguments;
+        } else {
+            both = target + ' ' + arguments;
+        }
+        return new String[] { dir + target, arguments, both };
     }
 
     /**
@@ -695,25 +707,46 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param id the id that should be used
      * @param product the product node in the XML.
      * @param installDir referent to INSTALLDIR
-     * @return the CustomAction
+     * @param Return the Return attribute, can be null, "asyncNoWait", "asyncWait", "check" or "ignore"
+     * @param execute the Execute attribute
      */
-    private Element addRun( DesktopStarter run, String id, Element product, Element installDir ) {
+    private void addRun( DesktopStarter run, String id, Element product, Element installDir, String Return, String execute ) {
         String[] cmd = getCommandLine( run );
         Element action = getOrCreateChildById( product, "CustomAction", id );
-        if( cmd[1].isEmpty() ) {
-            Element target = getOrCreateChildByKeyValue( product, "SetProperty", "Action", id + "_target" );
-            addAttributeIfNotExists( target, "Id", "WixShellExecTarget" );
-            addAttributeIfNotExists( target, "Before", id );
-            addAttributeIfNotExists( target, "Sequence", "execute" );
-            addAttributeIfNotExists( target, "Value", cmd[0] );
 
-            addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
-            addAttributeIfNotExists( action, "DllEntry", "WixShellExec" );
+        // run with elevated privileges
+        addAttributeIfNotExists( action, "Execute", execute == null ? "deferred" : execute );
+        addAttributeIfNotExists( action, "Impersonate", "no" );
+        if( Return != null ) {
+            addAttributeIfNotExists( action, "Return", Return );
+        }
+
+        String targetID;
+        String dllEntry;
+        String command;
+        if( !"asyncNoWait".equals( Return ) ) {
+            if( cmd[1].isEmpty() ) {
+                targetID = "WixShellExecTarget";
+                dllEntry = "WixShellExec";
+                command = cmd[2];
+            } else {
+                targetID = id;
+                dllEntry = "CAQuietExec";
+                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]\" & " + cmd[2] + '\"';
+            }
         } else {
             addAttributeIfNotExists( action, "Directory", getWoringDirID( run, installDir ) );
-            addAttributeIfNotExists( action, "ExeCommand", cmd[2] );
+            addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd[0] + "\" " + cmd[1] ); // full quoted path + arguments 
+            return;
         }
-        return action;
+        Element target = getOrCreateChildByKeyValue( product, "SetProperty", "Action", id + "_target" );
+        addAttributeIfNotExists( target, "Id", targetID );
+        addAttributeIfNotExists( target, "Before", id );
+        addAttributeIfNotExists( target, "Sequence", "execute" );
+        addAttributeIfNotExists( target, "Value", command );
+
+        addAttributeIfNotExists( action, "BinaryKey", "WixCA" );
+        addAttributeIfNotExists( action, "DllEntry", dllEntry );
     }
 
     /**
@@ -728,10 +761,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
         String id = "runBeforeUninstall";
-        Element action = addRun( runBeforeUninstall, id, product, installDir );
+        addRun( runBeforeUninstall, id, product, installDir, null, null );
 
         Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-        Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", "runBeforeUninstall" );
+        Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
         addAttributeIfNotExists( custom, "After", "InstallInitialize" );
         // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
         custom.setTextContent( "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
@@ -749,8 +782,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
         String id = "runAfter";
-        Element action = addRun( runAfter, id, product, installDir );
-        addAttributeIfNotExists( action, "Return", "asyncNoWait" );
+        addRun( runAfter, id, product, installDir, "asyncNoWait", "immediate" );
 
         Element ui = getOrCreateChild( product, "UI" );
         Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog" );
@@ -775,20 +807,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             folder = folder.replace( '/', '\\' );
             String id = id( folder );
 
-            Element component = addDeleteFiles( folder + (folder.endsWith( "\\" ) ? "*.*" : "\\*.*" ), installDir );
-            Element remove = getOrCreateChildById( component, "RemoveFolder", "removeFolder" + id );
-            addAttributeIfNotExists( remove, "On", "both" );
-
-//          This delete also the sub tree but it popup shortly a command line at setup time 
-//            Element action = getOrCreateChildById( product, "CustomAction", id );
-//            addAttributeIfNotExists( action, "Directory", "INSTALLDIR" );
-//            addAttributeIfNotExists( action, "ExeCommand", "\"[SystemFolder]cmd.exe\" /C rmdir /S /Q " + folder );
-//            addAttributeIfNotExists( action, "Return", "ignore" );
-//            addAttributeIfNotExists( action, "Execute", "deferred" );
-//            addAttributeIfNotExists( action, "Impersonate", "no" );
-//            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-//            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
-//            addAttributeIfNotExists( custom, "After", "RemoveFiles" );
+            if( folder.endsWith( "\\" ) ) {
+                folder = folder.substring( 0, folder.length()-1 );
+            }
+            DesktopStarter run = new DesktopStarter( setup );
+            run.setExecutable( "rmdir" );
+            run.setStartArguments( "/S /Q \"[INSTALLDIR]" + folder + '\"' );
+            addRun( run, id, product, installDir, "ignore", null );
+            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
+            addAttributeIfNotExists( custom, "After", "InstallInitialize" );
         }
     }
 

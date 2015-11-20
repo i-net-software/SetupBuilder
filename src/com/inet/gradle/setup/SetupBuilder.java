@@ -484,7 +484,7 @@ public class SetupBuilder implements SetupSources {
     }
 
     /**
-     * Add a folder to delete before install and after uninstall.
+     * Add a folder to delete before install and after uninstall. It delete the folder with all sub directories.
      * @param folder the folder
      */
     public void deleteFolder( String folder ) {
