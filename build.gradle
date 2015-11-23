@@ -33,6 +33,9 @@ sourceSets {
 
 if( file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
+    preparePublish.dependsOn 'publishPluginJavaDocsJar'
+    preparePublish.dependsOn 'jar'
+    preparePublish.dependsOn 'publishPluginJar'
 } else {
     uploadArchives {
         repositories {
