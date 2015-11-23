@@ -31,10 +31,14 @@ sourceSets {
     }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: uri('../repo'))
+if( file( '../BuildScripts/base.gradle' ).exists() ) {
+    apply from: '../BuildScripts/base.gradle' // for internal build system
+} else {
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: uri('../repo'))
+            }
         }
     }
 }
