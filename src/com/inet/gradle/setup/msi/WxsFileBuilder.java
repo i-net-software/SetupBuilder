@@ -634,12 +634,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 }
             }
 
-            String[] cmd = getCommandLine( starter );
-            target = cmd[0];
-            String arguments = cmd[1];
-            addAttributeIfNotExists( shortcut, "Target", target );
-            if( !arguments.isEmpty() ) {
-                addAttributeIfNotExists( shortcut, "Arguments", arguments );
+            CommandLine cmd = new CommandLine( starter, javaDir );
+            addAttributeIfNotExists( shortcut, "Target", cmd.target );
+            if( !cmd.arguments.isEmpty() ) {
+                addAttributeIfNotExists( shortcut, "Arguments", cmd.arguments );
             }
             if( iconID != null ) {
                 addAttributeIfNotExists( shortcut, "Icon", iconID );
@@ -666,42 +664,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
-     * Get the command of the starter without arguments
-     * 
-     * @param starter the DesktopStarter
-     * @return [0] - target; [1] - arguments; [2] - both
-     */
-    private String[] getCommandLine( DesktopStarter starter ) {
-        String target = starter.getExecutable();
-        String arguments = starter.getStartArguments();
-        String dir;
-        if( target == null || target.isEmpty() ) {
-            if( javaDir != null ) {
-                dir = "[INSTALLDIR]";
-                target =  javaDir + "\\bin\\javaw.exe";
-                arguments = "-cp " + starter.getMainJar() + " " + starter.getMainClass() + " " + arguments;
-            } else {
-                dir = "";
-                target = "javaw.exe";
-                arguments = "-cp \"[INSTALLDIR]" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
-            }
-        } else {
-            if( !target.startsWith( "[" ) ) {
-                dir = "[INSTALLDIR]";
-            } else {
-                dir = "";
-            }
-        }
-        String both;
-        if( target.indexOf( ' ' ) >  0 || target.indexOf( '[' ) >  0 ) {
-            both = '\"' + target + "\" " + arguments;
-        } else {
-            both = target + ' ' + arguments;
-        }
-        return new String[] { dir + target, arguments, both };
-    }
-
-    /**
      * Add a runner without command line window.
      * 
      * @param run the runner
@@ -712,7 +674,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param execute the Execute attribute
      */
     private void addRun( DesktopStarter run, String id, Element product, Element installDir, String Return, String execute ) {
-        String[] cmd = getCommandLine( run );
+        CommandLine cmd = new CommandLine( run, javaDir );
         Element action = getOrCreateChildById( product, "CustomAction", id );
 
         // run with elevated privileges
@@ -726,18 +688,18 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         String dllEntry;
         String command;
         if( !"asyncNoWait".equals( Return ) ) {
-            if( cmd[1].isEmpty() ) {
+            if( cmd.arguments.isEmpty() ) {
                 targetID = "WixShellExecTarget";
                 dllEntry = "WixShellExec";
-                command = cmd[2];
+                command = cmd.full;
             } else {
                 targetID = id;
                 dllEntry = "CAQuietExec";
-                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]\" & " + cmd[2] + '\"';
+                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.full + '\"';
             }
         } else {
             addAttributeIfNotExists( action, "Directory", getWoringDirID( run, installDir ) );
-            addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd[0] + "\" " + cmd[1] ); // full quoted path + arguments 
+            addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd.target + "\" " + cmd.arguments ); // full quoted path + arguments 
             return;
         }
         Element target = getOrCreateChildByKeyValue( product, "SetProperty", "Action", id + "_target" );
