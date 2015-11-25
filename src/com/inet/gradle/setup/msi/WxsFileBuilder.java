@@ -806,7 +806,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
         for( String folder : setup.getDeleteFolders() ) {
             folder = folder.replace( '/', '\\' );
-            String id = id( folder );
+            String id = id( "rmdir_" + folder );
 
             if( folder.endsWith( "\\" ) ) {
                 folder = folder.substring( 0, folder.length()-1 );
@@ -995,11 +995,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             builder.append( '_' );
         }
         if( builder == null ) {
-            if( str.length() > 72 ) {
-                builder = new StringBuilder();
-            } else {
-                return str;
+            if( str.length() <= 72 ) {
+                if( !ids.containsKey( str ) ) {
+                    ids.put( str, str );
+                    return str;
+                }
+                if( str.equals( ids.get( str ) ) ) {
+                    return str;
+                }
             }
+            builder = new StringBuilder();
         }
         builder.append( str.substring( builder.length() ) );
         if( builder.length() > 62 ) {
