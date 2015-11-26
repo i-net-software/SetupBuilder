@@ -61,7 +61,7 @@ class CommandLine {
             }
         }
         String full;
-        if( target.indexOf( ' ' ) >  0 || target.indexOf( '[' ) >  0 ) {
+        if( target.indexOf( ' ' ) >=  0 || target.indexOf( '[' ) >=  0 ) {
             full = '\"' + target + "\" " + arguments;
         } else {
             full = target + ' ' + arguments;
