@@ -46,6 +46,8 @@ public class Msi extends AbstractSetupTask {
 
     private SignTool signTool;
 
+    private double minOS;
+
     /**
      * Create a new instance.
      */
@@ -248,5 +250,40 @@ public class Msi extends AbstractSetupTask {
         }
 
         this.languages = list;
+    }
+
+    /**
+     * Get the minimum OS version.
+     * 
+     * @return the version
+     */
+    public double getMinOS() {
+        return minOS;
+    }
+
+    /**
+     * Set the minimum OS version.
+     * <ul>
+     * <li>10.0 - Windows 10
+     * <li>10.0 - Windows Server 2016
+     * <li> 6.3 - Windows 8.1
+     * <li> 6.3 - Windows Server 2012 R2
+     * <li> 6.2 - Windows 8
+     * <li> 6.2 - Windows Server 2012
+     * <li> 6.1 - Windows 7
+     * <li> 6.1 - Windows Server 2008 R2
+     * <li> 6.0 - Windows Server 2008
+     * <li> 6.0 - Windows Vista
+     * <li> 5.2 - Windows Server 2003 R2
+     * <li> 5.2 - Windows Server 2003
+     * <li> 5.2 - Windows XP 64-Bit Edition
+     * <li> 5.1 - Windows XP
+     * <li> 5.0 - Windows 2000
+     * </ul>
+     * 
+     * @param minVersion the version
+     */
+    public void setMinOS( double minVersion ) {
+        this.minOS = minVersion;
     }
 }

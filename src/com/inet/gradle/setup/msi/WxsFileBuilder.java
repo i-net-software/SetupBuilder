@@ -145,6 +145,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
         } );
 
+        setMinimumOsVersion( product );
+
         addBundleJre( installDir );
         addGUI( product );
         addIcon( product );
@@ -161,6 +163,51 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
 
         save();
+    }
+
+    /**
+     * Add a condition for the minimum OS version if needed
+     * @param product the product node
+     */
+    private void setMinimumOsVersion( Element product ) {
+        double version = task.getMinOS();
+        if( version == 0 ) {
+            return;
+        }
+        Element condition = getOrCreateChild( product, "Condition" );
+        int intVersion = 100 * (int)version + (int)((version * 10) % 10);
+        String os;
+        switch( intVersion ) {
+            case 1000:
+                os = "Windows 10, Windows Server 2016";
+                break;
+            case 603:
+                os = "Windows 8.1, Windows Server 2012 R2";
+                break;
+            case 602:
+                os = "Windows 8, Windows Server 2012";
+                break;
+            case 601:
+                os = "Windows 7, Windows Server 2008 R2";
+                break;
+            case 600:
+                os = "Windows Vista, Windows Server 2008";
+                break;
+            case 502:
+                os = "Windows Server 2003";
+                break;
+            case 501:
+                os = "Windows XP";
+                break;
+            case 500:
+                os = "Windows 2000";
+                break;
+            default:
+                throw new RuntimeException("Unsupported minimum OS version: " + version + ", " + intVersion );
+        }
+        String msg = java.text.MessageFormat.format( "{0} is only supported on {1}, or higher.", setup.getApplication(), os );
+        addAttributeIfNotExists( condition, "Message", msg );
+        condition.setTextContent( "Installed OR (VersionNT >= " + intVersion + ")" );
     }
 
     /**
