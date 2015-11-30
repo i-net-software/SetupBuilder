@@ -15,19 +15,19 @@
  */
 package com.inet.gradle.setup.rpm;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * The rpm Gradle task. It build a rpm package for Linux.
  * 
  * @author Volker Berlin
  */
-public class Rpm extends AbstractSetupTask {
+public class Rpm extends AbstractSetupTask<SetupBuilder> {
 	
     private String                  section;
 
@@ -77,14 +77,6 @@ public class Rpm extends AbstractSetupTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new RpmBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void copyTo(File target) {
-    	super.copyTo(target);
     }
       
     /**

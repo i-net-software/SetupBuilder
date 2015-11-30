@@ -3,7 +3,7 @@ package com.inet.gradle.setup;
 /**
  * Definition of a service to be installed on the target system.
  */
-public class Service extends Application {
+public class Service extends Application<SetupBuilder> {
     private boolean startOnBoot = true, keepAlive = false;
     private String  startArguments, id, wrapper;
 

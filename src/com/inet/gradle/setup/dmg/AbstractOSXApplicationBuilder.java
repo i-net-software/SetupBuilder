@@ -15,7 +15,6 @@ import com.inet.gradle.setup.AbstractSetupBuilder;
 import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DocumentType;
-import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
@@ -28,7 +27,7 @@ import com.oracle.appbundler.BundleDocument;
  * @param <T> the Task
  * @param <S> the SetupBuilder
  */
-public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<S>,S> extends AbstractBuilder<T,S> {
+public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<S>,S extends AbstractSetupBuilder<S>> extends AbstractBuilder<T,S> {
 	
 	protected AbstractSetupBuilder<S> setup;
 	private AppBundlerTask appBundler;
@@ -50,7 +49,10 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<
 	 * @param application to use
 	 * @throws Exception on errors
 	 */
-	protected void prepareApplication( Application<SetupBuilder> application ) throws Exception {
+	protected void prepareApplication( Application<S> application ) throws Exception {
+		
+		
+		System.out.println( "BuildDir now: " + buildDir );
 		appBundler.setOutputDirectory(buildDir);
 		appBundler.setName(application.getDisplayName());
 		appBundler.setDisplayName(application.getDisplayName());
@@ -100,9 +102,9 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<
 	 * @param list of document types
 	 * @throws IOException on complications with the icon
 	 */
-	protected void setDocumentTypes(List<DocumentType> list) throws IOException {
+	protected void setDocumentTypes(List<DocumentType<S>> list) throws IOException {
 		// add file extensions
-		for (DocumentType doc : list) {
+		for (DocumentType<S> doc : list) {
 			BundleDocument bundle = new BundleDocument();
 			bundle.setExtensions(String.join(",", doc.getFileExtension()));
 			bundle.setName(doc.getName());
@@ -189,7 +191,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<
 	 * @param application the application
 	 * @throws IOException on errors
 	 */
-	protected void copyBundleFiles( Application<SetupBuilder> application) throws IOException {
+	protected void copyBundleFiles( Application<S> application) throws IOException {
 		File destination = new File(buildDir, application.getDisplayName() + ".app");
 		getTask().copyTo( new File(destination, "Contents/Java") );
 

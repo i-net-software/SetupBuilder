@@ -37,8 +37,10 @@ import com.inet.gradle.setup.util.ResourceUtils;
  * 
  * @author Volker Berlin
  */
-class MsiBuilder extends AbstractBuilder<Msi> {
+class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
+	private SetupBuilder setup;
+	
     /**
      * Create a new instance
      * 
@@ -47,7 +49,8 @@ class MsiBuilder extends AbstractBuilder<Msi> {
      * @param fileResolver the file Resolver
      */
     MsiBuilder( Msi msi, SetupBuilder setup, FileResolver fileResolver ) {
-        super( msi, setup, fileResolver );
+        super( msi, fileResolver );
+        this.setup = setup;
     }
 
     /**

@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.util.IndentationOutputStream;
@@ -31,20 +32,18 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
  * @author Volker Berlin
  *
  * @param <T> the task
+ * @param <S>
  */
-public abstract class AbstractBuilder<T extends AbstractSetupTask> {
+public abstract class AbstractBuilder<T extends AbstractSetupTask<S>, S> {
 
-    protected T            task;
+	protected T task;
 
-    protected FileResolver fileResolver;
+	protected FileResolver fileResolver;
 
-    protected SetupBuilder setup;
+	protected File buildDir;
 
-    protected File         buildDir;
-
-    protected AbstractBuilder( T task, SetupBuilder setup, FileResolver fileResolver ) {
+    protected AbstractBuilder( T task, FileResolver fileResolver ) {
         this.task = task;
-        this.setup = setup;
         this.fileResolver = fileResolver;
         this.buildDir = task.getTemporaryDir();
     }

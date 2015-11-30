@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.inet.gradle.setup.Application;
+import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 
 /**
@@ -26,7 +27,7 @@ public class OSXScriptBuilder extends Template {
 		super( template );
 	}
 	
-	public OSXScriptBuilder(Application application, String template) throws IOException {
+	public OSXScriptBuilder(Application<SetupBuilder> application, String template) throws IOException {
 		super( template );
 
 		setPlaceholder("executable", 	application.getExecutable());

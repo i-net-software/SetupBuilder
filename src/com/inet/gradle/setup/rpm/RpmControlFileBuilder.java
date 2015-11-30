@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.inet.gradle.setup.AbstractSetupBuilder;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
 
