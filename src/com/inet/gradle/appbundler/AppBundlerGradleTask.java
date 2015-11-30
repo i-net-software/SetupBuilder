@@ -1,13 +1,18 @@
 package com.inet.gradle.appbundler;
 
-import java.io.File;
-
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 
-public class AppBundlerGradleTask extends AbstractSetupTask {
+/**
+ * Task to create a .app archive  
+ * @author gamma
+ */
+public class AppBundlerGradleTask extends AbstractSetupTask<AppBundler> {
 
+	/**
+	 * Construct static as .app
+	 */
 	public AppBundlerGradleTask() {
 		super( "app" );
 	}
@@ -18,13 +23,6 @@ public class AppBundlerGradleTask extends AbstractSetupTask {
     @Override
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void copyTo( File target ) {
-        super.copyTo( target );
+        new AppBundlerBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 }
