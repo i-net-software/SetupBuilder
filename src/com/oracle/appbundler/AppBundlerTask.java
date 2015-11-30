@@ -55,6 +55,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
+import org.w3c.dom.views.AbstractView;
 
 /**
  * App bundler Ant task.
@@ -63,7 +64,7 @@ public class AppBundlerTask extends Task {
     // Output folder for generated bundle
     private File outputDirectory = null;
 
-    // General bundle properties
+	// General bundle properties
     private String name = null;
     private String displayName = null;
     private String identifier = null;
@@ -277,6 +278,122 @@ public class AppBundlerTask extends Task {
         architectures.add(name);   
     }
 
+    public File getOutputDirectory() {
+		return outputDirectory;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public File getIcon() {
+		return icon;
+	}
+
+	public String getExecutableName() {
+		return executableName;
+	}
+
+	public String getShortVersion() {
+		return shortVersion;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public String getCopyright() {
+		return copyright;
+	}
+
+	public String getPrivileged() {
+		return privileged;
+	}
+
+	public String getWorkingDirectory() {
+		return workingDirectory;
+	}
+
+	public String getMinimumSystemVersion() {
+		return minimumSystemVersion;
+	}
+
+	public String getApplicationCategory() {
+		return applicationCategory;
+	}
+
+	public boolean isHighResolutionCapable() {
+		return highResolutionCapable;
+	}
+
+	public boolean isSupportsAutomaticGraphicsSwitching() {
+		return supportsAutomaticGraphicsSwitching;
+	}
+
+	public boolean isHideDockIcon() {
+		return hideDockIcon;
+	}
+
+	public String getMainClassName() {
+		return mainClassName;
+	}
+
+	public String getJnlpLauncherName() {
+		return jnlpLauncherName;
+	}
+
+	public String getJarLauncherName() {
+		return jarLauncherName;
+	}
+
+	public FileSet getRuntime() {
+		return runtime;
+	}
+
+	public ArrayList<FileSet> getClassPath() {
+		return classPath;
+	}
+
+	public ArrayList<FileSet> getLibraryPath() {
+		return libraryPath;
+	}
+
+	public ArrayList<Option> getOptions() {
+		return options;
+	}
+
+	public ArrayList<String> getArguments() {
+		return arguments;
+	}
+
+	public ArrayList<String> getArchitectures() {
+		return architectures;
+	}
+
+	public ArrayList<String> getRegisteredProtocols() {
+		return registeredProtocols;
+	}
+
+	public ArrayList<BundleDocument> getBundleDocuments() {
+		return bundleDocuments;
+	}
+
+	public Reference getClassPathRef() {
+		return classPathRef;
+	}
+	
     @Override
     public void execute() throws BuildException {
         // Validate required properties
@@ -306,7 +423,7 @@ public class AppBundlerTask extends Task {
 
         if (icon != null) {
             if (!icon.exists()) {
-                throw new IllegalStateException("Icon does not exist.");
+                throw new IllegalStateException("Icon does not exist: " + icon);
             }
 
             if (icon.isDirectory()) {

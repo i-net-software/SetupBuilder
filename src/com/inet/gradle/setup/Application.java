@@ -1,8 +1,13 @@
 package com.inet.gradle.setup;
 
-
-public class Application {
-	protected final SetupBuilder			setup;
+/**
+ * Generic application wrapper
+ * @author gamma
+ *
+ * @param <S> Type of the SetupBuilder  
+ */
+public class Application<S extends AbstractSetupBuilder<S>> {
+	protected final AbstractSetupBuilder<S> setup;
 	private String 							displayName, mainJar, mainClass, executable, description, workDir;
 	private Object icons;
 
@@ -10,7 +15,7 @@ public class Application {
      * Create a new DesktopStarter
      * @param setup current SetupBuilder
      */
-    public Application( SetupBuilder setup ) {
+    public Application( AbstractSetupBuilder<S> setup ) {
         this.setup = setup;
     }
 

@@ -6,7 +6,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'de.inetsoftware'
-version = '1.4.7'
+version = '1.5.0'
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
@@ -31,12 +31,14 @@ sourceSets {
     }
 }
 
-if( file( '../BuildScripts/base.gradle' ).exists() ) {
+if( !project.hasProperty("debug") && file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
     preparePublish.dependsOn 'publishPluginJavaDocsJar'
     preparePublish.dependsOn 'jar'
     preparePublish.dependsOn 'publishPluginJar'
+    println "Uploading into internal Repository 'fileserver'"
 } else {
+    println "Uploading into local '../repo'"
     uploadArchives {
         repositories {
             mavenDeployer {
@@ -56,6 +58,10 @@ pluginBundle {
     setupBuilderPlugin {
       id = 'de.inetsoftware.setupbuilder'
       displayName = 'Gradle Setup Builder plugin'
+    }
+    appBunderPlugin {
+      id = 'de.inetsoftware.appbundler'
+      displayName = 'Gradle Application Bundler plugin for OSX'
     }
   }
 }

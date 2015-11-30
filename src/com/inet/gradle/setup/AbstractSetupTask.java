@@ -15,11 +15,11 @@
  */
 package com.inet.gradle.setup;
 
-import groovy.lang.Closure;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Set;
@@ -49,22 +49,46 @@ import org.gradle.api.tasks.WorkResult;
 import org.gradle.internal.nativeplatform.filesystem.FileSystem;
 import org.gradle.internal.reflect.Instantiator;
 
+import groovy.lang.Closure;
+
 /**
  * Base class for all setup task.
+ * @param <S> the concrete SetupBuilder Type
  * 
  * @author Volker Berlin
  */
-public abstract class AbstractSetupTask extends DefaultTask implements SetupSources {
+public abstract class AbstractSetupTask<S> extends DefaultTask implements SetupSources {
 
-    private final CopySpecInternal rootSpec;
+	private final CopySpecInternal rootSpec;
 
-    private SetupBuilder           setupBuilder;
+	protected AbstractSetupBuilder<S> setupBuilder;
 
-    private String                 extension;
+	private String extension;
 
-    public AbstractSetupTask( String extension ) {
+	/**
+	 * Constructor with indication to artifact result
+	 * Runs with the default SetupBuilder for dmg, msi ...
+	 * @param extension of the setup
+	 */
+    @SuppressWarnings("unchecked")
+	public AbstractSetupTask( String extension ) {
         this.extension = extension;
         this.rootSpec = (CopySpecInternal)getProject().copySpec( (Closure<CopySpec>)null );
+
+    	ProjectInternal project = (ProjectInternal)getProject();
+    	
+    	Type genericSuperClass = getClass().getGenericSuperclass();
+
+    	ParameterizedType parametrizedType = null;
+    	while (parametrizedType == null) {
+    	   if ((genericSuperClass instanceof ParameterizedType)) {
+    	       parametrizedType = (ParameterizedType) genericSuperClass;
+    	   } else {
+    	       genericSuperClass = ((Class<?>) genericSuperClass).getGenericSuperclass();
+    	   }
+    	}
+
+        setupBuilder = (AbstractSetupBuilder<S>) project.getExtensions().getByType( (Class<S>) parametrizedType.getActualTypeArguments()[0] );
     }
 
     /**
@@ -84,7 +108,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
      * Copy all files of this task to the given target.
      * @param target the target directory
      */
-    protected void copyTo( File target ) {
+    public void copyTo( File target ) {
         processFiles( new CopyActionProcessingStreamAction() {
             @Override
             public void processFile( FileCopyDetailsInternal details ) {
@@ -111,7 +135,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
      * @param action the action that should be process for every file
      */
     protected void processFiles( CopyActionProcessingStreamAction action ) {
-        processFiles( action, getSetupBuilder().getRootSpec() );
+        processFiles( action, setupBuilder.getRootSpec() );
         processFiles( action, rootSpec );
     }
 
@@ -120,7 +144,7 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
      * @param action the action that should be process for every file
      */
     private void processFiles( CopyActionProcessingStreamAction action, CopySpecInternal copySpec ) {
-        if( getSetupBuilder().isFailOnEmptyFrom() ) {
+        if( setupBuilder.isFailOnEmptyFrom() ) {
             for( CopySpecInternal cs : copySpec.getChildren() ) {
                 CopySpecResolver rootResolver = cs.buildRootResolver();
                 Set<File> files = rootResolver.getAllSource().getFiles();
@@ -180,14 +204,15 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
      */
     public abstract void build();
 
-    public SetupBuilder getSetupBuilder() {
-        if( setupBuilder == null ) {
-            ProjectInternal project = (ProjectInternal)getProject();
-            setupBuilder = project.getExtensions().getByType( SetupBuilder.class );
-        }
-        return setupBuilder;
+    /**
+     * Return the setupBuilder using the specified type 
+     * @return setupBuilder
+     */
+    @SuppressWarnings("unchecked")
+	public S getSetupBuilder() {
+        return (S) setupBuilder;
     }
-
+    
     @Override
     public CopySpecInternal getRootSpec() {
         return rootSpec;
@@ -202,15 +227,26 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         return SetupSources.super.getSource();
     }
 
+    /**
+     * The setup Sources
+     * @return FileTree
+     */
     @InputFiles
     public FileTree getSetupSource() {
-        return getSetupBuilder().getSource();
+        try {
+        	return setupBuilder.getSource();
+        } catch ( Throwable e ) {
+        	throw new IllegalArgumentException( "You have to specify input sources for your application", e ); 
+        }
     }
 
+    /**
+     * The resulting application
+     * @return the application
+     */
     @OutputFile
     public File getSetupFile() {
-        SetupBuilder setup = getSetupBuilder();
-        return new File( setup.getDestinationDir(), setup.getArchiveName() + "." + getExtension() );
+        return new File( setupBuilder.getDestinationDir(), setupBuilder.getArchiveName() + "." + getExtension() );
     }
 
     /**
@@ -240,6 +276,6 @@ public abstract class AbstractSetupTask extends DefaultTask implements SetupSour
         if( desc != null && !desc.isEmpty() ) {
             return desc;
         }
-        return getSetupBuilder().getDescription();
+        return setupBuilder.getDescription();
     }
 }

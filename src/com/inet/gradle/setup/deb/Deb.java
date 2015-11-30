@@ -15,19 +15,19 @@
  */
 package com.inet.gradle.setup.deb;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * The deb Gradle task. It build a deb package for Debian / Ubuntu.
  * 
  * @author Stefan Heidrich
  */
-public class Deb extends AbstractSetupTask {	
+public class Deb extends AbstractSetupTask<SetupBuilder> {	
 
     private String                 section;
 
@@ -64,7 +64,6 @@ public class Deb extends AbstractSetupTask {
         super( "deb" );
     }
 
-    
     /**
      * {@inheritDoc}
      */
@@ -72,14 +71,6 @@ public class Deb extends AbstractSetupTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new DebBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void copyTo(File target) {
-    	super.copyTo(target);
     }
 
 	public String getSection() {

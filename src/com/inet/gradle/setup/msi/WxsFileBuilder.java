@@ -648,7 +648,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws IOException If any I/O exception occur on icon loading
      */
     private void addShortcuts( Element product, Element installDir ) throws IOException {
-        List<DesktopStarter> starters = setup.getDesktopStarters();
+        List<DesktopStarter<SetupBuilder>> starters = setup.getDesktopStarters();
         if( starters.isEmpty() ) {
             return;
         }

@@ -33,10 +33,11 @@ import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
 import com.inet.gradle.setup.image.ImageFactory;
 
-public class DebBuilder extends AbstractBuilder<Deb> {
+public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
 
     private DebControlFileBuilder  controlBuilder;
     private DebDocumentFileBuilder documentBuilder;
+    private SetupBuilder		   setup;
 
     /**
      * Create a new instance
@@ -45,7 +46,8 @@ public class DebBuilder extends AbstractBuilder<Deb> {
      * @param fileResolver the file Resolver
      */
     public DebBuilder( Deb deb, SetupBuilder setup, FileResolver fileResolver ) {
-        super( deb, setup, fileResolver );
+        super( deb, fileResolver );
+        this.setup = setup;
     }
 
     /**

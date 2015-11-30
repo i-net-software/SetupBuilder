@@ -1,0 +1,45 @@
+/*
+plugins {
+	id "de.inetsoftware.setupbuilder" version "1.4.7"
+}
+/*/
+buildscript {
+    repositories {
+        maven {
+            url uri('../../repo')
+        }
+    }
+    dependencies {
+        classpath 'de.inetsoftware:SetupBuilder:+'
+    }
+}
+
+apply plugin: 'de.inetsoftware.appbundler'
+//*/
+
+apply plugin: 'java'
+
+sourceSets {
+	main {
+		java {
+			srcDirs 'src'
+		}
+	}
+}
+
+appBundler {
+
+	application = "appBundler Test Build"
+	description = 'Build a test programm.'
+	icons = "test-icon.icns"
+	
+	from jar.outputs
+
+    bundleJre = 1.8
+    mainClass = 'com.inet.testapplication.TestLauncher'
+    mainJar = 'testBuilds.jar'
+}
+
+bundleApp {
+	dependsOn jar
+}

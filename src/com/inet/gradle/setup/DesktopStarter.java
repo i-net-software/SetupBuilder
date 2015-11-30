@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup;
 
-import groovy.lang.Closure;
+package com.inet.gradle.setup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +22,22 @@ import java.util.List;
 import org.gradle.api.GradleException;
 import org.gradle.util.ConfigureUtil;
 
+import groovy.lang.Closure;
+
 /**
  * Definition of an executable which can be started on the desktop (e.g. an entry in the start menu on Windows)
+ * @param <S> Type of the SetupBuilder  
  */
-public class DesktopStarter extends Application {
-    private String             	startArguments, mimeTypes, categories;
-    private Location			location;
-	private List<DocumentType>	documentTypes = new ArrayList<>();
+public class DesktopStarter<S extends AbstractSetupBuilder<S>> extends Application<S> {
+    private String             		startArguments, mimeTypes, categories;
+    private Location				location;
+	private List<DocumentType<S>>	documentTypes = new ArrayList<>();
 
     /**
      * Create a new DesktopStarter
      * @param setup current SetupBuilder
      */
-    public DesktopStarter( SetupBuilder setup ) {
+    public DesktopStarter( AbstractSetupBuilder<S> setup ) {
         super( setup );
     }
 
@@ -126,7 +128,7 @@ public class DesktopStarter extends Application {
      * @param closue document type
      */
     public void documentType( Closure<?> closue ) {
-        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( setup ) );
+        DocumentType<S> doc = ConfigureUtil.configure( closue, new DocumentType<S>( setup ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
             throw new GradleException( "documentType must contains minimum one fileExtension." );
         }
@@ -137,7 +139,7 @@ public class DesktopStarter extends Application {
      * Return the registered file extensions or the ones defined by the main setup
      * @return list of document types.
      */
-    public List<DocumentType> getDocumentType() {
+    public List<DocumentType<S>> getDocumentType() {
     	if ( documentTypes.isEmpty() ) {
     		return setup.getDocumentType();
     	}
