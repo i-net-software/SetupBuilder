@@ -35,6 +35,12 @@ public class AppBundler extends AbstractSetupBuilder<AppBundler> implements Setu
     public AppBundler( Project project ) {
     	super(project);
     }
-    
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getArchiveName() {
+    	return getApplication();
+    }	
 }
