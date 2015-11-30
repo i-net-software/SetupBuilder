@@ -20,13 +20,14 @@ import java.io.File;
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * The dmg Gradle task. It build a dmg package for Mac.
  * 
  * @author Volker Berlin
  */
-public class Dmg extends AbstractSetupTask {
+public class Dmg extends AbstractSetupTask<SetupBuilder> {
 
     private File backgroundImage;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
@@ -46,15 +47,6 @@ public class Dmg extends AbstractSetupTask {
         ProjectInternal project = (ProjectInternal)getProject();
         new DmgBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void copyTo( File target ) {
-        super.copyTo( target );
-    }
-
 
     /**
      * Return width of Finder view
