@@ -6,6 +6,11 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePlugin;
 
+/**
+ * Plugin for the appBundler Task that will create a bundled application for OSX
+ * @author gamma
+ *
+ */
 public class AppBundlerPlugin implements Plugin<Project> {
 
 	@Override
@@ -15,6 +20,7 @@ public class AppBundlerPlugin implements Plugin<Project> {
         plugin.put( "plugin", BasePlugin.class );
         project.apply( plugin );
         
-        project.getTasks().create( "appBundler", AppBundlerGradleTask.class );
+        project.getExtensions().create( "appBundler", AppBundler.class, project );
+        project.getTasks().create( "bundleApp", AppBundlerGradleTask.class );
 	}
 }
