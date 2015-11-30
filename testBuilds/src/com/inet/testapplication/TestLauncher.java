@@ -30,5 +30,6 @@ public class TestLauncher {
         frame.setLocationRelativeTo( null );
         JOptionPane.showMessageDialog( frame, "The Application seems to work, right?", "Test Application", JOptionPane.OK_OPTION );
         frame.dispose();
+        System.exit(0);
     }
 }
