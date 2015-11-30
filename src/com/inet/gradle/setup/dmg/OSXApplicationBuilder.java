@@ -1,31 +1,25 @@
 package com.inet.gradle.setup.dmg;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
-import org.apache.tools.ant.types.FileSet;
-import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.Application;
+import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.ResourceUtils;
-import com.oracle.appbundler.AppBundlerTask;
-import com.oracle.appbundler.Architecture;
-import com.oracle.appbundler.BundleDocument;
 
-public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
+/**
+ * Build an OSX Application - service
+ * @author gamma
+ *
+ */
+public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, SetupBuilder> {
 
 	/**
 	 * Setup this builder.
@@ -51,164 +45,36 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		}
 		
 		System.err.println("Having executable of: '" + service.getExecutable() +"'" );
-		new PreparedAppBundlerTask(service).prepare().finish();
+		prepareApplication(service);
+		finishApplication();
+		copyBundleFiles( service );
 		createPreferencePane( service );
 	}
 
 	/**
 	 * Create Application from the desktop starter provided
-	 * @param application
-	 * @throws Exception
+	 * @param application - the application
+	 * @throws Exception on errors
 	 */
-	void buildApplication(DesktopStarter application) throws Exception {
+	void buildApplication(DesktopStarter<SetupBuilder> application) throws Exception {
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
 			application.setExecutable( setup.getAppIdentifier() );
 		}
 		
-		PreparedAppBundlerTask bundlerTask = new PreparedAppBundlerTask( application );
-		bundlerTask.prepare();
-
-		// add file extensions
-		for (DocumentType doc : application.getDocumentType()) {
-			BundleDocument bundle = new BundleDocument();
-			bundle.setExtensions(String.join(",", doc.getFileExtension()));
-			bundle.setName(doc.getName());
-			bundle.setRole(doc.getRole()); // Viewer or Editor
-			bundle.setIcon(getApplicationIcon().toString());
-			bundlerTask.appBundler.addConfiguredBundleDocument(bundle);
-		}
-
-		bundlerTask.finish();
+		prepareApplication( application );
+		setDocumentTypes( application.getDocumentType() );
+		finishApplication();
+		copyBundleFiles( application );
 	}
 
-	private class PreparedAppBundlerTask {
-
-		private Application application;
-		private AppBundlerTask appBundler;
-
-		private PreparedAppBundlerTask(Application application) {
-
-			this.application = application;
-			appBundler = new AppBundlerTask();
-		}
-
-		private PreparedAppBundlerTask prepare() throws Exception {
-			appBundler.setOutputDirectory(buildDir);
-			appBundler.setName(application.getDisplayName());
-			appBundler.setDisplayName(application.getDisplayName());
-
-			String version = setup.getVersion();
-			appBundler.setVersion(version);
-			int idx = version.indexOf('.');
-			if (idx >= 0) {
-				idx = version.indexOf('.', idx + 1);
-				if (idx >= 0) {
-					version = version.substring(0, idx);
-				}
-			}
-
-			// Get the working directory and patch the main jar with it.
-			String mainJar = application.getMainJar();
-			if ( application.getWorkDir() != null ) {
-				appBundler.setWorkingDirectory(new File( new File("$APP_ROOT/Contents/Java"), application.getWorkDir()).toString());
-				mainJar = new File( new File(application.getWorkDir()), mainJar).toString();
-			}
-			
-			appBundler.setShortVersion(version);
-			appBundler.setExecutableName( application.getExecutable() );
-			appBundler.setIdentifier(application.getMainClass());
-			appBundler.setMainClassName(application.getMainClass());
-			appBundler.setJarLauncherName(mainJar);
-			appBundler.setCopyright(setup.getVendor());
-			appBundler.setIcon(getApplicationIcon());
-			Architecture x86_64 = new Architecture();
-			x86_64.setName("x86_64");
-			appBundler.addConfiguredArch(x86_64);
-
-			return this;
-		}
-
-		private PreparedAppBundlerTask finish() throws Exception {
-			bundleJre();
-
-			org.apache.tools.ant.Project antProject = new org.apache.tools.ant.Project();
-			appBundler.setProject(antProject);
-			appBundler.execute();
-
-			File destiantion = new File(buildDir, application.getDisplayName() + ".app");
-			task.copyTo( new File(destiantion, "Contents/Java") );
-
-			setApplicationFilePermissions( destiantion );
-			return this;
-		}
-
-		/**
-		 * Bundle the Java VM if set.
-		 * 
-		 * @param appBundler
-		 *            the ANT Task
-		 */
-		private void bundleJre() {
-			Object jre = setup.getBundleJre();
-			if (jre == null) {
-				return;
-			}
-			File jreDir;
-			try {
-				jreDir = task.getProject().file(jre);
-			} catch (Exception e) {
-				jreDir = null;
-			}
-			if (jreDir == null || !jreDir.isDirectory()) {
-				ArrayList<String> command = new ArrayList<>();
-				command.add("/usr/libexec/java_home");
-				command.add("-v");
-				command.add(jre.toString());
-				command.add("-F");
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				exec(command, null, baos);
-				jreDir = new File(baos.toString().trim());
-				if (!jreDir.isDirectory()) {
-					throw new GradleException("bundleJre version " + jre
-							+ " can not be found in: " + jreDir);
-				}
-			}
-			task.getProject().getLogger().lifecycle("\tbundle JRE: " + jreDir);
-			FileSet fileSet = new FileSet();
-			fileSet.setDir(jreDir);
-
-			fileSet.appendIncludes(new String[] { "jre/*", "jre/lib/",
-					"jre/bin/java" });
-
-			fileSet.appendExcludes(new String[] { "jre/lib/deploy/",
-					"jre/lib/deploy.jar", "jre/lib/javaws.jar",
-					"jre/lib/libdeploy.dylib", "jre/lib/libnpjp2.dylib",
-					"jre/lib/plugin.jar", "jre/lib/security/javaws.policy" });
-
-			appBundler.addConfiguredRuntime(fileSet);
-		}
-	}
-
-	/**
-	 * Returns the icns application icon file
-	 * 
-	 * @return Icon file
-	 * @throws IOException
-	 */
-	File getApplicationIcon() throws IOException {
-		Object iconData = setup.getIcons();
-		return ImageFactory.getImageFile(task.getProject(), iconData, buildDir, "icns");
-	}
-
-	
 	/**
 	 * * Unpack the preference pane from the SetupBuilder,
 	 * * Modify the icon and text
 	 * * Put into the main application bundle
-	 * 
-	 * @throws Throwable
+	 * @param service to create prefpane for
+	 * @throws Throwable in case of error
 	 */
 	private void createPreferencePane( Service service ) throws Throwable {
 
@@ -260,61 +126,15 @@ public class OSXApplicationBuilder extends AbstractBuilder<Dmg> {
 		setPlistProperty( servicePLIST, ":Name", displayName );
 		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : setup.getAppIdentifier() );
 		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
-		setPlistProperty( servicePLIST, ":Description", setup.getServices().get(0).getDescription() );
+		setPlistProperty( servicePLIST, ":Description", service.getDescription() );
 		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
 		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
 		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
 		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
 	}
 
-	/**
-	 * Modify a plist file
-	 * @param plist file to modify
-	 * @param property property to set
-	 * @param value of property
-	 */
-	void setPlistProperty(File plist, String property, String value) {
-		
-		// Set Property in plist file
-		// /usr/libexec/PlistBuddy -c "Set PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/libexec/PlistBuddy" );
-        command.add( "-c" );
-        command.add( "Set " + property +  " " + value );
-        command.add( plist.getAbsolutePath() );
-    	exec( command );
-	}
-
-
-	/**
-	 * Set File permissions to the resulting application
-	 * @throws IOException
-	 */
-	private void setApplicationFilePermissions( File destiantion ) throws IOException {
-		
-		// Set Read on all files and folders
-		ArrayList<String> command = new ArrayList<>();
-        command.add( "chmod" );
-        command.add( "-R" );
-        command.add( "a+r" );
-		command.add( destiantion.getAbsolutePath() );
-        exec( command );
-        
-		// Set execute on all folders.
-        command = new ArrayList<>();
-        command.add( "find" );
-        command.add( destiantion.getAbsolutePath() );
-        
-        if ( destiantion.isDirectory() ) {
-	        command.add( "-type" );
-	        command.add( "d" );
-        }
-	        
-        command.add( "-exec" );
-        command.add( "chmod" );
-        command.add( "a+x" );
-        command.add( "{}" );
-        command.add( ";" );
-        exec( command );
+	@Override
+	protected AbstractSetupTask<SetupBuilder> getTask() {
+		return task;
 	}
 }
