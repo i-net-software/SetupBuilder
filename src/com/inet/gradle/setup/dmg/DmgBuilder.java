@@ -140,7 +140,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 			
 			// patch runafter
 			if ( runAfter != null ) {
-				service.setDisplayName(service.getDisplayName());
+				runAfter.setDisplayName(service.getDisplayName());
 				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/postinstall.runafter.txt" ));
 			}
 		}
