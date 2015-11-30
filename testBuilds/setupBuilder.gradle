@@ -1,0 +1,50 @@
+/*
+plugins {
+	id "de.inetsoftware.setupbuilder" version "1.4.7"
+}
+/*/
+buildscript {
+    repositories {
+        maven {
+            url uri('../../repo')
+        }
+    }
+    dependencies {
+        classpath 'de.inetsoftware:SetupBuilder:+'
+    }
+}
+
+apply plugin: 'de.inetsoftware.setupbuilder'
+//*/
+
+apply plugin: 'java'
+
+sourceSets {
+	main {
+		java {
+			srcDirs 'src'
+		}
+	}
+}
+
+setupBuilder {
+
+	application = "Setup Builder Test"
+	description = 'Build a test Programm.'
+	icons = "test-icon.icns"
+	
+	from jar.outputs
+
+    bundleJre = 1.8
+    mainClass = 'com.inet.testapplication.TestLauncher'
+    mainJar = 'testBuilds.jar'
+
+    desktopStarter {
+        displayName = "Setup Builder Test"
+    }
+}
+
+dmg.dependsOn jar
+deb.dependsOn jar
+rpm.dependsOn jar
+msi.dependsOn jar
