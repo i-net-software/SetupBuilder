@@ -304,9 +304,6 @@ public class AbstractSetupBuilder<S> implements SetupSources {
      * @return the class name
      */
     public String getMainClass() {
-    	if ( mainClass == null ) {
-    		throw new IllegalArgumentException( "You have the specify the main class for this application" );
-    	}
         return mainClass;
     }
 
