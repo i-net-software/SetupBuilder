@@ -31,19 +31,27 @@ sourceSets {
     }
 }
 
-if( file( '../BuildScripts/base.gradle' ).exists() ) {
-    apply from: '../BuildScripts/base.gradle' // for internal build system
-    preparePublish.dependsOn 'publishPluginJavaDocsJar'
-    preparePublish.dependsOn 'jar'
-    preparePublish.dependsOn 'publishPluginJar'
-} else {
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                repository(url: uri('../repo'))
-            }
-        }
-    }
+task prepareRepository() {
+	
+	compileJava.dependsOn prepareRepository
+
+	ext.debugMode = false
+	doFirst {
+		if( !debugMode && file( '../BuildScripts/base.gradle' ).exists() ) {
+		    apply from: '../BuildScripts/base.gradle' // for internal build system
+		    preparePublish.dependsOn 'publishPluginJavaDocsJar'
+		    preparePublish.dependsOn 'jar'
+		    preparePublish.dependsOn 'publishPluginJar'
+		} else {
+		    uploadArchives {
+		        repositories {
+		            mavenDeployer {
+		                repository(url: uri('../repo'))
+		            }
+		        }
+		    }
+		}
+	}
 }
 
 pluginBundle {
@@ -57,5 +65,14 @@ pluginBundle {
       id = 'de.inetsoftware.setupbuilder'
       displayName = 'Gradle Setup Builder plugin'
     }
+    appBunderPlugin {
+      id = 'de.inetsoftware.appbundler'
+      displayName = 'Gradle Application Bundler plugin for OSX'
+    }
   }
+}
+
+task debug() {
+	prepareRepository.debugMode = true
+	javadoc.enabled = false
 }
