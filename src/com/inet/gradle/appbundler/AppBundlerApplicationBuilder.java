@@ -23,6 +23,7 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 	protected AppBundlerApplicationBuilder(AppBundlerGradleTask task, AbstractSetupBuilder<AppBundler> setup,
 			FileResolver fileResolver) {
 		super(task, setup, fileResolver);
+		buildDir = setup.getDestinationDir();
 	}
 
 	@Override
@@ -35,7 +36,7 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 	 * @param application - the application
 	 * @throws Exception on errors
 	 */
-	void buildApplication(DesktopStarter application) throws Exception {
+	void buildApplication(DesktopStarter<AppBundler> application) throws Exception {
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
