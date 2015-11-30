@@ -43,10 +43,11 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  * 
  * @author Volker Berlin
  */
-public class DmgBuilder extends AbstractBuilder<Dmg> {
+public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
-    private String applicationName, applicationIdentifier, imageSourceRoot;
+	private String applicationName, applicationIdentifier, imageSourceRoot;
 	private File iconFile;
+	private SetupBuilder setup;
 
     /**
      * Create a new instance
@@ -56,7 +57,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
      * @param fileResolver the file Resolver
      */
     public DmgBuilder( Dmg dmg, SetupBuilder setup, FileResolver fileResolver ) {
-        super( dmg, setup, fileResolver );
+        super( dmg, fileResolver );
+        this.setup = setup;
     }
 
     /**
@@ -68,13 +70,17 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
         try {
         	OSXApplicationBuilder applicationBuilder = new OSXApplicationBuilder( task, setup, fileResolver );
         	
+        	if ( setup.getServices().isEmpty() && setup.getDesktopStarters().isEmpty() ) {
+        		throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
+        	}
+        	
         	// Build all services 
         	for (Service service : setup.getServices() ) {
         		applicationBuilder.buildService( service );
 			}
         	
         	// Build all standalone applications
-        	for (DesktopStarter application : setup.getDesktopStarters() ) {
+        	for (DesktopStarter<SetupBuilder> application : setup.getDesktopStarters() ) {
         		applicationBuilder.buildApplication( application );
 			}
 
@@ -124,7 +130,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg> {
     private void createServiceFiles( ) throws IOException {
     	
     	// Create Pre and Post install scripts
-    	DesktopStarter runAfter = setup.getRunAfter();
+    	DesktopStarter<SetupBuilder> runAfter = setup.getRunAfter();
 		OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
 		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
 		for (Service service : setup.getServices() ) {
