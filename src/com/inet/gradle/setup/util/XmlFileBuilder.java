@@ -33,7 +33,13 @@ import org.w3c.dom.Node;
 import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.SetupBuilder;
 
-public class XmlFileBuilder<T extends AbstractSetupTask> {
+/**
+ * Build an XML.
+ * @author gamma
+ *
+ * @param <T> The SetupBuilder Task.
+ */
+public class XmlFileBuilder<T extends AbstractSetupTask<SetupBuilder>> {
 
     public final T            task;
 
