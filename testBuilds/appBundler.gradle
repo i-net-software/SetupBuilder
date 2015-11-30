@@ -37,7 +37,7 @@ appBundler {
 
     bundleJre = 1.8
     mainClass = 'com.inet.testapplication.TestLauncher'
-    mainJar = 'java/testBuilds.jar'
+    mainJar = 'testBuilds.jar'
 }
 
 bundleApp {
