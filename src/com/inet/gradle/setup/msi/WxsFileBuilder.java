@@ -534,7 +534,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             String subdir = service.getWorkDir();
             if ( subdir != null && !subdir.isEmpty() ) {
-                exe = new File( new File( subdir ), exe ).getPath(); 
+                exe = new File( new File( subdir ), exe ).getPath();
+                if( !subdir.endsWith( "\\" ) ) {
+                    subdir += '\\';
+                }
             } else {
                 subdir = "";
             }
