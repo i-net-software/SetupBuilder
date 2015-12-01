@@ -321,9 +321,6 @@ public class AbstractSetupBuilder implements SetupSources {
      * @return the main jar
      */
     public String getMainJar() {
-    	if ( mainJar == null ) {
-    		throw new IllegalArgumentException( "You have the specify the main jar for this application" );
-    	}
         return mainJar;
     }
 
