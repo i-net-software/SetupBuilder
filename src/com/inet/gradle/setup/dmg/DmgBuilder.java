@@ -80,7 +80,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 			}
         	
         	// Build all standalone applications
-        	for (DesktopStarter<SetupBuilder> application : setup.getDesktopStarters() ) {
+        	for (DesktopStarter application : setup.getDesktopStarters() ) {
         		applicationBuilder.buildApplication( application );
 			}
 
@@ -130,7 +130,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     private void createServiceFiles( ) throws IOException {
     	
     	// Create Pre and Post install scripts
-    	DesktopStarter<SetupBuilder> runAfter = setup.getRunAfter();
+    	DesktopStarter runAfter = setup.getRunAfter();
 		OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
 		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
 		for (Service service : setup.getServices() ) {

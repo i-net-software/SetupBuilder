@@ -56,7 +56,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 	 * @param application - the application
 	 * @throws Exception on errors
 	 */
-	void buildApplication(DesktopStarter<SetupBuilder> application) throws Exception {
+	void buildApplication(DesktopStarter application) throws Exception {
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {

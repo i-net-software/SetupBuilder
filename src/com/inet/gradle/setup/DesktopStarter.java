@@ -26,18 +26,17 @@ import groovy.lang.Closure;
 
 /**
  * Definition of an executable which can be started on the desktop (e.g. an entry in the start menu on Windows)
- * @param <S> Type of the SetupBuilder  
  */
-public class DesktopStarter<S extends AbstractSetupBuilder<S>> extends Application<S> {
+public class DesktopStarter extends Application {
     private String             		startArguments, mimeTypes, categories;
     private Location				location;
-	private List<DocumentType<S>>	documentTypes = new ArrayList<>();
+	private List<DocumentType>	documentTypes = new ArrayList<>();
 
     /**
      * Create a new DesktopStarter
      * @param setup current SetupBuilder
      */
-    public DesktopStarter( AbstractSetupBuilder<S> setup ) {
+    public DesktopStarter( AbstractSetupBuilder setup ) {
         super( setup );
     }
 
@@ -128,7 +127,7 @@ public class DesktopStarter<S extends AbstractSetupBuilder<S>> extends Applicati
      * @param closue document type
      */
     public void documentType( Closure<?> closue ) {
-        DocumentType<S> doc = ConfigureUtil.configure( closue, new DocumentType<S>( setup ) );
+        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( setup ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
             throw new GradleException( "documentType must contains minimum one fileExtension." );
         }
@@ -139,7 +138,7 @@ public class DesktopStarter<S extends AbstractSetupBuilder<S>> extends Applicati
      * Return the registered file extensions or the ones defined by the main setup
      * @return list of document types.
      */
-    public List<DocumentType<S>> getDocumentType() {
+    public List<DocumentType> getDocumentType() {
     	if ( documentTypes.isEmpty() ) {
     		return setup.getDocumentType();
     	}
