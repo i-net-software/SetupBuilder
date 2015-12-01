@@ -28,6 +28,8 @@ import com.inet.gradle.setup.SetupSources;
  */
 public class AppBundler extends AbstractSetupBuilder implements SetupSources {
 
+	private String jnlpLauncherName;	
+	
 	/**
      * Create a new instance.
      * @param project current project
@@ -43,4 +45,22 @@ public class AppBundler extends AbstractSetupBuilder implements SetupSources {
     public String getArchiveName() {
     	return getApplication();
     }
+
+    /**
+     * Get the JNLP Launcher Name
+     * This can be used instead of the mainJar
+     * @return the launcher file
+     */
+	public String getJnlpLauncherName() {
+		return jnlpLauncherName;
+	}
+
+    /**
+     * Set the JNLP Launcher file
+     * This can be used instead of the mainJar
+     * @param jnlpLauncher the launcher file
+     */
+	public void setJnlpLauncherName(String jnlpLauncher) {
+		this.jnlpLauncherName = jnlpLauncher;
+	}
 }
