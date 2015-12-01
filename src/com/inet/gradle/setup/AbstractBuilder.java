@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.util.IndentationOutputStream;
@@ -42,6 +41,11 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask<S>, S extends 
 
 	protected File buildDir;
 
+	/**
+	 * Builder abstraction
+	 * @param task concrete task
+	 * @param fileResolver resolver for files
+	 */
     protected AbstractBuilder( T task, FileResolver fileResolver ) {
         this.task = task;
         this.fileResolver = fileResolver;
@@ -57,6 +61,13 @@ public abstract class AbstractBuilder<T extends AbstractSetupTask<S>, S extends 
         exec( parameters, null, null );
     }
 
+    /**
+     * Execute an external process.
+     * 
+     * @param parameters command line
+     * @param input optional InputStream for the process
+     * @param output optional OutputStream for the process
+     */
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output ) {
     	exec( parameters, input, output, false);
     }
