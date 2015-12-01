@@ -175,6 +175,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( imageSourceRoot + "/" + applicationIdentifier + ".pkg" );
     	exec( command );
     	
+    	// Sign the final package
+    	if ( task.getCodeSign() != null ) {
+    		task.getCodeSign().signApplication( new File( imageSourceRoot, applicationIdentifier + ".pkg" ).getAbsoluteFile() );
+    	}
+
     	Files.copy( new File(imageSourceRoot + "/" + applicationIdentifier + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
@@ -373,7 +378,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
      * convert to final image
      */
     private void finalImage() {
-        ArrayList<String> command = new ArrayList<>();
+
+    	ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "convert" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );

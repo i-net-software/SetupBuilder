@@ -44,6 +44,12 @@ setupBuilder {
     }
 }
 
+dmg {
+    codeSign {
+        identity = 'Developer ID Application'
+    }
+}
+
 dmg.dependsOn jar
 deb.dependsOn jar
 rpm.dependsOn jar

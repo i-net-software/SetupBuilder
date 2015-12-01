@@ -139,7 +139,7 @@ public class Dmg extends AbstractSetupTask<SetupBuilder> {
      * 
      * @param closue the data for signing
      */
-    public void codeSign( Closure<OSXCodeSign<Dmg,SetupBuilder>> closue ) {
+    public void setCodeSign( Closure<OSXCodeSign<Dmg,SetupBuilder>> closue ) {
         ProjectInternal project = (ProjectInternal)getProject();
         codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<Dmg,SetupBuilder>(this, project.getFileResolver()) );
     }

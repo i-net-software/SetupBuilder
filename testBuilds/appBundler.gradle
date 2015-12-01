@@ -42,4 +42,8 @@ appBundler {
 
 bundleApp {
 	dependsOn jar
+	
+    codeSign {
+        identity = 'Developer ID Application'
+    }
 }

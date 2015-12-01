@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
@@ -49,6 +50,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		finishApplication();
 		copyBundleFiles( service );
 		createPreferencePane( service );
+		codeSignApplication( service );
 	}
 
 	/**
@@ -67,6 +69,8 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		setDocumentTypes( application.getDocumentType() );
 		finishApplication();
 		copyBundleFiles( application );
+
+		codeSignApplication( application );
 	}
 
 	/**
@@ -136,5 +140,16 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 	@Override
 	protected AbstractSetupTask<SetupBuilder> getTask() {
 		return task;
+	}
+	
+	/**
+	 * Sign an application
+	 * @param application to sign
+	 */
+	private void codeSignApplication( Application application ) {
+		if ( task.getCodeSign() == null ) {
+			return;
+		}
+		task.getCodeSign().signApplication( new File(buildDir, application.getDisplayName() + ".app") );
 	}
 }

@@ -16,6 +16,8 @@
 
 package com.inet.gradle.appbundler;
 
+import java.io.File;
+
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractSetupBuilder;
@@ -63,5 +65,9 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 		setDocumentTypes( application.getDocumentType() );
 		finishApplication();
 		copyBundleFiles( application );
+		
+		if ( task.getCodeSign() != null ) {
+			task.getCodeSign().signApplication( new File(buildDir, application.getDisplayName() + ".app") );
+		}
 	}	
 }
