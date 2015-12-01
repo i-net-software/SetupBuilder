@@ -22,11 +22,10 @@ import java.util.List;
  * This class contains content for registering file extensions.
  * 
  * @author Volker
- * @param <S> The concrete Setup that will use this type 
  */
-public class DocumentType<S> {
+public class DocumentType {
 
-	private final AbstractSetupBuilder<S> setup;
+	private final AbstractSetupBuilder setup;
 
 	private List<String> extensions;
 
@@ -36,8 +35,8 @@ public class DocumentType<S> {
 
 	private Object icons;
 
-    DocumentType( AbstractSetupBuilder<S> abstractSetupBuilder ) {
-        this.setup = abstractSetupBuilder;
+    DocumentType( AbstractSetupBuilder setup ) {
+        this.setup = setup;
     }
 
     /**

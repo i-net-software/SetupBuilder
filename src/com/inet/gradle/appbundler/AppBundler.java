@@ -26,7 +26,7 @@ import com.inet.gradle.setup.SetupSources;
  * 
  * @author Gerry Weißbach
  */
-public class AppBundler extends AbstractSetupBuilder<AppBundler> implements SetupSources {
+public class AppBundler extends AbstractSetupBuilder implements SetupSources {
 
 	/**
      * Create a new instance.

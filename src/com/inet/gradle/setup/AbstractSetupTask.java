@@ -57,11 +57,11 @@ import groovy.lang.Closure;
  * 
  * @author Volker Berlin
  */
-public abstract class AbstractSetupTask<S> extends DefaultTask implements SetupSources {
+public abstract class AbstractSetupTask<S extends AbstractSetupBuilder> extends DefaultTask implements SetupSources {
 
 	private final CopySpecInternal rootSpec;
 
-	protected AbstractSetupBuilder<S> setupBuilder;
+	protected AbstractSetupBuilder setupBuilder;
 
 	private String extension;
 
@@ -88,7 +88,7 @@ public abstract class AbstractSetupTask<S> extends DefaultTask implements SetupS
     	   }
     	}
 
-        setupBuilder = (AbstractSetupBuilder<S>) project.getExtensions().getByType( (Class<S>) parametrizedType.getActualTypeArguments()[0] );
+        setupBuilder = project.getExtensions().getByType( (Class<S>) parametrizedType.getActualTypeArguments()[0] );
     }
 
     /**

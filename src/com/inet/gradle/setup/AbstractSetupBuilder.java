@@ -31,10 +31,9 @@ import groovy.lang.Closure;
 
 /**
  * The Gradle extension for all setup tasks.
- * @param <S> Type of setup builder
  * @author Volker Berlin
  */
-public class AbstractSetupBuilder<S> implements SetupSources {
+public class AbstractSetupBuilder implements SetupSources {
 
     protected final Project        project;
 
@@ -62,7 +61,7 @@ public class AbstractSetupBuilder<S> implements SetupSources {
 
     private String                 mainJar;
 
-    private List<DocumentType<S>>  documentTypes   = new ArrayList<>();
+    private List<DocumentType>  documentTypes   = new ArrayList<>();
 
     private boolean                failOnEmptyFrom = true;
 
@@ -344,7 +343,7 @@ public class AbstractSetupBuilder<S> implements SetupSources {
      * @param closue document type
      */
     public void documentType( Closure<?> closue ) {
-        DocumentType<S> doc = ConfigureUtil.configure( closue, new DocumentType<S>( this ) );
+        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( this ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
             throw new GradleException( "documentType must contains minimum one fileExtension." );
         }
@@ -355,7 +354,7 @@ public class AbstractSetupBuilder<S> implements SetupSources {
      * Get the list of document types.
      * @return the list
      */
-    public List<DocumentType<S>> getDocumentType() {
+    public List<DocumentType> getDocumentType() {
         return documentTypes;
     }
 

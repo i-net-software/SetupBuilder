@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gradle.api.Project;
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import groovy.lang.Closure;
@@ -31,19 +30,19 @@ import groovy.lang.Closure;
  * 
  * @author Volker Berlin
  */
-public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements SetupSources {
+public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
-    private Object                 						licenseFile;
+    private Object                     licenseFile;
 
-    private DesktopStarter<SetupBuilder>         		runAfter, runBeforeUninstall;
+    private DesktopStarter             runAfter, runBeforeUninstall;
 
-    private List<Service>          						services = new ArrayList<>();
+    private List<Service>              services        = new ArrayList<>();
 
-    private final List<DesktopStarter<SetupBuilder>>	desktopStarters = new ArrayList<>();
+    private final List<DesktopStarter> desktopStarters = new ArrayList<>();
 
-    private List<String>           						deleteFiles = new ArrayList<>();
+    private List<String>               deleteFiles     = new ArrayList<>();
 
-    private List<String>           						deleteFolders = new ArrayList<>();
+    private List<String>               deleteFolders   = new ArrayList<>();
 
     /**
      * Create a new instance.
@@ -68,7 +67,7 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * A command that run after the installer.
      * @return the command or null
      */
-    public DesktopStarter<SetupBuilder> getRunAfter() {
+    public DesktopStarter getRunAfter() {
         return runAfter;
     }
 
@@ -77,7 +76,7 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * @param runAfter the command
      */
     public void setRunAfter( String runAfter ) {
-        this.runAfter = new DesktopStarter<SetupBuilder>( this );
+        this.runAfter = new DesktopStarter( this );
         this.runAfter.setExecutable( runAfter );
     }
 
@@ -86,14 +85,14 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * @param closue the command
      */
     public void runAfter( Closure<?> closue ) {
-        runAfter = ConfigureUtil.configure( closue, new DesktopStarter<SetupBuilder>( this ) );
+        runAfter = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
     }
 
     /**
      * A command that run before the uninstaller.
      * @return the command or null
      */
-    public DesktopStarter<SetupBuilder> getRunBeforeUninstall() {
+    public DesktopStarter getRunBeforeUninstall() {
         return runBeforeUninstall;
     }
 
@@ -102,7 +101,7 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * @param runAfter the command
      */
     public void setRunBeforeUninstall( String runAfter ) {
-        this.runBeforeUninstall = new DesktopStarter<SetupBuilder>( this );
+        this.runBeforeUninstall = new DesktopStarter( this );
         this.runBeforeUninstall.setExecutable( runAfter );
     }
 
@@ -111,7 +110,7 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * @param closue the command
      */
     public void runBeforeUninstall( Closure<?> closue ) {
-        runBeforeUninstall = ConfigureUtil.configure( closue, new DesktopStarter<SetupBuilder>( this ) );
+        runBeforeUninstall = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
     }
 
     /**
@@ -139,7 +138,7 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * @param closue the closure of the desktop starter's definition
      */
     public void desktopStarter( Closure<?> closue ) {
-        DesktopStarter<SetupBuilder> service = ConfigureUtil.configure( closue, new DesktopStarter<SetupBuilder>( this ) );
+        DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
         desktopStarters.add( service );
     }
 
@@ -148,7 +147,7 @@ public class SetupBuilder extends AbstractSetupBuilder<SetupBuilder> implements 
      * 
      * @return the registered desktop starters, never null, can be empty.
      */
-    public List<DesktopStarter<SetupBuilder>> getDesktopStarters() {
+    public List<DesktopStarter> getDesktopStarters() {
         return desktopStarters;
     }
 
