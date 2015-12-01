@@ -35,7 +35,7 @@ public class Dmg extends AbstractSetupTask<SetupBuilder> {
 
     private File backgroundImage;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
-	private OSXCodeSign<SetupBuilder> codeSign;
+	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
 
 	/**
      * Create the task.
@@ -139,9 +139,9 @@ public class Dmg extends AbstractSetupTask<SetupBuilder> {
      * 
      * @param closue the data for signing
      */
-    public void codeSign( Closure<OSXCodeSign<SetupBuilder>> closue ) {
+    public void codeSign( Closure<OSXCodeSign<Dmg,SetupBuilder>> closue ) {
         ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<SetupBuilder>(this, project.getFileResolver()) );
+        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<Dmg,SetupBuilder>(this, project.getFileResolver()) );
     }
 
     /**
@@ -149,7 +149,7 @@ public class Dmg extends AbstractSetupTask<SetupBuilder> {
      * 
      * @return the settings or null
      */
-    public OSXCodeSign<SetupBuilder> getCodeSign() {
+    public OSXCodeSign<Dmg,SetupBuilder> getCodeSign() {
         return codeSign;
     }
 }

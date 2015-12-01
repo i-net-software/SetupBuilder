@@ -29,7 +29,7 @@ import groovy.lang.Closure;
  */
 public class AppBundlerGradleTask extends AbstractSetupTask<AppBundler> {
 
-	private OSXCodeSign<AppBundler> codeSign;
+	private OSXCodeSign<AppBundlerGradleTask,AppBundler> codeSign;
 
 	/**
 	 * Construct static as .app
@@ -55,7 +55,7 @@ public class AppBundlerGradleTask extends AbstractSetupTask<AppBundler> {
      */
     public void codeSign( Closure<AppBundler> closue ) {
         ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<AppBundler>(this, project.getFileResolver()) );
+        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, project.getFileResolver()) );
     }
 
     /**
@@ -63,7 +63,7 @@ public class AppBundlerGradleTask extends AbstractSetupTask<AppBundler> {
      * 
      * @return the settings or null
      */
-    public OSXCodeSign<AppBundler> getCodeSign() {
+    public OSXCodeSign<AppBundlerGradleTask,AppBundler> getCodeSign() {
         return codeSign;
     }
 }

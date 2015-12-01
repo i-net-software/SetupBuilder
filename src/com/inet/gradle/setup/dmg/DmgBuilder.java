@@ -19,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -127,6 +126,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
     
+    /**
+     * Create the service files and the pre- and post installer scripts
+     * @throws IOException in case of errors
+     */
     private void createServiceFiles( ) throws IOException {
     	
     	// Create Pre and Post install scripts
@@ -150,6 +153,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     }
     
 
+    /**
+     * Create a package from the specified app files
+     * @throws Throwable in case of errors
+     */
     private void createPackageFromApp() throws Throwable {
 		
     	createServiceFiles();
@@ -171,6 +178,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     	Files.copy( new File(imageSourceRoot + "/" + applicationIdentifier + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
+    /**
+     * Extract the application information to use for the package builder
+     * @throws IOException in case of errors
+     */
 	private void extractApplicationInformation() throws IOException {
 		// Create application information plist
         ArrayList<String> command = new ArrayList<>();
@@ -202,6 +213,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     	Files.copy( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 	}
 
+	/**
+	 * Create and patch the ditribution xml file that defines the package 
+	 * @throws Throwable in case of error
+	 */
 	private void createAndPatchDistributionXML() throws Throwable {
 		ArrayList<String> command;
 		// Synthesize Distribution xml
@@ -216,6 +231,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         patchDistributionXML();
 	}
 
+	/**
+	 * Patch the distriubiton file withn custom settings 
+	 * @throws Throwable in case of errors
+	 */
 	private void patchDistributionXML() throws Throwable {
 
         File xml = TempPath.getTempFile( "distribution.xml" );
@@ -264,8 +283,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
     /**
      * Call hdiutil to mount temporary image
-     * 
-     * @throws UnsupportedEncodingException
+     * @throws IOException in case of errors
      */
     private void attach() throws IOException {
         ArrayList<String> command = new ArrayList<>();
@@ -322,6 +340,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         }
     }
 
+    /**
+     * Run an apple script using the applescript.txt template
+     * This will set up the layout of the DMG window
+     * @throws IOException in case of errors
+     */
     private void applescript() throws IOException {
     	
     	Template applescript = new Template( "dmg/template/applescript.txt" );
