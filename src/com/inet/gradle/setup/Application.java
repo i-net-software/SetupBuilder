@@ -114,10 +114,13 @@ public class Application {
      * @return the class name
      */
     public String getMainClass() {
-        if( mainClass != null ) {
-            return mainClass;
+        if( mainClass == null ) {
+            mainClass = setup.getMainClass();
         }
-        return setup.getMainClass();
+        if( mainClass != null ) {
+        	return mainClass;
+        }
+        return setup.getAppIdentifier();
     }
 
     /**
