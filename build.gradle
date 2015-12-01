@@ -39,6 +39,7 @@ if( !project.hasProperty("debug") && file( '../BuildScripts/base.gradle' ).exist
     println "Uploading into internal Repository 'fileserver'"
 } else {
     println "Uploading into local '../repo'"
+    version += '-SNAPSHOT' // setting version to snapshot
     uploadArchives {
         repositories {
             mavenDeployer {
