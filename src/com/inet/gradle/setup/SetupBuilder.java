@@ -52,6 +52,10 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
     	super(project);
     }
 
+    /**
+     * Return the license file
+     * @return license file
+     */
     public File getLicenseFile() {
         if( licenseFile != null ) {
             return project.file( licenseFile );
@@ -59,6 +63,10 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
         return null;
     }
 
+    /**
+     * Set the license file
+     * @param licenseFile license file
+     */
     public void setLicenseFile( Object licenseFile ) {
         this.licenseFile = licenseFile;
     }
