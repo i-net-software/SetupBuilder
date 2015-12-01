@@ -18,9 +18,13 @@ package com.inet.gradle.setup.dmg;
 import java.io.File;
 
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.util.ConfigureUtil;
 
+import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.SetupBuilder;
+
+import groovy.lang.Closure;
 
 /**
  * The dmg Gradle task. It build a dmg package for Mac.
@@ -31,6 +35,7 @@ public class Dmg extends AbstractSetupTask<SetupBuilder> {
 
     private File backgroundImage;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
+	private OSXCodeSign<SetupBuilder> codeSign;
 
 	/**
      * Create the task.
@@ -127,4 +132,24 @@ public class Dmg extends AbstractSetupTask<SetupBuilder> {
 	public void setFontSize(Integer fontSize) {
 		this.fontSize = fontSize;
 	}
+
+    
+    /**
+     * Set the needed information for signing the setup.
+     * 
+     * @param closue the data for signing
+     */
+    public void codeSign( Closure<OSXCodeSign<SetupBuilder>> closue ) {
+        ProjectInternal project = (ProjectInternal)getProject();
+        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<SetupBuilder>(this, project.getFileResolver()) );
+    }
+
+    /**
+     * Get the SignTool configuration if set
+     * 
+     * @return the settings or null
+     */
+    public OSXCodeSign<SetupBuilder> getCodeSign() {
+        return codeSign;
+    }
 }
