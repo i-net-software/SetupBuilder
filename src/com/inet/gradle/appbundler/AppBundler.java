@@ -28,7 +28,7 @@ import com.inet.gradle.setup.SetupSources;
  */
 public class AppBundler extends AbstractSetupBuilder implements SetupSources {
 
-    /**
+	/**
      * Create a new instance.
      * @param project current project
      */
@@ -42,5 +42,5 @@ public class AppBundler extends AbstractSetupBuilder implements SetupSources {
     @Override
     public String getArchiveName() {
     	return getApplication();
-    }	
+    }
 }

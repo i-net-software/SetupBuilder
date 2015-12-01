@@ -40,8 +40,8 @@ public class AppBundlerGradleTask extends AbstractTask {
     }
 
     /**
-     * 
-     * @return
+     * Get the app builder
+     * @return the app builder
      */
     public AppBundler getAppBuilder() {
         return (AppBundler)super.getAbstractSetupBuilder();
@@ -54,26 +54,6 @@ public class AppBundlerGradleTask extends AbstractTask {
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
         new AppBundlerBuilder( this, getAppBuilder(), project.getFileResolver() ).build();
-    }
-
-    
-    /**
-     * Set the needed information for signing the setup.
-     * 
-     * @param closue the data for signing
-     */
-    public void codeSign( Closure<AppBundler> closue ) {
-        ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, project.getFileResolver()) );
-    }
-
-    /**
-     * Get the SignTool configuration if set
-     * 
-     * @return the settings or null
-     */
-    public OSXCodeSign<AppBundlerGradleTask,AppBundler> getCodeSign() {
-        return codeSign;
     }
 
     

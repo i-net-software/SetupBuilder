@@ -24,6 +24,8 @@ import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.SetupBuilder;
 
+import groovy.lang.Closure;
+
 /**
  * The dmg Gradle task. It build a dmg package for Mac.
  * 
@@ -33,6 +35,7 @@ public class Dmg extends AbstractSetupTask {
 
     private File backgroundImage;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
+	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
 
 	/**
      * Create the task.

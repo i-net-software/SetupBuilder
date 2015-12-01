@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.inet.gradle.setup.Application;
-import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 
 /**
@@ -23,10 +22,21 @@ public class OSXScriptBuilder extends Template {
 
 	private ArrayList<OSXScriptBuilder> scripts = new ArrayList<OSXScriptBuilder>();
 
+	/**
+	 * Create an OSX script using the specified template
+	 * @param template to create script from
+	 * @throws IOException in case of errors 
+	 */
 	public OSXScriptBuilder(String template) throws IOException {
 		super( template );
 	}
 	
+	/**
+	 * Create an OSX script using the specified template
+	 * @param application to use for initial setup
+	 * @param template to create script from
+	 * @throws IOException in case of errors 
+	 */
 	public OSXScriptBuilder(Application application, String template) throws IOException {
 		super( template );
 
@@ -41,7 +51,7 @@ public class OSXScriptBuilder extends Template {
 	
 	/**
 	 * Add another subscript. These will be inserted at the {{script}} tokens
-	 * @param script
+	 * @param script to add
 	 */
 	public void addScript( OSXScriptBuilder script ) {
 		scripts.add(script);
@@ -64,6 +74,8 @@ public class OSXScriptBuilder extends Template {
 	
 	/**
 	 * Write file and set permissions
+	 * @param file to write to
+	 * @throws IOException that can occur
 	 */
 	public void writeTo( File file ) throws IOException {
         
