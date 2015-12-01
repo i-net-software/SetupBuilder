@@ -20,14 +20,13 @@ import java.util.ArrayList;
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * The rpm Gradle task. It build a rpm package for Linux.
  * 
  * @author Volker Berlin
  */
-public class Rpm extends AbstractSetupTask<SetupBuilder> {
+public class Rpm extends AbstractSetupTask {
 	
     private String                  section;
 

@@ -30,14 +30,13 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.
  * 
  * @author Volker Berlin
  */
-public class Msi extends AbstractSetupTask<SetupBuilder> {
+public class Msi extends AbstractSetupTask {
 
     private String   arch;
 

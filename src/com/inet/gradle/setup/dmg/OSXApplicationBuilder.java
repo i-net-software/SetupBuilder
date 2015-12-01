@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
@@ -62,7 +62,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
-			application.setExecutable( setup.getAppIdentifier() );
+			application.setExecutable( getAbstractSetupBuilder().getAppIdentifier() );
 		}
 		
 		prepareApplication( application );
@@ -119,7 +119,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		
 		// Patch Info.plist
 		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
-		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier()) + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (getAbstractSetupBuilder().getMainClass() != null ? getAbstractSetupBuilder().getMainClass() : getAbstractSetupBuilder().getAppIdentifier()) + ".prefPane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
 		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
@@ -128,17 +128,17 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
-		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : setup.getAppIdentifier() );
-		setPlistProperty( servicePLIST, ":Program", "/Library/" + setup.getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
+		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : getAbstractSetupBuilder().getAppIdentifier() );
+		setPlistProperty( servicePLIST, ":Program", "/Library/" + getAbstractSetupBuilder().getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
 		setPlistProperty( servicePLIST, ":Description", service.getDescription() );
-		setPlistProperty( servicePLIST, ":Version", setup.getVersion() );
+		setPlistProperty( servicePLIST, ":Version", getAbstractSetupBuilder().getVersion() );
 		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
 		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
 		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
 	}
 
 	@Override
-	protected AbstractSetupTask<SetupBuilder> getTask() {
+	protected AbstractTask getTask() {
 		return task;
 	}
 	

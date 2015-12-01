@@ -31,7 +31,7 @@ import groovy.lang.Closure;
  * 
  * @author Volker Berlin
  */
-public class Dmg extends AbstractSetupTask<SetupBuilder> {
+public class Dmg extends AbstractSetupTask {
 
     private File backgroundImage;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;

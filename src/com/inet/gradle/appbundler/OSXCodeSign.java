@@ -7,7 +7,7 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.AbstractSetupBuilder;
-import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.AbstractTask;
 
 /**
  * Create code signature for packages. Deep Signing. 
@@ -16,7 +16,7 @@ import com.inet.gradle.setup.AbstractSetupTask;
  * @param <S> concrete SetupBuilder
  *
  */
-public class OSXCodeSign<T extends AbstractSetupTask<S>, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
+public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
 	private String identity, identifier, keychain;
 	private boolean ignoreError;

@@ -27,7 +27,7 @@ import com.inet.gradle.setup.SetupBuilder;
  * 
  * @author Stefan Heidrich
  */
-public class Deb extends AbstractSetupTask<SetupBuilder> {	
+public class Deb extends AbstractSetupTask {	
 
     private String                 section;
 

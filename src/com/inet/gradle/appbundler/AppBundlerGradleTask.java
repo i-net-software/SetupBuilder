@@ -19,7 +19,8 @@ package com.inet.gradle.appbundler;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
-import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.AbstractTask;
+import com.inet.gradle.setup.SetupBuilder;
 
 import groovy.lang.Closure;
 
@@ -27,16 +28,24 @@ import groovy.lang.Closure;
  * Task to create a .app archive  
  * @author gamma
  */
-public class AppBundlerGradleTask extends AbstractSetupTask<AppBundler> {
+public class AppBundlerGradleTask extends AbstractTask {
 
 	private OSXCodeSign<AppBundlerGradleTask,AppBundler> codeSign;
 
 	/**
 	 * Construct static as .app
 	 */
-	public AppBundlerGradleTask() {
-		super( "app" );
-	}
+    public AppBundlerGradleTask() {
+        super( "app", AppBundler.class );
+    }
+
+    /**
+     * Get the app builder
+     * @return the app builder
+     */
+    public AppBundler getAppBuilder() {
+        return (AppBundler)super.getAbstractSetupBuilder();
+    }
 
     /**
      * {@inheritDoc}
@@ -44,7 +53,7 @@ public class AppBundlerGradleTask extends AbstractSetupTask<AppBundler> {
     @Override
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
-        new AppBundlerBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new AppBundlerBuilder( this, getAppBuilder(), project.getFileResolver() ).build();
     }
 
     
