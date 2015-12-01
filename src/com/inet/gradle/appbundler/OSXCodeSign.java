@@ -75,7 +75,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
 	/**
 	 * Set Key chain to use for signing. It has to be unlocked. 
-	 * @return keychain key chain
+	 * @param keychain key chain
 	 */
 	public void setKeychain(String keychain) {
 		this.keychain = keychain;
