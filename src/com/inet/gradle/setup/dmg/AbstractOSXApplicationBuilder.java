@@ -12,7 +12,7 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.AbstractSetupBuilder;
-import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DocumentType;
 import com.inet.gradle.setup.image.ImageFactory;
@@ -27,9 +27,9 @@ import com.oracle.appbundler.BundleDocument;
  * @param <T> the Task
  * @param <S> the SetupBuilder
  */
-public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<S>,S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
+public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 	
-	protected AbstractSetupBuilder setup;
+	private AbstractSetupBuilder setup;
 	private AppBundlerTask appBundler;
 
 	/**
@@ -202,7 +202,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<
 	 * Method that needs to be implemented that will return the task
 	 * @return the concrete task
 	 */
-	protected abstract AbstractSetupTask<S> getTask();
+	protected abstract AbstractTask getTask();
 
 	/**
 	 * Set File permissions to the resulting application
@@ -244,4 +244,8 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractSetupTask<
 	protected AppBundlerTask getAppBundler() {
 		return appBundler;
 	}
+
+    protected AbstractSetupBuilder getAbstractSetupBuilder() {
+        return setup;
+    }
 }

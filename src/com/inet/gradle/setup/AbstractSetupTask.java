@@ -15,267 +15,27 @@
  */
 package com.inet.gradle.setup;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.Set;
-
-import javax.inject.Inject;
-
-import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
-import org.gradle.api.file.CopySpec;
-import org.gradle.api.file.FileTree;
-import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
-import org.gradle.api.internal.file.FileLookup;
-import org.gradle.api.internal.file.FileResolver;
-import org.gradle.api.internal.file.copy.CopyAction;
-import org.gradle.api.internal.file.copy.CopyActionExecuter;
-import org.gradle.api.internal.file.copy.CopyActionProcessingStream;
-import org.gradle.api.internal.file.copy.CopySpecInternal;
-import org.gradle.api.internal.file.copy.CopySpecResolver;
-import org.gradle.api.internal.file.copy.DefaultCopySpec;
-import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
-import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.api.internal.tasks.SimpleWorkResult;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
-import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.WorkResult;
-import org.gradle.internal.nativeplatform.filesystem.FileSystem;
-import org.gradle.internal.reflect.Instantiator;
-
-import groovy.lang.Closure;
-
 /**
- * Base class for all setup task.
- * @param <S> the concrete SetupBuilder Type
+ * Base task for all setup builder tasks.
  * 
  * @author Volker Berlin
  */
-public abstract class AbstractSetupTask<S extends AbstractSetupBuilder> extends DefaultTask implements SetupSources {
-
-	private final CopySpecInternal rootSpec;
-
-	protected AbstractSetupBuilder setupBuilder;
-
-	private String extension;
-
-	/**
-	 * Constructor with indication to artifact result
-	 * Runs with the default SetupBuilder for dmg, msi ...
-	 * @param extension of the setup
-	 */
-    @SuppressWarnings("unchecked")
-	public AbstractSetupTask( String extension ) {
-        this.extension = extension;
-        this.rootSpec = (CopySpecInternal)getProject().copySpec( (Closure<CopySpec>)null );
-
-    	ProjectInternal project = (ProjectInternal)getProject();
-    	
-    	Type genericSuperClass = getClass().getGenericSuperclass();
-
-    	ParameterizedType parametrizedType = null;
-    	while (parametrizedType == null) {
-    	   if ((genericSuperClass instanceof ParameterizedType)) {
-    	       parametrizedType = (ParameterizedType) genericSuperClass;
-    	   } else {
-    	       genericSuperClass = ((Class<?>) genericSuperClass).getGenericSuperclass();
-    	   }
-    	}
-
-        setupBuilder = project.getExtensions().getByType( (Class<S>) parametrizedType.getActualTypeArguments()[0] );
-    }
+public abstract class AbstractSetupTask extends AbstractTask {
 
     /**
-     * The action called from Gradle
-     */
-    @TaskAction
-    public void action() {
-        build();
-        File setupFile = getSetupFile();
-        if( !setupFile.exists() ) {
-            throw new GradleException( "Setup file was not created: " + setupFile );
-        }
-        getProject().getArtifacts().add( "archives", setupFile );
-    }
-
-    /**
-     * Copy all files of this task to the given target.
-     * @param target the target directory
-     */
-    public void copyTo( File target ) {
-        processFiles( new CopyActionProcessingStreamAction() {
-            @Override
-            public void processFile( FileCopyDetailsInternal details ) {
-//                details.copyTo( details.getRelativePath().getFile( target ) ); // didn't work with mounted smb devises under Unix
-                if( !details.isDirectory() ) {
-                    try {
-                    	File f = details.getRelativePath().getFile( target );
-                    	if(!f.getParentFile().exists()) {
-                    		f.getParentFile().mkdirs(); // the parent directory must be created, else the copy fails
-                    	}
-                        try( InputStream input = details.open() ) {
-                            Files.copy( input, f.toPath(), StandardCopyOption.REPLACE_EXISTING );
-                        }
-					} catch (IOException ex) {
-						throw new RuntimeException(ex);
-					}
-                }
-            }
-        } );
-    }
-
-    /**
-     * Handle all files of this task.
-     * @param action the action that should be process for every file
-     */
-    protected void processFiles( CopyActionProcessingStreamAction action ) {
-        processFiles( action, setupBuilder.getRootSpec() );
-        processFiles( action, rootSpec );
-    }
-
-    /**
-     * Handle all files of the CopySpec.
-     * @param action the action that should be process for every file
-     */
-    private void processFiles( CopyActionProcessingStreamAction action, CopySpecInternal copySpec ) {
-        if( setupBuilder.isFailOnEmptyFrom() ) {
-            for( CopySpecInternal cs : copySpec.getChildren() ) {
-                CopySpecResolver rootResolver = cs.buildRootResolver();
-                Set<File> files = rootResolver.getAllSource().getFiles();
-                if( files.size() == 0 ) {
-                    throw new IllegalArgumentException( "No files selected by: " + ((DefaultCopySpec)cs).getSourcePaths() + " --> " + rootResolver.getDestPath() + ". This means that there are files missing or your 'from' method in your gradle script is wrong. If an empty 'from' is valid then disable the check with 'setupBuilder.failOnEmptyFrom = false'" );
-                }
-                int includeCount = cs.getIncludes().size();
-                if( files.size() < includeCount ) {
-                    StringBuilder msg = new StringBuilder( "Not every 'include' match a file by: " );
-                    msg.append( ((DefaultCopySpec)cs).getSourcePaths() );
-                    msg.append( "\n\tDeclared includes:");
-                    for( String include : cs.getIncludes() ) {
-                        msg.append( "\n\t\t" ).append( include );
-                    }
-                    msg.append( "\n\tMatching files:" );
-                    for( File file : files ) {
-                        msg.append( "\n\t\t" ).append( file );
-                    }
-                    throw new IllegalArgumentException( msg.toString()  );
-                }
-            }
-        }
-
-        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
-        CopyAction copyAction = new CopyAction() {
-            @Override
-            public WorkResult execute( CopyActionProcessingStream stream ) {
-                stream.process( action );
-                return new SimpleWorkResult( true );
-            }
-        };
-        copyActionExecuter.execute( copySpec, copyAction );
-    }
-
-    @Inject
-    protected Instantiator getInstantiator() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Inject
-    protected FileSystem getFileSystem() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Inject
-    protected FileResolver getFileResolver() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Inject
-    protected FileLookup getFileLookup() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * The platform depending build.
-     */
-    public abstract void build();
-
-    /**
-     * Return the setupBuilder using the specified type 
-     * @return setupBuilder
-     */
-    @SuppressWarnings("unchecked")
-	public S getSetupBuilder() {
-        return (S) setupBuilder;
-    }
-    
-    @Override
-    public CopySpecInternal getRootSpec() {
-        return rootSpec;
-    }
-
-    /**
-     * Overridden for annotation. {@inheritDoc}
-     */
-    @InputFiles
-    @Override
-    public FileTree getSource() {
-        return SetupSources.super.getSource();
-    }
-
-    /**
-     * The setup Sources
-     * @return FileTree
-     */
-    @InputFiles
-    public FileTree getSetupSource() {
-        try {
-        	return setupBuilder.getSource();
-        } catch ( Throwable e ) {
-        	throw new IllegalArgumentException( "You have to specify input sources for your application", e ); 
-        }
-    }
-
-    /**
-     * The resulting application
-     * @return the application
-     */
-    @OutputFile
-    public File getSetupFile() {
-        return new File( setupBuilder.getDestinationDir(), setupBuilder.getArchiveName() + "." + getExtension() );
-    }
-
-    /**
-     * Get the file extension.
+     * Constructor with indication to artifact result Runs with the default SetupBuilder for dmg, msi ...
      * 
-     * @return the extension
+     * @param extension of the setup
      */
-    public String getExtension() {
-        return extension;
+    public AbstractSetupTask( String extension ) {
+        super( extension, SetupBuilder.class );
     }
 
     /**
-     * Set the file extension of the installer. The default is equals the task name.
-     * 
-     * @param extension the file extension
+     * Get the setup builder extension.
+     * @return the instance of the SetupBuilder
      */
-    public void setExtension( String extension ) {
-        this.extension = extension;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getDescription() {
-        String desc = super.getDescription();
-        if( desc != null && !desc.isEmpty() ) {
-            return desc;
-        }
-        return setupBuilder.getDescription();
+    public SetupBuilder getSetupBuilder() {
+        return (SetupBuilder)super.getAbstractSetupBuilder();
     }
 }

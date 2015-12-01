@@ -19,7 +19,7 @@ package com.inet.gradle.appbundler;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractSetupBuilder;
-import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.dmg.AbstractOSXApplicationBuilder;
 
@@ -43,7 +43,7 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 	}
 
 	@Override
-	protected AbstractSetupTask<AppBundler> getTask() {
+	protected AbstractTask getTask() {
 		return task;
 	}
 
@@ -56,7 +56,7 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
-			application.setExecutable( setup.getAppIdentifier() );
+			application.setExecutable( getAbstractSetupBuilder().getAppIdentifier() );
 		}
 		
 		prepareApplication( application );

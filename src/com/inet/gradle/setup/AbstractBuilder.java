@@ -34,7 +34,7 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
  * @param <T> the task
  * @param <S>
  */
-public abstract class AbstractBuilder<T extends AbstractSetupTask<S>, S extends AbstractSetupBuilder> {
+public abstract class AbstractBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> {
 
 	protected T task;
 
