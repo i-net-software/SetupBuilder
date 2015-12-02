@@ -16,11 +16,14 @@
 
 package com.inet.gradle.appbundler;
 
+import java.io.File;
+
+import org.gradle.api.GradleException;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.AbstractTask;
-import com.inet.gradle.setup.SetupBuilder;
 
 import groovy.lang.Closure;
 
@@ -56,6 +59,19 @@ public class AppBundlerGradleTask extends AbstractTask {
         new AppBundlerBuilder( this, getAppBuilder(), project.getFileResolver() ).build();
     }
 
+
+    /**
+     * The action called from Gradle
+     * Will not add an artifact since it would be a directory. 
+     */
+    @TaskAction
+    public void action() {
+        build();
+        File setupFile = getSetupFile();
+        if( !setupFile.exists() ) {
+            throw new GradleException( "Setup file was not created: " + setupFile );
+        }
+    }    
     
     /**
      * Set the needed information for signing the setup.
