@@ -93,6 +93,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( !"Wix".equals( wix.getTagName() ) ) {
             throw new IllegalArgumentException( "Template does not contains a Wix root: " + wix.getTagName() );
         }
+        wix.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "http://schemas.microsoft.com/wix/2006/wi" );
+        wix.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns:util", "http://schemas.microsoft.com/wix/UtilExtension" );
 
         // Product node
         Element product = getOrCreateChildById( wix, "Product", "*" );
