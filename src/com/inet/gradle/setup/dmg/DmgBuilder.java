@@ -145,7 +145,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 		preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ));
 
         OSXScriptBuilder uninstall = new OSXScriptBuilder( core, "template/uninstall.txt" );
-		OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
+        uninstall.addScript( new OSXScriptBuilder( task.getPrerm() ));
+
+        OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
 
         for (Service service : setup.getServices() ) {
 			
@@ -162,6 +164,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 			}
 		}
 
+        uninstall.addScript( new OSXScriptBuilder( task.getPostrm() ));
     	uninstall.writeTo( new File ( imageSourceRoot + "/Contents/Resources/uninstall.sh" ) );
     	watchUninstall.writeTo( new File ( imageSourceRoot + "/Contents/Resources/watchuninstall.plist" ) );
     	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));
