@@ -2,4 +2,12 @@
 # pre-installation script
 
 set -e
+
+# Remove watcher before anything can start
+AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
+if [ -e "$AGENT_DESTINATION" ]; then
+	launchctl unload "$AGENT_DESTINATION"
+	rm "$AGENT_DESTINATION"
+fi
+
 {{script}}

@@ -31,6 +31,7 @@ import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.AbstractBuilder;
+import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
@@ -93,7 +94,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         		createPackageFromApp();
         	}
 
-/*
+//*
         	new File ( task.getSetupFile().toString() ).createNewFile();
 /*/
         	createBinary();
@@ -132,19 +133,28 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
      */
     private void createServiceFiles( ) throws IOException {
     	
+    	Application core = new Application(setup);
+    	
     	// Create Pre and Post install scripts
     	DesktopStarter runAfter = setup.getRunAfter();
-		OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
+
+        OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
 		preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ));
 		
 		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
 		preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ));
 
-		for (Service service : setup.getServices() ) {
+        OSXScriptBuilder uninstall = new OSXScriptBuilder( core, "template/uninstall.txt" );
+		OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
+
+        for (Service service : setup.getServices() ) {
 			
 			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
 			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" ));
 			
+			// Unload service in uninstall as well.
+			uninstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
+
 			// patch runafter
 			if ( runAfter != null ) {
 				runAfter.setDisplayName(service.getDisplayName());
@@ -152,6 +162,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 			}
 		}
 
+    	uninstall.writeTo( new File ( imageSourceRoot + "/Contents/Resources/uninstall.sh" ) );
+    	watchUninstall.writeTo( new File ( imageSourceRoot + "/Contents/Resources/watchuninstall.plist" ) );
     	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));
     	postinstall.writeTo( TempPath.getTempFile("scripts", "postinstall"));
     }

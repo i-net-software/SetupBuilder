@@ -1,7 +1,15 @@
+
+DAEMON_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.plist"
+PREFPANE_DESTINATION="/Library/PreferencePanes/{{displayName}}.prefPane"
+
 if /bin/launchctl list "{{serviceName}}" &> /dev/null; then
-    /bin/launchctl unload "/Library/LaunchDaemons/{{serviceName}}.plist"
+    /bin/launchctl unload "$DAEMON_DESTINATION"
 fi
 
-if test -e "/Library/LaunchDaemons/{{serviceName}}.plist"; then
-	rm "/Library/LaunchDaemons/{{serviceName}}.plist"
+if test -e "$DAEMON_DESTINATION"; then
+	rm "$DAEMON_DESTINATION"
+fi
+
+if test -e "$PREFPANE_DESTINATION"; then
+	rm "$PREFPANE_DESTINATION"
 fi

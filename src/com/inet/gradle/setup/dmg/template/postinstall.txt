@@ -2,7 +2,27 @@
 # post-installation script
 
 TARGET_LOCATION="$2"
+RESOURCE_LOCATION="$TARGET_LOCATION/{{displayName}}.app/Contents/Resources"
+UNINSTALL_WATCH="$RESOURCE_LOCATION/watchuninstall.plist"
+AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
 
 set -e
 
 {{script}}
+
+################################################################################################
+### Update the uninstall watcher
+if [ -f "/usr/libexec/PlistBuddy" ]; then
+	# Watch for modification to trigger uninstall
+	/usr/libexec/PlistBuddy -c "Add :WatchPaths: String $TARGET_LOCATION" "$UNINSTALL_WATCH"
+	/usr/libexec/PlistBuddy -c "Add :WatchPaths: String $TARGET_LOCATION/{{displayName}}.app" "$UNINSTALL_WATCH"
+	/usr/libexec/PlistBuddy -c "Set :Program $RESOURCE_LOCATION/uninstall.sh" "$UNINSTALL_WATCH"
+else
+	echo "Cannot properly set up the service without the PlistBuddy tool"
+	exit 1
+fi
+
+/usr/bin/ditto "$UNINSTALL_WATCH" "$AGENT_DESTINATION"
+/bin/launchctl load "$AGENT_DESTINATION"
+
+################################################################################################

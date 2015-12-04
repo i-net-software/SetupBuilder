@@ -4,9 +4,54 @@
 
 set -e
 
-# Remove PrefPane
-rm "/Library/PreferencePanes/{{displayName}}.prefPane"
+PACKAGEID="{{serviceName}}"
+AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
 
-INSTALLPATH=$(basename "$0") "../../../"
+FLAG=0
+COUNT=0
+while [ $? -eq 0 ] && [ $FLAG -eq 0 ]; do
 
-echo "Removing '$INSTALLPATH'"
+    ENTRY=`/usr/libexec/PlistBuddy "$AGENT_DESTINATION" -c "Print :WatchPaths:$COUNT"`
+    if [ $? -eq 0 ]; then
+        if [ ! -e "$ENTRY" ]; then
+            # remove all others as well
+            FLAG=1
+        fi
+    fi
+    
+    COUNT=$(( $COUNT+1 ))
+
+done
+
+
+if [ $FLAG -eq 1 ]; then
+
+    echo "########################################"
+    echo "# Running uninstall for {{displayName}}"
+
+	# Remove watcher for this uninstall script
+	if [ -e "$AGENT_DESTINATION" ]; then
+		launchctl unload "$AGENT_DESTINATION"
+	fi
+
+	# Find all files that should be present for our current package
+	PKGTMP="/tmp/$PACKAGEID.pkg.info"
+	pkgutil --pkg-info-plist "$PACKAGEID" > "$PKGTMP"
+	VOLUME=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :volume"`
+	LOCATION=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :install-location"`
+	TARGET_PATH="${VOLUME}${LOCATION}"
+
+{{script}}
+
+    cd "$TARGET_PATH" && pwd
+    pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -i
+    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rm -i
+    pkgutil --forget "$PACKAGEID"
+
+	rm "$PKGTMP"
+	rm "$AGENT_DESTINATION"
+
+    echo "# Done"
+    echo "########################################"
+
+fi

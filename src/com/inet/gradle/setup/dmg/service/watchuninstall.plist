@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>watch.uninstall.application.label</string>
-	<key>Name</key>
-	<string>watch.uninstall.application.name</string>
-	<key>Version</key>
-	<string>1.0.0</string>
+	<string>{{serviceName}}.uninstall</string>
 	<key>Program</key>
 	<string>watch.uninstall.application.program</string>
 	<key>WatchPaths</key>
 	<array/>
+	<key>StandardOutPath</key>
+	<string>/tmp/test.std</string>
+	<key>StandardErrorPath</key>
+	<string>/tmp/test.std</string>
 </dict>
 </plist>
