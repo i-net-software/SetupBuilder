@@ -1,5 +1,5 @@
 #!/bin/sh
-# pre-installation script
+# post-installation script
 
 TARGET_LOCATION="$2"
 
