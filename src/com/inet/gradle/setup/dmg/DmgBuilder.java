@@ -229,7 +229,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( "--install-location" );
         
         // Application as default directory except there are more application parts to install.
-        command.add( "/Application/" + (setup.getServices().size()+setup.getDesktopStarters().size() > 0 ? setup.getApplication() + "/" : "") );
+        command.add( "/Applications/" + (setup.getServices().size()+setup.getDesktopStarters().size() > 0 ? setup.getApplication() + "/" : "") );
         command.add(  TempPath.getTempString( "packages", applicationIdentifier + ".pkg" ) );
     	exec( command );
     	
