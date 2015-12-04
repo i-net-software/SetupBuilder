@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 /**
  * Simple template class for replacing placeholders in text files (e.g. scripts, config files).
@@ -43,6 +44,14 @@ public class Template {
             }
             template = sb.toString();
         }
+    }
+
+    /**
+     * Creates an instance and concatenates the script from the input lines
+     * @param script input lines
+     */
+    public Template( ArrayList<String> script ) {
+    	template = String.join("\n", script);
     }
     
     /**

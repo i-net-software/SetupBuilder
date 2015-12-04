@@ -15,12 +15,9 @@
  */
 package com.inet.gradle.setup.deb;
 
-import java.util.ArrayList;
-
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * The deb Gradle task. It build a deb package for Debian / Ubuntu.
@@ -50,15 +47,6 @@ public class Deb extends AbstractSetupTask {
     private String				   changes;
     
     private String				   installationRoot;
-    
-    private ArrayList<String> 		preinst = new ArrayList<String>();
-	
-	private ArrayList<String> 		postinst = new ArrayList<String>();
-
-	private ArrayList<String> 		prerm = new ArrayList<String>();
-	
-	private ArrayList<String> 		postrm = new ArrayList<String>();
-    
 	
     public Deb() {
         super( "deb" );
@@ -192,69 +180,4 @@ public class Deb extends AbstractSetupTask {
 	public void setInstallationRoot(String installationRoot) {		
 		this.installationRoot = installationRoot.endsWith("/") ? installationRoot.substring(0, installationRoot.length()-1) : installationRoot;
 	}
-
-	/**
-	 * Returns the preinst that should be used in the 'preinst' config file.
-	 * @return the preinst specified in the gradle script
-	 */
-	public ArrayList<String> getPreinst() {
-		return preinst;
-	}
-
-	/**
-	 * Sets the value for the 'preinst' config file.
-	 * @param preinst the value for the entry
-	 */
-	public void setPreinst(String preinst) {
-		this.preinst.add( preinst );
-	}
-
-	/**
-	 * Returns the prerm that should be used in the 'prerm' config file.
-	 * @return the prerm specified in the gradle script
-	 */
-	public ArrayList<String> getPrerm() {
-		return prerm;
-	}
-	
-	/**
-	 * Sets the value for the 'prerm' config file.
-	 * @param prerm the value for the entry
-	 */
-	public void setPrerm(String prerm) {
-		this.prerm.add( prerm );
-	}
-
-	/**
-	 * Returns the postinst that should be used in the 'postinst' config file.
-	 * @return the postinst specified in the gradle script
-	 */
-	public ArrayList<String> getPostinst() {
-		return postinst;
-	}
-	
-	/**
-	 * Sets the value for the 'postinst' config file.
-	 * @param postinst the value for the entry
-	 */
-	public void setPostinst(String postinst) {
-		this.postinst.add( postinst );
-	}
-	
-	/**
-	 * Returns the postrm that should be used in the 'postrm' config file.
-	 * @return the postrm specified in the gradle script
-	 */
-	public ArrayList<String> getPostrm() {
-		return postrm;
-	}
-	
-	/**
-	 * Sets the value for the 'postrm' config file.
-	 * @param postrm the value for the entry
-	 */
-	public void setPostrm(String postrm) {
-		this.postrm.add( postrm );
-	}
-	
 }

@@ -30,6 +30,14 @@ public class OSXScriptBuilder extends Template {
 	public OSXScriptBuilder(String template) throws IOException {
 		super( template );
 	}
+
+    /**
+     * Creates an instance and concatenates the script from the input lines
+     * @param script input lines
+     */
+	public OSXScriptBuilder(ArrayList<String> script) {
+		super( script );
+	}
 	
 	/**
 	 * Create an OSX script using the specified template
@@ -65,6 +73,9 @@ public class OSXScriptBuilder extends Template {
 		
 		StringBuilder sb = new StringBuilder();
 		for (OSXScriptBuilder osxScriptBuilder : scripts) {
+			if ( osxScriptBuilder == null) {
+				continue;
+			}
 			sb.append( osxScriptBuilder.toString() );
 		}
 		

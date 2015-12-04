@@ -135,7 +135,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     	// Create Pre and Post install scripts
     	DesktopStarter runAfter = setup.getRunAfter();
 		OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
+		preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ));
+		
 		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
+		preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ));
+
 		for (Service service : setup.getServices() ) {
 			
 			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
