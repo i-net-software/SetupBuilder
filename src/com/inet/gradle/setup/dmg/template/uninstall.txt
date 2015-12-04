@@ -2,19 +2,28 @@
 # uninstall script
 # This script is in the installation Folder / Contents / Resources / uninstall.sh
 
-set -e
-
 PACKAGEID="{{serviceName}}"
+if [ -z "$PACKAGEID" ] ; then
+	echo "Package ID is not set"
+	exit 1
+fi
+
 AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
+
+echo "I am Batman, or: $(whoami)"
 
 FLAG=0
 COUNT=0
-while [ $? -eq 0 ] && [ $FLAG -eq 0 ]; do
+RESULT=0
+echo "Checking for Action"
+while [[ $RESULT -eq 0 ]] && [[ $FLAG -eq 0 ]]; do
 
     ENTRY=`/usr/libexec/PlistBuddy "$AGENT_DESTINATION" -c "Print :WatchPaths:$COUNT"`
-    if [ $? -eq 0 ]; then
+    RESULT=$?
+    if [ $RESULT -eq 0 ]; then
         if [ ! -e "$ENTRY" ]; then
             # remove all others as well
+            echo "Will remove all, '$ENTRY' did not exist"
             FLAG=1
         fi
     fi
@@ -23,35 +32,50 @@ while [ $? -eq 0 ] && [ $FLAG -eq 0 ]; do
 
 done
 
-
-if [ $FLAG -eq 1 ]; then
+echo "Flag is: $FLAG"
+if [[ $FLAG -eq 1 ]]; then
 
     echo "########################################"
     echo "# Running uninstall for {{displayName}}"
 
-	# Remove watcher for this uninstall script
-	if [ -e "$AGENT_DESTINATION" ]; then
-		launchctl unload "$AGENT_DESTINATION"
-	fi
-
 	# Find all files that should be present for our current package
+	echo "# Collecting Package Information"
 	PKGTMP="/tmp/$PACKAGEID.pkg.info"
 	pkgutil --pkg-info-plist "$PACKAGEID" > "$PKGTMP"
 	VOLUME=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :volume"`
 	LOCATION=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :install-location"`
 	TARGET_PATH="${VOLUME}${LOCATION}"
+	
+	echo "# Before Script Section"
 
 {{script}}
 
-    cd "$TARGET_PATH" && pwd
-    pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -i
-    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rm -i
-    pkgutil --forget "$PACKAGEID"
+	echo "# After Script Section"
 
+	if [ -d "$TARGET_PATH" ]; then
+	    cd "$TARGET_PATH" && pwd
+	    pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -f
+	    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rmdir
+	    pkgutil --forget "$PACKAGEID"
+	fi
+
+	echo "# Cleanup"
 	rm "$PKGTMP"
-	rm "$AGENT_DESTINATION"
+
+	if [ -e "$AGENT_DESTINATION" ]; then
+		rm "$AGENT_DESTINATION"
+	fi
 
     echo "# Done"
     echo "########################################"
+	# Remove watcher for this uninstall script
+	if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
+		echo "# Removed uninstall watcher"
+	    echo "########################################"
+	    /bin/launchctl unload "$AGENT_DESTINATION"
 
+	    if [ -d "/opt/{{serviceName}}" ]; then 
+			rm -rf "/opt/{{serviceName}}"
+		fi
+	fi
 fi

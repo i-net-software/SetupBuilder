@@ -9,8 +9,8 @@
 	<key>WatchPaths</key>
 	<array/>
 	<key>StandardOutPath</key>
-	<string>/tmp/test.std</string>
+	<string>/tmp/test.stdout</string>
 	<key>StandardErrorPath</key>
-	<string>/tmp/test.std</string>
+	<string>/tmp/test.stderr</string>
 </dict>
 </plist>

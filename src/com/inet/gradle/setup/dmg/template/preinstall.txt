@@ -5,8 +5,11 @@ set -e
 
 # Remove watcher before anything can start
 AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
+if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
+    /bin/launchctl unload "$AGENT_DESTINATION"
+fi
+
 if [ -e "$AGENT_DESTINATION" ]; then
-	launchctl unload "$AGENT_DESTINATION"
 	rm "$AGENT_DESTINATION"
 fi
 
