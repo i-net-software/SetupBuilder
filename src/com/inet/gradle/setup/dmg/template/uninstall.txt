@@ -1,0 +1,12 @@
+#!/bin/sh
+# uninstall script
+# This script is in the installation Folder / Contents / Resources / uninstall.sh
+
+set -e
+
+# Remove PrefPane
+rm "/Library/PreferencePanes/{{displayName}}.prefPane"
+
+INSTALLPATH=$(basename "$0") "../../../"
+
+echo "Removing '$INSTALLPATH'"

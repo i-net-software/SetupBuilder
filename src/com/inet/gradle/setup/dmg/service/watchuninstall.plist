@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>watch.uninstall.application.label</string>
+	<key>Name</key>
+	<string>watch.uninstall.application.name</string>
+	<key>Version</key>
+	<string>1.0.0</string>
+	<key>Program</key>
+	<string>watch.uninstall.application.program</string>
+	<key>WatchPaths</key>
+	<array/>
+</dict>
+</plist>
