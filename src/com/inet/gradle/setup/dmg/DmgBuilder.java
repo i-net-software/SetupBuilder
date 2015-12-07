@@ -94,7 +94,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         		createPackageFromApp();
         	}
 
-//*
+/*
         	new File ( task.getSetupFile().toString() ).createNewFile();
 /*/
         	createBinary();
