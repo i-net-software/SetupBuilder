@@ -51,7 +51,7 @@ public class Template {
      * @param script input lines
      */
     public Template( ArrayList<String> script ) {
-    	template = String.join("\n", script);
+    	template = script != null && !script.isEmpty() ? String.join("\n", script) : "";
     }
     
     /**
