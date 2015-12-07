@@ -1,24 +1,25 @@
 #!/bin/sh
 # post-installation script
 
+SCRIPT_PATH=`dirname "$0"`
 TARGET_LOCATION="$2"
-RESOURCE_LOCATION="$TARGET_LOCATION/{{displayName}}.app/Contents/Resources"
-UNINSTALL_WATCH="$RESOURCE_LOCATION/watchuninstall.plist"
+UNINSTALL_WATCH="$SCRIPT_PATH/watchuninstall.plist"
 AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
 
 set -e
+
+echo "SCRIPT_PATH: '$SCRIPT_PATH'"
+echo "TARGET_LOCATION: '$TARGET_LOCATION'"
+echo "UNINSTALL_WATCH: '$UNINSTALL_WATCH'"
+echo "AGENT_DESTINATION: '$AGENT_DESTINATION'"
 
 {{script}}
 
 ################################################################################################
 ### Update the uninstall watcher
 if [ -f "/usr/libexec/PlistBuddy" ]; then
-	# Watch for modification to trigger uninstall
-	/usr/libexec/PlistBuddy -c "Add :WatchPaths: String $TARGET_LOCATION" "$UNINSTALL_WATCH"
-	/usr/libexec/PlistBuddy -c "Add :WatchPaths: String $TARGET_LOCATION/{{displayName}}.app" "$UNINSTALL_WATCH"
-	
 	# Use libexec as told by Apple to have semipermanent storage for executable for Agent 
-	/usr/bin/ditto "$RESOURCE_LOCATION/uninstall.sh" "/opt/{{serviceName}}/uninstall.sh"
+	/usr/bin/ditto "$SCRIPT_PATH/uninstall.sh" "/opt/{{serviceName}}/uninstall.sh"
 	/usr/libexec/PlistBuddy -c "Set :Program /opt/{{serviceName}}/uninstall.sh" "$UNINSTALL_WATCH"
 else
 	echo "Cannot properly set up the service without the PlistBuddy tool"
