@@ -136,10 +136,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     	// Create Pre and Post install scripts
     	DesktopStarter runAfter = setup.getRunAfter();
 
-        OSXScriptBuilder preinstall = new OSXScriptBuilder( "template/preinstall.txt" );
+        OSXScriptBuilder preinstall = new OSXScriptBuilder( core, "template/preinstall.txt" );
 		preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ));
 		
-		OSXScriptBuilder postinstall = new OSXScriptBuilder( "template/postinstall.txt" );
+		OSXScriptBuilder postinstall = new OSXScriptBuilder( core, "template/postinstall.txt" );
 		preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ));
 
         OSXScriptBuilder uninstall = new OSXScriptBuilder( core, "template/uninstall.txt" );
@@ -163,8 +163,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 		}
 
         uninstall.addScript( new OSXScriptBuilder( task.getPostrm() ));
-    	uninstall.writeTo( new File ( imageSourceRoot + "/Contents/Resources/uninstall.sh" ) );
-    	watchUninstall.writeTo( new File ( imageSourceRoot + "/Contents/Resources/watchuninstall.plist" ) );
+    	uninstall.writeTo( TempPath.getTempFile("scripts", "uninstall.sh" ) );
+    	watchUninstall.writeTo( TempPath.getTempFile("scripts", "watchuninstall.plist" ) );
     	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));
     	postinstall.writeTo( TempPath.getTempFile("scripts", "postinstall"));
     }
@@ -230,7 +230,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( "--install-location" );
         
         // Application as default directory except there are more application parts to install.
-        command.add( "/Applications/" + (setup.getServices().size()+setup.getDesktopStarters().size() > 0 ? setup.getApplication() + "/" : "") );
+        command.add( "/Applications/" + (setup.getServices().size()+setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "") );
         command.add(  TempPath.getTempString( "packages", applicationIdentifier + ".pkg" ) );
     	exec( command );
     	
