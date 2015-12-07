@@ -26,9 +26,6 @@ if [ -f "/usr/libexec/PlistBuddy" ]; then
 	chown "$(whoami)":wheel "/opt/{{serviceName}}/uninstall.sh"
 	
 	/usr/libexec/PlistBuddy -c "Set :Program /opt/{{serviceName}}/uninstall.sh" "$UNINSTALL_WATCH"
-	
-	ls -al "$SCRIPT_PATH/uninstall.sh"
-	ls -al "/opt/{{serviceName}}/uninstall.sh"
 else
 	echo "Cannot properly set up the service without the PlistBuddy tool"
 	exit 1
@@ -36,10 +33,6 @@ fi
 
 /usr/bin/ditto "$UNINSTALL_WATCH" "$AGENT_DESTINATION"
 chown "$(whoami)":wheel "$AGENT_DESTINATION"
-
-ls -al "$UNINSTALL_WATCH"
-ls -al "$AGENT_DESTINATION"
-
 /bin/launchctl load "$AGENT_DESTINATION"
 
 ################################################################################################
