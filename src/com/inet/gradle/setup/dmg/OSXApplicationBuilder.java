@@ -129,7 +129,9 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
 		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : getAbstractSetupBuilder().getAppIdentifier() );
-		setPlistProperty( servicePLIST, ":Program", "/Library/" + getAbstractSetupBuilder().getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
+		
+		// Program will be set during installation.
+		//setPlistProperty( servicePLIST, ":Program", "/Library/" + getAbstractSetupBuilder().getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
 		setPlistProperty( servicePLIST, ":Description", service.getDescription() );
 		setPlistProperty( servicePLIST, ":Version", getAbstractSetupBuilder().getVersion() );
 		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
