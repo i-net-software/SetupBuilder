@@ -16,12 +16,17 @@
 
 package com.inet.gradle.setup;
 
+import java.io.File;
+import java.io.IOException;
+
+import com.inet.gradle.setup.image.ImageFactory;
+
 /**
  * Generic application wrapper
  * @author gamma
  */
 public class Application {
-	protected final AbstractSetupBuilder setup;
+	protected final AbstractSetupBuilder    setup;
 	private String 							displayName, mainJar, mainClass, executable, description, workDir;
 	private Object icons;
 
@@ -138,6 +143,17 @@ public class Application {
      */
     public Object getIcons() {
         return icons;
+    }
+    
+    /**
+     * Retrieve a specific icon from the icons set for the setup
+     * @param buildDir directory in which to put the icon
+     * @param type of the icon to retrieve
+     * @return the icon file
+     * @throws IOException if an error occurs
+     */
+    public File getIconForType( File buildDir, String type ) throws IOException {
+		return ImageFactory.getImageFile( setup.getProject(), getIcons(), buildDir, type);
     }
 
     /**

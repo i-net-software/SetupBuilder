@@ -68,26 +68,24 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     public void build() throws RuntimeException {
 
         try {
-        	OSXApplicationBuilder applicationBuilder = new OSXApplicationBuilder( task, setup, fileResolver );
-        	
         	if ( setup.getServices().isEmpty() && setup.getDesktopStarters().isEmpty() ) {
         		throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
         	}
         	
         	// Build all services 
         	for (Service service : setup.getServices() ) {
-        		applicationBuilder.buildService( service );
+        		 new OSXApplicationBuilder( task, setup, fileResolver ).buildService( service );
 			}
         	
         	// Build all standalone applications
         	for (DesktopStarter application : setup.getDesktopStarters() ) {
-        		applicationBuilder.buildApplication( application );
+        		 new OSXApplicationBuilder( task, setup, fileResolver ).buildApplication( application );
 			}
 
             applicationIdentifier = setup.getAppIdentifier();
             applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + setup.getApplication() + ".app";
-            iconFile = applicationBuilder.getApplicationIcon();
+            iconFile = setup.getIconForType( buildDir, "icns" );
 
         	if ( !setup.getServices().isEmpty() ) {
         		// Create installer package

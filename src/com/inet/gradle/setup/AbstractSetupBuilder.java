@@ -17,6 +17,7 @@
 package com.inet.gradle.setup;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,8 @@ import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.util.ConfigureUtil;
+
+import com.inet.gradle.setup.image.ImageFactory;
 
 import groovy.lang.Closure;
 
@@ -61,7 +64,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     private String                 mainJar;
 
-    private List<DocumentType>  documentTypes   = new ArrayList<>();
+    private List<DocumentType>     documentTypes   = new ArrayList<>();
 
     private boolean                failOnEmptyFrom = true;
 
@@ -238,6 +241,17 @@ public class AbstractSetupBuilder implements SetupSources {
     	}
     	
         return icons;
+    }
+    
+    /**
+     * Retrieve a specific icon from the icons set for the setup
+     * @param buildDir directory in which to put the icon
+     * @param type of the icon to retrieve
+     * @return the icon file
+     * @throws IOException if an error occurs
+     */
+    public File getIconForType( File buildDir, String type ) throws IOException {
+		return ImageFactory.getImageFile( project, getIcons(), buildDir, type);
     }
 
     /**

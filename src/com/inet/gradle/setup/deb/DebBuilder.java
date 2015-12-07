@@ -272,7 +272,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         for( int size : iconSizes ) {
             File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
             iconDir.mkdirs();
-            File scaledFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), iconDir, "png" + size );
+            File scaledFile = setup.getIconForType( iconDir, "png" + size );
             if( scaledFile != null ) {
                 File iconFile = new File( iconDir, unixName + ".png" );
                 scaledFile.renameTo( iconFile );

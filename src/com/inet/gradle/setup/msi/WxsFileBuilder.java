@@ -458,7 +458,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws IOException if an error occur on reading the image files
      */
     private void addIcon( Element product ) throws IOException {
-        File iconFile = ImageFactory.getImageFile( task.getProject(), setup.getIcons(), buildDir, "ico" );
+        File iconFile = setup.getIconForType( buildDir, "ico" );
         if( iconFile == null ) {
             // no icon was set
             return;
@@ -671,7 +671,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 if( starter.getIcons().equals( setup.getIcons() ) ) {
                     iconID = ICON_ID;
                 } else {
-                    File iconFile = ImageFactory.getImageFile( task.getProject(), starter.getIcons(), buildDir, "ico" );
+                    File iconFile = starter.getIconForType( buildDir, "ico" );
                     iconID = id( starter.getDisplayName() + ".ico" );
                     Element icon = getOrCreateChildById( product, "Icon", iconID );
                     addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );

@@ -164,8 +164,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 	 * @throws IOException when there are errors while getting the file
 	 */
 	protected File getApplicationIcon() throws IOException {
-		Object iconData = setup.getIcons();
-		return ImageFactory.getImageFile(task.getProject(), iconData, buildDir, "icns");
+		return setup.getIconForType( buildDir, "icns");
 	}
 
 	/**
