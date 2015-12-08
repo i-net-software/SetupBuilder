@@ -24,10 +24,10 @@ import java.util.ArrayList;
  */
 public abstract class AbstractSetupTask extends AbstractTask {
 
-    private ArrayList<String> postinst;
-	private ArrayList<String> preinst;
-	private ArrayList<String> postrm;
-	private ArrayList<String> prerm;
+    private ArrayList<String> postinst = new ArrayList<String>();
+	private ArrayList<String> preinst = new ArrayList<String>();
+	private ArrayList<String> postrm = new ArrayList<String>();
+	private ArrayList<String> prerm = new ArrayList<String>();
 
 	/**
      * Constructor with indication to artifact result Runs with the default SetupBuilder for dmg, msi ...
