@@ -32,7 +32,7 @@ class CommandLine {
      * @param starter a command description
      * @param javaDir path to java if embedded
      */
-    public CommandLine( DesktopStarter starter, String javaDir ) {
+    CommandLine( DesktopStarter starter, String javaDir ) {
         String target = starter.getExecutable();
         String arguments = starter.getStartArguments();
         String dir;
