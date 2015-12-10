@@ -79,7 +79,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 		appBundler.setIdentifier(application.getMainClass());
 		appBundler.setMainClassName(application.getMainClass());
 		appBundler.setJarLauncherName(mainJar);
-		appBundler.setCopyright(setup.getVendor());
+		appBundler.setCopyright( setup.getCopyright() );
 		appBundler.setIcon(getApplicationIcon());
 		Architecture x86_64 = new Architecture();
 		x86_64.setName("x86_64");

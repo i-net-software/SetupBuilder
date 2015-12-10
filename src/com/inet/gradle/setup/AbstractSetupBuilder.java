@@ -16,9 +16,12 @@
 
 package com.inet.gradle.setup;
 
+import groovy.lang.Closure;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.gradle.api.GradleException;
@@ -29,8 +32,6 @@ import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.image.ImageFactory;
-
-import groovy.lang.Closure;
 
 /**
  * The Gradle extension for all setup tasks.
@@ -68,7 +69,9 @@ public class AbstractSetupBuilder implements SetupSources {
 
     private boolean                failOnEmptyFrom = true;
 
-	private String description;
+    private String                 description;
+
+    private String                 copyright;
 
     /**
      * Create a new instance.
@@ -404,5 +407,28 @@ public class AbstractSetupBuilder implements SetupSources {
      */
     public void setDescription( String description ) {
         this.description = description;
+    }
+
+    /**
+     * Get the Copyright information.
+     * @return the copyright notice
+     */
+    public String getCopyright() {
+        if( copyright != null ) {
+            return copyright;
+        }
+        StringBuilder builder = new StringBuilder( "© Copyright " );
+        builder.append( Calendar.getInstance().get(Calendar.YEAR) );
+        builder.append( " by " );
+        builder.append( getVendor() );
+        return builder.toString();
+    }
+
+    /**
+     * Set the copyright information.
+     * @param copyright the copyright notice
+     */
+    public void setCopyright( String copyright ) {
+        this.copyright = copyright;
     }
 }
