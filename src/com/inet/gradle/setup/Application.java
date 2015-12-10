@@ -142,15 +142,18 @@ public class Application {
      * @return the icons
      */
     public Object getIcons() {
-        return icons;
+        if( icons != null ) {
+            return icons;
+        }
+        return setup.getIcons();
     }
-    
+
     /**
      * Retrieve a specific icon from the icons set for the setup
      * @param buildDir directory in which to put the icon
      * @param type of the icon to retrieve
      * @return the icon file
-     * @throws IOException if an error occurs
+     * @throws IOException if an error occurs on reading the image files
      */
     public File getIconForType( File buildDir, String type ) throws IOException {
 		return ImageFactory.getImageFile( setup.getProject(), getIcons(), buildDir, type);
