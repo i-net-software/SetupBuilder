@@ -31,7 +31,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -93,18 +92,18 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         }
     }
 
-    public Element getOrCreateChild( Element parent, String name ) {
+    public Element getOrCreateChild( Node parent, String name ) {
         return getOrCreateChild( parent, name, true );
     }
 
-    public Element getOrCreateChild( Element parent, String name, boolean append ) {
+    public Element getOrCreateChild( Node parent, String name, boolean append ) {
         Node first = parent.getFirstChild();
         for( Node child = first; child != null; child = child.getNextSibling() ) {
             if( name.equals( child.getNodeName() ) ) {
                 return (Element)child;
             }
         }
-        Document doc = parent.getOwnerDocument();
+        Document doc = parent instanceof Document ? (Document)parent : parent.getOwnerDocument();
         Element child = doc.createElement( name );
         if( append || first == null ) {
             parent.appendChild( child );
@@ -114,19 +113,19 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         return child;
     }
 
-    public Element getOrCreateChildById( Element parent, String name, String id ) {
+    public Element getOrCreateChildById( Node parent, String name, String id ) {
         return getOrCreateChildByKeyValue( parent, name, "Id", id, true );
     }
 
-    public Element getOrCreateChildById( Element parent, String name, String id, boolean append ) {
+    public Element getOrCreateChildById( Node parent, String name, String id, boolean append ) {
         return getOrCreateChildByKeyValue( parent, name, "Id", id, append );
     }
 
-    public Element getOrCreateChildByKeyValue( Element parent, String name, String key, String value ) {
+    public Element getOrCreateChildByKeyValue( Node parent, String name, String key, String value ) {
         return getOrCreateChildByKeyValue( parent, name, key, value, true );
     }
 
-    public Element getOrCreateChildByKeyValue( Element parent, String name, String key, String value, boolean append ) {
+    public Element getOrCreateChildByKeyValue( Node parent, String name, String key, String value, boolean append ) {
         Node first = parent.getFirstChild();
         for( Node child = first; child != null; child = child.getNextSibling() ) {
             if( name.equals( child.getNodeName() ) && value.equals( ((Element)child).getAttribute( key ) ) ) {
