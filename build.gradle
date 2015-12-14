@@ -52,7 +52,7 @@ if( !project.hasProperty("local") && file( '../BuildScripts/base.gradle' ).exist
 pluginBundle {
   website = 'https://github.com/i-net-software/SetupBuilder'
   vcsUrl = 'https://github.com/i-net-software/SetupBuilder'
-  description = 'The Setup Builder is a plugin for Gradle which can create a native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
+  description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
   tags = ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ]
 
   plugins {
@@ -63,6 +63,7 @@ pluginBundle {
     appBunderPlugin {
       id = 'de.inetsoftware.appbundler'
       displayName = 'Gradle Application Bundler plugin for OSX'
+      tags = ['app']
     }
   }
 }
