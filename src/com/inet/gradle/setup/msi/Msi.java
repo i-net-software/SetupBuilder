@@ -30,6 +30,8 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.Service;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.
@@ -47,6 +49,9 @@ public class Msi extends AbstractSetupTask {
     private SignTool signTool;
 
     private double minOS;
+
+    private List<DesktopStarter> launch4j = new ArrayList<>();
+
 
     /**
      * Create a new instance.
@@ -285,5 +290,24 @@ public class Msi extends AbstractSetupTask {
      */
     public void setMinOS( double minVersion ) {
         this.minOS = minVersion;
+    }
+
+    /**
+     * Register a lauch4j configuration.
+     * 
+     * @param closue the closure of the launch4j definition
+     */
+    public void launch4j( Closure<DesktopStarter> closue ) {
+        DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( getSetupBuilder() ) );
+        launch4j.add( service );
+    }
+
+    /**
+     * Returns the registered services.
+     * 
+     * @return the registered services
+     */
+    public List<DesktopStarter> getLaunch4js() {
+        return launch4j;
     }
 }

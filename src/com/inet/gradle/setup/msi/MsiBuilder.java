@@ -26,9 +26,11 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.gradle.api.GradleException;
+import org.gradle.api.file.CopySpec;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
+import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.util.ResourceUtils;
 
@@ -58,6 +60,8 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      */
     void build() {
         try {
+            buildLauch4j();
+
             File wxsFile = getWxsFile();
             URL template = task.getWxsTemplate();
             new WxsFileBuilder( task, setup, wxsFile, buildDir, template, false ).build();
@@ -101,6 +105,27 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
+        }
+    }
+
+    /**
+     * Create the lauch4j starter if there was set some and add it to the sources.
+     * 
+     * @throws Exception if any error occur
+     */
+    private void buildLauch4j() throws Exception {
+        if( task.getLaunch4js().size() > 0 ) {
+            Launch4jCreator creator = new Launch4jCreator();
+            for( DesktopStarter launch : task.getLaunch4js() ) {
+                File file = creator.create( launch, task, setup );
+                signTool( file );
+                CopySpec copySpec = task.from( file );
+                String workDir = launch.getWorkDir();
+                if( workDir != null && !workDir.isEmpty() ) {
+                    copySpec.into( workDir );
+                }
+            }
+            creator.close();
         }
     }
 
