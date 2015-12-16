@@ -1,0 +1,28 @@
+/*
+plugins {
+	id "de.inetsoftware.setupbuilder" version "1.4.7"
+}
+/*/
+buildscript {
+    repositories {
+        maven {
+            url uri('../../repo')
+        }
+    }
+    dependencies {
+        classpath 'de.inetsoftware:SetupBuilder:+'
+    }
+}
+
+apply plugin: 'de.inetsoftware.appbundler'
+//*/
+
+appBundler {
+
+	application = "jnlpBundler Test Build"
+	description = 'Build a test programm.'
+    appIdentifier = "com.inet.jnlpBundler"
+	icons = "test-icon.icns"
+
+    jnlpLauncherName = 'Contents/_CodeSignature/bundler.jnlp'
+}
