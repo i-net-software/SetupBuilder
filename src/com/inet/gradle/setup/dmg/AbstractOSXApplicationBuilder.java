@@ -76,7 +76,14 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 		
 		appBundler.setShortVersion(version);
 		appBundler.setExecutableName( application.getExecutable() );
-		appBundler.setIdentifier(application.getMainClass());
+		
+		String identifier = setup.getAppIdentifier();
+		String appName = application.getDisplayName();
+		if ( appName != setup.getApplication() ) {
+			identifier += "." + appName.replaceAll("^A-Za-z0-9]", "");
+		}
+
+		appBundler.setIdentifier(identifier);
 		appBundler.setMainClassName(application.getMainClass());
 		appBundler.setJarLauncherName(mainJar);
 		appBundler.setCopyright( setup.getCopyright() );
