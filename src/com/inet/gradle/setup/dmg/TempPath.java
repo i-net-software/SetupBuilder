@@ -35,7 +35,7 @@ public class TempPath {
             @Override
             public void run() {
                 try {
-					clearTemporaryFolder();
+					// clearTemporaryFolder();
 				} catch (Exception e) {
 					System.err.println( "Could not remove temporary Resources" );
 					e.printStackTrace();

@@ -16,12 +16,15 @@
 package com.inet.gradle.setup.dmg;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;
 
 import groovy.lang.Closure;
@@ -33,9 +36,11 @@ import groovy.lang.Closure;
  */
 public class Dmg extends AbstractSetupTask {
 
-    private File backgroundImage;
+    private Object backgroundImage, setupBackground;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
 	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
+	
+	private List<LocalizedResource> welcomePages =  new ArrayList<>();
 
 	/**
      * Create the task.
@@ -106,7 +111,10 @@ public class Dmg extends AbstractSetupTask {
      * @return background Image for Finder View
      */
 	public File getBackgroundImage() {
-		return backgroundImage;
+		if ( backgroundImage != null ) {
+			return getProject().file( backgroundImage );
+		}
+		return null;
 	}
 
     /**
@@ -152,4 +160,52 @@ public class Dmg extends AbstractSetupTask {
     public OSXCodeSign<Dmg,SetupBuilder> getCodeSign() {
         return codeSign;
     }
+
+
+    /**
+     * Return the welcome page list
+     * Allowed Format: rtf, rtfd, txt, html
+     * @return welcome page
+     */
+    public List<LocalizedResource> getWelcomePages() {
+        return welcomePages;
+    }
+
+    /**
+     * Set the welcome page
+     * Allowed Format: rtf, rtfd, txt, html
+     * @param welcomePage license file
+     */
+    public void welcomePage( Object welcomePage ) {
+    	
+    	LocalizedResource res = new LocalizedResource( getSetupBuilder() );
+    	if ( welcomePage instanceof Closure<?> ) {
+    		res = ConfigureUtil.configure((Closure<?>)welcomePage, res);
+    	} else {
+        	res.setLocale( "en" );
+        	res.setResource( welcomePage );
+    	}
+    	
+    	welcomePages.add( res );
+    }
+    
+	/**
+	 * Return the background image for the setup
+	 * @return background image
+	 */
+	public File getSetupBackgroundImage() {
+		if ( setupBackground != null ) {
+			return getProject().file( setupBackground );
+		}
+		return null;
+	}
+
+	/**
+	 * Set the background image for the setup 
+	 * @param setupBackground to set
+	 */
+	public void setSetupBackgroundImage( Object setupBackground ) {
+		this.setupBackground = setupBackground;
+	}
+
 }

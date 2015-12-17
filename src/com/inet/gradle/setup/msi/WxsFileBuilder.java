@@ -477,7 +477,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws Exception if any exception occur
      */
     private boolean addLicense( Element product ) throws Exception {
-        File license = setup.getLicenseFile();
+    	// TODO: Internationalize
+        File license = setup.getLicenseFile( "en" );
         if( license == null ) {
             return false;
         }

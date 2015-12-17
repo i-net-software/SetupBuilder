@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -33,6 +34,7 @@ import org.w3c.dom.Element;
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
@@ -189,6 +191,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( TempPath.getTempString( "distribution.xml" ) );
         command.add( "--package-path" );
         command.add( TempPath.get( "packages" ).toString() );
+        command.add( "--resources" );
+        command.add( TempPath.get( "resources" ).toString() );
         
         // Sign the final package
         if ( task.getCodeSign() != null ) {
@@ -258,6 +262,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 	}
 
 	/**
+	 * Patch the distriubiton file with custom settings 
 	 * @throws Throwable in case of errors
 	 */
 	private void patchDistributionXML() throws Throwable {
@@ -273,22 +278,61 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         }
 
         // Product node
-        Element background = xmlFile.getOrCreateChildById( distribution, "background", "*", false );
-        xmlFile.addAttributeIfNotExists( background, "file", "background.png" );
-        xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
-        xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
+        File backgroundImage = task.getSetupBackgroundImage();
+        if ( backgroundImage != null ) {
+        	Files.copy( backgroundImage.toPath(), TempPath.getTempFile("resources", backgroundImage.getName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+	        Element background = xmlFile.getOrCreateChildById( distribution, "background", "*", false );
+	        xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
+	        xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
+	        xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
+        }
 
         // Welcome Node
-        Element welcome = xmlFile.getOrCreateChildById( distribution, "welcome", "*", false );
-        xmlFile.addAttributeIfNotExists( welcome, "file", "welcome.rtf" );
-
+        List<LocalizedResource> welcomePages = task.getWelcomePages();
+        for (LocalizedResource localizedResource : welcomePages) {
+            File welcomePage = checkSetupTextFile( localizedResource.getResource() );
+            if ( welcomePage != null ) {
+            	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "Welcome").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            	Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
+            	xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
+            }
+		}
+        
         // License node
-        Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
-        xmlFile.addAttributeIfNotExists( license, "file", "license.txt" );
+        List<LocalizedResource> licenseFiles = setup.getLicenseFiles();
+        for (LocalizedResource localizedResource : licenseFiles) {
+            File licenseFile = checkSetupTextFile( localizedResource.getResource() );
+            if ( licenseFile != null ) {
+            	Files.copy( licenseFile.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "License").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            	Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
+            	xmlFile.addAttributeIfNotExists( license, "file", "License" );
+            }
+		}
     
         xmlFile.save();
 	}
 
+	/**
+	 * Check a file for the correct setup text-resource type
+	 * @param file to check
+	 * @return file if ok, or null
+	 */
+	private File checkSetupTextFile(File file) {
+		
+		if ( file != null ) {
+			
+			String name = file.getName();
+			for (String format : new String[] { "txt", "rtf", "rtfd", "html"}) {
+				if ( name.toLowerCase().endsWith( "." + format ) ) {
+					return file;
+				}
+			}
+			System.err.println( "The provided file must be of type: txt, rtf, rtfd or html. File was: " + name );
+		}
+		
+		return null;
+	}
+	
 	/**
      * Call hdiutil to create a temporary image.
      */

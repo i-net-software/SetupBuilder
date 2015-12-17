@@ -32,7 +32,7 @@ import groovy.lang.Closure;
  */
 public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
-    private Object                     licenseFile;
+    private List<LocalizedResource>    licenseFiles    = new ArrayList<>();
 
     private DesktopStarter             runAfter, runBeforeUninstall;
 
@@ -53,22 +53,44 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
     }
 
     /**
-     * Return the license file
+     * Return the license files
+     * @return licenseFiles list of license files
+     */
+    public List<LocalizedResource> getLicenseFiles() {
+        return licenseFiles;
+    }
+
+    /**
+     * Return the license file for a specific locale
+     * @param locale for which to get the file
      * @return license file
      */
-    public File getLicenseFile() {
-        if( licenseFile != null ) {
-            return project.file( licenseFile );
-        }
+    public File getLicenseFile( String locale ) {
+    	
+    	for (LocalizedResource res : licenseFiles) {
+			if ( locale.equalsIgnoreCase( res.getLocale().getLanguage()) ) {
+				return res.getResource();
+			}
+		}
+    	
         return null;
     }
 
     /**
      * Set the license file
-     * @param licenseFile license file
+     * @param license license file or closure
      */
-    public void setLicenseFile( Object licenseFile ) {
-        this.licenseFile = licenseFile;
+    public void licenseFile( Object license ) {
+    	
+    	LocalizedResource res = new LocalizedResource( this );
+    	if ( license instanceof Closure<?> ) {
+    		res = ConfigureUtil.configure((Closure<?>)license, res);
+    	} else {
+        	res.setLocale( "en" );
+        	res.setResource( license );
+    	}
+    	
+    	licenseFiles.add( res );
     }
 
     /**

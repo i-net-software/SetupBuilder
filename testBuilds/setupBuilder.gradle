@@ -32,7 +32,13 @@ setupBuilder {
 	application = "Setup Builder Test"
 	description = 'Build a test Programm.'
 	icons = "test-icon.icns"
-	
+
+    licenseFile "license_en.txt"
+	licenseFile {
+	   locale = "de"
+	   resource = "license_de.txt"
+	}
+
 	from jar.outputs
 
     bundleJre = 1.8
@@ -41,6 +47,9 @@ setupBuilder {
 
     desktopStarter {
         displayName = "Setup Builder Test"
+    }
+    
+    service {
     }
 }
 

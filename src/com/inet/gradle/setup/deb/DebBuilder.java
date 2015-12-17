@@ -74,7 +74,8 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
                 setupStarter( starter );
             }
             
-            if( setup.getLicenseFile() != null ) {
+            // TODO: internationalize
+            if( setup.getLicenseFile( "en" ) != null ) {
                 setupEula();
             }
 
@@ -157,7 +158,8 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         String templateAcceptName = setup.getAppIdentifier()+"/accept-license";
         String templateErrorName = setup.getAppIdentifier()+"/error-license";
         try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) );
-             BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile() ) )) {
+        	// TODO: internationalize
+            BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile( "en" ) ) )) {
             fw.write( "Template: " + templateLicenseName + "\n" );
             fw.write( "Type: note\n" );
             fw.write( "Description: License agreement\n" );

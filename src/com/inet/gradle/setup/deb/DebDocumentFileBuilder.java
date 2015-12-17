@@ -91,7 +91,8 @@ class DebDocumentFileBuilder {
 		controlWriter.write( "File: *" + NEWLINE);
 		controlWriter.write( "Copyright: 2011-" + Calendar.getInstance().get(Calendar.YEAR) + " i-net software" + NEWLINE);
 		controlWriter.write( "License: commercial" + NEWLINE);
-		File license = setup.getLicenseFile();
+        // TODO: internationalize
+		File license = setup.getLicenseFile( "en" );
 		if(license != null) {
 		    FileReader reader = new FileReader(license);
 		    int c = reader.read();
