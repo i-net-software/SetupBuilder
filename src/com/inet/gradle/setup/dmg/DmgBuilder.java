@@ -189,13 +189,15 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( TempPath.getTempString( "distribution.xml" ) );
         command.add( "--package-path" );
         command.add( TempPath.get( "packages" ).toString() );
+        
+        // Sign the final package
+        if ( task.getCodeSign() != null ) {
+            command.add( "--sign" );
+            command.add( task.getCodeSign().getIdentifier() );
+        }
+
         command.add( imageSourceRoot + "/" + applicationIdentifier + ".pkg" );
     	exec( command );
-    	
-    	// Sign the final package
-    	if ( task.getCodeSign() != null ) {
-    		task.getCodeSign().signApplication( new File( imageSourceRoot, applicationIdentifier + ".pkg" ).getAbsoluteFile() );
-    	}
 
     	Files.copy( new File(imageSourceRoot + "/" + applicationIdentifier + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
@@ -256,7 +258,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 	}
 
 	/**
-	 * Patch the distriubiton file withn custom settings 
 	 * @throws Throwable in case of errors
 	 */
 	private void patchDistributionXML() throws Throwable {

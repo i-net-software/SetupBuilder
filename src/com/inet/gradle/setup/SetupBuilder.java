@@ -117,7 +117,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      * Set a command that run run before the uninstaller.
      * @param closue the command
      */
-    public void runBeforeUninstall( Closure<?> closue ) {
+    public void runBeforeUninstall( Closure<DesktopStarter> closue ) {
         runBeforeUninstall = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
     }
 
@@ -126,7 +126,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      * 
      * @param closue the closure of the service definition
      */
-    public void service( Closure closue ) {
+    public void service( Closure<Service> closue ) {
         Service service = ConfigureUtil.configure( closue, new Service( this ) );
         services.add( service );
     }
