@@ -282,6 +282,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
             throw new IllegalArgumentException( "Template does not contains a installer-gui-script root: " + distribution.getTagName() );
         }
 
+        // The title of the installer
+        Element title = xmlFile.getOrCreateChild( distribution, "title" );
+        xmlFile.addNodeText( title, applicationName);
+
         // Product node
         File backgroundImage = task.getSetupBackgroundImage();
         if ( backgroundImage != null ) {

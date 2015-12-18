@@ -91,6 +91,16 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
             el.setAttribute( name, value );
         }
     }
+    
+    /**
+     * Adds Text content to a node 
+     * @param el Node
+     * @param text content
+     */
+    public void addNodeText( Element el, String text ) {
+    	Document doc = el.getOwnerDocument();
+    	el.appendChild( doc.createTextNode( text ) );
+    }
 
     public Element getOrCreateChild( Node parent, String name ) {
         return getOrCreateChild( parent, name, true );
