@@ -240,7 +240,7 @@ public class AbstractSetupBuilder implements SetupSources {
      */
     public Object getIcons() {
     	if ( icons == null ) {
-    		throw new IllegalArgumentException( "You have to specify a valif icon file" );
+    		throw new IllegalArgumentException( "You have to specify a valid icon file" );
     	}
     	
         return icons;
