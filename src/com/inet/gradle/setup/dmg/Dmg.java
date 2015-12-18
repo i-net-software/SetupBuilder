@@ -36,7 +36,7 @@ import groovy.lang.Closure;
  */
 public class Dmg extends AbstractSetupTask {
 
-    private Object backgroundImage, setupBackground;
+    private Object backgroundImage, setupBackground, setupIcon;
     private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 16;
 	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
 	
@@ -233,6 +233,23 @@ public class Dmg extends AbstractSetupTask {
 	 */
 	public void setSetupBackgroundImage( Object setupBackground ) {
 		this.setupBackground = setupBackground;
+	}
+
+	/**
+	 * @return the setupIcon
+	 */
+	public Object getSetupIcon() {
+		if ( setupIcon == null ) {
+			return getSetupBuilder().getIcons();
+		}
+		return setupIcon;
+	}
+
+	/**
+	 * @param setupIcon the setupIcon to set
+	 */
+	public void setSetupIcon(Object setupIcon) {
+		this.setupIcon = setupIcon;
 	}
 
 }

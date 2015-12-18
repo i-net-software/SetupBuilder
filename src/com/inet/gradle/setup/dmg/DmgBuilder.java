@@ -38,6 +38,7 @@ import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
@@ -48,7 +49,6 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
 public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
 	private String applicationName, applicationIdentifier, imageSourceRoot;
-	private File iconFile;
 	private SetupBuilder setup;
 
     /**
@@ -87,7 +87,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
             applicationIdentifier = setup.getAppIdentifier();
             applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + setup.getApplication() + ".app";
-            iconFile = setup.getIconForType( buildDir, "icns" );
 
         	if ( !setup.getServices().isEmpty() ) {
         		// Create installer package
@@ -208,7 +207,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( imageSourceRoot + "/" + applicationIdentifier + ".pkg" );
     	exec( command );
 
-    	Files.copy( new File(imageSourceRoot + "/" + applicationIdentifier + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+    	packageApplescript();
+    	Files.copy( new File(imageSourceRoot, applicationIdentifier + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
@@ -406,7 +406,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         
     	// Copy Icon as file icon into attached container 
         File iconDestination = TempPath.getTempFile(applicationName, ".VolumeIcon.icns" );
-		Files.copy( iconFile.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.copy( setup.getIconForType( buildDir, "icns" ).toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     	
     	ArrayList<String> command = new ArrayList<>();
         command.add( "SetFile" );
@@ -457,6 +457,24 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
 
+    /**
+     * run a Script for the Package.
+     * @throws IOException exception
+     */
+    private void packageApplescript() throws IOException {
+    	
+    	Template applescript = new Template( "dmg/template/package.applescript.txt" );
+    	applescript.setPlaceholder("icon", ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns").getAbsolutePath() ); 
+    	applescript.setPlaceholder("package", new File(imageSourceRoot, applicationIdentifier + ".pkg").getAbsolutePath() );
+
+    	ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/bin/osascript" );
+        
+        System.out.println( "Setting DMG display options." );
+        System.out.println( applescript );
+        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
+    }
+    
     /**
      * convert to final image
      */
