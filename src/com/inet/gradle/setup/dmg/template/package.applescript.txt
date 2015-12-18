@@ -4,6 +4,7 @@ set theItem to (POSIX file "{{package}}") as alias
 tell application "Preview"
     activate
     open newIcon
+    delay 1
 end tell
 tell application "System Events"
     tell process "Preview"
@@ -13,11 +14,11 @@ end tell
 tell application "Preview" to quit
 
 tell application "Finder"
+    activate
     set infoWindow to open information window of theItem
     set infoWindowName to name of infoWindow
 end tell
 
-tell application "Finder" to activate
 tell application "System Events"
     tell application process "Finder"
         tell window infoWindowName
