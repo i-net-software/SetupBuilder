@@ -41,6 +41,7 @@ public class Dmg extends AbstractSetupTask {
 	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
 	
 	private List<LocalizedResource> welcomePages =  new ArrayList<>();
+	private List<LocalizedResource> conclusionPages =  new ArrayList<>();
 
 	/**
      * Create the task.
@@ -161,7 +162,33 @@ public class Dmg extends AbstractSetupTask {
         return codeSign;
     }
 
+    /**
+     * Return the welcome page list
+     * Allowed Format: rtf, rtfd, txt, html
+     * @return welcome page
+     */
+    public List<LocalizedResource> getConclusionPages() {
+        return conclusionPages;
+    }
 
+    /**
+     * Set the welcome page
+     * Allowed Format: rtf, rtfd, txt, html
+     * @param conclusionPage which is shown at the end
+     */
+    public void conclusionPage( Object conclusionPage ) {
+    	
+    	LocalizedResource res = new LocalizedResource( getSetupBuilder() );
+    	if ( conclusionPage instanceof Closure<?> ) {
+    		res = ConfigureUtil.configure((Closure<?>)conclusionPage, res);
+    	} else {
+        	res.setLocale( "en" );
+        	res.setResource( conclusionPage );
+    	}
+    	
+    	conclusionPages.add( res );
+    }
+    
     /**
      * Return the welcome page list
      * Allowed Format: rtf, rtfd, txt, html
@@ -174,7 +201,7 @@ public class Dmg extends AbstractSetupTask {
     /**
      * Set the welcome page
      * Allowed Format: rtf, rtfd, txt, html
-     * @param welcomePage license file
+     * @param welcomePage welcome page file
      */
     public void welcomePage( Object welcomePage ) {
     	

@@ -279,7 +279,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         
         Element distribution = (Element)xmlFile.doc.getFirstChild();
         if( !"installer-gui-script".equals( distribution.getTagName() ) ) {
-            throw new IllegalArgumentException( "Template does not contains a installer-gui-script root: " + distribution.getTagName() );
+            throw new IllegalArgumentException( "Template does not contain an installer-gui-script root: " + distribution.getTagName() );
         }
 
         // The title of the installer
@@ -290,7 +290,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         File backgroundImage = task.getSetupBackgroundImage();
         if ( backgroundImage != null ) {
         	Files.copy( backgroundImage.toPath(), TempPath.getTempFile("resources", backgroundImage.getName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-	        Element background = xmlFile.getOrCreateChildById( distribution, "background", "*", false );
+	        Element background = xmlFile.getOrCreateChild( distribution, "background", false );
 	        xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
 	        xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
 	        xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
@@ -302,7 +302,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
             if ( welcomePage != null ) {
             	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "Welcome").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            	Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
+            	Element license = xmlFile.getOrCreateChild( distribution, "license", false );
             	xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
             }
 		}
@@ -313,11 +313,21 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
             File licenseFile = checkSetupTextFile( localizedResource.getResource() );
             if ( licenseFile != null ) {
             	Files.copy( licenseFile.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "License").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            	Element license = xmlFile.getOrCreateChildById( distribution, "license", "*", false );
+            	Element license = xmlFile.getOrCreateChild( distribution, "license", false );
             	xmlFile.addAttributeIfNotExists( license, "file", "License" );
             }
 		}
-    
+
+        // Conclusion Node
+        List<LocalizedResource> conclusionPages = task.getConclusionPages();
+        for (LocalizedResource localizedResource : conclusionPages) {
+            File welcomePage = checkSetupTextFile( localizedResource.getResource() );
+            if ( welcomePage != null ) {
+            	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "Conclusion").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            	Element license = xmlFile.getOrCreateChild( distribution, "conclusion", false );
+            	xmlFile.addAttributeIfNotExists( license, "file", "Conclusion" );
+            }
+		}   
         xmlFile.save();
 	}
 
