@@ -198,6 +198,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         if ( task.getCodeSign() != null ) {
             command.add( "--sign" );
             command.add( task.getCodeSign().getIdentifier() );
+            
+            if ( task.getCodeSign().getKeychain() != null ) {
+                command.add( "--keychain" );
+                command.add( task.getCodeSign().getKeychain() );
+            }
         }
 
         command.add( imageSourceRoot + "/" + applicationIdentifier + ".pkg" );
