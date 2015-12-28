@@ -157,6 +157,29 @@ class RpmControlFileBuilder {
 	 */
 	private void putPreun(OutputStreamWriter controlWriter)  throws IOException {
 		controlWriter.write(NEWLINE + "%preun" + NEWLINE);
+		
+		DesktopStarter starter = setup.getRunBeforeUninstall();
+		if(starter != null ) {
+			String executable = starter.getExecutable();
+			String mainClass = starter.getMainClass();
+			String workingDir = starter.getWorkDir();
+			if( executable != null ) {
+				if( workingDir != null ) {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " & )" + NEWLINE);
+				} else {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " & )" + NEWLINE);	
+				}
+				
+			} else if( mainClass != null ) {
+				if( workingDir != null ) {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )" + NEWLINE);
+				} else {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )"  + NEWLINE);	
+				}
+			}
+		}
+		
+		
 		ArrayList<String> preuns = rpm.getPreun();
 		for (String preun : preuns) {
 			controlWriter.write(preun + NEWLINE);	
