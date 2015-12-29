@@ -160,6 +160,7 @@ class RpmControlFileBuilder {
 		
 		DesktopStarter starter = setup.getRunBeforeUninstall();
 		if(starter != null ) {
+			controlWriter.write(NEWLINE);
 			String executable = starter.getExecutable();
 			String mainClass = starter.getMainClass();
 			String workingDir = starter.getWorkDir();
@@ -177,6 +178,7 @@ class RpmControlFileBuilder {
 					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )"  + NEWLINE);	
 				}
 			}
+			controlWriter.write(NEWLINE);
 		}
 		
 		
