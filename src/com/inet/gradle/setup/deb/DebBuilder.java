@@ -83,8 +83,14 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             // removes only the files in the installation path
     		List<String> del_files = setup.getDeleteFiles();
     		for (String file : del_files) {
-    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -f \""+ task.getInstallationRoot() + "/" + file + "\"\n" );
-    			controlBuilder.addTailScriptFragment( Script.POSTRM, "rm -f \"" + task.getInstallationRoot() + "/" + file + "\"\n" );
+    			controlBuilder.addTailScriptFragment( Script.PREINST, "if [ -f \"" + task.getInstallationRoot() + "/" + file + "\" ]; then\n  rm -f \""+ task.getInstallationRoot() + "/" + file + "\"\nfi\n" );
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "if [ -f \"" + task.getInstallationRoot() + "/" + file + "\" ]; then\n  rm -f \"" + task.getInstallationRoot() + "/" + file + "\"\nfi\n" );
+    		}
+    		// removes only the folders in the installation path
+    		List<String> del_folders = setup.getDeleteFolders();
+    		for (String folder : del_folders) {
+    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -R -f \""+ task.getInstallationRoot() + "/" + folder + "\"\n" );
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "rm -R -f \"" + task.getInstallationRoot() + "/" + folder + "\"\n" );
     		}
     		
     		DesktopStarter starter = setup.getRunAfter();
@@ -108,6 +114,26 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			}
     		}
             
+    		DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
+    		if(runBeforeUninstall != null ) {
+    			String executable = runBeforeUninstall.getExecutable();
+    			String mainClass = runBeforeUninstall.getMainClass();
+    			String workingDir = runBeforeUninstall.getWorkDir();
+    			if( executable != null ) {
+    				if( workingDir != null ) {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )\n" );
+    				} else {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )\n" );	
+    				}
+    				
+    			} else if( mainClass != null ) {
+    				if( workingDir != null ) {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")\n");
+    				} else {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")\n");	
+    				}
+    			}
+    		}
     		
     		
             controlBuilder.build();
