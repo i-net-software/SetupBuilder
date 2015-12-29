@@ -194,7 +194,7 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"" + NEWLINE);	
+			controlWriter.write("if [ -f \"${RPM_INSTALL_PREFIX}/" + file + "\" ]; then\n  rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"\nfi" + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
@@ -224,7 +224,7 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"" + NEWLINE);	
+			controlWriter.write("if [ -f \"${RPM_INSTALL_PREFIX}/" + file + "\" ]; then\n  rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"\nfi" + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
