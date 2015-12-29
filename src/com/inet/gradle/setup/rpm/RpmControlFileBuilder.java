@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -166,16 +168,16 @@ class RpmControlFileBuilder {
 			String workingDir = starter.getWorkDir();
 			if( executable != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " & )" + NEWLINE);
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " & )" + NEWLINE);	
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " )" + NEWLINE);	
 				}
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )" + NEWLINE);
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )"  + NEWLINE);	
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )"  + NEWLINE);	
 				}
 			}
 			controlWriter.write(NEWLINE);
@@ -311,6 +313,10 @@ class RpmControlFileBuilder {
 		
 		if(setup.getServices() != null && setup.getServices().size() > 0) {
 			controlWriter.write("%config /etc/init.d/*" + NEWLINE);	
+		}
+		
+		if( setup.getLicenseFiles() != null && setup.getLicenseFiles().size() > 0) {
+			controlWriter.write( "/usr/share/licenses/**/*" + NEWLINE);
 		}
 		
 	}

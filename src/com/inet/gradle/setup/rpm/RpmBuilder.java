@@ -28,10 +28,10 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.AbstractBuilder;
 import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.rpm.RpmControlFileBuilder.Script;
 
 public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
@@ -89,6 +89,13 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
             
             for( DesktopStarter starter : setup.getDesktopStarters() ) {
                 setupStarter( starter );
+            }
+            
+            // copy the license files
+            for( LocalizedResource license : setup.getLicenseFiles()) {
+            	File licensetarget = new File(buildDir.getAbsolutePath() + "/BUILD/usr/share/licenses/" + setup.getApplication() + "/" + license.getResource().getName());
+            	licensetarget.mkdirs();
+            	Files.copy(license.getResource().toPath(), licensetarget.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }
             
             controlBuilder.build();
