@@ -16,7 +16,6 @@
 package com.inet.gradle.setup.msi;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.w3c.dom.Element;
 
@@ -50,9 +49,9 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
      * Create the XML file.
      * 
      * @return the created file
-     * @throws IOException if an error occurs on reading the image files
+     * @throws Exception if an error occurs on reading the image files
      */
-    File build() throws IOException {
+    File build() throws Exception {
         String exe = launch.getExecutable();
         if( exe == null ) {
             throw new RuntimeException( "No executable set for launch4j." );
@@ -111,6 +110,11 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
         }
         getOrCreateChild( versionInfo, "internalName" ).setTextContent( exe );
 
+        Launch4jManifest manifest = new Launch4jManifest( launch, task, setup );
+        manifest.build();
+        manifest.save();
+        getOrCreateChild( launch4jConfig, "manifest" ).setTextContent( manifest.xmlFile.getAbsolutePath() );
+
         return outfile;
     }
 
@@ -120,7 +124,7 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
      * @param version current version
      * @return normalize version
      */
-    private String normalizeVersionNumber( String version ) {
+    static String normalizeVersionNumber( String version ) {
         String[] digits = version.split( "[.]" );
         StringBuilder newVersion = new StringBuilder();
         int count = 0;
