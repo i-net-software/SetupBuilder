@@ -80,7 +80,15 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
         Element jre = getOrCreateChild( launch4jConfig, "jre" );
         Object bundleJRE = setup.getBundleJre();
         if( bundleJRE != null ) {
-            getOrCreateChild( jre, "path" ).setTextContent( setup.getBundleJreTarget() );
+            String jreTarget = setup.getBundleJreTarget();
+            String workDir = launch.getWorkDir();
+            if( workDir != null && !workDir.isEmpty() ) {
+                int count = workDir.split( "[/\\\\]" ).length;
+                for( int i = 0; i < count; i++ ) {
+                    jreTarget = "..\\" + jreTarget;
+                }
+            }
+            getOrCreateChild( jre, "path" ).setTextContent( jreTarget );
         } else {
             getOrCreateChild( jre, "minVersion" ).setTextContent( System.getProperty( "java.version" ) );
         }
