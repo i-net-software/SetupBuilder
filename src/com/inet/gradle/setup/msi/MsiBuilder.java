@@ -15,6 +15,8 @@
  */
 package com.inet.gradle.setup.msi;
 
+import groovy.lang.Closure;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -119,7 +121,8 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             for( DesktopStarter launch : task.getLaunch4js() ) {
                 File file = creator.create( launch, task, setup );
                 signTool( file );
-                CopySpec copySpec = task.from( file );
+                CopySpec copySpec = task.getProject().copySpec( (Closure<CopySpec>)null );
+                copySpec.from( file );
                 String workDir = launch.getWorkDir();
                 if( workDir != null && !workDir.isEmpty() ) {
                     copySpec.into( workDir );
