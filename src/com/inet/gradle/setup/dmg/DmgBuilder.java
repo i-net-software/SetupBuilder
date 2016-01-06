@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -406,7 +406,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         
     	// Copy Icon as file icon into attached container 
         File iconDestination = TempPath.getTempFile(applicationName, ".VolumeIcon.icns" );
-		Files.copy( setup.getIconForType( buildDir, "icns" ).toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        File icons = setup.getIconForType( buildDir, "icns" );
+        if ( icons == null ) {
+            throw new IllegalArgumentException( "You have to specify a valid icon file" );
+        }
+        Files.copy( icons.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     	
     	ArrayList<String> command = new ArrayList<>();
         command.add( "SetFile" );

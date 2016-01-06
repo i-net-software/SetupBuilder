@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,13 +239,9 @@ public class AbstractSetupBuilder implements SetupSources {
      * @return the icons
      */
     public Object getIcons() {
-    	if ( icons == null ) {
-    		throw new IllegalArgumentException( "You have to specify a valid icon file" );
-    	}
-    	
         return icons;
     }
-    
+
     /**
      * Retrieve a specific icon from the icons set for the setup
      * @param buildDir directory in which to put the icon

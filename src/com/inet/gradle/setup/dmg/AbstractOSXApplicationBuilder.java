@@ -1,3 +1,19 @@
+/*
+ * Copyright 2015 - 2016 i-net software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.inet.gradle.setup.dmg;
 
 import java.io.ByteArrayOutputStream;
@@ -15,7 +31,6 @@ import com.inet.gradle.setup.AbstractSetupBuilder;
 import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.DocumentType;
-import com.inet.gradle.setup.image.ImageFactory;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
@@ -171,7 +186,11 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 	 * @throws IOException when there are errors while getting the file
 	 */
 	protected File getApplicationIcon() throws IOException {
-		return setup.getIconForType( buildDir, "icns");
+        File icons = setup.getIconForType( buildDir, "icns");
+        if ( icons == null ) {
+            throw new IllegalArgumentException( "You have to specify a valid icon file" );
+        }
+        return icons;
 	}
 
 	/**
