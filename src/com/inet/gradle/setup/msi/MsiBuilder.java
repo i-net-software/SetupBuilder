@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
                 File file = creator.create( launch, task, setup );
                 signTool( file );
                 CopySpec copySpec = task.getProject().copySpec( (Closure<CopySpec>)null );
+                task.with( copySpec );
                 copySpec.from( file );
                 String workDir = launch.getWorkDir();
                 if( workDir != null && !workDir.isEmpty() ) {
