@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,7 +44,6 @@ import org.w3c.dom.Element;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.ResourceUtils;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
@@ -149,6 +149,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         setMinimumOsVersion( product );
 
+        addMultiInstanceTransforms( product, installDir );
         addBundleJre( installDir );
         addGUI( product );
         addIcon( product );
@@ -252,6 +253,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         components.add( compID );
         Element component = getOrCreateChildById( dir, "Component", compID );
         addAttributeIfNotExists( component, "Guid", getGuid( compID ) );
+        if( task.getMultiInstanceCount() > 1 ) {
+            addAttributeIfNotExists( component, "MultiInstance", "yes" );
+        }
         return component;
     }
 
@@ -856,13 +860,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a registry key.
+     * 
      * @param component parent component
      * @param root The root of the key like HKLM, HKCU, HKMU
      * @param id the id for the key
      * @param key the key
      * @return the element to add values
      */
-    private Element addRegistryKey( Element component, String root, String id, String key ){
+    private Element addRegistryKey( Element component, String root, String id, String key ) {
         Element regkey = getOrCreateChildById( component, "RegistryKey", id );
         addAttributeIfNotExists( regkey, "Root", root );
         addAttributeIfNotExists( regkey, "Key", key );
@@ -874,7 +879,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Add a registry value.
      * 
      * @param regkey the parent registry key
-     * @param name the value name
+     * @param name the value name, null use the default value of a key
      * @param type the type
      * @param value the value
      * @return the value node
@@ -1051,7 +1056,84 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param id a parameter as random input
      * @return the GUID
      */
-    String getGuid( String id ) {
+    private String getGuid( String id ) {
         return UUID.nameUUIDFromBytes( (setup.getVendor() + setup.getApplication() + id).getBytes() ).toString();
+    }
+
+    /**
+     * Add the settings for multiple instances
+     * 
+     * @param product the product node in the XML.
+     * @param installDir referent to INSTALLDIR
+     * @throws IOException If an I/O error occur on loading resources
+     */
+    private void addMultiInstanceTransforms( Element product, Element installDir ) throws IOException {
+        int instanceCount = task.getMultiInstanceCount();
+        if( instanceCount <= 1 ) {
+            return;
+        }
+        // http://windows-installer-xml-wix-toolset.687559.n2.nabble.com/Multiple-Instance-Transforms-Walkthrough-Proposed-Simple-Addition-to-WiX-to-Make-Them-Easier-td708828.html
+
+        // define the property "INSTANCE_ID"
+        Element property = getOrCreateChildById( product, "Property", "INSTANCE_ID" );
+        addAttributeIfNotExists( property, "Value", "Instance_0" );
+
+        // define the property "InstancesCount"
+        property = getOrCreateChildById( product, "Property", "InstancesCount" );
+        addAttributeIfNotExists( property, "Value", Integer.toString( instanceCount ) );
+
+        // add instance count InstanceTransforms
+        Element transforms = getOrCreateChildByKeyValue( product, "InstanceTransforms", "Property", "INSTANCE_ID" );
+        for( int i = 0; i < instanceCount; i++ ) {
+            String id = "Instance_" + i;
+            Element instance = getOrCreateChildById( transforms, "Instance", id );
+            addAttributeIfNotExists( instance, "ProductCode", "*" );
+            addAttributeIfNotExists( instance, "UpgradeCode", getGuid( id ) );
+        }
+
+        // Get the sequence lists for the follow actions
+        Element uiSequence = getOrCreateChild( product, "InstallUISequence" ); // https://msdn.microsoft.com/en-us/library/aa372039(v=vs.85).aspx
+        Element executionSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+        Element action, custom;
+
+        // add a vbscript action to set the instance names
+        action = getOrCreateChildById( product, "CustomAction", "SetInstanceID" );
+        addAttributeIfNotExists( action, "Script", "vbscript" );
+        try( Scanner scanner = new Scanner( task.getMultiInstanceScript().openStream() ) ) {
+            String vbscript = scanner.useDelimiter( "\\A" ).next();
+            vbscript = vbscript.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
+            action.setTextContent( vbscript );
+        }
+        custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetInstanceID" );
+        addAttributeIfNotExists( custom, "Before", "ExecuteAction" );
+
+        // add a action to set the property TRANSFORM
+        action = getOrCreateChildById( product, "CustomAction", "SetTransforms" );
+        addAttributeIfNotExists( action, "Property", "TRANSFORMS" );
+        addAttributeIfNotExists( action, "Value", "{:[INSTANCE_ID];}[TRANSFORMS]" );
+        custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetTransforms" );
+        addAttributeIfNotExists( custom, "After", "SetInstanceID" );
+        custom.setTextContent( "ACTION = \"INSTALL\"" );
+
+        // add a action to set the property MSINEWINSTANCE
+        action = getOrCreateChildById( product, "CustomAction", "SetMsiNewInstance" );
+        addAttributeIfNotExists( action, "Property", "MSINEWINSTANCE" );
+        addAttributeIfNotExists( action, "Value", "1" );
+        custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetMsiNewInstance" );
+        addAttributeIfNotExists( custom, "After", "SetInstanceID" );
+        custom.setTextContent( "ACTION = \"INSTALL\"" );
+
+        // set the ProductName properties from the property PRODUCT_NAME of the vbscript
+        action = getOrCreateChildById( product, "CustomAction", "SetProductName" );
+        addAttributeIfNotExists( action, "Property", "ProductName" );
+        addAttributeIfNotExists( action, "Value", "[PRODUCT_NAME]" );
+        custom = getOrCreateChildByKeyValue( executionSequence, "Custom", "Action", "SetProductName" );
+        addAttributeIfNotExists( custom, "Before", "ValidateProductID" );
+        custom.setTextContent( "PRODUCT_NAME" );
+
+        // add the registry key with instance path
+        Element component = getComponent( installDir, "instance_path" );
+        Element key = addRegistryKey( component, "HKLM", "instance_path_reg", "Software\\" + setup.getVendor() + "\\" + setup.getApplication() + "\\Instances\\[INSTANCE_NUMBER]" );
+        addRegistryValue( key, null, "string", "[INSTALLDIR]" );
     }
 }
