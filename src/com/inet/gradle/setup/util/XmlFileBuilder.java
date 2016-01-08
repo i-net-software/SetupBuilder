@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.inet.gradle.setup.util;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -135,16 +136,30 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         return getOrCreateChildByKeyValue( parent, name, key, value, true );
     }
 
+    /**
+     * Get or create a child element.
+     * 
+     * @param parent the parent node in which we search and create
+     * @param name The tag name of the element
+     * @param key the name of an attribute, can't be null
+     * @param value the value, can be null for not existing
+     * @param append true, append at end of the children; false, add at top of the children
+     * @return the create of find Element
+     */
     public Element getOrCreateChildByKeyValue( Node parent, String name, String key, String value, boolean append ) {
         Node first = parent.getFirstChild();
         for( Node child = first; child != null; child = child.getNextSibling() ) {
-            if( name.equals( child.getNodeName() ) && value.equals( ((Element)child).getAttribute( key ) ) ) {
-                return (Element)child;
+            if( name.equals( child.getNodeName() ) ) {
+                if( Objects.equals( value, ((Element)child).getAttribute( key ) ) || (value == null && !((Element)child).hasAttribute( key )) ) {
+                    return (Element)child;
+                }
             }
         }
         Document doc = parent.getOwnerDocument();
         Element child = doc.createElement( name );
-        child.setAttribute( key, value );
+        if( value != null ) {
+            child.setAttribute( key, value );
+        }
         if( append || first == null ) {
             parent.appendChild( child );
         } else {
