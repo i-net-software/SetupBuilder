@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class Launch4jCreator {
     private ClassLoader getClassLoader( Project project, File buildDir ) throws IOException {
         if( lauch4jClassLoader == null ) {
             String configName = "setupLaunch4j";
-            Configuration config = project.getConfigurations().create( configName );
+            Configuration config = project.getConfigurations().maybeCreate( configName );
             config.setVisible( false );
             config.setTransitive( false );
             DependencyHandler dependencies = project.getDependencies();
