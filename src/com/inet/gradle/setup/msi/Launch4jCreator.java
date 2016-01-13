@@ -79,13 +79,16 @@ public class Launch4jCreator {
     private ClassLoader getClassLoader( Project project, File buildDir ) throws IOException {
         if( lauch4jClassLoader == null ) {
             String configName = "setupLaunch4j";
-            Configuration config = project.getConfigurations().maybeCreate( configName );
-            config.setVisible( false );
-            config.setTransitive( false );
-            DependencyHandler dependencies = project.getDependencies();
-            dependencies.add( configName, "net.sf.launch4j:launch4j:3.8.0" );
-            dependencies.add( configName, "net.sf.launch4j:launch4j:3.8.0:workdir-win32" );
-            dependencies.add( configName, "com.thoughtworks.xstream:xstream:1.4.8" );
+            Configuration config = project.getConfigurations().findByName( configName );
+            if( config == null ) {
+                config = project.getConfigurations().create( configName );
+                config.setVisible( false );
+                config.setTransitive( false );
+                DependencyHandler dependencies = project.getDependencies();
+                dependencies.add( configName, "net.sf.launch4j:launch4j:3.8.0" );
+                dependencies.add( configName, "net.sf.launch4j:launch4j:3.8.0:workdir-win32" );
+                dependencies.add( configName, "com.thoughtworks.xstream:xstream:1.4.8" );
+            }
 
             ArrayList<URL> urls = new ArrayList<>();
             File libDir = new File( buildDir, "launch4jlib" );
