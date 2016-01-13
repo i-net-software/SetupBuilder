@@ -102,7 +102,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
             // signing and moving the final msi file
             signTool( mui );
-            Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getArchiveName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
+            Files.move( mui.toPath(), task.getSetupFile().toPath(), StandardCopyOption.REPLACE_EXISTING );
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {

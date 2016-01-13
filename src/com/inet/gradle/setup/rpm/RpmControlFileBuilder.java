@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -334,7 +334,7 @@ class RpmControlFileBuilder {
 			release = "1";
 		}
 		controlWriter.write("cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm " + setup.getDestinationDir().getAbsolutePath() + NEWLINE);
-		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + setup.getDestinationDir().getAbsolutePath() + "/" + setup.getAppIdentifier() + "-" + setup.getVersion() + ".rpm" + NEWLINE);
+		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + rpm.getSetupFile() + NEWLINE);
 		ArrayList<String> cleans = rpm.getClean();
 		for (String clean : cleans) {
 			controlWriter.write(clean + NEWLINE);	
