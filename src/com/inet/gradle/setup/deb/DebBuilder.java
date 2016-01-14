@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
-import com.inet.gradle.setup.image.ImageFactory;
 
 public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
 
@@ -382,7 +381,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
             //    		command.add( "-d" );
-            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getArchiveName() + "." + task.getExtension() );
+            command.add( task.getSetupFile().getPath() );
             exec( command );
         }
     }
@@ -396,7 +395,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         command.add( "dpkg-deb" );
         command.add( "--build" );
         command.add( buildDir.getAbsolutePath() );
-        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getArchiveName() + "." + task.getExtension() );
+        command.add( task.getSetupFile().getPath() );
         exec( command );
     }
 

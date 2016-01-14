@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
+import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.FileLookup;
 import org.gradle.api.internal.file.FileResolver;
@@ -60,7 +63,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
 	private AbstractSetupBuilder setupBuilder;
 
-	private String extension;
+	private String extension, classifier;
 
 	/**
 	 * Constructor with indication to artifact result
@@ -87,7 +90,8 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         if( !setupFile.exists() ) {
             throw new GradleException( "Setup file was not created: " + setupFile );
         }
-        getProject().getArtifacts().add( "archives", setupFile );
+        Configuration archives = getProject().getConfigurations().getByName( "archives" );
+        archives.getArtifacts().add( new DefaultPublishArtifact( setupBuilder.getAppIdentifier(), extension, extension, classifier, new Date(setupFile.lastModified()), setupFile, this ) );
     }
 
     /**
@@ -232,7 +236,14 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      */
     @OutputFile
     public File getSetupFile() {
-        return new File( setupBuilder.getDestinationDir(), setupBuilder.getArchiveName() + "." + getExtension() );
+        StringBuilder setupFile = new StringBuilder(setupBuilder.getArchiveName());
+        if( getClassifier() != null && !getClassifier().isEmpty() ) {
+            setupFile.append( '-' );
+            setupFile.append( getClassifier() );
+        }
+        setupFile.append( '.' );
+        setupFile.append( getExtension() );
+        return new File( setupBuilder.getDestinationDir(), setupFile.toString() );
     }
 
     /**
@@ -252,7 +263,25 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
     public void setExtension( String extension ) {
         this.extension = extension;
     }
-    
+
+    /**
+     * Returns the classifier part of the installer, if any.
+     *
+     * @return The classifier. May be null.
+     */
+    public String getClassifier() {
+        return classifier;
+    }
+
+    /**
+     * Set the classifier part of the installer.
+     *
+     * @param classifier The classifier. May be null.
+     */
+    public void setClassifier(String classifier) {
+        this.classifier = classifier;
+    }
+
     /**
      * {@inheritDoc}
      */
