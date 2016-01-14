@@ -288,21 +288,43 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupStarter( DesktopStarter starter ) throws IOException {
-        String unixName = starter.getExecutable();
+        String unixName = starter.getDisplayName(); 
         String consoleStarterPath = "usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
+            if(starter.getExecutable() != null) {
+            	fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
+            } else {
             fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
                 + starter.getStartArguments() + " \"$@\"" );
+            }
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
 
         for( int size : iconSizes ) {
             File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
+            File iconDir2 = new File( buildDir, "usr/share/pixmaps/" );
             iconDir.mkdirs();
+            iconDir2.mkdirs();
             File scaledFile = setup.getIconForType( iconDir, "png" + size );
             if( scaledFile != null ) {
-                File iconFile = new File( iconDir, unixName + ".png" );
+            	File iconFile;
+            	if(starter.getIcons() != null) {
+            		iconFile = new File( iconDir, starter.getIcons().toString() );
+            	} else {
+            		iconFile = new File( iconDir, unixName + ".png" );
+            	}
+                scaledFile.renameTo( iconFile );
+                DebUtils.setPermissions( iconFile, false );
+            }
+            scaledFile = setup.getIconForType( iconDir2, "png" + size );
+            if( scaledFile != null ) {
+            	File iconFile;
+            	if(starter.getIcons() != null) {
+            		iconFile = new File( iconDir2, starter.getIcons().toString() );
+            	} else {
+            		iconFile = new File( iconDir2, unixName + ".png" );
+            	}
                 scaledFile.renameTo( iconFile );
                 DebUtils.setPermissions( iconFile, false );
             }
@@ -311,8 +333,16 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             fw.write( "[Desktop Entry]\n" );
             fw.write( "Name=" + starter.getDisplayName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
-            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
-            fw.write( "Icon=" + unixName + "\n" );
+            if(starter.getExecutable() != null) {
+            	fw.write( "Exec=" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\n" );
+            } else {
+            	fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
+            }
+            if(starter.getIcons() != null) {
+            	fw.write( "Icon=" + starter.getIcons().toString() + "\n" );
+        	} else {
+        		fw.write( "Icon=" + unixName + "\n" );
+        	}
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
