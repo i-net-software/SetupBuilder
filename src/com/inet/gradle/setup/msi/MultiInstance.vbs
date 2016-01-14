@@ -1,6 +1,6 @@
 Option Explicit
 
-Dim installDir
+Dim installDir, transform
 installDir = Session.Property("INSTALLDIR")
 log installDir
 
@@ -8,10 +8,24 @@ Dim FSO, SHELL
 Set FSO = CreateObject("Scripting.FileSystemObject")
 Set SHELL = CreateObject("WScript.Shell")
 
+transform = Session.Property("TRANSFORMS")
+log "TRANSFORMS: " & transform
 
-Dim parentPath, name, isStandardFolder, instanceNumber
-installDir = FSO.GetAbsolutePathName( installDir ) ' normalize the case sensitivity
-Session.Property("INSTALLDIR") = installDir
+Dim instanceNumber
+If Not IsNull( transform ) And InStr( transform, ":Instance_" ) = 1 Then
+    instanceNumber = Mid( transform, 11 )
+    installDir = getInstallDir( instanceNumber )
+    If isNull( installDir ) Or installDir = "" Then
+        installDir = Session.Property("INSTALLDIR")
+    End If
+Else
+    installDir = FSO.GetAbsolutePathName( installDir ) ' normalize the case sensitivity
+    Session.Property("INSTALLDIR") = installDir
+
+    instanceNumber = CStr( getInstanceID(installDir) )
+End If
+
+Dim parentPath, name, isStandardFolder
 parentPath = FSO.GetParentFolderName( installDir )
 log "parent path: " & parentPath
 name = FSO.GetFileName( installDir )
@@ -24,8 +38,7 @@ If Not isStandardFolder Then
 End If
 log "product name: " + name
 
-instanceNumber = getInstanceID(installDir)
-Session.Property( "INSTANCE_NUMBER" ) = CStr( instanceNumber )
+Session.Property( "INSTANCE_NUMBER" ) = instanceNumber
 Session.Property( "INSTANCE_ID" ) = "Instance_" & instanceNumber
 log "instance: " + Session.Property( "INSTANCE_ID" )
 Session.Property( "ProductName" ) = name
@@ -116,9 +129,9 @@ End Function
 Function getInstanceID( installDir )
     Dim InstancesCount, Manufacturer, ProductName, i, instancesKey, reg, names
 
-    InstancesCount = 3 'Session.Property( "InstancesCount" )
-    ProductName = "i-net Test" 'Session.Property( "ProductName" )
-    Manufacturer = "i-net software GmbH" 'Session.Property( "Manufacturer" )
+    InstancesCount = Session.Property( "InstancesCount" )
+    ProductName = Session.Property( "ProductName" )
+    Manufacturer = Session.Property( "Manufacturer" )
     instancesKey = "Software\" & Manufacturer & "\" & ProductName & "\Instances"
 
     Const HKLM = &H80000002
@@ -152,4 +165,23 @@ Function getInstanceID( installDir )
 
     MsgBox "To many instances installed. The maximum of " & InstancesCount & " is already installed."
     getInstanceID = -1 ' this should produce an error in the calling setup because the ID does not exists
+End Function
+
+
+
+' =====================
+' Get the install directory for the given ID
+' =====================
+Function getInstallDir( instanceID )
+    Dim Manufacturer, ProductName, reg, value
+
+    ProductName = Session.Property( "ProductName" )
+    Manufacturer = Session.Property( "Manufacturer" )
+
+    Const HKLM = &H80000002
+
+    Set reg = GetObject("winmgmts:!root\default:StdRegProv")
+
+    reg.GetStringValue HKLM, "Software\" & Manufacturer & "\" & ProductName & "\Instances\" & instanceID, "", value
+    getInstallDir = value
 End Function

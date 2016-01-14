@@ -1093,19 +1093,21 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         // Get the sequence lists for the follow actions
         Element uiSequence = getOrCreateChild( product, "InstallUISequence" ); // https://msdn.microsoft.com/en-us/library/aa372039(v=vs.85).aspx
-        Element executionSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+        Element executionSequence = getOrCreateChild( product, "InstallExecuteSequence" ); // https://msdn.microsoft.com/en-us/library/aa372038(v=vs.85).aspx
         Element action, custom;
 
         // add a vbscript action to set the instance names
         action = getOrCreateChildById( product, "CustomAction", "SetInstanceID" );
         addAttributeIfNotExists( action, "Script", "vbscript" );
-        try( Scanner scanner = new Scanner( task.getMultiInstanceScript().openStream() ) ) {
-            String vbscript = scanner.useDelimiter( "\\A" ).next();
+        try( Scanner scanner = new Scanner( task.getMultiInstanceScript().openStream(), "UTF8" ) ) {
+            String vbscript = scanner.useDelimiter( "\\A" ).next(); // read the completely file into a string
             vbscript = vbscript.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
             action.setTextContent( vbscript );
         }
         custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetInstanceID" );
         addAttributeIfNotExists( custom, "Before", "ExecuteAction" );
+        custom = getOrCreateChildByKeyValue( executionSequence, "Custom", "Action", "SetInstanceID" );
+        addAttributeIfNotExists( custom, "Before", "ValidateProductID" );
 
         // add a action to set the property TRANSFORM
         action = getOrCreateChildById( product, "CustomAction", "SetTransforms" );
@@ -1128,7 +1130,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( action, "Property", "ProductName" );
         addAttributeIfNotExists( action, "Value", "[PRODUCT_NAME]" );
         custom = getOrCreateChildByKeyValue( executionSequence, "Custom", "Action", "SetProductName" );
-        addAttributeIfNotExists( custom, "Before", "ValidateProductID" );
+        addAttributeIfNotExists( custom, "After", "SetInstanceID" );
         custom.setTextContent( "PRODUCT_NAME" );
 
         // add the registry key with instance path
