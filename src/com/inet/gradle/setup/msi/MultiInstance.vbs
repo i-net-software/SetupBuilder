@@ -20,6 +20,9 @@ If Not IsNull( transform ) And InStr( transform, ":Instance_" ) = 1 Then
     End If
 Else
     installDir = FSO.GetAbsolutePathName( installDir ) ' normalize the case sensitivity
+    If Right( installDir, 1 ) <> "\" Then
+        installDir = installDir + "\"
+    End If
     Session.Property("INSTALLDIR") = installDir
 
     instanceNumber = CStr( getInstanceID(installDir) )
@@ -159,6 +162,7 @@ Function getInstanceID( installDir )
         reg.GetStringValue HKLM, instancesKey & "\" & i, "", value
         If IsNull( value ) Then
             getInstanceID = i
+            Session.Property("MSINEWINSTANCE") = "1"
             Exit Function
         End If
     Next

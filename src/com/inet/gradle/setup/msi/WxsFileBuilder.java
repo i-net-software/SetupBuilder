@@ -1114,7 +1114,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         // define the property "INSTANCE_ID"
         Element property = getOrCreateChildById( product, "Property", "INSTANCE_ID" );
-        addAttributeIfNotExists( property, "Value", "Instance_0" );
+        addAttributeIfNotExists( property, "Value", "NotSet" );
 
         // define the property "InstancesCount"
         property = getOrCreateChildById( product, "Property", "InstancesCount" );
@@ -1152,14 +1152,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( action, "Property", "TRANSFORMS" );
         addAttributeIfNotExists( action, "Value", "{:[INSTANCE_ID];}[TRANSFORMS]" );
         custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetTransforms" );
-        addAttributeIfNotExists( custom, "After", "SetInstanceID" );
-        custom.setTextContent( "ACTION = \"INSTALL\"" );
-
-        // add a action to set the property MSINEWINSTANCE
-        action = getOrCreateChildById( product, "CustomAction", "SetMsiNewInstance" );
-        addAttributeIfNotExists( action, "Property", "MSINEWINSTANCE" );
-        addAttributeIfNotExists( action, "Value", "1" );
-        custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetMsiNewInstance" );
         addAttributeIfNotExists( custom, "After", "SetInstanceID" );
         custom.setTextContent( "ACTION = \"INSTALL\"" );
 
