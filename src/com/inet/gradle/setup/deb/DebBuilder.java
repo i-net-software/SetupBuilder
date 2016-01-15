@@ -300,6 +300,15 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
 
+        String iconName = "";
+        if(starter.getIcons() != null) {
+    		iconName = starter.getIcons().toString();
+    		int index = iconName.lastIndexOf('/'); 
+    		if(index > -1) {
+    			iconName = iconName.substring(index+1);
+    		}
+        }
+        
         for( int size : iconSizes ) {
             File iconDir = new File( buildDir, "usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
             iconDir.mkdirs();
@@ -307,7 +316,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             if( scaledFile != null ) {
             	File iconFile;
             	if(starter.getIcons() != null) {
-            		iconFile = new File( iconDir, starter.getIcons().toString() );
+            		iconFile = new File( iconDir, iconName );
             	} else {
             		iconFile = new File( iconDir, unixName + ".png" );
             	}
@@ -322,10 +331,10 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             if(starter.getExecutable() != null) {
             	fw.write( "Exec=\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\"\n" );
             } else {
-            	fw.write( "Exec=\"/" + consoleStarterPath + " %F\"\n" );
+            	fw.write( "Exec=\"/" + consoleStarterPath + "\" %F\n" );
             }
             if(starter.getIcons() != null) {
-            	fw.write( "Icon=" + starter.getIcons().toString() + "\n" );
+            	fw.write( "Icon=" + iconName + "\n" );
         	} else {
         		fw.write( "Icon=" + unixName + "\n" );
         	}
