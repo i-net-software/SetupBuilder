@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;
 
 /**
@@ -157,6 +159,31 @@ class RpmControlFileBuilder {
 	 */
 	private void putPreun(OutputStreamWriter controlWriter)  throws IOException {
 		controlWriter.write(NEWLINE + "%preun" + NEWLINE);
+		
+		DesktopStarter starter = setup.getRunBeforeUninstall();
+		if(starter != null ) {
+			controlWriter.write(NEWLINE);
+			String executable = starter.getExecutable();
+			String mainClass = starter.getMainClass();
+			String workingDir = starter.getWorkDir();
+			if( executable != null ) {
+				if( workingDir != null ) {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " )" + NEWLINE);
+				} else {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " )" + NEWLINE);	
+				}
+				
+			} else if( mainClass != null ) {
+				if( workingDir != null ) {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )" + NEWLINE);
+				} else {
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )"  + NEWLINE);	
+				}
+			}
+			controlWriter.write(NEWLINE);
+		}
+		
+		
 		ArrayList<String> preuns = rpm.getPreun();
 		for (String preun : preuns) {
 			controlWriter.write(preun + NEWLINE);	
@@ -169,7 +196,7 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"" + NEWLINE);	
+			controlWriter.write("if [ -f \"${RPM_INSTALL_PREFIX}/" + file + "\" ]; then\n  rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"\nfi" + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
@@ -199,7 +226,7 @@ class RpmControlFileBuilder {
 		// removes only the files in the installation path
 		List<String> del_files = setup.getDeleteFiles();
 		for (String file : del_files) {
-			controlWriter.write("rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"" + NEWLINE);	
+			controlWriter.write("if [ -f \"${RPM_INSTALL_PREFIX}/" + file + "\" ]; then\n  rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"\nfi" + NEWLINE);	
 		}
 		// removes only the dirs in the installation path
 		List<String> del_dirs = setup.getDeleteFolders();
@@ -288,6 +315,10 @@ class RpmControlFileBuilder {
 			controlWriter.write("%config /etc/init.d/*" + NEWLINE);	
 		}
 		
+		if( setup.getLicenseFiles() != null && setup.getLicenseFiles().size() > 0) {
+			controlWriter.write( "/usr/share/licenses/**/*" + NEWLINE);
+		}
+		
 	}
 
 	/**
@@ -303,7 +334,7 @@ class RpmControlFileBuilder {
 			release = "1";
 		}
 		controlWriter.write("cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm " + setup.getDestinationDir().getAbsolutePath() + NEWLINE);
-		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + setup.getDestinationDir().getAbsolutePath() + "/" + setup.getAppIdentifier() + "-" + setup.getVersion() + ".rpm" + NEWLINE);
+		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + rpm.getSetupFile() + NEWLINE);
 		ArrayList<String> cleans = rpm.getClean();
 		for (String clean : cleans) {
 			controlWriter.write(clean + NEWLINE);	

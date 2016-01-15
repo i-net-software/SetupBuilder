@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
-import com.inet.gradle.setup.image.ImageFactory;
 
 public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
 
@@ -83,8 +82,14 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             // removes only the files in the installation path
     		List<String> del_files = setup.getDeleteFiles();
     		for (String file : del_files) {
-    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -f \""+ task.getInstallationRoot() + "/" + file + "\"\n" );
-    			controlBuilder.addTailScriptFragment( Script.POSTRM, "rm -f \"" + task.getInstallationRoot() + "/" + file + "\"\n" );
+    			controlBuilder.addTailScriptFragment( Script.PREINST, "if [ -f \"" + task.getInstallationRoot() + "/" + file + "\" ]; then\n  rm -f \""+ task.getInstallationRoot() + "/" + file + "\"\nfi\n" );
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "if [ -f \"" + task.getInstallationRoot() + "/" + file + "\" ]; then\n  rm -f \"" + task.getInstallationRoot() + "/" + file + "\"\nfi\n" );
+    		}
+    		// removes only the folders in the installation path
+    		List<String> del_folders = setup.getDeleteFolders();
+    		for (String folder : del_folders) {
+    			controlBuilder.addTailScriptFragment( Script.PREINST, "rm -R -f \""+ task.getInstallationRoot() + "/" + folder + "\"\n" );
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "rm -R -f \"" + task.getInstallationRoot() + "/" + folder + "\"\n" );
     		}
     		
     		DesktopStarter starter = setup.getRunAfter();
@@ -108,6 +113,26 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			}
     		}
             
+    		DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
+    		if(runBeforeUninstall != null ) {
+    			String executable = runBeforeUninstall.getExecutable();
+    			String mainClass = runBeforeUninstall.getMainClass();
+    			String workingDir = runBeforeUninstall.getWorkDir();
+    			if( executable != null ) {
+    				if( workingDir != null ) {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )\n" );
+    				} else {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )\n" );	
+    				}
+    				
+    			} else if( mainClass != null ) {
+    				if( workingDir != null ) {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")\n");
+    				} else {
+    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")\n");	
+    				}
+    			}
+    		}
     		
     		
             controlBuilder.build();
@@ -249,8 +274,8 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
         controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " start >/dev/null\nfi");
-        controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " stop >/dev/null\nfi");
+        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " start \nfi");
+        controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " stop \nfi");
         controlBuilder.addTailScriptFragment( Script.POSTRM,   "if [ \"$1\" = \"purge\" ] ; then\n" + 
             "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
             "fi" );
@@ -262,12 +287,16 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupStarter( DesktopStarter starter ) throws IOException {
-        String unixName = starter.getExecutable();
+        String unixName = starter.getDisplayName(); 
         String consoleStarterPath = "usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
+            if(starter.getExecutable() != null) {
+            	fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
+            } else {
             fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
                 + starter.getStartArguments() + " \"$@\"" );
+            }
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
 
@@ -276,7 +305,12 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             iconDir.mkdirs();
             File scaledFile = setup.getIconForType( iconDir, "png" + size );
             if( scaledFile != null ) {
-                File iconFile = new File( iconDir, unixName + ".png" );
+            	File iconFile;
+            	if(starter.getIcons() != null) {
+            		iconFile = new File( iconDir, starter.getIcons().toString() );
+            	} else {
+            		iconFile = new File( iconDir, unixName + ".png" );
+            	}
                 scaledFile.renameTo( iconFile );
                 DebUtils.setPermissions( iconFile, false );
             }
@@ -285,8 +319,16 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             fw.write( "[Desktop Entry]\n" );
             fw.write( "Name=" + starter.getDisplayName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
-            fw.write( "Exec=/" + consoleStarterPath + " %F\n" );
-            fw.write( "Icon=" + unixName + "\n" );
+            if(starter.getExecutable() != null) {
+            	fw.write( "Exec=\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\"\n" );
+            } else {
+            	fw.write( "Exec=\"/" + consoleStarterPath + " %F\"\n" );
+            }
+            if(starter.getIcons() != null) {
+            	fw.write( "Icon=" + starter.getIcons().toString() + "\n" );
+        	} else {
+        		fw.write( "Icon=" + unixName + "\n" );
+        	}
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
@@ -326,7 +368,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
             //    		command.add( "-d" );
-            command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getArchiveName() + "." + task.getExtension() );
+            command.add( task.getSetupFile().getPath() );
             exec( command );
         }
     }
@@ -340,7 +382,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         command.add( "dpkg-deb" );
         command.add( "--build" );
         command.add( buildDir.getAbsolutePath() );
-        command.add( setup.getDestinationDir().getAbsolutePath() + "/" + setup.getArchiveName() + "." + task.getExtension() );
+        command.add( task.getSetupFile().getPath() );
         exec( command );
     }
 

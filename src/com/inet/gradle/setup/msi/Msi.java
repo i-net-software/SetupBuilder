@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 -2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.Service;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.
@@ -42,7 +41,7 @@ public class Msi extends AbstractSetupTask {
 
     private String   arch;
 
-    private Object   bannerBmp, dialogBmp, wxsTemplate;
+    private Object   bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript;
 
     private List<String> languages;
 
@@ -51,6 +50,8 @@ public class Msi extends AbstractSetupTask {
     private double minOS;
 
     private List<DesktopStarter> launch4j = new ArrayList<>();
+
+    private int multiInstanceCount = 1;
 
 
     /**
@@ -309,5 +310,46 @@ public class Msi extends AbstractSetupTask {
      */
     public List<DesktopStarter> getLaunch4js() {
         return launch4j;
+    }
+
+    /**
+     * Get the count of possible multiple instances.
+     * 
+     * @return instance count
+     */
+    public int getMultiInstanceCount() {
+        return multiInstanceCount;
+    }
+
+    /**
+     * Set the count of possible multiple instances. The default is 1. A value lesser or equals 1 result in a single
+     * instance setup.
+     * 
+     * @param instanceCount the current instance count
+     */
+    public void setMultiInstanceCount( int instanceCount ) {
+        this.multiInstanceCount = instanceCount;
+    }
+
+    /**
+     * Get the URL to a vbscript that set the instance name.
+     * 
+     * @return the URL
+     * @throws MalformedURLException if any error occur
+     */
+    public URL getMultiInstanceScript() throws MalformedURLException {
+        if( multiInstanceScript != null ) {
+            return getProject().file( multiInstanceScript ).toURI().toURL();
+        }
+        return getClass().getResource( "MultiInstance.vbs" );
+    }
+
+    /**
+     * Set a vbscript that can change the product name, instance id and other things on a multi instance installation.
+     * 
+     * @param multiInstanceScript the script
+     */
+    public void setMultiInstanceScript( Object multiInstanceScript ) {
+        this.multiInstanceScript = multiInstanceScript;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package com.inet.gradle.setup.msi;
+
+import groovy.lang.Closure;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +102,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
             // signing and moving the final msi file
             signTool( mui );
-            Files.move( mui.toPath(), new File( setup.getDestinationDir(), setup.getArchiveName() + ".msi" ).toPath(), StandardCopyOption.REPLACE_EXISTING );
+            Files.move( mui.toPath(), task.getSetupFile().toPath(), StandardCopyOption.REPLACE_EXISTING );
         } catch( RuntimeException ex ) {
             throw ex;
         } catch( Exception ex ) {
@@ -119,7 +121,9 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             for( DesktopStarter launch : task.getLaunch4js() ) {
                 File file = creator.create( launch, task, setup );
                 signTool( file );
-                CopySpec copySpec = task.from( file );
+                CopySpec copySpec = task.getProject().copySpec( (Closure<CopySpec>)null );
+                task.with( copySpec );
+                copySpec.from( file );
                 String workDir = launch.getWorkDir();
                 if( workDir != null && !workDir.isEmpty() ) {
                     copySpec.into( workDir );
