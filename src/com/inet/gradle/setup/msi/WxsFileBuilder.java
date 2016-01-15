@@ -563,7 +563,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( install, "Start", service.isStartOnBoot() ? "auto" : "demand" );
             addAttributeIfNotExists( install, "Type", "ownProcess" );
             addAttributeIfNotExists( install, "ErrorControl", "normal" );
-            addAttributeIfNotExists( install, "Arguments", " //RS//" + name );
+            addAttributeIfNotExists( install, "Arguments", " \"//RS//" + name + "\"");
 
             // add an empty parameters registry key
             Element regkey = getOrCreateChildById( component, "RegistryKey", id + "_RegParameters" );
