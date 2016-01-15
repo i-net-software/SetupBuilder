@@ -191,6 +191,25 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
         command.add( plist.getAbsolutePath() );
     	exec( command );
 	}
+
+	/**
+	 * Add an entry to a plist file
+	 * @param plist file to modify
+	 * @param property property to set
+	 * @param type of property
+	 * @param value of property
+	 */
+	protected void addPlistProperty(File plist, String property, String type, String value) {
+		
+		// Set Property in plist file
+		// /usr/libexec/PlistBuddy -c "Add PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/libexec/PlistBuddy" );
+        command.add( "-c" );
+        command.add( "Add " + property +  " " + type +  " " + value );
+        command.add( plist.getAbsolutePath() );
+    	exec( command );
+	}
 	
 	/**
 	 * Copy the files defined in the gradle script into their final destination

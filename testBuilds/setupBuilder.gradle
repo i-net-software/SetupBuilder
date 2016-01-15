@@ -44,19 +44,29 @@ setupBuilder {
     bundleJre = 1.8
     mainClass = 'com.inet.testapplication.TestLauncher'
     mainJar = 'testBuilds.jar'
-
+/*
     desktopStarter {
         displayName = "Setup Builder Test"
     }
-    
+*/    
     service {
     }
 }
 
 dmg {
-    codeSign {
-        identity = 'Developer ID Application'
+    preferencesLink {
+        title = "Testing Link"
+        action = "echo Hello World"
     }
+    preferencesLink {
+        title = "Second Testing Link"
+        action = "echo Another World, hello"
+    }
+
+
+//    codeSign {
+//        identity = 'Developer ID Application'
+//    }
 }
 
 dmg.dependsOn jar

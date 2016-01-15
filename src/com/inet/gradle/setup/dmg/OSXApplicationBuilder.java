@@ -137,6 +137,19 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
 		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
 		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
+		
+		// Output the preference link actions to the plist
+		for (int i = 0; i < task.getPreferencesLinks().size(); i++) {
+
+			if ( i == 0 ) {
+				addPlistProperty( servicePLIST, ":starter", "array", null );
+			}
+			
+			PreferencesLink preferencesLink = task.getPreferencesLinks().get(i);
+			addPlistProperty( servicePLIST, ":starter:", "dict", null );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":title", "string", preferencesLink.getTitle() );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":action", "string", preferencesLink.getAction() );
+		}
 	}
 
 	@Override

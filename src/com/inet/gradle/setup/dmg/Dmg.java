@@ -42,6 +42,7 @@ public class Dmg extends AbstractSetupTask {
 	
 	private List<LocalizedResource> welcomePages =  new ArrayList<>();
 	private List<LocalizedResource> conclusionPages =  new ArrayList<>();
+	private List<PreferencesLink> preferencesLink = new ArrayList<>();
 
 	/**
      * Create the task.
@@ -252,4 +253,19 @@ public class Dmg extends AbstractSetupTask {
 		this.setupIcon = setupIcon;
 	}
 
+    /**
+     * Return the list of preferences links
+     * @return preferences links
+     */
+    public List<PreferencesLink> getPreferencesLinks() {
+        return preferencesLink;
+    }
+
+    /**
+     * Set a preferences link
+     * @param link the link
+     */
+    public void preferencesLink( Object link ) {
+    	preferencesLink.add( ConfigureUtil.configure((Closure<?>)link, new PreferencesLink()) );
+    }
 }
