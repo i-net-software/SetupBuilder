@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -138,6 +139,9 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
 		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
 		
+		// Reset the plist.
+		deletePlistProperty(servicePLIST, ":starter");
+		
 		// Output the preference link actions to the plist
 		for (int i = 0; i < task.getPreferencesLinks().size(); i++) {
 
@@ -149,6 +153,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 			addPlistProperty( servicePLIST, ":starter:", "dict", null );
 			addPlistProperty( servicePLIST, ":starter:" + i + ":title", "string", preferencesLink.getTitle() );
 			addPlistProperty( servicePLIST, ":starter:" + i + ":action", "string", preferencesLink.getAction() );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "boolean", String.valueOf(preferencesLink.isRunAsRoot()) );
 		}
 	}
 
