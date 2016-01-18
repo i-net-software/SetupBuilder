@@ -10,6 +10,7 @@ public class PreferencesLink {
 
 	private String title;
 	private String action;
+	private boolean runAsRoot = false;
 	
 	/**
 	 * @return the title
@@ -36,5 +37,17 @@ public class PreferencesLink {
 	 */
 	public void setAction(String action) {
 		this.action = action;
+	}
+	/**
+	 * @return the runAsRoot
+	 */
+	public boolean isRunAsRoot() {
+		return runAsRoot;
+	}
+	/**
+	 * @param runAsRoot the runAsRoot to set
+	 */
+	public void setRunAsRoot(boolean runAsRoot) {
+		this.runAsRoot = runAsRoot;
 	}
 }
