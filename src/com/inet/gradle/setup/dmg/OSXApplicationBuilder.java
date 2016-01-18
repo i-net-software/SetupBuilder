@@ -153,7 +153,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 			addPlistProperty( servicePLIST, ":starter:", "dict", null );
 			addPlistProperty( servicePLIST, ":starter:" + i + ":title", "string", preferencesLink.getTitle() );
 			addPlistProperty( servicePLIST, ":starter:" + i + ":action", "string", preferencesLink.getAction() );
-			addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "boolean", String.valueOf(preferencesLink.isRunAsRoot()) );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "bool", preferencesLink.isRunAsRoot()?"YES":"NO" );
 		}
 	}
 
