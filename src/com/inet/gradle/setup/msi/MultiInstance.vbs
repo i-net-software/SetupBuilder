@@ -75,6 +75,11 @@ Function isProgramFiles( dirName )
         End If
     Next
 
+    If Not FSO.FolderExists( dirName ) Then
+        isProgramFiles = False
+        Exit Function
+    End If
+
     Dim tempName, fullTempName
     tempName = FSO.GetTempName
     fullTempName = dirName & "\" + tempName
