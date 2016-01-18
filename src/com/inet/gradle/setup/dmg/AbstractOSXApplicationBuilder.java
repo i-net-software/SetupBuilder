@@ -231,6 +231,23 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 	}
 	
 	/**
+	 * Add an entry to a plist file
+	 * @param plist file to modify
+	 * @param property property to set
+	 */
+	protected void deletePlistProperty(File plist, String property) {
+		
+		// Set Property in plist file
+		// /usr/libexec/PlistBuddy -c "Add PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "/usr/libexec/PlistBuddy" );
+        command.add( "-c" );
+        command.add( "Delete " + property);
+        command.add( plist.getAbsolutePath() );
+    	exec( command, null, null, true );
+	}
+	
+	/**
 	 * Copy the files defined in the gradle script into their final destination
 	 * @param application the application
 	 * @throws IOException on errors
