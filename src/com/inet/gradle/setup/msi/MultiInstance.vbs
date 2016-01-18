@@ -101,7 +101,10 @@ End Function
 ' =====================
 ' calculate an unique ID from the given string.
 ' =====================
-Function idCode( str )
+Function idCode( ByVal str )
+    If Right( str, 1 ) = "\" Then
+        str = Left(str, Len(str) - 1)
+    End If 
     idCode = LCase( Hex( hashCode( LCase( str ) ) ) )
 End Function
 
