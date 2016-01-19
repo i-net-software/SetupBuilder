@@ -787,7 +787,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return;
         }
         String id = "runBeforeUninstall";
-        addRun( runBeforeUninstall, id, null, null );
+        addRun( runBeforeUninstall, id, "ignore", null );
 
         Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
         Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
