@@ -616,7 +616,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             run.setExecutable( "del" );
             run.setStartArguments( "/Q /F \"" + subdir + name + ".exe\"" );
             addRun( run, id + "Delete", "ignore", null );
-            addCustomActionToSequence( id + "Delete", true, "InstallFiles", false );
+            Element custom = addCustomActionToSequence( id + "Delete", true, "InstallFiles", false );
+            custom.setTextContent( "NOT Installed OR REINSTALL OR REMOVE" );
 
             // delete log files on uninstall
             addDeleteFiles( subdir + "service.*.log" );
@@ -829,11 +830,13 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param sequenceAction the name of an existing action in sequence after which it should be added.
      *            https://msdn.microsoft.com/en-us/library/aa372038(v=vs.85).aspx
      * @param after true, After the action; false, Before
+     * @return the Custom element node
      */
-    private void addCustomActionToSequence( String id, boolean execute, String sequenceAction, boolean after ) {
+    private Element addCustomActionToSequence( String id, boolean execute, String sequenceAction, boolean after ) {
         Element executeSequence = getOrCreateChild( product, execute ? "InstallExecuteSequence" : "InstallUISequence" );
         Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
         addAttributeIfNotExists( custom, after ? "After" : "Before", sequenceAction );
+        return custom;
     }
 
     /**

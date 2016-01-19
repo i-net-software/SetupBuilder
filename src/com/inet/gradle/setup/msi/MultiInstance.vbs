@@ -17,6 +17,8 @@ If Not IsNull( transform ) And InStr( transform, ":Instance_" ) = 1 Then
     installDir = getInstallDir( instanceNumber )
     If isNull( installDir ) Or installDir = "" Then
         installDir = Session.Property("INSTALLDIR")
+    Else
+        Session.Property("INSTALLDIR") = installDir
     End If
 Else
     installDir = FSO.GetAbsolutePathName( installDir ) ' normalize the case sensitivity
