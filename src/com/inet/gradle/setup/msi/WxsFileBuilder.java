@@ -578,8 +578,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                                             : "SOFTWARE\\Apache Software Foundation\\ProcRun 2.0\\";
             regkey = addRegistryKey( component, "HKLM", id + "_RegJava", baseKey + name + "\\Parameters\\Java" );
             addRegistryValue( regkey, "Classpath", "string", service.getMainJar() );
-            addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
-            addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
+            if( setup.getBundleJre() != null ) {
+                addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
+                addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
+            }
             regkey = addRegistryKey( component, "HKLM", id + "_RegStart", baseKey + name + "\\Parameters\\Start" );
             addRegistryValue( regkey, "Class", "string", service.getMainClass() );
             addRegistryValue( regkey, "Mode", "string", "jvm" );
