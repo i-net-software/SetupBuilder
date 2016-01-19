@@ -307,6 +307,14 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     		if(index > -1) {
     			iconName = iconName.substring(index+1);
     		}
+    		// icons must be png files and should named like that 
+    		if(!iconName.endsWith(".png")) {
+    			index = iconName.lastIndexOf('.'); 
+        		if(index > -1) {
+        			iconName = iconName.substring(0,index);
+        		}
+        		iconName = iconName + ".png";
+    		}
         }
         
         for( int size : iconSizes ) {
@@ -316,6 +324,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             if( scaledFile != null ) {
             	File iconFile;
             	if(starter.getIcons() != null) {
+            		
             		iconFile = new File( iconDir, iconName );
             	} else {
             		iconFile = new File( iconDir, unixName + ".png" );
