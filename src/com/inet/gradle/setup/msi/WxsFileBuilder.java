@@ -149,7 +149,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                             file = new File( buildDir, details.getRelativePath().getPathString() );
                             details.copyTo( file );
                         }
-                        addFile( installDir, file, segments );
+                        addFile( file, segments );
                     }
                 } catch( Exception ex ) {
                     throw new GradleException( "Can't add file: " + details, ex );
@@ -157,17 +157,17 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
         } );
 
-        setMinimumOsVersion( product );
+        setMinimumOsVersion();
 
-        addMultiInstanceTransforms( product, installDir );
-        addBundleJre( installDir );
-        addGUI( product );
-        addIcon( product );
-        addServices( installDir );
-        addShortcuts( product, installDir );
-        addRunBeforeUninstall( product, installDir );
-        addRunAfter( product, installDir );
-        addDeleteFiles( product, installDir );
+        addMultiInstanceTransforms();
+        addBundleJre();
+        addGUI();
+        addIcon();
+        addServices();
+        addShortcuts();
+        addRunBeforeUninstall();
+        addRunAfter();
+        addDeleteFiles();
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
@@ -180,9 +180,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a condition for the minimum OS version if needed
-     * @param product the product node
      */
-    private void setMinimumOsVersion( Element product ) {
+    private void setMinimumOsVersion() {
         double version = task.getMinOS();
         if( version == 0 ) {
             return;
@@ -226,23 +225,21 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Get or create a directory node.
      * 
-     * @param installDir The XML element of the install directory.
      * @param segments the segments of the path in the target. The last segment contains the file name.
      * @return the directory node
      */
-    private Element getDirectory( Element installDir, String[] segments ) {
-        return getDirectory( installDir, segments, segments.length - 1 );
+    private Element getDirectory( String[] segments ) {
+        return getDirectory( segments, segments.length - 1 );
     }
 
     /**
      * Get or create a directory node.
      * 
-     * @param installDir The XML element of the install directory.
      * @param segments the segments of the path in the target. The last segment contains the file name.
      * @param length the used length from the segments
      * @return the directory node
      */
-    private Element getDirectory( Element installDir, String[] segments, int length ) {
+    private Element getDirectory( String[] segments, int length ) {
         Element parent = installDir;
         for( int i = 0; i < length; i++ ) {
             String seg = segments[i];
@@ -272,12 +269,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add a file to the setup
      * 
-     * @param installDir The XML element of the install directory.
      * @param file the file to add.
      * @param segments the segments of the path in the target. The last segment contains the file name.
      */
-    private void addFile( Element installDir, File file, String[] segments ) {
-        Element parent = getDirectory( installDir, segments );
+    private void addFile( File file, String[] segments ) {
+        Element parent = getDirectory( segments );
 
         String pathID = id( segments, segments.length - 1 );
         String compID = id( pathID + "_Comp");
@@ -335,28 +331,25 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add all files in a directory.
      * 
-     * @param installDir The XML element of the install directory.
      * @param dir the source directory
      * @param baseLength the base length of the directory. This length will be cut from the absolute path.
      * @param target the target directory
      */
-    private void addDirectory( Element installDir, File dir, int baseLength, String target ) {
+    private void addDirectory( File dir, int baseLength, String target ) {
         for( File file : dir.listFiles() ) {
             if( file.isDirectory() ) {
-                addDirectory( installDir, file, baseLength, target );
+                addDirectory( file, baseLength, target );
             } else {
                 String name = file.getAbsolutePath().substring( baseLength );
-                addFile( installDir, file, segments( (target + name) ) );
+                addFile( file, segments( (target + name) ) );
             }
         }
     }
 
     /**
      * Bundle a JRE if setup.
-     * 
-     * @param installDir referent to INSTALLDIR
      */
-    private void addBundleJre( Element installDir ) {
+    private void addBundleJre() {
         Object jre = setup.getBundleJre();
         if( jre == null ) {
             return;
@@ -401,7 +394,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             baseLength++;
         }
 
-        addDirectory( installDir, jreDir, baseLength, javaDir );
+        addDirectory( jreDir, baseLength, javaDir );
     }
 
     /**
@@ -424,12 +417,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the GUI to the Setup.
      * 
-     * @param product the product node in the XML.
      * @throws Exception if any exception occur
      */
-    private void addGUI( Element product ) throws Exception {
-        Element installdir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR" );
-        addAttributeIfNotExists( installdir, "Value", "INSTALLDIR" );
+    private void addGUI() throws Exception {
+        Element wixUiInstalldir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR" );
+        addAttributeIfNotExists( wixUiInstalldir, "Value", "INSTALLDIR" );
         Element uiRef = getOrCreateChild( product, "UIRef" );
         addAttributeIfNotExists( uiRef, "Id", "WixUI_InstallDir" );
 
@@ -467,11 +459,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add an icon in Add/Remove Programs
      * 
-     * @param product the product node in the XML.
      * @param appDirRef
      * @throws IOException if an error occur on reading the image files
      */
-    private void addIcon( Element product ) throws IOException {
+    private void addIcon() throws IOException {
         File iconFile = setup.getIconForType( buildDir, "ico" );
         if( iconFile == null ) {
             // no icon was set
@@ -532,10 +523,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the windows services.
      * 
-     * @param installDir referent to INSTALLDIR
      * @throws IOException if an I/O error occurs when reading or writing
      */
-    private void addServices( Element installDir ) throws IOException {
+    private void addServices() throws IOException {
         List<Service> services = setup.getServices();
         if( services == null || services.isEmpty() ) {
             return;
@@ -561,7 +551,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             // add the service file
             String[] segments = segments( exe );
-            Element directory = getDirectory( installDir, segments );
+            Element directory = getDirectory( segments );
             Element component = getComponent( directory, id );
             addFile( component, prunsrv, id, segments[segments.length - 1], true );
 
@@ -614,17 +604,17 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             DesktopStarter run = new DesktopStarter( setup );
             run.setExecutable( "ren" );
             run.setStartArguments( "\"" + subdir + "prunmgr.exe\" \"" + name + ".exe\"" );
-            addRun( run, id + "Rename", product, installDir, "ignore", null );
+            addRun( run, id + "Rename", "ignore", null );
             addCustomActionToSequence( id + "Rename", true, "InstallFiles", true );
 
             run = new DesktopStarter( setup );
             run.setExecutable( "del" );
             run.setStartArguments( "/Q /F \"" + subdir + name + ".exe\"" );
-            addRun( run, id + "Delete", product, installDir, "ignore", null );
+            addRun( run, id + "Delete", "ignore", null );
             addCustomActionToSequence( id + "Delete", true, "InstallFiles", false );
 
             // delete log files on uninstall
-            addDeleteFiles( subdir + "service.*.log", installDir );
+            addDeleteFiles( subdir + "service.*.log" );
         }
     }
 
@@ -673,11 +663,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add the shortcuts if which was define.
-     * @param product the node of the product
-     * @param installDir referent to INSTALLDIR
+     * 
      * @throws IOException If any I/O exception occur on icon loading
      */
-    private void addShortcuts( Element product, Element installDir ) throws IOException {
+    private void addShortcuts() throws IOException {
         List<DesktopStarter> starters = setup.getDesktopStarters();
         if( starters.isEmpty() ) {
             return;
@@ -690,7 +679,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( shortcut, "Name", starter.getDisplayName() );
             addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
 
-            addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter, installDir ) );
+            addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter ) );
 
             // find the optional id for an icon
             String target = starter.getExecutable();
@@ -729,14 +718,13 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Get the ID of the working directory.
      * 
      * @param starter the shortcut definition
-     * @param installDir referent to INSTALLDIR
      * @return the id
      */
-    private String getWoringDirID( DesktopStarter starter, Element installDir ) {
+    private String getWoringDirID( DesktopStarter starter ) {
         String workDir = starter.getWorkDir();
         if( workDir != null && !workDir.isEmpty() ) {
             String[] segments = segments( workDir );
-            Element dir = getDirectory( installDir, segments, segments.length );
+            Element dir = getDirectory( segments, segments.length );
             return dir.getAttribute( "Id" );
         } else {
             return "INSTALLDIR";
@@ -748,12 +736,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * 
      * @param run the runner
      * @param id the id that should be used
-     * @param product the product node in the XML.
-     * @param installDir referent to INSTALLDIR
-     * @param Return the Return attribute, can be null, "asyncNoWait", "asyncWait", "check" or "ignore"
+     * @param Return the Return attribute, can be null (default "check"), possible values: "asyncNoWait", "asyncWait", "check" or "ignore"
      * @param execute the Execute attribute
      */
-    private void addRun( DesktopStarter run, String id, Element product, Element installDir, String Return, String execute ) {
+    private void addRun( DesktopStarter run, String id, String Return, String execute ) {
         CommandLine cmd = new CommandLine( run, javaDir );
         Element action = getOrCreateChildById( product, "CustomAction", id );
 
@@ -778,7 +764,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.full + '\"';
             }
         } else {
-            addAttributeIfNotExists( action, "Directory", getWoringDirID( run, installDir ) );
+            addAttributeIfNotExists( action, "Directory", getWoringDirID( run ) );
             addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd.target + "\" " + cmd.arguments ); // full quoted path + arguments 
             return;
         }
@@ -794,17 +780,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add an action that is executed before uninstall.
-     * 
-     * @param product the product node in the XML.
-     * @param installDir referent to INSTALLDIR
      */
-    private void addRunBeforeUninstall( Element product, Element installDir ) {
+    private void addRunBeforeUninstall() {
         DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
         if( runBeforeUninstall == null ) {
             return;
         }
         String id = "runBeforeUninstall";
-        addRun( runBeforeUninstall, id, product, installDir, null, null );
+        addRun( runBeforeUninstall, id, null, null );
 
         Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
         Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
@@ -815,17 +798,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add an action that is executed after the setup.
-     * 
-     * @param product the product node in the XML.
-     * @param installDir referent to INSTALLDIR
      */
-    private void addRunAfter( Element product, Element installDir ) {
+    private void addRunAfter() {
         DesktopStarter runAfter = setup.getRunAfter();
         if( runAfter == null ) {
             return;
         }
         String id = "runAfter";
-        addRun( runAfter, id, product, installDir, "asyncNoWait", "immediate" );
+        addRun( runAfter, id, "asyncNoWait", "immediate" );
 
         Element ui = getOrCreateChild( product, "UI" );
         Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog" );
@@ -853,13 +833,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add files to delete if there any define in SetupBuilder.
-     * 
-     * @param product the product node in the XML.
-     * @param installDir referent to INSTALLDIR
      */
-    private void addDeleteFiles( Element product, Element installDir ) {
+    private void addDeleteFiles() {
         for( String pattern : setup.getDeleteFiles() ) {
-            addDeleteFiles( pattern, installDir );
+            addDeleteFiles( pattern );
         }
         for( String folder : setup.getDeleteFolders() ) {
             folder = folder.replace( '/', '\\' );
@@ -871,7 +848,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             DesktopStarter run = new DesktopStarter( setup );
             run.setExecutable( "rmdir" );
             run.setStartArguments( "/S /Q \"[INSTALLDIR]" + folder + '\"' );
-            addRun( run, id, product, installDir, "ignore", null );
+            addRun( run, id, "ignore", null );
             Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
             Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
             addAttributeIfNotExists( custom, "After", "InstallInitialize" );
@@ -882,12 +859,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * Add files to delete.
      * 
      * @param pattern the pattern to delete
-     * @param installDir referent to INSTALLDIR
      * @return the component
      */
-    private Element addDeleteFiles( String pattern, Element installDir ) {
+    private Element addDeleteFiles( String pattern ) {
         String[] segments = segments( pattern );
-        Element dir = getDirectory( installDir, segments );
+        Element dir = getDirectory( segments );
         String id = id( pattern );
         Element component = getComponent( dir, "deleteFiles" + id );
         Element remove = getOrCreateChildById( component, "RemoveFile", "removeFile" + id );
@@ -928,66 +904,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( regValue, "Value", value );
         return regValue;
     }
-
-    /**
-     * Split a large property into multiple sub properties to handle the length limit.
-     * 
-     * @param product the product element
-     * @param id the if of the property
-     * @param value the value of the property
-     */
-//    private void addLargeProperty( Element product, String id, final String value ) {
-//        int count = 0;
-//        String rest = value;
-//        String partValue;
-//        String after = "InstallFiles";
-//        do {
-//            String propID;
-//            if( rest.length() < 200 ) {
-//                propID = id;
-//                partValue = rest;
-//            } else {
-//                propID = id + count;
-//                partValue = rest.substring( 0, 200 );
-//                int brackets = 0;
-//                int lastSeroPosition = 0;
-//                // search for place holder
-//                for( int i = 0; i < partValue.length(); i++ ) {
-//                    char ch = partValue.charAt( i );
-//                    switch( ch ) {
-//                        case '[':
-//                            if( brackets == 0 ) {
-//                                lastSeroPosition = i;
-//                            }
-//                            brackets++;
-//                            break;
-//                        case ']':
-//                            brackets--;
-//                            if( brackets == 0 ) {
-//                                lastSeroPosition = i + 1;
-//                            }
-//                            break;
-//                    }
-//                }
-//                if( brackets != 0 ) {
-//                    partValue = partValue.substring( 0, lastSeroPosition );
-//                }
-//                if( partValue.length() == 0 ) {
-//                    throw new GradleException( "Invalid property value: " + value );
-//                }
-//                rest = '[' + propID + ']' + rest.substring( partValue.length() );
-//            }
-//            String actionID = "action." + propID;
-//            Element action = getOrCreateChildById( product, "CustomAction", actionID );
-//            addAttributeIfNotExists( action, "Property", propID );
-//            addAttributeIfNotExists( action, "Value", partValue );
-//            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-//            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", actionID );
-//            addAttributeIfNotExists( custom, "After", after );
-//            after = actionID;
-//            count++;
-//        } while( partValue != rest );
-//    }
 
     /**
      * Split a path in segments.
@@ -1101,11 +1017,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     /**
      * Add the settings for multiple instances
      * 
-     * @param product the product node in the XML.
-     * @param installDir referent to INSTALLDIR
      * @throws IOException If an I/O error occur on loading resources
      */
-    private void addMultiInstanceTransforms( Element product, Element installDir ) throws IOException {
+    private void addMultiInstanceTransforms() throws IOException {
         int instanceCount = task.getMultiInstanceCount();
         if( instanceCount <= 1 ) {
             return;
