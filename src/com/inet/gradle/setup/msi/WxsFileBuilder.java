@@ -120,6 +120,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( media, "EmbedCab", "yes" );
         Element packge = getOrCreateChild( product, "Package", false ); // must be the first in Product
         addAttributeIfNotExists( packge, "Compressed", "yes" );
+        if( !setup.getDescription().isEmpty() ) {
+            addAttributeIfNotExists( packge, "Comments", setup.getDescription() );
+        }
 
         // MajorUpgrade
         Element update = getOrCreateChild( product, "MajorUpgrade" );
