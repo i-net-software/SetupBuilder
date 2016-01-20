@@ -46,7 +46,6 @@ log "product name: " + name
 Session.Property( "INSTANCE_NUMBER" ) = instanceNumber
 Session.Property( "INSTANCE_ID" ) = "Instance_" & instanceNumber
 log "instance: " + Session.Property( "INSTANCE_ID" )
-Session.Property( "ProductName" ) = name
 Session.Property( "PRODUCT_NAME" ) = name
 
 
