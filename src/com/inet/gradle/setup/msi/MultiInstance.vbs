@@ -76,25 +76,7 @@ Function isProgramFiles( dirName )
         End If
     Next
 
-    If Not FSO.FolderExists( dirName ) Then
-        isProgramFiles = False
-        Exit Function
-    End If
-
-    Dim tempName, fullTempName
-    tempName = FSO.GetTempName
-    fullTempName = dirName & "\" + tempName
-    fso.CreateFolder( fullTempName )
-
     isProgramFiles = False
-    For Each environment In environments
-        If FSO.FolderExists( SHELL.ExpandEnvironmentStrings( environment ) & "\" & tempName ) Then
-            isProgramFiles = True
-            Exit For
-        End If
-    Next
-
-    SHELL.Run SHELL.ExpandEnvironmentStrings( "%SystemRoot%\system32\cmd.exe /c rd """ & fullTempName & """" ), 0
 End Function
 
 
