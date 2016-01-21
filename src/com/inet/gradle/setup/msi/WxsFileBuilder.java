@@ -608,6 +608,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addAttributeIfNotExists( start, "Stop", "both" );
                 addAttributeIfNotExists( start, "Remove", "uninstall" );
                 addAttributeIfNotExists( start, "Wait", "yes" );
+
+                // MSI does not restart a service if it was stopped before the setup
+                DesktopStarter run = new DesktopStarter( setup );
+                run.setExecutable( "net" );
+                run.setStartArguments( "start \"" + name + "\"" );
+                addRun( run, id + "Restart", "ignore", null );
+                Element custom = addCustomActionToSequence( id + "Restart", true, "InstallFiles", true );
+                custom.setTextContent( "NOT REMOVE" );
             }
 
             // Add the prunmgr.exe and change it name dynamically to the service name. Dynamically is important for multiple instances.
