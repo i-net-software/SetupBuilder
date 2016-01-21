@@ -83,7 +83,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param wxsFile the file name
      * @param buildDir the temporary directory of the task
      * @param template a template file
-     * @param addFiles if files shouls be added in this phase
+     * @param addFiles if files should be added in this phase
      * @throws Exception if any error occur
      */
     WxsFileBuilder( Msi msi, SetupBuilder setup, File wxsFile, File buildDir, URL template, boolean addFiles ) throws Exception {
@@ -119,10 +119,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( media, "Cabinet", "media1.cab" );
         addAttributeIfNotExists( media, "EmbedCab", "yes" );
         Element packge = getOrCreateChild( product, "Package", false ); // must be the first in Product
+        if( product.getFirstChild() != packge ) {
+            product.insertBefore( packge, product.getFirstChild() );
+        }
         addAttributeIfNotExists( packge, "Compressed", "yes" );
         if( !setup.getDescription().isEmpty() ) {
             addAttributeIfNotExists( packge, "Comments", setup.getDescription() );
         }
+        addAttributeIfNotExists( packge, "InstallScope", task.getInstallScope().name() );
 
         // MajorUpgrade
         Element update = getOrCreateChild( product, "MajorUpgrade" );
