@@ -795,9 +795,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         String id = "runBeforeUninstall";
         addRun( runBeforeUninstall, id, "ignore", null );
 
-        Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-        Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
-        addAttributeIfNotExists( custom, "After", "InstallInitialize" );
+        Element custom = addCustomActionToSequence( id, true, "InstallInitialize", true );
         // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
         custom.setTextContent( "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
     }
@@ -829,6 +827,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param execute true, InstallExecuteSequence; false, InstallUISequence
      * @param sequenceAction the name of an existing action in sequence after which it should be added.
      *            https://msdn.microsoft.com/en-us/library/aa372038(v=vs.85).aspx
+     *            https://msdn.microsoft.com/en-us/library/aa372039(v=vs.85).aspx
      * @param after true, After the action; false, Before
      * @return the Custom element node
      */
@@ -857,9 +856,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             run.setExecutable( "rmdir" );
             run.setStartArguments( "/S /Q \"[INSTALLDIR]" + folder + '\"' );
             addRun( run, id, "ignore", null );
-            Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
-            Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
-            addAttributeIfNotExists( custom, "After", "InstallInitialize" );
+            addCustomActionToSequence( id, true, "InstallInitialize", true );
         }
     }
 
@@ -1051,9 +1048,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( instance, "UpgradeCode", getGuid( id ) );
         }
 
-        // Get the sequence lists for the follow actions
-        Element uiSequence = getOrCreateChild( product, "InstallUISequence" ); // https://msdn.microsoft.com/en-us/library/aa372039(v=vs.85).aspx
-        Element executionSequence = getOrCreateChild( product, "InstallExecuteSequence" ); // https://msdn.microsoft.com/en-us/library/aa372038(v=vs.85).aspx
         Element action, custom;
 
         // add a vbscript action to set the instance names
@@ -1064,25 +1058,21 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             vbscript = vbscript.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
             action.setTextContent( vbscript );
         }
-        custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetInstanceID" );
-        addAttributeIfNotExists( custom, "Before", "ExecuteAction" );
-        custom = getOrCreateChildByKeyValue( executionSequence, "Custom", "Action", "SetInstanceID" );
-        addAttributeIfNotExists( custom, "Before", "ValidateProductID" );
+        addCustomActionToSequence( "SetInstanceID", false, "ExecuteAction", false );
+        addCustomActionToSequence( "SetInstanceID", true, "ValidateProductID", false );
 
         // add a action to set the property TRANSFORM
         action = getOrCreateChildById( product, "CustomAction", "SetTransforms" );
         addAttributeIfNotExists( action, "Property", "TRANSFORMS" );
         addAttributeIfNotExists( action, "Value", "{:[INSTANCE_ID];}[TRANSFORMS]" );
-        custom = getOrCreateChildByKeyValue( uiSequence, "Custom", "Action", "SetTransforms" );
-        addAttributeIfNotExists( custom, "After", "SetInstanceID" );
+        custom = addCustomActionToSequence( "SetTransforms", false, "SetInstanceID", true );
         custom.setTextContent( "ACTION = \"INSTALL\"" );
 
         // set the ProductName properties from the property PRODUCT_NAME of the vbscript
         action = getOrCreateChildById( product, "CustomAction", "SetProductName" );
         addAttributeIfNotExists( action, "Property", "ProductName" );
         addAttributeIfNotExists( action, "Value", "[PRODUCT_NAME]" );
-        custom = getOrCreateChildByKeyValue( executionSequence, "Custom", "Action", "SetProductName" );
-        addAttributeIfNotExists( custom, "After", "SetInstanceID" );
+        custom = addCustomActionToSequence( "SetProductName", true, "SetInstanceID", true );
         custom.setTextContent( "PRODUCT_NAME" );
 
         // add the registry key with instance path
