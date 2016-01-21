@@ -127,6 +127,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( packge, "Comments", setup.getDescription() );
         }
         addAttributeIfNotExists( packge, "InstallScope", task.getInstallScope().name() );
+        if( task.getMultiInstanceCount() > 1 ) {
+            addAttributeIfNotExists( packge, "Id", getGuid( "PackageCode" ) );
+        }
 
         // MajorUpgrade
         Element update = getOrCreateChild( product, "MajorUpgrade" );
@@ -1048,7 +1051,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         for( int i = 0; i < instanceCount; i++ ) {
             String id = "Instance_" + i;
             Element instance = getOrCreateChildById( transforms, "Instance", id );
-            addAttributeIfNotExists( instance, "ProductCode", "*" );
+            addAttributeIfNotExists( instance, "ProductCode", getGuid( "ProductCode" + i ) );
             addAttributeIfNotExists( instance, "UpgradeCode", getGuid( id ) );
         }
 
