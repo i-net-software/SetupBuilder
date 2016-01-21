@@ -118,20 +118,22 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			String executable = runBeforeUninstall.getExecutable();
     			String mainClass = runBeforeUninstall.getMainClass();
     			String workingDir = runBeforeUninstall.getWorkDir();
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "case \"$1\" in remove|purge)" );    			
     			if( executable != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )\n" );
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )" );
     				} else {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )\n" );	
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )" );	
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")\n");
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")");
     				} else {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")\n");	
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")");	
     				}
     			}
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
     		}
     		
     		
