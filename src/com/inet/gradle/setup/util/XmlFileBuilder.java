@@ -60,6 +60,7 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         xmlFile.getParentFile().mkdirs();
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        docFactory.setIgnoringComments( true );
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
         doc = template != null ? docBuilder.parse( template.toString() ) : docBuilder.newDocument();
 
