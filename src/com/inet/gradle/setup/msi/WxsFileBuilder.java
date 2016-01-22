@@ -127,13 +127,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( packge, "Comments", setup.getDescription() );
         }
         addAttributeIfNotExists( packge, "InstallScope", task.getInstallScope().name() );
-        if( task.getMultiInstanceCount() > 1 ) {
-            addAttributeIfNotExists( packge, "Id", getGuid( "PackageCode" ) );
-        }
 
         // MajorUpgrade
-        Element update = getOrCreateChild( product, "MajorUpgrade" );
-        addAttributeIfNotExists( update, "AllowDowngrades", "yes" );
+        if( task.getMultiInstanceCount() <= 1 ) { 
+            Element update = getOrCreateChild( product, "MajorUpgrade" );
+            addAttributeIfNotExists( update, "AllowDowngrades", "yes" );
+        }
 
         // Directory
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR" );
@@ -1054,14 +1053,23 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         property = getOrCreateChildById( product, "Property", "InstancesCount" );
         addAttributeIfNotExists( property, "Value", Integer.toString( instanceCount ) );
 
-        // add instance count InstanceTransforms
+        // add instance count InstanceTransforms and UpgradeVersion
         Element transforms = getOrCreateChildByKeyValue( product, "InstanceTransforms", "Property", "INSTANCE_ID" );
         for( int i = 0; i < instanceCount; i++ ) {
             String id = "Instance_" + i;
+            String guid = getGuid( id );
             Element instance = getOrCreateChildById( transforms, "Instance", id );
-            addAttributeIfNotExists( instance, "ProductCode", getGuid( "ProductCode" + i ) );
-            addAttributeIfNotExists( instance, "UpgradeCode", getGuid( id ) );
+            addAttributeIfNotExists( instance, "ProductCode", "*" );
+            addAttributeIfNotExists( instance, "UpgradeCode", guid );
+
+            Element upgrade = getOrCreateChildById( product, "Upgrade", guid );
+            Element upgradeVersion = getOrCreateChildByKeyValue( upgrade, "UpgradeVersion", "Property", "WIX_UPGRADE_DETECTED_" + i );
+            addAttributeIfNotExists( upgradeVersion, "Minimum", "0.0.0.0" );
+            addAttributeIfNotExists( upgradeVersion, "MigrateFeatures", "yes" );
         }
+        Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
+        Element removeExistingProducts = getOrCreateChild( executeSequence, "RemoveExistingProducts" );
+        addAttributeIfNotExists( removeExistingProducts, "After", "InstallValidate" );
 
         Element action, custom;
 

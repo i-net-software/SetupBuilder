@@ -49,6 +49,9 @@ log "instance: " + Session.Property( "INSTANCE_ID" )
 Session.Property( "PRODUCT_NAME" ) = name
 
 
+patchUpgradeDetected
+
+
 
 ' =====================
 ' write in the log file of the MSI
@@ -179,4 +182,19 @@ Function getInstallDir( instanceID )
 
     reg.GetStringValue HKLM, "Software\" & Manufacturer & "\" & ProductName & "\Instances\" & instanceID, "", value
     getInstallDir = value
+End Function
+
+
+' =====================
+' Patch the upgarde properties. Only the current instance should replaced.
+' All other instances was detected but should not replaced.
+' =====================
+Function patchUpgradeDetected()
+    Dim i, InstancesCount
+    InstancesCount = Session.Property( "InstancesCount" )
+    For i = 0 To InstancesCount - 1
+        If CStr(i) <> instanceNumber Then
+            Session.Property( "WIX_UPGRADE_DETECTED_" & i ) = ""
+        End If
+    Next
 End Function
