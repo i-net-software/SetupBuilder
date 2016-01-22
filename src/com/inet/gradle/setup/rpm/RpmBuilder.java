@@ -230,31 +230,76 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
      */
     // share
     private void setupStarter( DesktopStarter starter ) throws IOException {
-        String unixName = starter.getExecutable();
+        String unixName = starter.getDisplayName(); 
         String consoleStarterPath = "/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
-            fw.write( "java -cp \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
-                + starter.getStartArguments() + " \"$@\"" );
+            if(starter.getExecutable() != null) {
+            	fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
+            } else {
+            	fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
+            			+ starter.getStartArguments() + " \"$@\"" );
+            }
         }
+        
+
+        
         int[] iconSizes = { 16, 32, 48, 64, 128 };
 
+        String iconName = "";
+        if(starter.getIcons() != null) {
+    		iconName = starter.getIcons().toString();
+    		int index = iconName.lastIndexOf('/'); 
+    		if(index > -1) {
+    			iconName = iconName.substring(index+1);
+    		}
+    		// icons must be png files and should named like that 
+    		if(!iconName.endsWith(".png")) {
+    			index = iconName.lastIndexOf('.'); 
+        		if(index > -1) {
+        			iconName = iconName.substring(0,index);
+        		}
+        		iconName = iconName + ".png";
+    		}
+        }
+        
         for( int size : iconSizes ) {
             File iconDir = new File( buildDir, "BUILD/usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
             iconDir.mkdirs();
             File scaledFile = setup.getIconForType( iconDir, "png" + size );
             if( scaledFile != null ) {
-                File iconFile = new File( iconDir, unixName + ".png" );
+            	File iconFile;
+            	if(starter.getIcons() != null) {
+            		
+            		iconFile = new File( iconDir, iconName );
+            	} else {
+            		iconFile = new File( iconDir, unixName + ".png" );
+            	}
+
                 scaledFile.renameTo( iconFile );
                 setPermissions( iconFile, false );
             }
         }
+        
         try (FileWriter fw = new FileWriter( createFile( "BUILD/usr/share/applications/" + unixName + ".desktop", false ) )) {
             fw.write( "[Desktop Entry]\n" );
             fw.write( "Name=" + starter.getDisplayName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
-            fw.write( "Exec=" + consoleStarterPath + " %F\n" );
-            fw.write( "Icon=" + unixName + "\n" );
+            if(starter.getExecutable() != null) {
+            	fw.write( "Exec=\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\"\n" );
+            } else {
+            	fw.write( "Exec=\"/" + consoleStarterPath + "\" %F\n" );
+            }
+            if(starter.getIcons() != null) {
+            	int index = iconName.lastIndexOf('.'); 
+        		if(index > -1) {
+        			iconName = iconName.substring(0,index); // as of the Icon Theme Specification the icon name should be without extension
+        		}
+            	fw.write( "Icon=" + iconName + "\n" );
+        	} else {
+        		fw.write( "Icon=" + unixName + "\n" );
+        	}
+
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
@@ -264,8 +309,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
             if( starter.getCategories() != null ) {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
-        }
-        
+        }        
     }
     
     /**
