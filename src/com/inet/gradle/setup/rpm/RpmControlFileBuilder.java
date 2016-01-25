@@ -309,7 +309,7 @@ class RpmControlFileBuilder {
 		}
 		
 		if(setup.getServices() != null && setup.getServices().size() > 0) {
-			controlWriter.write("%config /etc/init.d/*" + NEWLINE);	
+			controlWriter.write("/etc/init.d/*" + NEWLINE);	
 		}
 		
 		if( setup.getLicenseFiles() != null && setup.getLicenseFiles().size() > 0) {
