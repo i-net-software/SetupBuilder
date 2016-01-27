@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2016 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ public abstract class AbstractSetupTask extends AbstractTask {
 	}
 
 	/**
-	 * Sets the value for the 'preinst' config file.
-	 * @param preinst the value for the entry
+	 * Adds the content for the 'preinst' config file. On Windows this can be vbscript or jscript that should be executed.
+	 * @param preinst the content for the entry
 	 */
 	public void setPreinst(String preinst) {
 		this.preinst.add( preinst );
@@ -73,7 +73,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
 	}
 	
 	/**
-	 * Sets the value for the 'postinst' config file.
+	 * Adds the content for the 'postinst' config file. On Windows this can be vbscript or jscript that should be executed.
 	 * @param postinst the value for the entry
 	 */
 	public void setPostinst(String postinst) {
@@ -90,7 +90,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
 	}
 	
 	/**
-	 * Sets the value for the 'prerm' config file.
+	 * Adds the content for the 'prerm' config file. On Windows this can be vbscript or jscript that should be executed.
 	 * @param prerm the value for the entry
 	 */
 	public void setPrerm(String prerm) {
@@ -106,7 +106,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
 	}
 	
 	/**
-	 * Sets the value for the 'postrm' config file.
+	 * Adds the content for the 'postrm' config file. On Windows this can be vbscript or jscript that should be executed.
 	 * @param postrm the value for the entry
 	 */
 	public void setPostrm(String postrm) {

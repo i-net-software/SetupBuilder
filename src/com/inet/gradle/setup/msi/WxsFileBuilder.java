@@ -15,10 +15,12 @@
  */
 package com.inet.gradle.setup.msi;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -177,6 +179,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addRunBeforeUninstall();
         addRunAfter();
         addDeleteFiles();
+        addPreAndPostScripts();
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
@@ -870,7 +873,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             run.setExecutable( "rmdir" );
             run.setStartArguments( "/S /Q \"[INSTALLDIR]" + folder + '\"' );
             addRun( run, id, "ignore", null );
-            addCustomActionToSequence( id, true, "InstallInitialize", true );
+            addCustomActionToSequence( id, true, "RemoveFolders", true );
         }
     }
 
@@ -1102,5 +1105,81 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element component = getComponent( installDir, "instance_path" );
         Element key = addRegistryKey( component, "HKLM", "instance_path_reg", "Software\\" + setup.getVendor() + "\\" + setup.getApplication() + "\\Instances\\[INSTANCE_NUMBER]" );
         addRegistryValue( key, null, "string", "[INSTALLDIR]" );
+    }
+
+    /**
+     * Add pre and post scripts if any set.
+     * 
+     * @throws IOException can not occur
+     */
+    private void addPreAndPostScripts() throws IOException {
+        addPreAndPostScripts( "Preinst_Script", task.getPreinst(), "InstallInitialize", true, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        addPreAndPostScripts( "Postinst_Script", task.getPostinst(), "InstallFinalize", false, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        addPreAndPostScripts( "Prerm_Script", task.getPrerm(), "InstallInitialize", true, "REMOVE" );
+        addPreAndPostScripts( "Postrm_Script", task.getPostrm(), "InstallFinalize", false, "REMOVE" );
+    }
+
+    /**
+     * Add pre and post scripts if any set.
+     * 
+     * @param actionId the unique ID
+     * @param scripts the scripts content
+     * @param sequenceAction the name of an existing action in sequence after which it should be added.
+     * @param after true, After the action; false, Before
+     * @param condition the condition under which it should run
+     * @throws IOException can not occur
+     */
+    private void addPreAndPostScripts( String actionId, ArrayList<String> scripts, String sequenceAction, boolean after, String condition ) throws IOException {
+        if( scripts == null || scripts.isEmpty() ) {
+            return;
+        }
+        for( String script : scripts ) {
+            addPreAndPostScripts( actionId, script, sequenceAction, after, condition );
+        }
+    }
+
+    /**
+     * Add pre and post scripts if any set.
+     * 
+     * @param actionId the unique ID
+     * @param script the script content
+     * @param sequenceAction the name of an existing action in sequence after which it should be added.
+     * @param after true, After the action; false, Before
+     * @param condition the condition under which it should run
+     * @throws IOException can not occur
+     */
+    private void addPreAndPostScripts( String actionId, String script, String sequenceAction, boolean after, String condition ) throws IOException {
+        if( script == null || script.trim().isEmpty() ) {
+            return;
+        }
+
+        Element action = getOrCreateChildById( product, "CustomAction", actionId );
+        addAttributeIfNotExists( action, "Script", getScriptLanguage( script ) );
+        script = script.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
+        action.setTextContent( script );
+        Element custom = addCustomActionToSequence( actionId, true, sequenceAction, after );
+        if( condition != null ) {
+            custom.setTextContent( condition );
+        }
+    }
+
+    /**
+     * Detect the script language.
+     * 
+     * @param script current script
+     * @return "vbscript" or "jsscript"
+     * @throws IOException can not occur
+     */
+    private static String getScriptLanguage( String script ) throws IOException {
+        BufferedReader reader = new BufferedReader( new StringReader( script ) );
+        do {
+            String line = reader.readLine();
+            if( line == null ) {
+                return "vbscript";
+            }
+            if( line.trim().endsWith( ";" ) ) {
+                return "jscript";
+            }
+        } while( true );
     }
 }
