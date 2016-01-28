@@ -99,16 +99,16 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			String workingDir = starter.getWorkDir();
     			if( executable != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + "& )\n" );
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " & )\n" );
     				} else {
     					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " & )\n" );	
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )\n");
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + starter.getMainJar()  + "\" " +  mainClass + "& )\n");	
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + starter.getMainJar()  + "\" " +  mainClass + " & )\n");	
     				}
     			}
     		}
