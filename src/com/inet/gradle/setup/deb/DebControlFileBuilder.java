@@ -188,7 +188,7 @@ class DebControlFileBuilder {
      */
     private void putPreDepends(OutputStreamWriter controlWriter)
                     throws IOException {
-        controlWriter.write("Pre-Depends: debconf" + NEWLINE);
+        controlWriter.write("Pre-Depends: debconf, libgtk2-perl" + NEWLINE);
     }
     
 	/**
