@@ -1133,8 +1133,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( scripts == null || scripts.isEmpty() ) {
             return;
         }
-        for( String script : scripts ) {
-            addPreAndPostScripts( actionId, script, sequenceAction, after, condition );
+        for( int i = 0; i < scripts.size(); i++ ) {
+            String script = scripts.get( i );
+            addPreAndPostScripts( actionId + i, script, sequenceAction, after, condition );
         }
     }
 
@@ -1155,12 +1156,20 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         Element action = getOrCreateChildById( product, "CustomAction", actionId );
         addAttributeIfNotExists( action, "Script", getScriptLanguage( script ) );
+        addAttributeIfNotExists( action, "Execute", "deferred" );
+        addAttributeIfNotExists( action, "Impersonate", "no" );
         script = script.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
         action.setTextContent( script );
         Element custom = addCustomActionToSequence( actionId, true, sequenceAction, after );
         if( condition != null ) {
             custom.setTextContent( condition );
         }
+
+        //http://blogs.technet.com/b/alexshev/archive/2008/03/25/property-does-not-exist-or-empty-when-accessed-from-deferred-custom-action.aspx
+        action = getOrCreateChildById( product, "CustomAction", "SetProperties" + actionId );
+        addAttributeIfNotExists( action, "Property", actionId );
+        addAttributeIfNotExists( action, "Value", "INSTALLDIR='[INSTALLDIR]';ProductCode='[ProductCode]';INSTANCE_ID='[INSTANCE_ID]'" );
+        addCustomActionToSequence( "SetProperties" + actionId, true, actionId, false );
     }
 
     /**
