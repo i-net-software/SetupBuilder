@@ -106,9 +106,9 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )\n");
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " > starter.log )\n");
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + starter.getMainJar()  + "\" " +  mainClass + " & )\n");	
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + starter.getMainJar()  + "\" " +  mainClass + " > starter.log )\n");	
     				}
     			}
     		}
