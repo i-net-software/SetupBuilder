@@ -159,6 +159,7 @@ class RpmControlFileBuilder {
 	 */
 	private void putPreun(OutputStreamWriter controlWriter)  throws IOException {
 		controlWriter.write(NEWLINE + "%preun" + NEWLINE);
+		controlWriter.write(NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE);
 		
 		ArrayList<String> preuns = rpm.getPreun();
 		for (String preun : preuns) {
@@ -188,20 +189,21 @@ class RpmControlFileBuilder {
 			String workingDir = starter.getWorkDir();
 			if( executable != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " )" + NEWLINE);
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " " + starter.getStartArguments() + " )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " )" + NEWLINE);	
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " " + starter.getStartArguments() + " )" + NEWLINE);	
 				}
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )" + NEWLINE);
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " " + starter.getStartArguments() + " )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )"  + NEWLINE);	
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " " + starter.getStartArguments() + " )"  + NEWLINE);	
 				}
 			}
 			controlWriter.write(NEWLINE);
 		}
+		controlWriter.write(NEWLINE + "fi" + NEWLINE);
 	}
 
 	/**
@@ -266,12 +268,14 @@ class RpmControlFileBuilder {
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )" + NEWLINE);
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " > starter.log )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " & )"  + NEWLINE);	
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " > starter.log )"  + NEWLINE);	
 				}
 			}
 		}
+		
+		controlWriter.write("gtk-update-icon-cache /usr/share/icons/hicolor &>/dev/null || :"  + NEWLINE);
 		
 	}
 	
@@ -282,6 +286,11 @@ class RpmControlFileBuilder {
 	 */
 	private void putPostun(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%postun" + NEWLINE);
+		if(rpm.getPostun().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
+			controlWriter.write(NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE);
+		}
+		
+		
 		ArrayList<String> posts = rpm.getPostun();
 		for (String post : posts) {
 			controlWriter.write(post + NEWLINE);	
@@ -289,6 +298,9 @@ class RpmControlFileBuilder {
 		StringBuilder postun_script = scriptMap.get( Script.POSTRM );
 		if(postun_script != null) {
 			controlWriter.write(postun_script.toString() + NEWLINE);
+		}
+		if(rpm.getPostun().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
+			controlWriter.write(NEWLINE + "fi" + NEWLINE);
 		}
 	}
 	

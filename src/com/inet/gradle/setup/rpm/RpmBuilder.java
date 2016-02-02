@@ -161,7 +161,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         		+ "\nfi" );
         
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start >/dev/null\nfi");
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start \nfi");
         controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
         controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --del "+serviceUnixName+ "\nfi");
     }
@@ -244,7 +244,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         
 
         
-        int[] iconSizes = { 16, 32, 48, 64, 128 };
+        int[] iconSizes = { 16, 32, 48, 64, 128, 256, 512 };
 
         String iconName = "";
         if(starter.getIcons() != null) {

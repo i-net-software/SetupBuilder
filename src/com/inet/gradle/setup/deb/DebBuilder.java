@@ -112,6 +112,8 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     				}
     			}
     		}
+    		
+    		controlBuilder.addTailScriptFragment( Script.POSTINST, "gtk-update-icon-cache /usr/share/icons/hicolor &>/dev/null || : \n");
             
     		DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
     		if(runBeforeUninstall != null ) {
