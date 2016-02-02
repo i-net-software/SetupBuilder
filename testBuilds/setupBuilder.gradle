@@ -49,7 +49,12 @@ setupBuilder {
         displayName = "Setup Builder Test"
     }
 */    
+    runBeforeUninstall {
+        mainClass = 'com.inet.testapplication.TestLauncher'
+    }
     service {
+	    displayName = "i-net TestLaunch Server"
+	    id = "helpdesk"
     }
 }
 
