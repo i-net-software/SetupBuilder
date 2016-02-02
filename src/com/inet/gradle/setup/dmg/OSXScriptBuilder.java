@@ -105,4 +105,10 @@ public class OSXScriptBuilder extends Template {
         perms.add( PosixFilePermission.OTHERS_EXECUTE );
         Files.setPosixFilePermissions( file.toPath(), perms );
 	}
+	
+	@Override
+	public OSXScriptBuilder setPlaceholder(String placeholder, String content) {
+		super.setPlaceholder(placeholder, content);
+		return this;
+	}
 }
