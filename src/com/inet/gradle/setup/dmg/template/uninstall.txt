@@ -58,7 +58,9 @@ if [[ $FLAG -eq 1 ]]; then
     fi
 
     pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -f
-    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rmdir
+    
+    #Beware!
+    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rm -rf
     pkgutil --forget "$PACKAGEID"
 
 	echo "# Cleanup"
