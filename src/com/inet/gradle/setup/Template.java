@@ -81,6 +81,6 @@ public class Template {
     
     @Override
     public String toString() {
-    	return template;
+    	return template.replaceAll( "\\{\\{.*?\\}\\}", "" );
     }
 }
