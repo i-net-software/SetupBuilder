@@ -1,12 +1,16 @@
 # if there is a setup or something else to be started, do so now
-JAVAEXECUTABLE=`find "$TARGET_LOCATION/{{displayName}}.app/Contents" -name "java" -type f`
+JAVAEXECUTABLE=`find "$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}}.app/Contents" -name "java" -type f`
 RUNAFTER_MAINJAR="{{mainJar}}"
 RUNAFTER_MAINCLASS="{{mainClass}}"
-RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{displayName}}.app/Contents/Java/{{workingDir}}"
+RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}}.app/Contents/Java/{{workingDir}}"
+RUNINBACKGROUND="{{inBackground}}"
 
 # this is to be inteded with an embedded JRE and existing jars only
 if [ ! -z "$JAVAEXECUTABLE" ]; then
 	
+	# enable monitor for jobs
+    set -o monitor
+
 	# if the directory exists, start the run after
 	if [ -e "$RUNAFTER_WORKINGDIR" ]; then
 		if [ -z "$RUNAFTER_MAINCLASS" ]; then
@@ -14,7 +18,11 @@ if [ ! -z "$JAVAEXECUTABLE" ]; then
 		else
 			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" )&
 		fi
+        if [ ! -z "$RUNINBACKGROUND" ]; then
+            # bring job back into foreground
+            fg %+
+        fi
 	else
-		echo "Could not fine working direcoty at: '$RUNAFTER_WORKINGDIR'"
+		echo "Could not find working directory at: '$RUNAFTER_WORKINGDIR'"
 	fi
 fi
