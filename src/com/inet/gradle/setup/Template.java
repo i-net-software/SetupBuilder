@@ -58,12 +58,14 @@ public class Template {
      * Replaces occurences of the placeholder <tt>{{NAME}}</tt> to the specified content.
      * @param placeholder the name of the placerholder
      * @param content the content to which to placeholder will be replaces
+     * @return template
      */
-    public void setPlaceholder(String placeholder, String content) {
+    public Template setPlaceholder(String placeholder, String content) {
     	if ( content == null ) {
     		content = ""; // Remove if not set.
     	}
         template = template.replace( "{{" + placeholder + "}}", content );
+        return this;
     }
     
     /**
