@@ -53,6 +53,7 @@ public class Msi extends AbstractSetupTask {
 
     private int multiInstanceCount = 1;
 
+    private InstallScope installScope;
 
     /**
      * Create a new instance.
@@ -351,5 +352,34 @@ public class Msi extends AbstractSetupTask {
      */
     public void setMultiInstanceScript( Object multiInstanceScript ) {
         this.multiInstanceScript = multiInstanceScript;
+    }
+
+    /**
+     * Possible values for install scope
+     */
+    public static enum InstallScope {
+        perUser, perMachine
+    }
+
+    /**
+     * Get the install scope. Never null.
+     * 
+     * @return the scope
+     */
+    public InstallScope getInstallScope() {
+        if( installScope != null ) {
+            return installScope;
+        }
+        return getSetupBuilder().getServices().isEmpty() ? InstallScope.perUser : InstallScope.perMachine;
+    }
+
+    /**
+     * Set the install scope. Possible values are perUser and perMachine. If not set then it is perMachine if a service
+     * is configure else it is perUser.
+     * 
+     * @param installScope the new scope
+     */
+    public void setInstallScope( InstallScope installScope ) {
+        this.installScope = installScope;
     }
 }

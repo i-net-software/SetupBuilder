@@ -99,16 +99,16 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			String workingDir = starter.getWorkDir();
     			if( executable != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + "& )\n" );
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " & )\n" );
     				} else {
     					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " & )\n" );	
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + "& )\n");
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " > starter.log )\n");
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + starter.getMainJar()  + "\" " +  mainClass + "& )\n");	
+    					controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + starter.getMainJar()  + "\" " +  mainClass + " > starter.log )\n");	
     				}
     			}
     		}
@@ -118,20 +118,22 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			String executable = runBeforeUninstall.getExecutable();
     			String mainClass = runBeforeUninstall.getMainClass();
     			String workingDir = runBeforeUninstall.getWorkDir();
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "case \"$1\" in remove|purge)" );    			
     			if( executable != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )\n" );
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )" );
     				} else {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )\n" );	
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )" );	
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")\n");
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")");
     				} else {
-    					controlBuilder.addHeadScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")\n");	
+    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")");	
     				}
     			}
+    			controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
     		}
     		
     		
@@ -272,10 +274,9 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
                                    "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
-        controlBuilder.addConfFile( initScriptFile );
         controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " start \nfi");
-        controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  invoke-rc.d "+serviceUnixName+ " stop \nfi");
+        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start \nfi");
+        controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
         controlBuilder.addTailScriptFragment( Script.POSTRM,   "if [ \"$1\" = \"purge\" ] ; then\n" + 
             "    update-rc.d "+serviceUnixName+" remove >/dev/null\n" + 
             "fi" );
@@ -307,6 +308,14 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     		if(index > -1) {
     			iconName = iconName.substring(index+1);
     		}
+    		// icons must be png files and should named like that 
+    		if(!iconName.endsWith(".png")) {
+    			index = iconName.lastIndexOf('.'); 
+        		if(index > -1) {
+        			iconName = iconName.substring(0,index);
+        		}
+        		iconName = iconName + ".png";
+    		}
         }
         
         for( int size : iconSizes ) {
@@ -316,6 +325,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
             if( scaledFile != null ) {
             	File iconFile;
             	if(starter.getIcons() != null) {
+            		
             		iconFile = new File( iconDir, iconName );
             	} else {
             		iconFile = new File( iconDir, unixName + ".png" );

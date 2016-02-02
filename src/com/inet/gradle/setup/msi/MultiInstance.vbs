@@ -17,6 +17,8 @@ If Not IsNull( transform ) And InStr( transform, ":Instance_" ) = 1 Then
     installDir = getInstallDir( instanceNumber )
     If isNull( installDir ) Or installDir = "" Then
         installDir = Session.Property("INSTALLDIR")
+    Else
+        Session.Property("INSTALLDIR") = installDir
     End If
 Else
     installDir = FSO.GetAbsolutePathName( installDir ) ' normalize the case sensitivity
@@ -44,8 +46,10 @@ log "product name: " + name
 Session.Property( "INSTANCE_NUMBER" ) = instanceNumber
 Session.Property( "INSTANCE_ID" ) = "Instance_" & instanceNumber
 log "instance: " + Session.Property( "INSTANCE_ID" )
-Session.Property( "ProductName" ) = name
 Session.Property( "PRODUCT_NAME" ) = name
+
+
+patchUpgradeDetected
 
 
 
@@ -75,20 +79,7 @@ Function isProgramFiles( dirName )
         End If
     Next
 
-    Dim tempName, fullTempName
-    tempName = FSO.GetTempName
-    fullTempName = dirName & "\" + tempName
-    fso.CreateFolder( fullTempName )
-
     isProgramFiles = False
-    For Each environment In environments
-        If FSO.FolderExists( SHELL.ExpandEnvironmentStrings( environment ) & "\" & tempName ) Then
-            isProgramFiles = True
-            Exit For
-        End If
-    Next
-
-    SHELL.Run SHELL.ExpandEnvironmentStrings( "%SystemRoot%\system32\cmd.exe /c rd """ & fullTempName & """" ), 0
 End Function
 
 
@@ -96,7 +87,10 @@ End Function
 ' =====================
 ' calculate an unique ID from the given string.
 ' =====================
-Function idCode( str )
+Function idCode( ByVal str )
+    If Right( str, 1 ) = "\" Then
+        str = Left(str, Len(str) - 1)
+    End If 
     idCode = LCase( Hex( hashCode( LCase( str ) ) ) )
 End Function
 
@@ -188,4 +182,19 @@ Function getInstallDir( instanceID )
 
     reg.GetStringValue HKLM, "Software\" & Manufacturer & "\" & ProductName & "\Instances\" & instanceID, "", value
     getInstallDir = value
+End Function
+
+
+' =====================
+' Patch the upgarde properties. Only the current instance should replaced.
+' All other instances was detected but should not replaced.
+' =====================
+Function patchUpgradeDetected()
+    Dim i, InstancesCount
+    InstancesCount = Session.Property( "InstancesCount" )
+    For i = 0 To InstancesCount - 1
+        If CStr(i) <> instanceNumber Then
+            Session.Property( "WIX_UPGRADE_DETECTED_" & i ) = ""
+        End If
+    Next
 End Function

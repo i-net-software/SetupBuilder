@@ -35,11 +35,15 @@ package com.inet.gradle.setup.image.icns;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 public class IcnsCodec {
     private static final String ICNS = "icns";
@@ -188,7 +192,14 @@ public class IcnsCodec {
         return out.toByteArray();
     }
 
-    public IconSuite decode(InputStream inputStream) throws IOException {
+    /**
+     * Decode a icns file stream and returns a list of BufferedImages.
+     * 
+     * @param inputStream the data
+     * @return a list of images, never null
+     * @throws IOException if any IO/Error occur
+     */
+    public ArrayList<BufferedImage> decode(InputStream inputStream) throws IOException {
         /*
           Literal:
             4 bytes, each byte is an ASCII character
@@ -262,6 +273,8 @@ public class IcnsCodec {
             throw new IOException("Unexpected header encountered: " + header);
         }
 
+        ArrayList<BufferedImage> images = new ArrayList<>();
+
         int[] small = null;
         int[] large = null;
         int[] huge = null;
@@ -313,27 +326,33 @@ public class IcnsCodec {
                 IOSupport.readFully(inputStream, elementData);
                 thumb = decode8bitMask(elementData, thumb, THUMBNAIL_SIZE);
             } else {
-                IOSupport.skip(inputStream, elementDataSize);
+                // for all other formats we try if it is a PNG format that can be read with ImageIO
+                byte[] elementData = new byte[elementDataSize];
+                IOSupport.readFully(inputStream, elementData);
+                BufferedImage img = ImageIO.read( new ByteArrayInputStream(elementData) );
+                if( img != null ) {
+                    images.add( img );
+                }
+                //IOSupport.skip(inputStream, elementDataSize);
             }
 
             bytesLeft -= elementSize;
         }
 
-        IconSuite suite = new IconSuite();
         if (small != null) {
-            suite.setSmallIcon(createImage(SMALL_SIZE, small));
+            images.add(createImage(SMALL_SIZE, small));
         }
         if (large != null) {
-            suite.setLargeIcon(createImage(LARGE_SIZE, large));
+            images.add(createImage(LARGE_SIZE, large));
         }
         if (huge != null) {
-            suite.setHugeIcon(createImage(HUGE_SIZE, huge));
+            images.add(createImage(HUGE_SIZE, huge));
         }
         if (thumb != null) {
-            suite.setThumbnailIcon(createImage(THUMBNAIL_SIZE, thumb));
+            images.add(createImage(THUMBNAIL_SIZE, thumb));
         }
 
-        return suite;
+        return images;
     }
 
     private BufferedImage createImage(int size, int[] pixels) {

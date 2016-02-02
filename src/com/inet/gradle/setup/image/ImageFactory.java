@@ -83,19 +83,7 @@ public class ImageFactory {
                     break;
                 case "icns":
                     try( FileInputStream fis = new FileInputStream( file ) ) {
-                        IconSuite suite = new IcnsCodec().decode( fis );
-                        if( suite.getSmallIcon() != null ) {
-                            images.add( suite.getSmallIcon() );
-                        }
-                        if( suite.getLargeIcon() != null ) {
-                            images.add( suite.getLargeIcon() );
-                        }
-                        if( suite.getHugeIcon() != null ) {
-                            images.add( suite.getHugeIcon() );
-                        }
-                        if( suite.getThumbnailIcon() != null ) {
-                            images.add( suite.getThumbnailIcon() );
-                        }
+                        images.addAll( new IcnsCodec().decode( fis ) );
                     }
                     break;
                 default:

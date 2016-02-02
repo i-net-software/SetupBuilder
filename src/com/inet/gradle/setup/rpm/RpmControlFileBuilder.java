@@ -160,6 +160,26 @@ class RpmControlFileBuilder {
 	private void putPreun(OutputStreamWriter controlWriter)  throws IOException {
 		controlWriter.write(NEWLINE + "%preun" + NEWLINE);
 		
+		ArrayList<String> preuns = rpm.getPreun();
+		for (String preun : preuns) {
+			controlWriter.write(preun + NEWLINE);	
+		}
+		StringBuilder prep_script = scriptMap.get( Script.PRERM );
+		if(prep_script != null) {
+			controlWriter.write(prep_script.toString() + NEWLINE);
+		}
+		
+		// removes only the files in the installation path
+		List<String> del_files = setup.getDeleteFiles();
+		for (String file : del_files) {
+			controlWriter.write("if [ -f \"${RPM_INSTALL_PREFIX}/" + file + "\" ]; then\n  rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"\nfi" + NEWLINE);	
+		}
+		// removes only the dirs in the installation path
+		List<String> del_dirs = setup.getDeleteFolders();
+		for (String dirs : del_dirs) {
+			controlWriter.write("rm -R -f \"${RPM_INSTALL_PREFIX}/" + dirs + "\"" + NEWLINE);	
+		}
+		
 		DesktopStarter starter = setup.getRunBeforeUninstall();
 		if(starter != null ) {
 			controlWriter.write(NEWLINE);
@@ -182,28 +202,6 @@ class RpmControlFileBuilder {
 			}
 			controlWriter.write(NEWLINE);
 		}
-		
-		
-		ArrayList<String> preuns = rpm.getPreun();
-		for (String preun : preuns) {
-			controlWriter.write(preun + NEWLINE);	
-		}
-		StringBuilder prep_script = scriptMap.get( Script.PRERM );
-		if(prep_script != null) {
-			controlWriter.write(prep_script.toString() + NEWLINE);
-		}
-		
-		// removes only the files in the installation path
-		List<String> del_files = setup.getDeleteFiles();
-		for (String file : del_files) {
-			controlWriter.write("if [ -f \"${RPM_INSTALL_PREFIX}/" + file + "\" ]; then\n  rm -f \"${RPM_INSTALL_PREFIX}/" + file + "\"\nfi" + NEWLINE);	
-		}
-		// removes only the dirs in the installation path
-		List<String> del_dirs = setup.getDeleteFolders();
-		for (String dirs : del_dirs) {
-			controlWriter.write("rm -R -f \"${RPM_INSTALL_PREFIX}/" + dirs + "\"" + NEWLINE);	
-		}
-		
 	}
 
 	/**
@@ -302,7 +300,6 @@ class RpmControlFileBuilder {
 	 */
 	private void putFiles(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%files" + NEWLINE);
-		
 		controlWriter.write( "\"" + rpm.getInstallationRoot()+ "\"" + NEWLINE); // nimmt anscheinend nicht die Files in der Root
 		
 		if(setup.getDesktopStarters() != null && setup.getDesktopStarters().size() > 0) {
@@ -312,7 +309,7 @@ class RpmControlFileBuilder {
 		}
 		
 		if(setup.getServices() != null && setup.getServices().size() > 0) {
-			controlWriter.write("%config /etc/init.d/*" + NEWLINE);	
+			controlWriter.write("/etc/init.d/*" + NEWLINE);	
 		}
 		
 		if( setup.getLicenseFiles() != null && setup.getLicenseFiles().size() > 0) {
