@@ -45,6 +45,7 @@ if [[ $FLAG -eq 1 ]]; then
 	VOLUME=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :volume"`
 	LOCATION=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :install-location"`
 	TARGET_LOCATION="${VOLUME}${LOCATION}"
+    TARGET_LOCATION=${TARGET_LOCATION%/}
 	
 	echo "# Before Script Section"
 

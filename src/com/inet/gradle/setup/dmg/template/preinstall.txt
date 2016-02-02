@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_PATH=`dirname "$0"`
-TARGET_LOCATION="$2"
+TARGET_LOCATION=${2%/}
 
 # Remove watcher before anything can start
 AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
