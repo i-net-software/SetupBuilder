@@ -136,6 +136,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     	
     	// Create Pre and Post install scripts
     	DesktopStarter runAfter = setup.getRunAfter();
+    	DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
 
         OSXScriptBuilder preinstall = new OSXScriptBuilder( core, "template/preinstall.txt" );
 		preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ));
@@ -144,22 +145,27 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 		preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ));
 
         OSXScriptBuilder uninstall = new OSXScriptBuilder( core, "template/uninstall.txt" );
+        
         uninstall.addScript( new OSXScriptBuilder( task.getPrerm() ));
-
         OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
 
         for (Service service : setup.getServices() ) {
 			
+    		if ( runBeforeUninstall != null ) {
+    			runBeforeUninstall.setDisplayName(service.getDisplayName());
+    			uninstall.addScript(new OSXScriptBuilder(runBeforeUninstall, "template/runBeforeAfter.txt" ).setPlaceholder( "installationSubdirectory" , installationSubdirectory()).setPlaceholder("inBackground", "NO"));
+    		}
+
 			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
-			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" ));
-			
+			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" ).setPlaceholder( "installationSubdirectory" , installationSubdirectory()));
+
 			// Unload service in uninstall as well.
 			uninstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
 
 			// patch runafter
 			if ( runAfter != null ) {
 				runAfter.setDisplayName(service.getDisplayName());
-				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/postinstall.runafter.txt" ));
+				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/runBeforeAfter.txt" ).setPlaceholder( "installationSubdirectory" , installationSubdirectory()));
 			}
 		}
 
@@ -241,11 +247,19 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( "--install-location" );
         
         // Application as default directory except there are more application parts to install.
-        command.add( "/Applications/" + (setup.getServices().size()+setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "") );
+        command.add( "/Applications/" + installationSubdirectory() );
         command.add(  TempPath.getTempString( "packages", applicationIdentifier + ".pkg" ) );
     	exec( command );
     	
     	Files.copy( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+	}
+
+	/**
+	 * Returns a subdirectory if needed because of the installation
+	 * @return subdirectory or ""
+	 */
+	private String installationSubdirectory() {
+		return (setup.getServices().size()+setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "");
 	}
 
 	/**
