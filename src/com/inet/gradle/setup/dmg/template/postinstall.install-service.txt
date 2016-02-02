@@ -2,10 +2,10 @@
 # Parameter Setup
 DAEMON_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.plist"
 PREFPANE_DESTINATION="/Library/PreferencePanes/{{displayName}}.prefPane"
-SERVICE_APP_LOCATION="$TARGET_LOCATION/{{displayName}}.app"
+SERVICE_APP_LOCATION="$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}}.app"
 RESOURCE_LOCATION="$SERVICE_APP_LOCATION/Contents/Resources"
 SERVICE_PLIST="$RESOURCE_LOCATION/{{displayName}}.prefPane/Contents/Resources/service.plist"
-COMMAND="$TARGET_LOCATION/{{displayName}}.app/Contents/MacOS/{{executable}}"
+COMMAND="$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}}.app/Contents/MacOS/{{executable}}"
 
 # Link prefpane
 if [ -L "$PREFPANE_DESTINATION" ]; then
@@ -20,7 +20,7 @@ if [ -f "/usr/libexec/PlistBuddy" ]; then
 	/usr/libexec/PlistBuddy -c "Set :Program $COMMAND" "$SERVICE_PLIST"
 	
 	# Watch for modification to trigger uninstall
-	/usr/libexec/PlistBuddy -c "Add :WatchPaths: String $PREFPANE_DESTINATION" "$UNINSTALL_WATCH"
+    /usr/libexec/PlistBuddy -c "Add :WatchPaths: String $PREFPANE_DESTINATION" "$UNINSTALL_WATCH"
     /usr/libexec/PlistBuddy -c "Add :WatchPaths: String $SERVICE_APP_LOCATION" "$UNINSTALL_WATCH"
 else
 	echo "Cannot properly set up the service without the PlistBuddy tool"
