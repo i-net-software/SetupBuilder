@@ -44,7 +44,7 @@ if [[ $FLAG -eq 1 ]]; then
 	pkgutil --pkg-info-plist "$PACKAGEID" > "$PKGTMP"
 	VOLUME=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :volume"`
 	LOCATION=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :install-location"`
-	TARGET_PATH="${VOLUME}${LOCATION}"
+	TARGET_LOCATION="${VOLUME}${LOCATION}"
 	
 	echo "# Before Script Section"
 
@@ -52,12 +52,13 @@ if [[ $FLAG -eq 1 ]]; then
 
 	echo "# After Script Section"
 
-	if [ -d "$TARGET_PATH" ]; then
-	    cd "$TARGET_PATH" && pwd
-	    pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -f
-	    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rmdir
-	    pkgutil --forget "$PACKAGEID"
-	fi
+	if [ -d "$TARGET_LOCATION" ]; then
+	    cd "$TARGET_LOCATION" && pwd
+    fi
+
+    pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -f
+    pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rmdir
+    pkgutil --forget "$PACKAGEID"
 
 	echo "# Cleanup"
 	rm "$PKGTMP"
@@ -79,3 +80,5 @@ if [[ $FLAG -eq 1 ]]; then
 		fi
 	fi
 fi
+
+exit 0
