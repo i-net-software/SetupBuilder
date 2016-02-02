@@ -14,9 +14,9 @@ if [ ! -z "$JAVAEXECUTABLE" ]; then
 	# if the directory exists, start the run after
 	if [ -e "$RUNAFTER_WORKINGDIR" ]; then
 		if [ -z "$RUNAFTER_MAINCLASS" ]; then
-			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -jar "$RUNAFTER_MAINJAR" )&
+			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -jar "$RUNAFTER_MAINJAR" "{{startArgument}}" )&
 		else
-			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" )&
+			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" "{{startArgument}}" )&
 		fi
         if [ ! -z "$RUNINBACKGROUND" ]; then
             # bring job back into foreground

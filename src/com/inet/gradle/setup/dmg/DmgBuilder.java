@@ -153,11 +153,15 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 			
     		if ( runBeforeUninstall != null ) {
     			runBeforeUninstall.setDisplayName(service.getDisplayName());
-    			uninstall.addScript(new OSXScriptBuilder(runBeforeUninstall, "template/runBeforeAfter.txt" ).setPlaceholder( "installationSubdirectory" , installationSubdirectory()).setPlaceholder("inBackground", "NO"));
+    			uninstall.addScript(new OSXScriptBuilder(runBeforeUninstall, "template/runBeforeAfter.txt" )
+    					.setPlaceholder( "installationSubdirectory" , installationSubdirectory())
+    					.setPlaceholder("inBackground", "NO")
+    					.setPlaceholder("startArgument", runBeforeUninstall.getStartArguments()));
     		}
 
 			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
-			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" ).setPlaceholder( "installationSubdirectory" , installationSubdirectory()));
+			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" )
+					.setPlaceholder( "installationSubdirectory" , installationSubdirectory()));
 
 			// Unload service in uninstall as well.
 			uninstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
@@ -165,7 +169,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 			// patch runafter
 			if ( runAfter != null ) {
 				runAfter.setDisplayName(service.getDisplayName());
-				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/runBeforeAfter.txt" ).setPlaceholder( "installationSubdirectory" , installationSubdirectory()));
+				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/runBeforeAfter.txt" )
+						.setPlaceholder( "installationSubdirectory" , installationSubdirectory())
+    					.setPlaceholder("startArgument", runAfter.getStartArguments()));
 			}
 		}
 
