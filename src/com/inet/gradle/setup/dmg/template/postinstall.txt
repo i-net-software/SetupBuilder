@@ -25,6 +25,7 @@ if [ -f "/usr/libexec/PlistBuddy" ]; then
 	/usr/bin/ditto "$SCRIPT_PATH/uninstall.sh" "/opt/{{serviceName}}/uninstall.sh"
 	chown "$(whoami)":wheel "/opt/{{serviceName}}/uninstall.sh"
 	
+    /usr/libexec/PlistBuddy -c "Add :WatchPaths: String /Library/PreferencePanes" "$UNINSTALL_WATCH"
 	/usr/libexec/PlistBuddy -c "Set :Program /opt/{{serviceName}}/uninstall.sh" "$UNINSTALL_WATCH"
 else
 	echo "Cannot properly set up the service without the PlistBuddy tool"
