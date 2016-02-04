@@ -140,6 +140,8 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
     	}
         
         initScript.setPlaceholder( "name", serviceUnixName );
+        String version = setup.getVersion();
+        initScript.setPlaceholder( "majorversion", version.substring(0, version.indexOf('.')) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );

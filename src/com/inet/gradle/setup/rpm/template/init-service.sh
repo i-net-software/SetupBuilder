@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          {{name}}
+# Provides:          {{name}}{{majorversion}}
 # Required-Start:    $local_fs $network $remote_fs $syslog
 # Required-Stop:     $local_fs $network $remote_fs $syslog
 # Default-Start:     2 3 4 5

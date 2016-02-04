@@ -259,6 +259,8 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         String mainJarPath;
         Template initScript = new Template( "deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
+        String version = setup.getVersion();
+        initScript.setPlaceholder( "majorversion", version.substring(0, version.indexOf('.')) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
