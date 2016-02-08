@@ -370,12 +370,12 @@ public class Msi extends AbstractSetupTask {
         if( installScope != null ) {
             return installScope;
         }
-        return getSetupBuilder().getServices().isEmpty() ? InstallScope.perUser : InstallScope.perMachine;
+        return InstallScope.perMachine;
     }
 
     /**
-     * Set the install scope. Possible values are perUser and perMachine. If not set then it is perMachine if a service
-     * is configure else it is perUser.
+     * Set the install scope. Possible values are perUser and perMachine. If not set then it is perMachine.
+     * A perUser installer has no elevated rights and can not installed to program files.
      * 
      * @param installScope the new scope
      */
