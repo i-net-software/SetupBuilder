@@ -109,7 +109,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         wix.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns:util", "http://schemas.microsoft.com/wix/UtilExtension" );
 
         // Product node
-        product = getOrCreateChildById( wix, "Product", "*" );
+        product = getOrCreateChild( wix, "Product" );
+        addAttributeIfNotExists( product, "Id", UUID.randomUUID().toString() ); // for multiple instances, every language transformation must have the same ProductCode
         addAttributeIfNotExists( product, "Language", "1033" );
         addAttributeIfNotExists( product, "Manufacturer", setup.getVendor() );
         addAttributeIfNotExists( product, "Name", setup.getApplication() );
