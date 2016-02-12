@@ -170,7 +170,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         } );
 
         setMinimumOsVersion();
-
+        saveLoadLastInstallDir();
         addMultiInstanceTransforms();
         addBundleJre();
         addGUI();
@@ -233,6 +233,31 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         String msg = java.text.MessageFormat.format( "{0} is only supported on {1}, or higher.", setup.getApplication(), os );
         addAttributeIfNotExists( condition, "Message", msg );
         condition.setTextContent( "Installed OR (VersionNT >= " + intVersion + ")" );
+    }
+
+    /**
+     * Save the directory of the last installation and load it on an update as default install dir.
+     */
+    private void saveLoadLastInstallDir() {
+        String key = "Software\\" + setup.getVendor() + '\\' + setup.getApplication() + '\\' + "LastInstallDir";
+
+        // save the INSTALLDIR to the registry
+        Element component = getComponent( installDir, "install_path" );
+        Element regkey = addRegistryKey( component, "HKLM", "install_path_reg", key );
+        addRegistryValue( regkey, null, "string", "[INSTALLDIR]" );
+
+        // load the INSTALLDIR from the registry
+        Element lastInstalldir = getOrCreateChildById( product, "Property", "LAST_INSTALLDIR" );
+        Element search = getOrCreateChildById( lastInstalldir, "RegistrySearch", "SearchInstallDir" );
+        addAttributeIfNotExists( search, "Root", "HKLM" );
+        addAttributeIfNotExists( search, "Key", key );
+        addAttributeIfNotExists( search, "Type", "directory" );
+
+        Element action = getOrCreateChildById( product, "CustomAction", "SetInstallDir" );
+        addAttributeIfNotExists( action, "Execute", "firstSequence" );
+        addAttributeIfNotExists( action, "Property", "INSTALLDIR" );
+        addAttributeIfNotExists( action, "Value", "[LAST_INSTALLDIR]" );
+        addCustomActionToSequence( "SetInstallDir", false, "FileCost", true, "LAST_INSTALLDIR" );
     }
 
     /**
@@ -617,8 +642,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 run.setExecutable( "net" );
                 run.setStartArguments( "start \"" + name + "\"" );
                 addRun( run, id + "Restart", "ignore", null );
-                Element custom = addCustomActionToSequence( id + "Restart", true, "InstallFiles", true );
-                custom.setTextContent( "NOT REMOVE" );
+                addCustomActionToSequence( id + "Restart", true, "InstallFiles", true, "NOT REMOVE" );
             }
 
             // Add the prunmgr.exe and change it name dynamically to the service name. Dynamically is important for multiple instances.
@@ -628,14 +652,13 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             run.setExecutable( "ren" );
             run.setStartArguments( "\"" + subdir + "prunmgr.exe\" \"" + name + ".exe\"" );
             addRun( run, id + "Rename", "ignore", null );
-            addCustomActionToSequence( id + "Rename", true, "InstallFiles", true );
+            addCustomActionToSequence( id + "Rename", true, "InstallFiles", true, null );
 
             run = new DesktopStarter( setup );
             run.setExecutable( "del" );
             run.setStartArguments( "/Q /F \"" + subdir + name + ".exe\"" );
             addRun( run, id + "Delete", "ignore", null );
-            Element custom = addCustomActionToSequence( id + "Delete", true, "InstallFiles", false );
-            custom.setTextContent( "NOT Installed OR REINSTALL OR REMOVE" );
+            addCustomActionToSequence( id + "Delete", true, "InstallFiles", false, "NOT Installed OR REINSTALL OR REMOVE" );
 
             // delete log files on uninstall
             addDeleteFiles( subdir + "service.*.log" );
@@ -813,9 +836,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         String id = "runBeforeUninstall";
         addRun( runBeforeUninstall, id, "ignore", null );
 
-        Element custom = addCustomActionToSequence( id, true, "InstallInitialize", true );
         // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-        custom.setTextContent( "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
+        addCustomActionToSequence( id, true, "InstallInitialize", true, "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
     }
 
     /**
@@ -847,12 +869,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      *            https://msdn.microsoft.com/en-us/library/aa372038(v=vs.85).aspx
      *            https://msdn.microsoft.com/en-us/library/aa372039(v=vs.85).aspx
      * @param after true, After the action; false, Before
+     * @param condition the condition under which it should run
      * @return the Custom element node
      */
-    private Element addCustomActionToSequence( String id, boolean execute, String sequenceAction, boolean after ) {
+    private Element addCustomActionToSequence( String id, boolean execute, String sequenceAction, boolean after, String condition ) {
         Element executeSequence = getOrCreateChild( product, execute ? "InstallExecuteSequence" : "InstallUISequence" );
         Element custom = getOrCreateChildByKeyValue( executeSequence, "Custom", "Action", id );
         addAttributeIfNotExists( custom, after ? "After" : "Before", sequenceAction );
+        if( condition != null ) {
+            custom.setTextContent( condition );
+        }
         return custom;
     }
 
@@ -874,7 +900,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             run.setExecutable( "rmdir" );
             run.setStartArguments( "/S /Q \"[INSTALLDIR]" + folder + '\"' );
             addRun( run, id, "ignore", null );
-            addCustomActionToSequence( id, true, "RemoveFolders", true );
+            addCustomActionToSequence( id, true, "RemoveFolders", true, null );
         }
     }
 
@@ -1075,7 +1101,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element removeExistingProducts = getOrCreateChild( executeSequence, "RemoveExistingProducts" );
         addAttributeIfNotExists( removeExistingProducts, "After", "InstallValidate" );
 
-        Element action, custom;
+        Element action;
 
         // add a vbscript action to set the instance names
         action = getOrCreateChildById( product, "CustomAction", "SetInstanceID" );
@@ -1085,22 +1111,20 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             vbscript = vbscript.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
             action.setTextContent( vbscript );
         }
-        addCustomActionToSequence( "SetInstanceID", false, "ExecuteAction", false );
-        addCustomActionToSequence( "SetInstanceID", true, "ValidateProductID", false );
+        addCustomActionToSequence( "SetInstanceID", false, "ExecuteAction", false, null );
+        addCustomActionToSequence( "SetInstanceID", true, "ValidateProductID", false, null );
 
         // add a action to set the property TRANSFORM
         action = getOrCreateChildById( product, "CustomAction", "SetTransforms" );
         addAttributeIfNotExists( action, "Property", "TRANSFORMS" );
         addAttributeIfNotExists( action, "Value", "{:[INSTANCE_ID];}[TRANSFORMS]" );
-        custom = addCustomActionToSequence( "SetTransforms", false, "SetInstanceID", true );
-        custom.setTextContent( "ACTION = \"INSTALL\"" );
+        addCustomActionToSequence( "SetTransforms", false, "SetInstanceID", true, "ACTION = \"INSTALL\"" );
 
         // set the ProductName properties from the property PRODUCT_NAME of the vbscript
         action = getOrCreateChildById( product, "CustomAction", "SetProductName" );
         addAttributeIfNotExists( action, "Property", "ProductName" );
         addAttributeIfNotExists( action, "Value", "[PRODUCT_NAME]" );
-        custom = addCustomActionToSequence( "SetProductName", true, "SetInstanceID", true );
-        custom.setTextContent( "PRODUCT_NAME" );
+        addCustomActionToSequence( "SetProductName", true, "SetInstanceID", true, "PRODUCT_NAME" );
 
         // add the registry key with instance path
         Element component = getComponent( installDir, "instance_path" );
@@ -1161,16 +1185,13 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( action, "Impersonate", "no" );
         script = script.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
         action.setTextContent( script );
-        Element custom = addCustomActionToSequence( actionId, true, sequenceAction, after );
-        if( condition != null ) {
-            custom.setTextContent( condition );
-        }
+        addCustomActionToSequence( actionId, true, sequenceAction, after, condition );
 
         //http://blogs.technet.com/b/alexshev/archive/2008/03/25/property-does-not-exist-or-empty-when-accessed-from-deferred-custom-action.aspx
         action = getOrCreateChildById( product, "CustomAction", "SetProperties" + actionId );
         addAttributeIfNotExists( action, "Property", actionId );
         addAttributeIfNotExists( action, "Value", "INSTALLDIR='[INSTALLDIR]';ProductCode='[ProductCode]';INSTANCE_ID='[INSTANCE_ID]'" );
-        addCustomActionToSequence( "SetProperties" + actionId, true, actionId, false );
+        addCustomActionToSequence( "SetProperties" + actionId, true, actionId, false, null );
     }
 
     /**
