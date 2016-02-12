@@ -2,7 +2,7 @@ Gradle Setup Builder Plugin
 ====
 
 [![Build Status](https://travis-ci.org/i-net-software/SetupBuilder.svg)](https://travis-ci.org/i-net-software/SetupBuilder)
-[![License](https://img.shields.io/github/license/i-net-software/SetupBuilder.svg)](https://github.com/i-net-software/SetupBuilder/blob/master/license.txt)
+[![License](https://img.shields.io/badge/license-Apache_License_2.0-blue.svg)](https://github.com/i-net-software/SetupBuilder/blob/master/license.txt)
 
 The Setup Builder is a plugin for Gradle which can create a native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file. The target is an installer for Java applications.
 
