@@ -287,6 +287,10 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             parameters.add( "/sha1" );
             parameters.add( sign.getSha1() );
         }
+
+        parameters.add( "/d" ); // http://stackoverflow.com/questions/4315840/the-uac-prompt-shows-a-temporary-random-program-name-for-msi-can-the-correct-na
+        parameters.add( setup.getApplication() );
+
         parameters.add( file.getAbsolutePath() );
         exec( parameters );
 
