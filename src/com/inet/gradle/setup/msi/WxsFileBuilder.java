@@ -647,22 +647,39 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             // Add the prunmgr.exe and change it name dynamically to the service name. Dynamically is important for multiple instances.
             addFile( component, prunmgr, id + "GUI", "prunmgr.exe", true );
-
-            DesktopStarter run = new DesktopStarter( setup );
-            run.setExecutable( "ren" );
-            run.setStartArguments( "\"" + subdir + "prunmgr.exe\" \"" + name + ".exe\"" );
-            addRun( run, id + "Rename", "ignore", null );
-            addCustomActionToSequence( id + "Rename", true, "InstallFiles", true, null );
-
-            run = new DesktopStarter( setup );
-            run.setExecutable( "del" );
-            run.setStartArguments( "/Q /F \"" + subdir + name + ".exe\"" );
-            addRun( run, id + "Delete", "ignore", null );
-            addCustomActionToSequence( id + "Delete", true, "InstallFiles", false, "NOT Installed OR REINSTALL OR REMOVE" );
+            renameFileIfDynamic( id, subdir, "prunmgr.exe", name + ".exe" );
 
             // delete log files on uninstall
             addDeleteFiles( subdir + "service.*.log" );
         }
+    }
+
+    /**
+     * Rename a file after it was copy.
+     * 
+     * @param id the base ID for the actions
+     * @param directory the directory of the file
+     * @param sourceName the sourcename. This should not contain any placeholder in brackets []
+     * @param targetName the targetname, this can contain place holder
+     */
+    private void renameFileIfDynamic( String id, String directory, String sourceName, String targetName ) {
+        int idx = targetName.indexOf( '[' );
+        if( idx < 0 || targetName.indexOf( ']' ) < idx ) {
+            // not a dynamic name 
+            return;
+        }
+
+        DesktopStarter run = new DesktopStarter( setup );
+        run.setExecutable( "ren" );
+        run.setStartArguments( "\"" + directory + sourceName + "\" \"" + targetName + "\"" );
+        addRun( run, id + "Rename", "ignore", null );
+        addCustomActionToSequence( id + "Rename", true, "CreateShortcuts", true, null );
+
+        run = new DesktopStarter( setup );
+        run.setExecutable( "del" );
+        run.setStartArguments( "/Q /F \"" + directory + targetName + "\"" );
+        addRun( run, id + "Delete", "ignore", null );
+        addCustomActionToSequence( id + "Delete", true, "InstallFiles", false, "NOT Installed OR REINSTALL OR REMOVE" );
     }
 
     /**
@@ -723,7 +740,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element component = getShortcutComponent( starter, product );
             String id = id( starter.getLocation() + "_" + starter.getDisplayName() );
             Element shortcut = getOrCreateChildById( component, "Shortcut", id );
-            addAttributeIfNotExists( shortcut, "Name", starter.getDisplayName() );
+            String name = starter.getDisplayName().replace( '[', '_' ).replace( ']', '_' );
+            addAttributeIfNotExists( shortcut, "Name", name );
             addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
 
             addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter ) );
@@ -758,6 +776,25 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             if( iconID != null ) {
                 addAttributeIfNotExists( shortcut, "Icon", iconID );
             }
+
+
+            String linkLocation;
+            switch( starter.getLocation() ) {
+                default:
+                case StartMenu:
+                    linkLocation = "[ProgramMenuFolder]";
+                    break;
+                case ApplicationMenu:
+                    linkLocation = "[ApplicationProgramsFolder]";
+                    break;
+                case InstallDir:
+                    linkLocation = "[INSTALLDIR]";
+                    break;
+            }
+            if( starter.getWorkDir() != null ) {
+                linkLocation += starter.getWorkDir();
+            }
+            renameFileIfDynamic( id, linkLocation, name + ".lnk", starter.getDisplayName() + ".lnk" );
         }
     }
 
