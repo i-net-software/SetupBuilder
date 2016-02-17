@@ -342,7 +342,7 @@ class RpmControlFileBuilder {
 		if(release == null || release.length() == 0) {
 			release = "1";
 		}
-		controlWriter.write("cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm " + setup.getDestinationDir().getAbsolutePath() + NEWLINE);
+		controlWriter.write("cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm '" + setup.getDestinationDir().getAbsolutePath()+ "'" + NEWLINE);
 		controlWriter.write("mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm " + rpm.getSetupFile() + NEWLINE);
 		ArrayList<String> cleans = rpm.getClean();
 		for (String clean : cleans) {
@@ -359,7 +359,7 @@ class RpmControlFileBuilder {
 	 */
 	private void putInstall(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%install" + NEWLINE);
-		controlWriter.write("cp -R . %{buildroot}" + NEWLINE);
+		controlWriter.write("cp -R . '%{buildroot}'" + NEWLINE);
 //		if(setup.getServices() != null && setup.getServices().size() > 0) {
 //			controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);	
 //		}
