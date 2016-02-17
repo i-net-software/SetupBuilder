@@ -315,17 +315,17 @@ class RpmControlFileBuilder {
 		controlWriter.write( "\"" + rpm.getInstallationRoot()+ "\"" + NEWLINE); // nimmt anscheinend nicht die Files in der Root
 		
 		if(setup.getDesktopStarters() != null && setup.getDesktopStarters().size() > 0) {
-			controlWriter.write( "/usr/share/applications/" + NEWLINE);
-			controlWriter.write( "/usr/share/icons/" + NEWLINE);
-			controlWriter.write( "/usr/bin/" + NEWLINE);
+			controlWriter.write( "/usr/share/applications/*" + NEWLINE);
+			controlWriter.write( "/usr/share/icons/**/*" + NEWLINE);
+			controlWriter.write( "/usr/bin/*" + NEWLINE);
 		}
 		
 		if(setup.getServices() != null && setup.getServices().size() > 0) {
-			controlWriter.write("/etc/init.d/" + NEWLINE);	
+			controlWriter.write("/etc/init.d/*" + NEWLINE);	
 		}
 		
 		if( setup.getLicenseFiles() != null && setup.getLicenseFiles().size() > 0) {
-			controlWriter.write( "/usr/share/licenses/" + NEWLINE);
+			controlWriter.write( "/usr/share/licenses/**/*" + NEWLINE);
 		}
 		
 	}
