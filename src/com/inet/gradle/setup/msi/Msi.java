@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,6 +55,8 @@ public class Msi extends AbstractSetupTask {
     private int multiInstanceCount = 1;
 
     private InstallScope installScope;
+
+    private List<String> preGUI = new ArrayList<String>();
 
     /**
      * Create a new instance.
@@ -381,5 +384,42 @@ public class Msi extends AbstractSetupTask {
      */
     public void setInstallScope( InstallScope installScope ) {
         this.installScope = installScope;
+    }
+
+    /**
+     * Returns the preGUI scripts.
+     * 
+     * @return the scripts
+     */
+    public List<String> getPreGUI() {
+        return preGUI;
+    }
+
+    /**
+     * Set a vbscript or jscript that should be executed before the GUI is displayed. This can be used for setting
+     * a default install directory. This action has no elevated rights.
+     * 
+     * @param script list or single script
+     */
+    @SuppressWarnings( "unchecked" )
+    public void setPreGUI( Object script ) {
+        preGUI.clear();
+        preGUI( script );
+    }
+
+    /**
+     * Add a vbscript or jscript that should be executed before the GUI is displayed. This can be used for setting
+     * a default install directory. This action has no elevated rights.
+     * 
+     * @param script the content for the entry
+     */
+    public void preGUI( Object script ) {
+        if( script == null ) {
+            // nothing
+        } else if( script instanceof Collection ) {
+            preGUI.addAll( (Collection)script );
+        } else {
+            preGUI.add( script.toString() );
+        }
     }
 }

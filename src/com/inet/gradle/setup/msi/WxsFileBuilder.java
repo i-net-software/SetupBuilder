@@ -1175,10 +1175,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws IOException can not occur
      */
     private void addPreAndPostScripts() throws IOException {
-        addPreAndPostScripts( "Preinst_Script", task.getPreinst(), "InstallInitialize", true, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
-        addPreAndPostScripts( "Postinst_Script", task.getPostinst(), "InstallFinalize", false, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
-        addPreAndPostScripts( "Prerm_Script", task.getPrerm(), "InstallInitialize", true, "REMOVE" );
-        addPreAndPostScripts( "Postrm_Script", task.getPostrm(), "InstallFinalize", false, "REMOVE" );
+        addPreAndPostScripts( "PreGUI_Script", task.getPreGUI(), false, "PrepareDlg", false, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        addPreAndPostScripts( "Preinst_Script", task.getPreinst(), true, "InstallInitialize", true, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        addPreAndPostScripts( "Postinst_Script", task.getPostinst(), true, "InstallFinalize", false, "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        addPreAndPostScripts( "Prerm_Script", task.getPrerm(), true, "InstallInitialize", true, "REMOVE" );
+        addPreAndPostScripts( "Postrm_Script", task.getPostrm(), true, "InstallFinalize", false, "REMOVE" );
     }
 
     /**
@@ -1186,18 +1187,19 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * 
      * @param actionId the unique ID
      * @param scripts the scripts content
+     * @param execute true, InstallExecuteSequence; false, InstallUISequence
      * @param sequenceAction the name of an existing action in sequence after which it should be added.
      * @param after true, After the action; false, Before
      * @param condition the condition under which it should run
      * @throws IOException can not occur
      */
-    private void addPreAndPostScripts( String actionId, ArrayList<String> scripts, String sequenceAction, boolean after, String condition ) throws IOException {
+    private void addPreAndPostScripts( String actionId, List<String> scripts, boolean execute, String sequenceAction, boolean after, String condition ) throws IOException {
         if( scripts == null || scripts.isEmpty() ) {
             return;
         }
         for( int i = 0; i < scripts.size(); i++ ) {
             String script = scripts.get( i );
-            addPreAndPostScripts( actionId + i, script, sequenceAction, after, condition );
+            addPreAndPostScripts( actionId + i, script, execute, sequenceAction, after, condition );
         }
     }
 
@@ -1206,29 +1208,33 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * 
      * @param actionId the unique ID
      * @param script the script content
+     * @param execute true, InstallExecuteSequence; false, InstallUISequence
      * @param sequenceAction the name of an existing action in sequence after which it should be added.
      * @param after true, After the action; false, Before
      * @param condition the condition under which it should run
      * @throws IOException can not occur
      */
-    private void addPreAndPostScripts( String actionId, String script, String sequenceAction, boolean after, String condition ) throws IOException {
+    private void addPreAndPostScripts( String actionId, String script, boolean execute, String sequenceAction, boolean after, String condition ) throws IOException {
         if( script == null || script.trim().isEmpty() ) {
             return;
         }
 
         Element action = getOrCreateChildById( product, "CustomAction", actionId );
         addAttributeIfNotExists( action, "Script", getScriptLanguage( script ) );
-        addAttributeIfNotExists( action, "Execute", "deferred" );
-        addAttributeIfNotExists( action, "Impersonate", "no" );
         script = script.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
         action.setTextContent( script );
-        addCustomActionToSequence( actionId, true, sequenceAction, after, condition );
+        addCustomActionToSequence( actionId, execute, sequenceAction, after, condition );
 
-        //http://blogs.technet.com/b/alexshev/archive/2008/03/25/property-does-not-exist-or-empty-when-accessed-from-deferred-custom-action.aspx
-        action = getOrCreateChildById( product, "CustomAction", "SetProperties" + actionId );
-        addAttributeIfNotExists( action, "Property", actionId );
-        addAttributeIfNotExists( action, "Value", "INSTALLDIR='[INSTALLDIR]';ProductCode='[ProductCode]';INSTANCE_ID='[INSTANCE_ID]'" );
-        addCustomActionToSequence( "SetProperties" + actionId, true, actionId, false, null );
+        if( execute ) {
+            addAttributeIfNotExists( action, "Execute", "deferred" );
+            addAttributeIfNotExists( action, "Impersonate", "no" );
+
+            //http://blogs.technet.com/b/alexshev/archive/2008/03/25/property-does-not-exist-or-empty-when-accessed-from-deferred-custom-action.aspx
+            action = getOrCreateChildById( product, "CustomAction", "SetProperties" + actionId );
+            addAttributeIfNotExists( action, "Property", actionId );
+            addAttributeIfNotExists( action, "Value", "INSTALLDIR='[INSTALLDIR]';ProductCode='[ProductCode]';INSTANCE_ID='[INSTANCE_ID]'" );
+            addCustomActionToSequence( "SetProperties" + actionId, execute, actionId, false, null );
+        }
     }
 
     /**
