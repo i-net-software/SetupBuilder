@@ -1154,7 +1154,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         // add a action to set the property TRANSFORM
         action = getOrCreateChildById( product, "CustomAction", "SetTransforms" );
         addAttributeIfNotExists( action, "Property", "TRANSFORMS" );
-        addAttributeIfNotExists( action, "Value", "{:[INSTANCE_ID];}[TRANSFORMS]" );
+        addAttributeIfNotExists( action, "Value", ":[INSTANCE_ID]" );
         addCustomActionToSequence( "SetTransforms", false, "SetInstanceID", true, "ACTION = \"INSTALL\"" );
 
         // set the ProductName properties from the property PRODUCT_NAME of the vbscript
@@ -1167,6 +1167,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element component = getComponent( installDir, "instance_path" );
         Element key = addRegistryKey( component, "HKLM", "instance_path_reg", "Software\\" + setup.getVendor() + "\\" + setup.getApplication() + "\\Instances\\[INSTANCE_NUMBER]" );
         addRegistryValue( key, null, "string", "[INSTALLDIR]" );
+        addRegistryValue( key, "PackageCode", "string", "[PackageCode]" );
     }
 
     /**

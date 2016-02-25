@@ -141,10 +141,17 @@ Function getInstanceID( installDir )
             Dim name
             name = names(i)
             If IsNumeric( name ) Then
-                Dim dir
+                Dim dir, PackageCode
                 reg.GetStringValue HKLM, instancesKey & "\" & name, "", dir
                 If StrComp( installDir, dir, 1) = 0 Then
                     getInstanceID = CInt( name )
+                    reg.GetStringValue HKLM, instancesKey & "\" & name, "PackageCode", PackageCode
+                    log "Old PackageCode: " & Session.Property( "PackageCode" )
+                    If Not IsNull( PackageCode ) Then
+                        If PackageCode <> Session.Property( "PackageCode" ) Then
+                            Session.Property("MSINEWINSTANCE") = "1"
+                        End If
+                    End If
                     Exit Function
                 End If
             End If

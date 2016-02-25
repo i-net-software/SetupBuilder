@@ -63,7 +63,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( identity, "type", "win32" );
 
         Element compatibility = getOrCreateChild( assembly, "compatibility" );
-        assembly.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "urn:schemas-microsoft-com:compatibility.v1" );
+        compatibility.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "urn:schemas-microsoft-com:compatibility.v1" );
 
         Element application = getOrCreateChild( compatibility, "application" );
         getOrCreateChildById( application, "supportedOS", "{e2011457-1546-43c5-a5fe-008deee3d3f0}" ); // support for Vista
@@ -75,7 +75,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
         getOrCreateChild( assembly, "description" ).setTextContent( launch.getDescription() );
 
         Element trustInfo = getOrCreateChild( assembly, "trustInfo" );
-        assembly.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "urn:schemas-microsoft-com:asm.v2" );
+        trustInfo.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "urn:schemas-microsoft-com:asm.v2" );
 
         Element security = getOrCreateChild( trustInfo, "security" );
         Element requestedPrivileges = getOrCreateChild( security, "requestedPrivileges" );
