@@ -29,7 +29,7 @@ Sample Usage
 ----
 ### Base Sample
     plugins {
-        id "de.inetsoftware.setupbuilder" version "1.4.7"
+        id "de.inetsoftware.setupbuilder" version "1.5"
     }
     
     setupBuilder {
