@@ -7,7 +7,7 @@ SCRIPT_PATH=`dirname "$0"`
 TARGET_LOCATION=${2%/}
 
 # Remove watcher before anything can start
-AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
+AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
 if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
     /bin/launchctl unload "$AGENT_DESTINATION"
 fi

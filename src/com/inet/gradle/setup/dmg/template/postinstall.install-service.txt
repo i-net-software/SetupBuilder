@@ -30,5 +30,5 @@ fi
 # copy default launchd file and start daemon
 /usr/bin/ditto "$SERVICE_PLIST" "$DAEMON_DESTINATION"
 chown "$(whoami)":wheel "$DAEMON_DESTINATION"
-chmod 600 "$DAEMON_DESTINATION"
+chmod 644 "$DAEMON_DESTINATION"
 /bin/launchctl load "$DAEMON_DESTINATION"

@@ -12,5 +12,7 @@
 	<string>/tmp/test.stdout</string>
 	<key>StandardErrorPath</key>
 	<string>/tmp/test.stderr</string>
+	<key>RunAtLoad</key>
+    <false/>
 </dict>
 </plist>

@@ -4,7 +4,7 @@
 SCRIPT_PATH=`dirname "$0"`
 TARGET_LOCATION=${2%/}
 UNINSTALL_WATCH="$SCRIPT_PATH/watchuninstall.plist"
-AGENT_DESTINATION="/Library/LaunchAgents/{{serviceName}}.uninstall.plist"
+AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
 
 set -e
 
@@ -34,7 +34,7 @@ fi
 
 /usr/bin/ditto "$UNINSTALL_WATCH" "$AGENT_DESTINATION"
 chown "$(whoami)":wheel "$AGENT_DESTINATION"
-chmod 600 "$AGENT_DESTINATION"
+chmod 644 "$AGENT_DESTINATION"
 /bin/launchctl load "$AGENT_DESTINATION"
 
 ################################################################################################
