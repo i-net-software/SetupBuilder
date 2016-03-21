@@ -34,6 +34,7 @@ fi
 
 /usr/bin/ditto "$UNINSTALL_WATCH" "$AGENT_DESTINATION"
 chown "$(whoami)":wheel "$AGENT_DESTINATION"
+chmod 600 "$AGENT_DESTINATION"
 /bin/launchctl load "$AGENT_DESTINATION"
 
 ################################################################################################
