@@ -18,7 +18,7 @@ import com.inet.gradle.setup.AbstractTask;
  */
 public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
-	private String identity, identifier, keychain;
+	private String identity, identifier, keychain, keychainPassword;
 	private boolean ignoreError;
 	
 	/**
@@ -84,6 +84,22 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 	}
 
 	/**
+	 * The password to unlock the keychain
+	 * @return the keychainPassword
+	 */
+	public String getKeychainPassword() {
+		return keychainPassword;
+	}
+
+	/**
+	 * Set the keychain password to unlock the keychain
+	 * @param keychainPassword the keychainPassword to set
+	 */
+	public void setKeychainPassword(String keychainPassword) {
+		this.keychainPassword = keychainPassword;
+	}
+
+	/**
 	 * True if errors during signing should be ignored
 	 * @return ignore errors
 	 */
@@ -98,6 +114,29 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 	public void setIgnoreError(boolean ignoreError) {
 		this.ignoreError = ignoreError;
 	}
+
+	/**
+	 * Unlocks the keychain if the password is not null.
+	 * Will unlock the default login.keychain if no other is set.
+	 */
+	private void unlockKeychain() {
+		if ( getKeychainPassword() == null ) {
+			return;
+		}
+		
+		String keychain = getKeychain() != null ? getKeychain() : System.getenv("HOME") + "/Library/Keychains/login.keychain";
+
+		// unlock keychain
+		ArrayList<String> command = new ArrayList<>();
+        command.add( "security" );
+        command.add( "-v" );
+        command.add( "unlock-keychain" );
+        command.add( "-p" );
+        command.add( getKeychainPassword() );
+        command.add( keychain );
+
+        exec( command, null, null, isIgnoreError() );			
+	}
 	
 	/**
 	 * Signed an application package
@@ -105,7 +144,9 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 	 */
 	public void signApplication( File path ) {
 		
-		// Set Read on all files and folders
+		unlockKeychain();
+		
+		// Codesign
 		ArrayList<String> command = new ArrayList<>();
         command.add( "codesign" );
         command.add( "-f" );
@@ -126,14 +167,16 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( path.getAbsolutePath() );
         exec( command, null, null, isIgnoreError() );
 	}
-	
+
 	/**
 	 * Signed a product package
 	 * @param path of the application
 	 */
 	public void signProduct( File path ) {
 		
-		// Set Read on all files and folders
+		unlockKeychain();
+		
+		// Productsign
 		ArrayList<String> command = new ArrayList<>();
         command.add( "productsign" );
         command.add( "--sign" );
