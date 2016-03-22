@@ -194,6 +194,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         createAndPatchDistributionXML();
     	
         imageSourceRoot = TempPath.get( "distribution" ).toString();
+        File resultingPackage = new File(imageSourceRoot, applicationIdentifier + ".pkg");
 
 		// Build Product for packaging
         ArrayList<String> command = new ArrayList<>();
@@ -206,26 +207,15 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( TempPath.get( "resources" ).toString() );
         
         // Sign the final package
-        if ( task.getCodeSign() != null ) {
-            command.add( "--sign" );
-            command.add( task.getCodeSign().getIdentity() );
-            
-            if ( task.getCodeSign().getKeychain() != null ) {
-                command.add( "--keychain" );
-                command.add( task.getCodeSign().getKeychain() );
-            }
-
-            if ( task.getCodeSign().getIdentifier() != null ) {
-                command.add( "--identifier" );
-                command.add( task.getCodeSign().getIdentifier() );
-            }
-        }
-
-        command.add( imageSourceRoot + "/" + applicationIdentifier + ".pkg" );
+        command.add( resultingPackage.getAbsolutePath() );
     	exec( command );
 
+		if ( task.getCodeSign() != null ) {
+        	task.getCodeSign().signProduct( resultingPackage );
+        }
+
     	packageApplescript();
-    	Files.copy( new File(imageSourceRoot, applicationIdentifier + ".pkg").toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+    	Files.copy( resultingPackage.toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**

@@ -123,6 +123,35 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         command.add( path.getAbsolutePath() );
         exec( command, null, null, isIgnoreError() );
+	}
+	
+	/**
+	 * Signed a product package
+	 * @param path of the application
+	 */
+	public void signProduct( File path ) {
 		
+		// Set Read on all files and folders
+		ArrayList<String> command = new ArrayList<>();
+        command.add( "productsign" );
+        command.add( "--sign" );
+        command.add( getIdentity() );
+        
+        if ( getKeychain() != null ) {
+            command.add( "--keychain" );
+            command.add( getKeychain() );
+        }
+
+        
+        command.add( path.getAbsolutePath() );
+        
+        File output = new File( path.getParentFile(), "signed." + path.getName() ); 
+        command.add( output.getAbsolutePath() );
+        exec( command, null, null, isIgnoreError() );
+
+        // Move to old directory
+        if ( output.exists() && path.delete() ) {
+        	output.renameTo( path );
+        }
 	}
 }
