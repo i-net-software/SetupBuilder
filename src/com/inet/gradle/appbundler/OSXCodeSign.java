@@ -32,6 +32,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
 	/**
 	 * Return the Identity to sign with
+	 * This is the "Common Name" part from the certificate
 	 * @return identity
 	 */
 	public String getIdentity() {
@@ -43,6 +44,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
 	/**
 	 * Set the Identity to sign with.
+	 * This is the "Common Name" part from the certificate
 	 * @param identity to sign with
 	 */
 	public void setIdentity(String identity) {
