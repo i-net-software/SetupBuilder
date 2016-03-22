@@ -29,8 +29,8 @@ try
 
             set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0
             set appXPos to windowWidth - ourXPos
-            set yPos to windowHeight - 1.5 * iconSize
-
+            set yPos to (windowHeight - iconSize) / 2.0
+            
 			try
             	set position of item "{{executable}}.app" of container window to {ourXPos, yPos}
             	make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
@@ -38,10 +38,9 @@ try
             end try
             
             try
-				set ourXPos to (windowWidth - iconSize) / 2.0 + iconSize / 2.0
+				set ourXPos to windowWidth / 2.0
 				set position of item "{{executable}}.pkg" of container window to {ourXPos, yPos}
 			end try
-            
             
             try
 				set background picture of theViewOptions to file ".resources:background{{backgroundExt}}"
