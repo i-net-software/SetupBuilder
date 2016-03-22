@@ -88,13 +88,13 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         	
         	if ( para == null ) {
         		task.getProject().getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
+        	} else {
+	            log.append( '\"' ).append( para );
+	            if( para.endsWith( "\\" ) ) {
+	                log.append( '\\' );
+	            }
+	            log.append( "\" " );
         	}
-        	
-            log.append( '\"' ).append( para );
-            if( para.endsWith( "\\" ) ) {
-                log.append( '\\' );
-            }
-            log.append( "\" " );
         }
         task.getProject().getLogger().lifecycle( log.toString() );
 
