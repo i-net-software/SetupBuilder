@@ -36,7 +36,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 	 */
 	public String getIdentity() {
 		if ( identity == null ) {
-			throw new IllegalArgumentException( "Ypu have to define the signing identity" );
+			throw new IllegalArgumentException( "You have to define the signing identity" );
 		}
 		return identity;
 	}
