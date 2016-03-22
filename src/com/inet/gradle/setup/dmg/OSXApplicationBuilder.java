@@ -51,7 +51,9 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		finishApplication();
 		copyBundleFiles( service );
 		createPreferencePane( service );
-		codeSignApplication( service );
+		
+		// codesigning will be done on the final package.
+		// codeSignApplication( service );
 	}
 
 	/**
@@ -71,7 +73,9 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		finishApplication();
 		copyBundleFiles( application );
 
-		codeSignApplication( application );
+		if ( task.getCodeSign() != null ) {
+			task.getCodeSign().signApplication( new File(buildDir, application.getDisplayName() + ".app") );
+		}
 	}
 
 	/**
@@ -160,16 +164,5 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 	@Override
 	protected AbstractTask getTask() {
 		return task;
-	}
-	
-	/**
-	 * Sign an application
-	 * @param application to sign
-	 */
-	private void codeSignApplication( Application application ) {
-		if ( task.getCodeSign() == null ) {
-			return;
-		}
-		task.getCodeSign().signApplication( new File(buildDir, application.getDisplayName() + ".app") );
 	}
 }
