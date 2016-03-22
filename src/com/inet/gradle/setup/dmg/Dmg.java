@@ -37,7 +37,7 @@ import groovy.lang.Closure;
 public class Dmg extends AbstractSetupTask {
 
     private Object backgroundImage, setupBackground, setupIcon;
-    private Integer windowWidth = 400, windowHeight = 300, iconSize = 64, fontSize = 14;
+    private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 14;
 	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
 	
 	private List<LocalizedResource> welcomePages =  new ArrayList<>();
