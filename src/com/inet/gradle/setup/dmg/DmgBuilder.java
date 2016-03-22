@@ -208,11 +208,16 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         // Sign the final package
         if ( task.getCodeSign() != null ) {
             command.add( "--sign" );
-            command.add( task.getCodeSign().getIdentifier() );
+            command.add( task.getCodeSign().getIdentity() );
             
             if ( task.getCodeSign().getKeychain() != null ) {
                 command.add( "--keychain" );
                 command.add( task.getCodeSign().getKeychain() );
+            }
+
+            if ( task.getCodeSign().getIdentifier() != null ) {
+                command.add( "--identifier" );
+                command.add( task.getCodeSign().getIdentifier() );
             }
         }
 
