@@ -81,7 +81,7 @@ public class Service extends Application {
 	/**
 	 * Set the serviceID which should be a short version of the application name
 	 * It must not contain spaces.
-	 * @param serviceID
+     * @param serviceID the id
 	 */
 	public void setId(String serviceID) {
 		this.id = serviceID;

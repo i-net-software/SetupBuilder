@@ -31,7 +31,7 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
  * @author Volker Berlin
  *
  * @param <T> the task
- * @param <S>
+ * @param <S> the builder type
  */
 public abstract class AbstractBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> {
 
