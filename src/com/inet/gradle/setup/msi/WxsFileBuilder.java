@@ -627,6 +627,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             regkey = addRegistryKey( component, "HKLM", id + "_RegLog", baseKey + name + "\\Parameters\\Log" );
             addRegistryValue( regkey, "Path", "string", "[INSTALLDIR]" + subdir );
             addRegistryValue( regkey, "Prefix", "string", "service" );
+            regkey = addRegistryKey( component, "HKLM", id + "_RegStop", baseKey + name + "\\Parameters\\Stop" );
+            addRegistryValue( regkey, "Class", "string", "java.lang.System" ); // call System.exit() on stop to support Runtime.getRuntime().addShutdownHook()
+            addRegistryValue( regkey, "Mode", "string", "jvm" );
 
             // start the service
             if( service.isStartOnBoot() ) {
