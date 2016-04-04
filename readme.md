@@ -10,7 +10,8 @@ System Requirements
 ----
 | Platform  | Requirement                                                          |
 | :---------| :------------------------------------------------------------------- |
-| all       | Gradle 2.3 or higher                                                 |
+| all       | Plugin Version <= 2.5 Gradle 2.3 - 2.11                              |
+| all       | Plugin Version >= 2.6 Gradle 2.12 or higher                          |
 | all       | Java 8 or higher. Gradle must run with Java 8                        |
 | Windows   | Wix Toolset or WixEdit must be installed                             |
 | Linux     | Lintian, FakeRoot <br> on Ubuntu: `apt-get install lintian fakeroot` |
