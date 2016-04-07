@@ -350,7 +350,7 @@ public class ICOEncoder {
           int i = x % 8;
           int a = alpha.getSample(x, y, 0);
           //invert bit since and mask is applied to xor mask
-          int b = ~a & 1;
+          int b = a == 0 ? 1 : 0;
           line[bi] = setBit(line[bi], i, b);
         }
         
