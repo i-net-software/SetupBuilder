@@ -475,14 +475,22 @@ class RpmControlFileBuilder {
 	}
 
 	/**
-	 * Write the description to the file. The description is created from the application name and the description entry.
+	 * Write the description to the file. The description is created from the long description entries.
+	 * The description for language 'en' will be used as default description
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
-        String description = setup.getApplication() + "\n " + rpm.getDescription();
         controlWriter.write( NEWLINE + "%define __jar_repack %{nil}" + NEWLINE );
-        controlWriter.write( NEWLINE + "%description" + NEWLINE + description + NEWLINE );
+        
+        Map<String, String> descriptions = setup.getLongDescription();
+        for (String key : descriptions.keySet()) {
+        	if(key.equalsIgnoreCase("en")) {
+        		controlWriter.write( NEWLINE + "%description" + NEWLINE + " " + descriptions.get(key) + NEWLINE );			
+        	} else {
+        		controlWriter.write( NEWLINE + "%description -l " + key + NEWLINE + " " + descriptions.get(key) + NEWLINE );
+        	}
+		}        
     }
 
 	/**
