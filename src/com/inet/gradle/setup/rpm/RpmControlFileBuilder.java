@@ -484,6 +484,7 @@ class RpmControlFileBuilder {
         controlWriter.write( NEWLINE + "%define __jar_repack %{nil}" + NEWLINE );
         
         Map<String, String> descriptions = setup.getLongDescription();
+        if(descriptions.size() > 0) {
         for (String key : descriptions.keySet()) {
         	if(key.equalsIgnoreCase("en")) {
         		controlWriter.write( NEWLINE + "%description" + NEWLINE + " " + descriptions.get(key) + NEWLINE );			
@@ -491,6 +492,9 @@ class RpmControlFileBuilder {
         		controlWriter.write( NEWLINE + "%description -l " + key + NEWLINE + " " + descriptions.get(key) + NEWLINE );
         	}
 		}        
+        } else {
+        	controlWriter.write( NEWLINE + "%description" + NEWLINE + NEWLINE );
+        }
     }
 
 	/**
