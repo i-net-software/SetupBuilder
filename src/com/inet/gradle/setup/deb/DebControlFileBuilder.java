@@ -175,10 +175,9 @@ class DebControlFileBuilder {
 	private void putDepends(OutputStreamWriter controlWriter)
 	                throws IOException {
 	    String depends = deb.getDepends();
-	    if(depends == null || depends.length() == 0 ) {
-	        depends = "default-jre | default-jdk | openjdk-7-jdk | openjdk-7-jre";
+	    if(depends != null && depends.length() > 0 ) {
+	        controlWriter.write("Depends: " + depends + NEWLINE);
 	    }
-	    controlWriter.write("Depends: " + depends + NEWLINE);
 	}
 	
 	/**
@@ -199,9 +198,10 @@ class DebControlFileBuilder {
 	private void putRecommends(OutputStreamWriter controlWriter)
 			throws IOException {
 		String recommends = deb.getRecommends();
-		if(recommends != null && recommends.length() > 0) {
-			controlWriter.write("Recommends: " + recommends + NEWLINE);
+		if(recommends == null || recommends.length() == 0) {
+			recommends = "openjdk-8-jre | openjdk-8-jdk | default-jre | default-jdk";
 		}
+		controlWriter.write("Recommends: " + recommends + NEWLINE);
 	}
 
 	/**
