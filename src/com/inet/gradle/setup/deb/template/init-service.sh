@@ -45,18 +45,29 @@ do_start()
 	#   2 if daemon could not be started
 	start-stop-daemon --start --chdir "$WORKINGDIR" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon -b --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
-		{{startArguments}} \
-		|| return 2
-	sleep $WAIT
-	if start-stop-daemon --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
-		if [ -f "$CATALINA_PID" ]; then
-			rm -f "$CATALINA_PID"
-		fi
-		return 1
-	else
-		return 0
-	fi
+
+    BACKGROUND=""
+    if [ -z "$1" ]; then
+        BACKGROUND="-b"
+    fi
+    
+    start-stop-daemon $BACKGROUND --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
+        {{startArguments}} \
+        || return 2
+	
+	if [ ! -z "$1" ]; then
+        sleep $WAIT
+        if start-stop-daemon --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+            if [ -f "$PIDFILE" ]; then
+                rm -f "$PIDFILE"
+            fi
+            return 1
+        else
+            return 0
+        fi
+    else
+        return 0
+    fi
 }
 
 #
@@ -78,14 +89,22 @@ do_stop()
  
 case "$1" in
   start)
-	log_daemon_msg "Starting" "$NAME"
-	do_start
-	case "$?" in
-		0) log_end_msg 0 ;;
-		1) log_success_msg "(already running)"; log_end_msg 0 ;;
-		2) log_end_msg 1 ;;
-	esac
-	;;
+    log_daemon_msg "Starting" "$NAME"
+    do_start
+    case "$?" in
+        0) log_end_msg 0 ;;
+        1) log_success_msg "(already running)"; log_end_msg 0 ;;
+        2) log_end_msg 1 ;;
+    esac
+    ;;
+  daemon)
+    log_daemon_msg "Starting as Daemon" "$NAME"
+    do_start daemon
+    case "$?" in
+        0) log_end_msg 0 ;;
+        1) log_success_msg "(already running)"; log_end_msg 0 ;;
+    esac
+    ;;
   stop)
 	log_daemon_msg "Stopping" "$NAME"
 	do_stop
