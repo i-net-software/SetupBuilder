@@ -43,7 +43,13 @@ do_start()
 		echo_passed $NAME already running: $PID
 		return 1
 	else
-		daemonize -c "$WORKINGDIR" -p $PIDFILE -l $PIDFILE -o "$WORKINGDIR/log.txt" -e "$WORKINGDIR/error.txt"  $DAEMON {{startArguments}}
+        if [ -z "$1" ]; then
+            daemonize -c "$WORKINGDIR" -p $PIDFILE -l $PIDFILE -o "$WORKINGDIR/log.txt" -e "$WORKINGDIR/error.txt"  $DAEMON {{startArguments}}
+        else
+            # if a foreground daemon is summoned, just start the process with the arguments 
+            cd "$WORKINGDIR" && $DAEMON {{startArguments}}
+        fi
+        
 		return 0
 	fi
 }
@@ -81,6 +87,14 @@ case "$1" in
 		2) exit 1 ;;
 	esac
 	;;
+  daemon)
+    log_daemon_msg "Starting as Daemon" "$NAME"
+    do_start daemon
+    case "$?" in
+        0) log_end_msg 0 ;;
+        1) log_success_msg "(already running)"; log_end_msg 0 ;;
+    esac
+    ;;
   stop)
 	echo "Stopping" "$NAME"
 	do_stop
@@ -114,7 +128,7 @@ case "$1" in
 	esac
 	;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|daemon}" >&2
 	exit 3
 	;;
 esac
