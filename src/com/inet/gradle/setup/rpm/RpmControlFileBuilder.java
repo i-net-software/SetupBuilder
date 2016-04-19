@@ -524,7 +524,7 @@ class RpmControlFileBuilder {
 	        depends = "java-devel >= 1.8";
 	    }
 	    if(setup.getServices() != null && setup.getServices().size() > 0) {
-	    	depends = depends + ", daemonize, redhat-lsb";
+	    	depends = depends + ", daemonize, initscripts";
 	    }
 	    controlWriter.write("Requires: " + depends + NEWLINE);
 	}

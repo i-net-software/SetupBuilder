@@ -27,7 +27,7 @@ WORKINGDIR='{{workdir}}'
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
 # Source function library
-. /lib/lsb/init-functions
+. /etc/init.d/functions
 
 # Function that starts the daemon/service
 #
