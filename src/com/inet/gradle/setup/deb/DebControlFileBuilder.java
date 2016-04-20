@@ -152,11 +152,15 @@ class DebControlFileBuilder {
         String description = setup.getApplication() + "\n ";
         
         Map<String, String> descriptions = setup.getLongDescription();
+        String secondLine = "";
         if(descriptions.size() > 0) {
-        	 description = description + descriptions.get(setup.getDefaultDescriptionLanguage());
+        	 secondLine = descriptions.get(setup.getDefaultDescriptionLanguage());
+        }
+        if(secondLine.trim().length() == 0) {
+        	secondLine = setup.getDescription();
         }
         
-        controlWriter.write( "Description: " + description + NEWLINE );
+        controlWriter.write( "Description: " + description + secondLine + NEWLINE );
     }
 
 	/**
