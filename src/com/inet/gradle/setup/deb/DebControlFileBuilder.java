@@ -149,7 +149,13 @@ class DebControlFileBuilder {
 	 * @throws IOException if the was an error while writing to the file
 	 */
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
-        String description = setup.getApplication() + "\n " + deb.getDescription();
+        String description = setup.getApplication() + "\n ";
+        
+        Map<String, String> descriptions = setup.getLongDescription();
+        if(descriptions.size() > 0) {
+        	 description = description + descriptions.get(setup.getDefaultDescriptionLanguage());
+        }
+        
         controlWriter.write( "Description: " + description + NEWLINE );
     }
 
