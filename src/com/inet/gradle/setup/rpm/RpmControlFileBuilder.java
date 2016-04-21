@@ -476,7 +476,7 @@ class RpmControlFileBuilder {
 
 	/**
 	 * Write the description to the file. The description is created from the long description entries.
-	 * The description for language 'en' will be used as default description
+	 * The description for language specified with the defaultDescriptionLanguage property will be used as default description
 	 * @param controlWriter the writer for the file
 	 * @throws IOException if the was an error while writing to the file
 	 */
@@ -486,7 +486,7 @@ class RpmControlFileBuilder {
         Map<String, String> descriptions = setup.getLongDescription();
         if(descriptions.size() > 0) {
         for (String key : descriptions.keySet()) {
-        	if(key.equalsIgnoreCase("en")) {
+        	if(key.equalsIgnoreCase(setup.getDefaultDescriptionLanguage())) {
         		controlWriter.write( NEWLINE + "%description" + NEWLINE + " " + descriptions.get(key) + NEWLINE );			
         	} else {
         		controlWriter.write( NEWLINE + "%description -l " + key + NEWLINE + " " + descriptions.get(key) + NEWLINE );

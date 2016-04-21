@@ -74,6 +74,8 @@ public class AbstractSetupBuilder implements SetupSources {
     private String                 description;
     
     private Map<String, String>    longDescription = new HashMap<>();
+    
+    private String				   defaultDescriptionLanguage;
 
     private String                 copyright;
 
@@ -448,4 +450,24 @@ public class AbstractSetupBuilder implements SetupSources {
     public void setCopyright( String copyright ) {
         this.copyright = copyright;
     }
+
+    /**
+     * Get the default language for the long description. If no language is specified, 'en' is the default.
+     * @return the default language for the long description
+     */
+	public String getDefaultDescriptionLanguage() {
+		if( defaultDescriptionLanguage == null || defaultDescriptionLanguage.length() == 0) {
+			return "en";
+		} else {
+			return defaultDescriptionLanguage;			
+		}
+	}
+
+	/**
+	 * Sets the default language for the long description.
+	 * @param defaultDescriptionLanguage the default language
+	 */
+	public void setDefaultDescriptionLanguage(String defaultDescriptionLanguage) {
+		this.defaultDescriptionLanguage = defaultDescriptionLanguage;
+	}
 }
