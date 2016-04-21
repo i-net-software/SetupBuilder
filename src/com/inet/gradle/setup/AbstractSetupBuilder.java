@@ -20,9 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -72,10 +70,6 @@ public class AbstractSetupBuilder implements SetupSources {
     private boolean                failOnEmptyFrom = true;
 
     private String                 description;
-    
-    private Map<String, String>    longDescription = new HashMap<>();
-    
-    private String				   defaultDescriptionLanguage;
 
     private String                 copyright;
 
@@ -411,23 +405,6 @@ public class AbstractSetupBuilder implements SetupSources {
         this.description = description;
     }
 
-    /**
-     * Get a long description for all specified language. Could never be null. 
-	 * @return the long descriptions for all languages. 
-	 */
-	public Map<String, String> getLongDescription() {
-		return longDescription;
-	}
-
-	/**
-	 * Sets a description for the specified language. 
-	 * @param language the language for the description
-	 * @param longDescription the longDescription to set
-	 */
-	public void setLongDescription(String language, String longDescription) {
-		this.longDescription.put(language, longDescription);
-	}
-
 	/**
      * Get the Copyright information.
      * @return the copyright notice
@@ -450,24 +427,4 @@ public class AbstractSetupBuilder implements SetupSources {
     public void setCopyright( String copyright ) {
         this.copyright = copyright;
     }
-
-    /**
-     * Get the default language for the long description. If no language is specified, 'en' is the default.
-     * @return the default language for the long description
-     */
-	public String getDefaultDescriptionLanguage() {
-		if( defaultDescriptionLanguage == null || defaultDescriptionLanguage.length() == 0) {
-			return "en";
-		} else {
-			return defaultDescriptionLanguage;			
-		}
-	}
-
-	/**
-	 * Sets the default language for the long description.
-	 * @param defaultDescriptionLanguage the default language
-	 */
-	public void setDefaultDescriptionLanguage(String defaultDescriptionLanguage) {
-		this.defaultDescriptionLanguage = defaultDescriptionLanguage;
-	}
 }

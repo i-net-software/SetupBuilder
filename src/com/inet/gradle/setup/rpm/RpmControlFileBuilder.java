@@ -19,12 +19,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.LocalizedResource;
@@ -483,13 +483,18 @@ class RpmControlFileBuilder {
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%define __jar_repack %{nil}" + NEWLINE );
         
-        Map<String, String> descriptions = setup.getLongDescription();
+        List<LocalizedResource> descriptions = setup.getLongDescriptions();
         if(descriptions.size() > 0) {
-        for (String key : descriptions.keySet()) {
-        	if(key.equalsIgnoreCase(setup.getDefaultDescriptionLanguage())) {
-        		controlWriter.write( NEWLINE + "%description" + NEWLINE + " " + descriptions.get(key) + NEWLINE );			
-        	} else {
-        		controlWriter.write( NEWLINE + "%description -l " + key + NEWLINE + " " + descriptions.get(key) + NEWLINE );
+        for (LocalizedResource desc : descriptions) {
+        	
+        	String lang = desc.getLanguage();
+        	String content = NEWLINE + "%description";
+        	content += ( lang.equalsIgnoreCase(setup.getDefaultResourceLanguage()) ? " -l" + lang + NEWLINE : "" );
+        	
+        	try ( Scanner scanner = new Scanner( desc.getResource() ) ) {
+        		content += scanner.useDelimiter("\\Z").next();
+        	} finally {
+        		controlWriter.write( content + NEWLINE );
         	}
 		}        
         } else {

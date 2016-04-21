@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -149,18 +150,21 @@ class DebControlFileBuilder {
 	 * @throws IOException if the was an error while writing to the file
 	 */
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
-        String description = setup.getApplication() + "\n ";
+        String description = setup.getApplication();
         
-        Map<String, String> descriptions = setup.getLongDescription();
         String secondLine = "";
-        if(descriptions.size() > 0) {
-        	 secondLine = descriptions.get(setup.getDefaultDescriptionLanguage());
+        File longDescription = setup.getLongDescription( setup.getDefaultResourceLanguage() );
+        if ( longDescription != null ) {
+        	try ( Scanner scanner = new Scanner( longDescription ) ) {
+        		secondLine = scanner.useDelimiter("\\Z").next();
+        	}
         }
-        if(secondLine.trim().length() == 0) {
+    	
+    	if(secondLine.trim().length() == 0) {
         	secondLine = setup.getDescription();
         }
         
-        controlWriter.write( "Description: " + description + secondLine + NEWLINE );
+        controlWriter.write( "Description: " + description + NEWLINE + secondLine + NEWLINE );
     }
 
 	/**

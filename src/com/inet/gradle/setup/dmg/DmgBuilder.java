@@ -316,7 +316,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         for (LocalizedResource localizedResource : welcomePages) {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
             if ( welcomePage != null ) {
-            	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "Welcome").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLanguage()+".lproj", "Welcome").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             	Element license = xmlFile.getOrCreateChild( distribution, "license", false );
             	xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
             }
@@ -327,7 +327,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         for (LocalizedResource localizedResource : licenseFiles) {
             File licenseFile = checkSetupTextFile( localizedResource.getResource() );
             if ( licenseFile != null ) {
-            	Files.copy( licenseFile.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "License").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            	Files.copy( licenseFile.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLanguage()+".lproj", "License").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             	Element license = xmlFile.getOrCreateChild( distribution, "license", false );
             	xmlFile.addAttributeIfNotExists( license, "file", "License" );
             }

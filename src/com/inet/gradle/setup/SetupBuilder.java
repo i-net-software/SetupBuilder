@@ -34,6 +34,10 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     private List<LocalizedResource>    licenseFiles    = new ArrayList<>();
 
+    private List<LocalizedResource>    longDescription    = new ArrayList<>();
+    
+    private String                     defaultResourceLanguage = "en";
+
     private DesktopStarter             runAfter, runBeforeUninstall;
 
     private List<Service>              services        = new ArrayList<>();
@@ -66,14 +70,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      * @return license file
      */
     public File getLicenseFile( String locale ) {
-    	
-    	for (LocalizedResource res : licenseFiles) {
-			if ( locale.equalsIgnoreCase( res.getLocale().getLanguage()) ) {
-				return res.getResource();
-			}
-		}
-    	
-        return null;
+    	return LocalizedResource.getLocalizedResourceFile(licenseFiles, locale);
     }
 
     /**
@@ -81,16 +78,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      * @param license license file or closure
      */
     public void licenseFile( Object license ) {
-    	
-    	LocalizedResource res = new LocalizedResource( this );
-    	if ( license instanceof Closure<?> ) {
-    		res = ConfigureUtil.configure((Closure<?>)license, res);
-    	} else {
-        	res.setLocale( "en" );
-        	res.setResource( license );
-    	}
-    	
-    	licenseFiles.add( res );
+    	LocalizedResource.addLocalizedResource(this, licenseFiles, license);
     }
 
     /**
@@ -214,5 +202,44 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      */
     public void deleteFolder( String folder ) {
         this.deleteFolders.add( folder );
+    }
+
+	/**
+	 * @return the defaultResourceLanguage
+	 */
+	public String getDefaultResourceLanguage() {
+		return defaultResourceLanguage;
+	}
+
+	/**
+	 * @param defaultResourceLanguage the defaultResourceLanguage to set
+	 */
+	public void setDefaultResourceLanguage(String defaultResourceLanguage) {
+		this.defaultResourceLanguage = defaultResourceLanguage;
+	}
+
+    /**
+     * Return the description files
+     * @return licenseFiles list of license files
+     */
+    public List<LocalizedResource> getLongDescriptions() {
+        return longDescription;
+    }
+
+    /**
+     * Return the description file for a specific locale
+     * @param locale for which to get the file
+     * @return license file
+     */
+    public File getLongDescription( String locale ) {
+    	return LocalizedResource.getLocalizedResourceFile(longDescription, locale);
+    }
+
+    /**
+     * Set the description file
+     * @param description file or closure
+     */
+    public void longDescription( Object description ) {
+    	LocalizedResource.addLocalizedResource(this, longDescription, description);
     }
 }
