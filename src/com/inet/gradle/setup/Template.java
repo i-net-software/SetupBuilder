@@ -18,10 +18,8 @@ package com.inet.gradle.setup;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * Simple template class for replacing placeholders in text files (e.g. scripts, config files).
@@ -35,15 +33,10 @@ public class Template {
      * @throws IOException on errors during reading the file
      */
     public Template( String file ) throws IOException {
-        try (InputStream in = getClass().getResourceAsStream( file )) {
-            InputStreamReader reader = new InputStreamReader( in, StandardCharsets.UTF_8 );
-            StringBuffer sb = new StringBuffer( in.available() );
-            int chr;
-            while( (chr = reader.read()) != -1 ) {
-                sb.append( (char)chr );
-            }
-            template = sb.toString();
-        }
+    	
+    	try ( Scanner scanner = new Scanner( getClass().getResourceAsStream( file ), "UTF8" ) ) {
+    		template = scanner.useDelimiter("\\A").next();
+		}
     }
 
     /**
