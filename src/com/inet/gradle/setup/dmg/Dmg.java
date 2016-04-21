@@ -178,16 +178,7 @@ public class Dmg extends AbstractSetupTask {
      * @param conclusionPage which is shown at the end
      */
     public void conclusionPage( Object conclusionPage ) {
-    	
-    	LocalizedResource res = new LocalizedResource( getSetupBuilder() );
-    	if ( conclusionPage instanceof Closure<?> ) {
-    		res = ConfigureUtil.configure((Closure<?>)conclusionPage, res);
-    	} else {
-        	res.setLocale( "en" );
-        	res.setResource( conclusionPage );
-    	}
-    	
-    	conclusionPages.add( res );
+    	LocalizedResource.addLocalizedResource(getSetupBuilder(), conclusionPages, conclusionPage);
     }
     
     /**
@@ -196,7 +187,7 @@ public class Dmg extends AbstractSetupTask {
      * @return welcome page
      */
     public List<LocalizedResource> getWelcomePages() {
-        return welcomePages;
+        return welcomePages.size() > 0 ? welcomePages : getSetupBuilder().getLongDescriptions();
     }
 
     /**
@@ -205,16 +196,7 @@ public class Dmg extends AbstractSetupTask {
      * @param welcomePage welcome page file
      */
     public void welcomePage( Object welcomePage ) {
-    	
-    	LocalizedResource res = new LocalizedResource( getSetupBuilder() );
-    	if ( welcomePage instanceof Closure<?> ) {
-    		res = ConfigureUtil.configure((Closure<?>)welcomePage, res);
-    	} else {
-        	res.setLocale( "en" );
-        	res.setResource( welcomePage );
-    	}
-    	
-    	welcomePages.add( res );
+    	LocalizedResource.addLocalizedResource(getSetupBuilder(), welcomePages, welcomePage);
     }
     
 	/**
