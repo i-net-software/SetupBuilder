@@ -56,13 +56,19 @@ setupBuilder {
 	    displayName = "i-net TestLaunch Server"
 	    id = "helpdesk"
     }
+}
 
-    longDescription "longDesc_en.txt"
-    longDescription {
-        locale = "de"
-        resource = "longDesc_de.txt"
+configure( [ deb, rpm ] ) {
+    doFirst {
+        setupBuilder {
+            defaultResourceLanguage "de"
+		    longDescription "longDesc_de.txt"
+		    longDescription {
+		        locale = "en"
+		        resource = "longDesc_en.txt"
+		    }
+        }
     }
-
 }
 
 dmg {
