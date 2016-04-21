@@ -155,8 +155,8 @@ class DebControlFileBuilder {
         String secondLine = "";
         File longDescription = setup.getLongDescription( setup.getDefaultResourceLanguage() );
         if ( longDescription != null ) {
-        	try ( Scanner scanner = new Scanner( longDescription ) ) {
-        		secondLine = scanner.useDelimiter("\\Z").next();
+        	try ( Scanner scanner = new Scanner( longDescription, "UTF8" ) ) {
+        		secondLine = scanner.useDelimiter("\\A").next();
         	}
         }
     	

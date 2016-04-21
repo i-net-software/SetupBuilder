@@ -491,8 +491,8 @@ class RpmControlFileBuilder {
         	String content = NEWLINE + "%description";
         	content += ( lang.equalsIgnoreCase(setup.getDefaultResourceLanguage()) ? " -l" + lang + NEWLINE : "" );
         	
-        	try ( Scanner scanner = new Scanner( desc.getResource() ) ) {
-        		content += scanner.useDelimiter("\\Z").next();
+        	try ( Scanner scanner = new Scanner( desc.getResource(), "UTF8" ) ) {
+        		content += scanner.useDelimiter("\\A").next();
         	} finally {
         		controlWriter.write( content + NEWLINE );
         	}
