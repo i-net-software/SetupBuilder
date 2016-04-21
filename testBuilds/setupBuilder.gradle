@@ -1,6 +1,6 @@
 /*
 plugins {
-	id "de.inetsoftware.setupbuilder" version "1.4.7"
+	id "de.inetsoftware.setupbuilder" version "1.6.0"
 }
 /*/
 buildscript {
@@ -56,6 +56,13 @@ setupBuilder {
 	    displayName = "i-net TestLaunch Server"
 	    id = "helpdesk"
     }
+
+    longDescription "longDesc_en.txt"
+    longDescription {
+        locale = "de"
+        resource = "longDesc_de.txt"
+    }
+
 }
 
 dmg {
