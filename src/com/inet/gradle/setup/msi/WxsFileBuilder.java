@@ -877,7 +877,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addRun( runBeforeUninstall, id, "ignore", null );
 
         // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-        addCustomActionToSequence( id, true, "InstallInitialize", true, "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
+        addCustomActionToSequence( id, true, "StopServices", true, "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
     }
 
     /**
