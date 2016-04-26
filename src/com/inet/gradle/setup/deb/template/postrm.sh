@@ -18,6 +18,7 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+# confmodule is required for further commands like db_purge, db_input, db_get ...
 . /usr/share/debconf/confmodule
 
 {{head}}
@@ -32,9 +33,7 @@ case "$1" in
     ;;
 esac
 
-if [ "$1" = "purge" -a -e /usr/share/debconf/confmodule ]; then
-    # Source debconf library.
-    . /usr/share/debconf/confmodule
+if [ "$1" = "purge" ]; then
     # Remove my changes to the db.
     db_purge
 fi
