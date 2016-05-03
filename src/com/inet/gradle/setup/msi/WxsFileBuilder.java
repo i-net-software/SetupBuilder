@@ -649,8 +649,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
 
             // Add the prunmgr.exe and change it name dynamically to the service name. Dynamically is important for multiple instances.
-            addFile( component, prunmgr, id + "GUI", "prunmgr.exe", true );
-            renameFileIfDynamic( id, subdir, "prunmgr.exe", name + ".exe" );
+            String target = name.replace( '[', '_' ).replace( ']', '_' );
+            addFile( component, prunmgr, id + "GUI", target + ".exe", true );
+            renameFileIfDynamic( id, subdir, target + ".exe", name + ".exe" );
 
             // delete log files on uninstall
             addDeleteFiles( subdir + "service.*.log" );
