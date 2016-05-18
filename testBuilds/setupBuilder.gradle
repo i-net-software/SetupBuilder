@@ -4,6 +4,7 @@ plugins {
 }
 /*/
 buildscript {
+    
     repositories {
         maven {
             url uri('../../repo')
@@ -11,6 +12,12 @@ buildscript {
     }
     dependencies {
         classpath 'de.inetsoftware:SetupBuilder:+'
+    }
+}
+
+repositories {
+    maven {
+        url uri('../../repo')
     }
 }
 
