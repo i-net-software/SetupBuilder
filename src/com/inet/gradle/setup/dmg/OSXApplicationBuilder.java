@@ -65,7 +65,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
-			application.setExecutable( getAbstractSetupBuilder().getAppIdentifier() );
+			application.setExecutable( getSetupBuilder().getAppIdentifier() );
 		}
 		
 		prepareApplication( application );
@@ -124,7 +124,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		
 		// Patch Info.plist
 		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
-		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (getAbstractSetupBuilder().getMainClass() != null ? getAbstractSetupBuilder().getMainClass() : getAbstractSetupBuilder().getAppIdentifier()) + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier()) + ".prefPane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
 		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
 		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
@@ -133,12 +133,12 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 		
 		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
 		setPlistProperty( servicePLIST, ":Name", displayName );
-		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : getAbstractSetupBuilder().getAppIdentifier() );
+		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : getSetupBuilder().getAppIdentifier() );
 		
 		// Program will be set during installation.
 		//setPlistProperty( servicePLIST, ":Program", "/Library/" + getAbstractSetupBuilder().getApplication() + "/" + displayName + ".app/Contents/MacOS/" + service.getId() );
 		setPlistProperty( servicePLIST, ":Description", service.getDescription() );
-		setPlistProperty( servicePLIST, ":Version", getAbstractSetupBuilder().getVersion() );
+		setPlistProperty( servicePLIST, ":Version", getSetupBuilder().getVersion() );
 		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
 		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
 		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );

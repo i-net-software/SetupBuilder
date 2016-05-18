@@ -44,7 +44,7 @@ import com.oracle.appbundler.BundleDocument;
  */
 public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 	
-	private AbstractSetupBuilder setup;
+	private S setup;
 	private AppBundlerTask appBundler;
 
 	/**
@@ -53,7 +53,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 	 * @param setup - original setup
 	 * @param fileResolver - original fileResolver
 	 */
-	protected AbstractOSXApplicationBuilder(T task, AbstractSetupBuilder setup, FileResolver fileResolver) {
+	protected AbstractOSXApplicationBuilder(T task, S setup, FileResolver fileResolver) {
 		super(task, fileResolver);
 		this.setup = setup;
 		appBundler = new AppBundlerTask();
@@ -306,7 +306,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 		return appBundler;
 	}
 
-    protected AbstractSetupBuilder getAbstractSetupBuilder() {
+    protected S getSetupBuilder() {
         return setup;
     }
 }

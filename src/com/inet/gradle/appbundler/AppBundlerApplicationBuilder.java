@@ -20,7 +20,6 @@ import java.io.File;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractSetupBuilder;
 import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.dmg.AbstractOSXApplicationBuilder;
@@ -38,7 +37,7 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 	 * @param setup setup
 	 * @param fileResolver resolver
 	 */
-	protected AppBundlerApplicationBuilder(AppBundlerGradleTask task, AbstractSetupBuilder setup,
+	protected AppBundlerApplicationBuilder(AppBundlerGradleTask task, AppBundler setup,
 			FileResolver fileResolver) {
 		super(task, setup, fileResolver);
 		buildDir = setup.getDestinationDir();
@@ -58,12 +57,12 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 
 		// We need the executable. It has a different meaning than on other systems.
 		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
-			application.setExecutable( getAbstractSetupBuilder().getAppIdentifier() );
+			application.setExecutable( getSetupBuilder().getAppIdentifier() );
 		}
 		
 		prepareApplication( application );
 		setDocumentTypes( application.getDocumentType() );
-		getAppBundler().setJnlpLauncherName( ((AppBundler)getAbstractSetupBuilder()).getJnlpLauncherName() );
+		getAppBundler().setJnlpLauncherName( ((AppBundler)getSetupBuilder()).getJnlpLauncherName() );
 		
 		finishApplication();
 		copyBundleFiles( application );
