@@ -649,8 +649,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
 
             // Add the prunmgr.exe and change it name dynamically to the service name. Dynamically is important for multiple instances.
-            addFile( component, prunmgr, id + "GUI", "prunmgr.exe", true );
-            renameFileIfDynamic( id, subdir, "prunmgr.exe", name + ".exe" );
+            String target = name.replace( '[', '_' ).replace( ']', '_' );
+            addFile( component, prunmgr, id + "GUI", target + ".exe", true );
+            renameFileIfDynamic( id, subdir, target + ".exe", name + ".exe" );
 
             // delete log files on uninstall
             addDeleteFiles( subdir + "service.*.log" );
@@ -877,7 +878,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addRun( runBeforeUninstall, id, "ignore", null );
 
         // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-        addCustomActionToSequence( id, true, "InstallInitialize", true, "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
+        addCustomActionToSequence( id, true, "StopServices", true, "REMOVE=\"ALL\" AND NOT UPGRADINGPRODUCTCODE" );
     }
 
     /**

@@ -164,7 +164,7 @@ class DebControlFileBuilder {
         	secondLine = setup.getDescription();
         }
         
-        controlWriter.write( "Description: " + description + NEWLINE + secondLine + NEWLINE );
+        controlWriter.write( "Description: " + description + NEWLINE + " " + secondLine + NEWLINE );
     }
 
 	/**
