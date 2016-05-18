@@ -16,13 +16,12 @@
 package com.inet.gradle.setup.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -56,52 +55,39 @@ public class ResourceUtils {
 	 * @param folder zip file output folder
 	 */
 	public static void unZipIt(File file, File folder) {
+		unZipIt(file, folder, null);
+	}
 
-		try {
+    
+    public static void unZipIt(File file, File folder, Function<String, String> nameClosure) {
 
-			// create output directory is not exists
-			if (!folder.exists()) {
-				folder.mkdir();
-			}
+		// create output directory is not exists
+		if (!folder.exists()) {
+			folder.mkdir();
+		}
 
-			// get the zip file content
-			ZipFile zipFile = new ZipFile(file);
+		// get the zip file content
+		try ( ZipFile zipFile = new ZipFile(file) ) {
 			Enumeration<? extends ZipEntry> entries = zipFile.entries();
 			while (entries.hasMoreElements()) {
 				ZipEntry zipEntry = (ZipEntry) entries.nextElement();
 				
 				String fileName = zipEntry.getName();
-				if (zipEntry.isDirectory() ) {
-					new File( folder, fileName).mkdir();
-				} else {
+				if ( !zipEntry.isDirectory() ) {
 					
-					File target = new File(folder, fileName);
-					InputStream inputStream = zipFile.getInputStream(zipEntry);
-					FileOutputStream output = new FileOutputStream(target);
-					copyData(inputStream, output);
-					output.close();
-					inputStream.close();
+					if ( nameClosure != null ) {
+						fileName = nameClosure.apply( fileName );
+					}
+					
+                    try( InputStream input = zipFile.getInputStream( zipEntry ) ) {
+                    	File target = new File(folder, fileName);
+                    	target.getParentFile().mkdirs();
+                        Files.copy( input, target.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                    }
 				}
 			}
-			
-			zipFile.close();
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
-	
-	/**
-     * Copy the data from the input to the output
-     * @param input the input data
-     * @param output the target
-     * @throws IOException if IO issues
-     */
-    public static void copyData( InputStream input, OutputStream output ) throws IOException{
-        byte[] buf = new byte[4096];
-        int len;
-        while ((len = input.read(buf)) > 0) {
-            output.write(buf, 0, len);
-        }
-    }
 }

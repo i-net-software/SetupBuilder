@@ -17,15 +17,11 @@ package com.inet.gradle.setup.msi;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -34,6 +30,7 @@ import org.gradle.api.artifacts.dsl.DependencyHandler;
 
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.util.ResourceUtils;
 
 /**
  * Create the Lauch4j programs if there any configured.
@@ -100,22 +97,14 @@ public class Launch4jCreator {
                     if( name.contains( "-workdir-" ) ) {
                         name = name.substring( 0, name.length() - 4 ); // remove ".jar"
                         //binary files must be extracted
-                        ZipFile zip = new ZipFile( file );
-                        Enumeration<? extends ZipEntry> entries = zip.entries();
-                        while( entries.hasMoreElements() ) {
-                            ZipEntry entry = entries.nextElement();
-                            if( !entry.isDirectory() ) {
-                                String entryName = entry.getName();
-                                if( entryName.startsWith( name ) ) {
-                                    entryName = entryName.substring( name.length() + 1 );
-                                }
-                                try( InputStream input = zip.getInputStream( entry ) ) {
-                                    File target = new File( libDir, entryName );
-                                    target.getParentFile().mkdirs();
-                                    Files.copy( input, target.toPath(), StandardCopyOption.REPLACE_EXISTING );
-                                }
+                        final String internalName = name;
+            			ResourceUtils.unZipIt(file, libDir, (entryName) -> {
+                            if( entryName.startsWith( internalName ) ) {
+                                entryName = entryName.substring( internalName.length() + 1 );
                             }
-                        }
+            				return entryName;
+        				});
+                        
                     } else {
                         File target = new File( libDir, file.getName() );
                         Files.copy( file.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
