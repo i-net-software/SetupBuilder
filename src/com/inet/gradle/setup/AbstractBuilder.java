@@ -116,4 +116,12 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
             throw new RuntimeException( th );
         }
     }
+    
+    /**
+     * Returns the concrete task
+     * @return the task
+     */
+    protected T getTask() {
+    	return task;
+    }
 }

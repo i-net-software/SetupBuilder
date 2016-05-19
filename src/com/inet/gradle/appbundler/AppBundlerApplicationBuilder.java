@@ -20,7 +20,6 @@ import java.io.File;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractTask;
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.dmg.AbstractOSXApplicationBuilder;
 
@@ -41,11 +40,6 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
 			FileResolver fileResolver) {
 		super(task, setup, fileResolver);
 		buildDir = setup.getDestinationDir();
-	}
-
-	@Override
-	protected AbstractTask getTask() {
-		return task;
 	}
 
 	/**

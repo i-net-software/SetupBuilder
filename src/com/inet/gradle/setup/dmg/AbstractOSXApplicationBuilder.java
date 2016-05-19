@@ -260,12 +260,6 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask,S ext
 	}
 
 	/**
-	 * Method that needs to be implemented that will return the task
-	 * @return the concrete task
-	 */
-	protected abstract AbstractTask getTask();
-
-	/**
 	 * Set File permissions to the resulting application
 	 * @param destination of the files to manipulate 
 	 * @throws IOException on errors
