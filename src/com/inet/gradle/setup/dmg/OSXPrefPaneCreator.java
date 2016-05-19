@@ -2,28 +2,34 @@ package com.inet.gradle.setup.dmg;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
-import org.gradle.api.artifacts.dsl.RepositoryHandler;
+import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.util.ReplacingInputStream;
 import com.inet.gradle.setup.util.ResourceUtils;
 
-import aQute.bnd.osgi.Clazz;
+public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, SetupBuilder> {
 
-public class OSXPrefPaneCreator {
+	private File buildDir;
+	private Project project;
 
-    private URLClassLoader xcodeClassLoader;
+	protected OSXPrefPaneCreator(Dmg task, SetupBuilder setup, FileResolver fileResolver) {
+		super(task, setup, fileResolver);
+		buildDir = task.getTemporaryDir();
+		project = task.getProject();
+	}
 
-    /**
+	/**
      * Create a single Lauch4j launcher.
      * 
      * @param launch the launch description
@@ -32,20 +38,87 @@ public class OSXPrefPaneCreator {
      * @return the file to the created exe.
      * @throws Exception if any error occur
      */
-    File create( Service service, Dmg task, SetupBuilder setup ) throws Exception {
+    File create( Service service ) throws Exception {
     	
-    	// Download dependencies + Classloader
-    	File prefPaneSource = unpackAndPatchPrefPaneSource(task, service);
-    	File outfile = new File( "asd" );
+    	String displayName = service.getDisplayName();
+		String internalName = displayName.replaceAll("[^A-Za-z0-9]", "");
+    	File prefPaneSource = unpackAndPatchPrefPaneSource( internalName );
     	
-    	Project project = task.getProject();
-    	project.setProperty("xcodebuild.objRoot", prefPaneSource);
+    	ArrayList<String> command = new ArrayList<String>();
+    	command.add( "gradle" );
+    	command.add( "-b" );
+    	command.add( new File(prefPaneSource, "build.gradle").getAbsolutePath() );
+    	command.add( "xcodebuild" );
+    	exec(command);
     	
-		Class<?> clazz = Class.forName( "org.openbakery.XcodePlugin", true, getClassLoader( task.getProject(), task.getTemporaryDir() ) );
-    	Object xcodePlugin = clazz.getConstructor().newInstance();
-        clazz.getMethod( "apply", Project.class ).invoke( xcodePlugin, project );
+    	File prefPaneBinary = new File( prefPaneSource, "build/sym/Release/" + internalName + ".prefPane" );
+    	
+    	if ( !prefPaneBinary.exists() ) {
+            throw new GradleException( "Launch4j failed. " );
+    	}
+    	
+    	// Where will the Result be put
+    	File resourcesOutput = new File(buildDir, displayName  + ".app/Contents/Resources");
 
-        return outfile;
+    	// Rename to app-name to the final prefpane name in the service
+        File prefPaneLocation = new File(resourcesOutput, displayName + ".prefPane");
+    	
+        // rename helper Tool in binary of the pref pane
+        File prefPaneContents = new File(prefPaneBinary, "Contents");
+		Path iconPath = getApplicationIcon().toPath();
+
+		Files.copy(iconPath, new File(prefPaneContents, "Resources/"+internalName+".app/Contents/Resources/applet.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		Files.move(new File(prefPaneContents, "MacOS/" + internalName).toPath(), new File( prefPaneContents, "MacOS/"+ displayName ).toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		Files.move(new File(prefPaneContents, "Resources/" + internalName + ".app").toPath(), new File(prefPaneContents, "Resources/"+ displayName +".app").toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+		System.out.println("Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
+
+		// Make executable
+		setApplicationFilePermissions( new File(prefPaneContents, "Resources/"+ displayName +".app/Contents/MacOS/applet") );
+    	
+		// Rename prefPane
+		Files.move(prefPaneBinary.toPath(), prefPaneLocation.toPath(),  java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+
+		// Copy Icon
+		Files.copy(iconPath, new File(prefPaneLocation, "Contents/Resources/ProductIcon.icns").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+		
+		// Patch Info.plist
+		File prefPanePLIST = new File(prefPaneLocation, "Contents/Info.plist");
+		setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier()) + ".prefPane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
+		setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
+
+		setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
+		
+		File servicePLIST = new File(prefPaneLocation, "Contents/Resources/service.plist");
+		setPlistProperty( servicePLIST, ":Name", displayName );
+		setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : getSetupBuilder().getAppIdentifier() );
+		
+		// Program will be set during installation.
+		setPlistProperty( servicePLIST, ":Description", service.getDescription() );
+		setPlistProperty( servicePLIST, ":Version", getSetupBuilder().getVersion() );
+		setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf(service.isKeepAlive()) );
+		setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf(service.isStartOnBoot()) );
+		setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
+		
+		// Reset the plist.
+		deletePlistProperty(servicePLIST, ":starter");
+		
+		// Output the preference link actions to the plist
+		for (int i = 0; i < task.getPreferencesLinks().size(); i++) {
+
+			if ( i == 0 ) {
+				addPlistProperty( servicePLIST, ":starter", "array", null );
+			}
+			
+			PreferencesLink preferencesLink = task.getPreferencesLinks().get(i);
+			addPlistProperty( servicePLIST, ":starter:", "dict", null );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":title", "string", preferencesLink.getTitle() );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":action", "string", preferencesLink.getAction() );
+			addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "bool", preferencesLink.isRunAsRoot()?"YES":"NO" );
+		}    	
+    	
+        return prefPaneBinary;
     }
 
     /**
@@ -55,13 +128,10 @@ public class OSXPrefPaneCreator {
      * @return file to prefpane sources
      * @throws IOException if an error occurs
      */
-    private File unpackAndPatchPrefPaneSource( Dmg task, Service service ) throws IOException {
+    private File unpackAndPatchPrefPaneSource( String internalName ) throws IOException {
     	
     	// Create Config and load Dependencies.
     	String configName = "prefPaneSource";
-    	Project project = task.getProject();
-    	File buildDir = task.getTemporaryDir();
-    	
     	Configuration config = project.getConfigurations().findByName( configName );
     	if ( config == null ) {
     		config = project.getConfigurations().create( configName );
@@ -75,73 +145,17 @@ public class OSXPrefPaneCreator {
     	File outputDir = new File( buildDir, configName );
     	outputDir.mkdirs();
     	
-    	String internalName = service.getDisplayName().replaceAll("[^A-Za-z0-9]", "");
-    	
     	// Unzip the content
     	for( File file : config.getFiles() ) {
 			ResourceUtils.unZipIt(file, outputDir, (entryName) -> {
-				return entryName.replace("SetupBuilderOSXPrefPane", internalName);
+				return entryName.replaceAll("SetupBuilderOSXPrefPane", internalName);
+			}, (inputStream) -> {
+				
+				return new ReplacingInputStream( inputStream, new HashMap<byte[], byte[]>(){{
+					put("SetupBuilderOSXPrefPane".getBytes(), internalName.getBytes());
+				}});
 			});
     	}
     	return outputDir;
-    }
-    
-    /**
-     * Download the lauch4j and create a classloader
-     * 
-     * @param project current project
-     * @param buildDir current temp directory
-     * @return the ClassLoader for lauch4j
-     * @throws IOException if any error occur
-     */
-    private ClassLoader getClassLoader( Project project, File buildDir ) throws IOException {
-        if( xcodeClassLoader == null ) {
-            String configName = "setupXCode";
-
-            // add a repository
-            RepositoryHandler repositories = project.getRepositories();
-			repositories.add( repositories.maven(mavenArtifactRepository -> {
-			    mavenArtifactRepository.setName( configName );
-			    mavenArtifactRepository.setUrl( "http://repository.openbakery.org/" );
-			}));
-			
-            Configuration config = project.getConfigurations().findByName( configName );
-            
-            // Add the plugin
-            if( config == null ) {
-                config = project.getConfigurations().create( configName );
-                config.setVisible( false );
-                config.setTransitive( false );
-                DependencyHandler dependencies = project.getDependencies();
-                dependencies.add( configName, "org.openbakery:xcode-plugin:0.13.+" );
-            }
-
-            ArrayList<URL> urls = new ArrayList<>();
-            File libDir = new File( buildDir, configName );
-            libDir.mkdirs();
-            for( File file : config.getFiles() ) {
-                String name = file.getName();
-                if( name.endsWith( ".jar" ) ) {
-                    //https://github.com/TheBoegl/gradle-launch4j/blob/develop/src/main/groovy/edu/sc/seis/launch4j/Launch4jPlugin.groovy
-                    File target = new File( libDir, file.getName() );
-                    Files.copy( file.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING );
-                    urls.add( target.toURI().toURL() );
-                }
-            }
-            xcodeClassLoader = new URLClassLoader( urls.toArray( new URL[urls.size()] ), getClass().getClassLoader() );
-        }
-        return xcodeClassLoader;
-    }
-    
-    /**
-     * Close the ClassLoader
-     * 
-     * @throws IOException if any error occur
-     */
-    void close() throws IOException {
-        if( xcodeClassLoader != null ) {
-            xcodeClassLoader.close();
-            xcodeClassLoader = null;
-        }
     }
 }
