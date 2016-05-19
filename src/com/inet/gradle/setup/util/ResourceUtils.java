@@ -58,8 +58,11 @@ public class ResourceUtils {
 		unZipIt(file, folder, null);
 	}
 
-    
     public static void unZipIt(File file, File folder, Function<String, String> nameClosure) {
+    	unZipIt(file, folder, nameClosure, null);
+    }
+    	
+    public static void unZipIt(File file, File folder, Function<String, String> nameClosure, Function<InputStream, InputStream> streamClosure) {
 
 		// create output directory is not exists
 		if (!folder.exists()) {
@@ -82,7 +85,14 @@ public class ResourceUtils {
                     try( InputStream input = zipFile.getInputStream( zipEntry ) ) {
                     	File target = new File(folder, fileName);
                     	target.getParentFile().mkdirs();
-                        Files.copy( input, target.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                    	
+                    	@SuppressWarnings("resource")
+						InputStream stream = input;
+                    	if ( streamClosure != null ) {
+                    		stream = streamClosure.apply( input );
+                    	}
+                    	
+                        Files.copy( stream, target.toPath(), StandardCopyOption.REPLACE_EXISTING );
                     }
 				}
 			}
