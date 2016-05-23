@@ -160,6 +160,7 @@ class RpmControlFileBuilder {
 	private void putPreun(OutputStreamWriter controlWriter)  throws IOException {
 		controlWriter.write(NEWLINE + "%preun" + NEWLINE);
 		controlWriter.write(NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE);
+		controlWriter.write(NEWLINE + "echo \"preun step\"" + NEWLINE);
 		
 		ArrayList<String> preuns = rpm.getPreun();
 		for (String preun : preuns) {
