@@ -247,17 +247,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addRegistryValue( regkey, null, "string", "[INSTALLDIR]" );
 
         // load the INSTALLDIR from the registry
-        Element lastInstalldir = getOrCreateChildById( product, "Property", "LAST_INSTALLDIR" );
+        Element lastInstalldir = getOrCreateChildById( product, "Property", "INSTALLDIR" );
+        addAttributeIfNotExists( lastInstalldir, "Secure", "yes" );
         Element search = getOrCreateChildById( lastInstalldir, "RegistrySearch", "SearchInstallDir" );
         addAttributeIfNotExists( search, "Root", "HKLM" );
         addAttributeIfNotExists( search, "Key", key );
         addAttributeIfNotExists( search, "Type", "directory" );
-
-        Element action = getOrCreateChildById( product, "CustomAction", "SetInstallDir" );
-        addAttributeIfNotExists( action, "Execute", "firstSequence" );
-        addAttributeIfNotExists( action, "Property", "INSTALLDIR" );
-        addAttributeIfNotExists( action, "Value", "[LAST_INSTALLDIR]" );
-        addCustomActionToSequence( "SetInstallDir", false, "FileCost", true, "LAST_INSTALLDIR" );
     }
 
     /**
