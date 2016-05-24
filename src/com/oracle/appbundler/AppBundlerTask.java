@@ -932,7 +932,7 @@ public class AppBundlerTask extends Task {
 
         destination.getParentFile().mkdirs();
 
-        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS);
+        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING /*, LinkOption.NOFOLLOW_LINKS*/ );
 
         if (Files.isDirectory(sourcePath, LinkOption.NOFOLLOW_LINKS)) {
             String[] files = source.list();
