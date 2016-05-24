@@ -19,7 +19,7 @@ import com.inet.gradle.setup.AbstractTask;
 public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
 	private String identity, identifier, keychain, keychainPassword;
-	private boolean ignoreError;
+	private boolean ignoreError, deepsign = true;
 	
 	/**
 	 * Setup up the Sign Tool
@@ -150,7 +150,11 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 		ArrayList<String> command = new ArrayList<>();
         command.add( "codesign" );
         command.add( "-f" );
-        command.add( "--deep" );
+        
+        if ( isDeepsign() ) {
+        	command.add( "--deep" );
+        }
+        
         command.add( "-s" );
         command.add( getIdentity() );
         
@@ -198,5 +202,21 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
         if ( output.exists() && path.delete() ) {
         	output.renameTo( path );
         }
+	}
+
+	/**
+	 * Should be deep signed?
+	 * @return
+	 */
+	public boolean isDeepsign() {
+		return deepsign;
+	}
+
+	/**
+	 * Set deep signing
+	 * @param deepsign deep sign?
+	 */
+	public void setDeepsign(boolean deepsign) {
+		this.deepsign = deepsign;
 	}
 }
