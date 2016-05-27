@@ -269,9 +269,9 @@ class RpmControlFileBuilder {
 				
 			} else if( mainClass != null ) {
 				if( workingDir != null ) {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " > starter.log )" + NEWLINE);
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )" + NEWLINE);
 				} else {
-					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " > starter.log )"  + NEWLINE);	
+					controlWriter.write("( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar()  + " " +  mainClass + " )"  + NEWLINE);	
 				}
 			}
 		}
