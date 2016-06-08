@@ -26,9 +26,6 @@ WORKINGDIR='{{workdir}}'
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-# Source function library
-. /etc/init.d/functions
-
 # Function that starts the daemon/service
 #
 do_start()
@@ -36,15 +33,16 @@ do_start()
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
-	echo_passed "Starting $NAME: ";
+	echo "Starting $NAME: ";
 	if [ -f "$PIDFILE" ]
 	then
 		PID='cat $PIDFILE'
-		echo_passed $NAME already running: $PID
+		echo $NAME already running: $PID
 		return 1
 	else
         if [ -z "$1" ]; then
-            daemonize -c "$WORKINGDIR" -p $PIDFILE -l $PIDFILE -o "$WORKINGDIR/log.txt" -e "$WORKINGDIR/error.txt"  $DAEMON {{startArguments}}
+#            daemonize -c "$WORKINGDIR" -p $PIDFILE -l $PIDFILE -o "$WORKINGDIR/log.txt" -e "$WORKINGDIR/error.txt"  $DAEMON {{startArguments}}
+            cd "$WORKINGDIR" && $DAEMON {{startArguments}} &
         else
             # if a foreground daemon is summoned, just start the process with the arguments 
             cd "$WORKINGDIR" && $DAEMON {{startArguments}}
@@ -68,10 +66,10 @@ do_stop()
 	
 	echo " Ausgabe $?"
 	case "$?" in
-		0) echo_success "$NAME was stopped"; rm -f $PIDFILE ;;
-		1) echo_passed "(already running)";;
-		7) echo_warning "$NAME was not running";;
-		*) echo_warning "$NAME could not be stopped "
+		0) echo "$NAME was stopped"; rm -f $PIDFILE ;;
+		1) echo "(already running)";;
+		7) echo "$NAME was not running";;
+		*) echo "$NAME could not be stopped "
 	esac
 	
 	return "$?"
@@ -83,16 +81,16 @@ case "$1" in
 	do_start
 	case "$?" in
 		0) exit 0 ;;
-		1) echo_warning "(already running)"; exit 0 ;;
+		1) echo "(already running)"; exit 0 ;;
 		2) exit 1 ;;
 	esac
 	;;
   daemon)
-    log_daemon_msg "Starting as Daemon" "$NAME"
+    echo "Starting as Daemon" "$NAME"
     do_start daemon
     case "$?" in
-        0) log_end_msg 0 ;;
-        1) log_success_msg "(already running)"; log_end_msg 0 ;;
+        0) echo 0 ;;
+        1) echo "(already running)"; log_end_msg 0 ;;
     esac
     ;;
   stop)
@@ -117,7 +115,7 @@ case "$1" in
 		do_start
 		case "$?" in
 			0) exit 0 ;;
-			1) echo_warning "(already running)"; exit 0 ;;
+			1) echo "(already running)"; exit 0 ;;
 			2) exit 1 ;;
 		esac
 		;;

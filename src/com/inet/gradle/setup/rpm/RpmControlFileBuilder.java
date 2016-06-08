@@ -527,12 +527,14 @@ class RpmControlFileBuilder {
 	                throws IOException {
 	    String depends = rpm.getDepends();
 	    if(depends == null || depends.length() == 0 ) {
-	        depends = "java-devel >= 1.8";
+	        depends = "";
 	    }
 	    if(setup.getServices() != null && setup.getServices().size() > 0) {
-	    	depends = depends + ", daemonize, initscripts";
+//	    	depends = depends; // + ", daemonize, initscripts";
 	    }
-	    controlWriter.write("Requires: " + depends + NEWLINE);
+	    if(depends.trim().length() > 0) {
+	    	controlWriter.write("Requires: " + depends + NEWLINE);
+	    }
 	}
 
 	/**
