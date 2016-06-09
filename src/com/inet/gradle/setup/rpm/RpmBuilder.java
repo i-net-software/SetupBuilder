@@ -132,12 +132,15 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         String installationRoot = task.getInstallationRoot();
         
         if( workingDir != null ) {
-			initScript.setPlaceholder( "workdir", installationRoot + "/" + workingDir );
-    		mainJarPath = "'" + installationRoot + "/" + workingDir + "/" + service.getMainJar() + "'";
+			initScript.setPlaceholder( "workdir", (installationRoot + "/" + workingDir).replace(" ", "\\ ") );
+    		mainJarPath = installationRoot + "/" + workingDir + "/" + service.getMainJar();
     	} else {	
-    		initScript.setPlaceholder( "workdir", installationRoot );
-    		mainJarPath = "'" + installationRoot + "/" + service.getMainJar() + "'";
+    		initScript.setPlaceholder( "workdir", installationRoot.replace(" ", "\\ ") );
+    		mainJarPath = installationRoot + "/" + service.getMainJar();
     	}
+        
+        // under unix the spaces in the path must be encoded with an \ before
+        mainJarPath = mainJarPath.replace(" ", "\\ ");
         
         initScript.setPlaceholder( "name", serviceUnixName );
         String version = setup.getVersion();
@@ -150,7 +153,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         	
         
         initScript.setPlaceholder( "startArguments",
-                                   "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
+                                   ("-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments()).trim() );
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );

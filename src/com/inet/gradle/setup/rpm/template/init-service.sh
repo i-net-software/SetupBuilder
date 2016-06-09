@@ -13,9 +13,10 @@ DESC="{{displayName}}"
 NAME={{name}}
 MAINARCHIVE={{mainJar}}
 PIDFILE=/var/run/$NAME.pid
-WORKINGDIR='{{workdir}}'
+WORKINGDIR={{workdir}}
 EXEC=/usr/bin/java
-PROC="$EXEC {{startArguments}}"
+OPTIONS="{{startArguments}}"
+PROC="$EXEC ${OPTIONS}"
 
 
 
@@ -55,8 +56,9 @@ start() {
     return 0
   fi
   printf "%-50s%s" "Starting $NAME: " ''
-  cd ${WORKINGDIR}
-  $PROC &
+  cd "${WORKINGDIR}"
+  $EXEC {{startArguments}} &
+  
 
   # save pid to file if you want
   echo $! > $PIDFILE
