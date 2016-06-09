@@ -9,126 +9,109 @@
 # Description:       {{description}}
 ### END INIT INFO
 
-# PATH should only include /usr/* if it runs after the mountnfs.sh script
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="{{displayName}}"
 NAME={{name}}
-WAIT={{wait}}
-DAEMON=/usr/bin/java
 MAINARCHIVE={{mainJar}}
 PIDFILE=/var/run/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
 WORKINGDIR='{{workdir}}'
+EXEC=/usr/bin/java
+PROC="$EXEC {{startArguments}}"
+
+
 
 # Exit if the package is not installed
 [ ! -f "$MAINARCHIVE" ] && exit 0
 
-# Read configuration variable file if it is present
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Output colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Source config
+if [ -f /etc/sysconfig/$NAME ] ; then
+    . /etc/sysconfig/$NAME
+fi
+
+eval_cmd() {
+  local rc=$1
+  if [ $rc -eq 0 ]; then
+    printf "[  ${GREEN}OK${NC}  ]\n"
+  else
+    printf "[${RED}FAILED${NC}]\n"
+  fi
+  return $rc
+}
+
 
 # Function that starts the daemon/service
 #
-do_start()
-{
-	# Return
-	#   0 if daemon has been started
-	#   1 if daemon was already running
-	echo "Starting $NAME: ";
-	if [ -f "$PIDFILE" ]
-	then
-		PID='cat $PIDFILE'
-		echo $NAME already running: $PID
-		return 1
-	else
-        if [ -z "$1" ]; then
-#            daemonize -c "$WORKINGDIR" -p $PIDFILE -l $PIDFILE -o "$WORKINGDIR/log.txt" -e "$WORKINGDIR/error.txt"  $DAEMON {{startArguments}}
-            cd "$WORKINGDIR" && $DAEMON {{startArguments}} &
-        else
-            # if a foreground daemon is summoned, just start the process with the arguments 
-            cd "$WORKINGDIR" && $DAEMON {{startArguments}}
-        fi
-        
-		return 0
-	fi
+start() {
+  # see if running
+  local pids=$(pgrep -f "$PROC")
+
+  if [ -n "$pids" ]; then
+    echo "$NAME (pid $pids) is already running"
+    return 0
+  fi
+  printf "%-50s%s" "Starting $NAME: " ''
+  cd ${WORKINGDIR}
+  $PROC &
+
+  # save pid to file if you want
+  echo $! > $PIDFILE
+
+  # check again if running
+  pgrep -f "$PROC" >/dev/null 2>&1
+  eval_cmd $?
 }
 
 #
 # Function that stops the daemon/service
 #
-do_stop()
-{
-	# Return
-	#   0 if daemon has been stopped
-	#   1 if daemon was already stopped
-	#   2 if daemon could not be stopped
-	#   other if a failure occurred
-	killproc -p $PIDFILE $NAME
-	
-	echo " Ausgabe $?"
-	case "$?" in
-		0) echo "$NAME was stopped"; rm -f $PIDFILE ;;
-		1) echo "(already running)";;
-		7) echo "$NAME was not running";;
-		*) echo "$NAME could not be stopped "
-	esac
-	
-	return "$?"
+stop() {
+  # see if running
+  local pids=$(pgrep -f "$PROC")
+
+  if [ -z "$pids" ]; then
+    echo "$NAME not running"
+    return 0
+  fi
+  printf "%-50s%s" "Stopping $NAME: " ''
+  rm -f $PIDFILE
+  kill -9 $pids
+  eval_cmd $?
 }
- 
-case "$1" in
+
+status() {
+  # see if running
+  local pids=$(pgrep -f "$PROC")
+
+  if [ -n "$pids" ]; then
+    echo "$NAME (pid $pids) is running"
+  else
+    echo "$NAME is stopped"
+  fi
+}
+
+case $1 in
   start)
-	echo "Starting" "$NAME"
-	do_start
-	case "$?" in
-		0) exit 0 ;;
-		1) echo "(already running)"; exit 0 ;;
-		2) exit 1 ;;
-	esac
-	;;
-  daemon)
-    echo "Starting as Daemon" "$NAME"
-    do_start daemon
-    case "$?" in
-        0) echo 0 ;;
-        1) echo "(already running)"; log_end_msg 0 ;;
-    esac
+    start
     ;;
   stop)
-	echo "Stopping" "$NAME"
-	do_stop
-	case "$?" in
-		0|1) exit 0 ;;
-		2) exit 1 ;;
-	esac
-	;;
+    stop
+    ;;
   status)
-	status -p $PIDFILE
-	;;
-  restart|force-reload)
-	#
-	# If the "reload" option is implemented then remove the
-	# 'force-reload' alias
-	#
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) exit 0 ;;
-			1) echo "(already running)"; exit 0 ;;
-			2) exit 1 ;;
-		esac
-		;;
-	  *)
-		# Failed to stop
-		exit 1
-		;;
-	esac
-	;;
+    status
+    ;;
+  restart)
+    stop
+    sleep 1
+    start
+    ;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|daemon}" >&2
-	exit 3
-	;;
+    echo "Usage: $0 {start|stop|status|restart}"
+    exit 1
 esac
 
-:
+exit $?
