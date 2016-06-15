@@ -158,7 +158,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
         
-        controlBuilder.addScriptFragment( Script.PREINST,  "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
+        controlBuilder.addScriptFragment( Script.PREINST,  "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" stop \nfi");
         
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
         		+ "echo replace path\n"
@@ -166,8 +166,8 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         		+ "\nfi" );
         
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start \nfi");
-        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" start \nfi");
+        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" stop \nfi");
         controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --del "+serviceUnixName+ "\nfi");
     }
     
