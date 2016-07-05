@@ -36,7 +36,7 @@ Sample Usage
     setupBuilder {
         vendor = 'i-net software'
         application = "SetupBuilder Plugin"
-        baseName = "SetupBuilder"
+        appIdentifier = "SetupBuilder"
         version = '1.0'
         licenseFile = 'license.txt'
         // icons in different sizes for different usage. you can also use a single *.ico or *.icns file
