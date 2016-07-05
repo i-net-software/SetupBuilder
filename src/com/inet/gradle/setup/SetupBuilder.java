@@ -70,15 +70,24 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      * @return license file
      */
     public File getLicenseFile( String locale ) {
-    	return LocalizedResource.getLocalizedResourceFile(licenseFiles, locale);
+        return LocalizedResource.getLocalizedResourceFile(licenseFiles, locale);
     }
 
     /**
      * Set the license file
      * @param license license file or closure
      */
+    public void setLicenseFile( Object license ) {
+        licenseFiles.clear();
+        licenseFile( license );
+    }
+
+    /**
+     * Add a license file
+     * @param license license file or closure
+     */
     public void licenseFile( Object license ) {
-    	LocalizedResource.addLocalizedResource(this, licenseFiles, license);
+        LocalizedResource.addLocalizedResource(this, licenseFiles, license);
     }
 
     /**
