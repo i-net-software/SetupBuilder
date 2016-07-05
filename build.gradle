@@ -6,7 +6,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'de.inetsoftware'
-version = VersionNumber.parse( gradle.gradleVersion ) >= VersionNumber.parse( '2.12' ) ? '1.6.0' : '1.5.0'
+version = VersionNumber.parse( gradle.gradleVersion ) >= VersionNumber.parse( '2.12' ) ? '1.6.0' : '1.5.1'
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
