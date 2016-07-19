@@ -46,6 +46,8 @@ public class Rpm extends AbstractSetupTask {
     
     private String				   	installationRoot;
     
+    private String				   	pamConfigurationFile;
+    
     private ArrayList<String>	   	prep = new ArrayList<String>();
 
 	private ArrayList<String> 	   	build = new ArrayList<String>();
@@ -217,6 +219,22 @@ public class Rpm extends AbstractSetupTask {
 	 */
 	public void setDaemonUser(String daemonUser) {
 		this.daemonUser = daemonUser;
+	}
+
+	/**
+	 * Returns the name with path of the PAM configuration file that should be installed 
+	 * @return the name with path of the PAM configuration file
+	 */
+	public String getPamConfigurationFile() {
+		return pamConfigurationFile;
+	}
+
+	/**
+	 * Sets the name of the PAM configuration file
+	 * @param pamConfigurationFile the name of the PAM configuration file
+	 */
+	public void setPamConfigurationFile(String pamConfigurationFile) {
+		this.pamConfigurationFile = pamConfigurationFile;
 	}
 
 	/**

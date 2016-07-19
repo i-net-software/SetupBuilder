@@ -173,6 +173,13 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
 
         }
         
+        if(task.getPamConfigurationFile() != null) {
+        	File pamFile = new File (task.getPamConfigurationFile());         	
+        	File pamDestFile = new File(buildDir.getAbsolutePath() + "/BUILD/etc/pam.d/" + pamFile.getName());
+        	pamDestFile.mkdirs();
+        	Files.copy(pamFile.toPath(), pamDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);        	
+    	}
+        
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" start \nfi");
         controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" stop \nfi");
