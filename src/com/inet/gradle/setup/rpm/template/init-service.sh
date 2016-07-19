@@ -1,27 +1,28 @@
-#!/bin/sh
-### BEGIN INIT INFO
-# Provides:          {{name}}{{majorversion}}
-# Required-Start:    $local_fs $network $remote_fs $syslog
-# Required-Stop:     $local_fs $network $remote_fs $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: {{displayName}}
+#!/bin/bash
+#
 # Description:       {{description}}
-### END INIT INFO
+#
+# chkconfig: - 80 20
+#
 
-DESC="{{displayName}}"
+# Source function library.
+. /etc/init.d/functions
+
 NAME={{name}}
-MAINARCHIVE={{mainJar}}
+HDUSER={{daemonUser}}
 PIDFILE=/var/run/$NAME.pid
-WORKINGDIR={{workdir}}
 EXEC=/usr/bin/java
-OPTIONS="{{startArguments}}"
-PROC="$EXEC ${OPTIONS}"
+WORKINGDIR={{workdir}}
+MAINARCHIVE={{mainJar}}
+MAINCLASS={{mainClass}}
+STARTARGUMENTS={{startArguments}}
 
+if [ "$STARTARGUMENTS" ]; then
+    PROC="$EXEC -cp ${MAINARCHIVE} ${MAINCLASS} ${STARTARGUMENTS}"
+else
+    PROC="$EXEC -cp ${MAINARCHIVE} ${MAINCLASS}"
+fi
 
-
-# Exit if the package is not installed
-[ ! -f "$MAINARCHIVE" ] && exit 0
 
 
 # Output colors
@@ -44,9 +45,6 @@ eval_cmd() {
   return $rc
 }
 
-
-# Function that starts the daemon/service
-#
 start() {
   # see if running
   local pids=$(pgrep -f "$PROC")
@@ -57,20 +55,30 @@ start() {
   fi
   printf "%-50s%s" "Starting $NAME: " ''
   cd "${WORKINGDIR}"
-  $EXEC {{startArguments}} &
+  if [[ "${HDUSER}" = "root" ]]; then
+    if [ "$STARTARGUMENTS" ]; then
+        ${EXEC} -cp "${MAINARCHIVE}" "${MAINCLASS}" "${STARTARGUMENTS}" &
+    else
+        ${EXEC} -cp "${MAINARCHIVE}" "${MAINCLASS}" &
+    fi
+  else
+    if [ "$STARTARGUMENTS" ]; then
+        su ${HDUSER} -c "${EXEC} -cp '${MAINARCHIVE}' '${MAINCLASS}' '${STARTARGUMENTS}' &"
+    else
+        su ${HDUSER} -c "${EXEC} -cp '${MAINARCHIVE}' '${MAINCLASS}' &"
+    fi
+  fi
   
 
   # save pid to file if you want
   echo $! > $PIDFILE
 
   # check again if running
+  sleep 5
   pgrep -f "$PROC" >/dev/null 2>&1
   eval_cmd $?
 }
 
-#
-# Function that stops the daemon/service
-#
 stop() {
   # see if running
   local pids=$(pgrep -f "$PROC")

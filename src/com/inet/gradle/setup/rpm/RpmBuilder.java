@@ -149,11 +149,9 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
         initScript.setPlaceholder( "mainJar", mainJarPath );
-        
-        	
-        
-        initScript.setPlaceholder( "startArguments",
-                                   ("-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments()).trim() );
+        initScript.setPlaceholder( "mainClass", service.getMainClass() );
+        initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+        initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
@@ -164,6 +162,16 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         		+ "echo replace path\n"
         		+ "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/"+serviceUnixName 
         		+ "\nfi" );
+
+        String daemonuser = task.getDaemonUser(); 
+        if(!daemonuser.equalsIgnoreCase("root")) {
+        	controlBuilder.addScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + "\n"
+        			+ "\n"
+        			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + installationRoot + "'\n"
+        			+ "chmod -R g+w '" + installationRoot + "'\n"
+        			+ "\n" );
+
+        }
         
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" start \nfi");
