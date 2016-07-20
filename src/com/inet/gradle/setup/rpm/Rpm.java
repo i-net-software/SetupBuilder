@@ -48,6 +48,8 @@ public class Rpm extends AbstractSetupTask {
     
     private String				   	pamConfigurationFile;
     
+    private boolean					backwardCompatible = true;
+    
     private ArrayList<String>	   	prep = new ArrayList<String>();
 
 	private ArrayList<String> 	   	build = new ArrayList<String>();
@@ -235,6 +237,22 @@ public class Rpm extends AbstractSetupTask {
 	 */
 	public void setPamConfigurationFile(String pamConfigurationFile) {
 		this.pamConfigurationFile = pamConfigurationFile;
+	}
+
+	/**
+	 * Returns the backward compatibility for old rpm versions
+	 * @return the backward compatibility for old rpm versions
+	 */
+	public boolean isBackwardCompatible() {
+		return backwardCompatible;
+	}
+
+	/**
+	 * Sets the backward compatibility for old rpm versions
+	 * @param backwardCompatibility the backward compatibility for old rpm versions
+	 */
+	public void setBackwardCompatible(boolean backwardCompatibility) {
+		this.backwardCompatible = backwardCompatibility;
 	}
 
 	/**

@@ -112,6 +112,8 @@ class RpmControlFileBuilder {
 			putDepends(controlWriter);
 			putArchitecture(controlWriter);
 			
+			putBackwardCompatibility(controlWriter);
+			
 			putDescription(controlWriter); 
 			
 			putPrep(controlWriter);
@@ -150,6 +152,22 @@ class RpmControlFileBuilder {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Insert some defines for backward compatibility with old rpm versions.
+	 * This could be enabled and disabled with the backwardCompatibility entry of the RPM task. 
+	 * @param controlWriter the writer for the file
+	 * @throws IOException if the was an error while writing to the file
+	 */
+	private void putBackwardCompatibility(OutputStreamWriter controlWriter)  throws IOException {
+		if(rpm.isBackwardCompatible()) {
+			controlWriter.write(NEWLINE + "%define _binary_payload w9.gzdio" + NEWLINE);
+			controlWriter.write(NEWLINE + "%define _source_payload w9.gzdio" + NEWLINE);
+			controlWriter.write(NEWLINE + "%define _binary_filedigest_algorithm 1" + NEWLINE);
+			controlWriter.write(NEWLINE + "%define _source_filedigest_algorithm 1" + NEWLINE);
+		}
+		
 	}
 
 	/**
