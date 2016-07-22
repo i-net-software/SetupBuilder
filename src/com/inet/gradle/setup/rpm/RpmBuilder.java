@@ -83,6 +83,17 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
 
+            String daemonuser = task.getDaemonUser(); 
+            if(!daemonuser.equalsIgnoreCase("root")) {
+            	controlBuilder.addScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + "\n"
+            			+ "\n"
+            			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
+            			+ "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
+            			+ "\n" );
+
+            }
+
+            
             for( Service service : setup.getServices() ) {
                 setupService( service );
             }
@@ -162,16 +173,6 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         		+ "echo replace path\n"
         		+ "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/"+serviceUnixName 
         		+ "\nfi" );
-
-        String daemonuser = task.getDaemonUser(); 
-        if(!daemonuser.equalsIgnoreCase("root")) {
-        	controlBuilder.addScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + "\n"
-        			+ "\n"
-        			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + installationRoot + "'\n"
-        			+ "chmod -R g+w '" + installationRoot + "'\n"
-        			+ "\n" );
-
-        }
         
         if(task.getPamConfigurationFile() != null) {
         	File pamFile = new File (task.getPamConfigurationFile());         	
