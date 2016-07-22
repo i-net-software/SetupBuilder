@@ -14,6 +14,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="{{displayName}}"
 NAME={{name}}
 WAIT={{wait}}
+HDUSER={{daemonUser}}
 DAEMON=/usr/bin/java
 MAINARCHIVE={{mainJar}}
 PIDFILE=/var/run/$NAME.pid
@@ -43,7 +44,7 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --chdir "$WORKINGDIR" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+	start-stop-daemon --chuid $HDUSER --start --chdir "$WORKINGDIR" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
 
     BACKGROUND=""
@@ -51,13 +52,13 @@ do_start()
         BACKGROUND="-b"
     fi
     
-    start-stop-daemon $BACKGROUND --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
+    start-stop-daemon  --chuid $HDUSER $BACKGROUND --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
         {{startArguments}} \
         || return 2
 	
 	if [ ! -z "$1" ]; then
         sleep $WAIT
-        if start-stop-daemon --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+        if start-stop-daemon  --chuid $HDUSER --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
             if [ -f "$PIDFILE" ]; then
                 rm -f "$PIDFILE"
             fi
@@ -80,7 +81,7 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-	start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE 
+	start-stop-daemon  --chuid $HDUSER --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE 
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
 	rm -f $PIDFILE
@@ -114,7 +115,7 @@ case "$1" in
 	esac
 	;;
   status)
-	if start-stop-daemon --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+	if start-stop-daemon  --chuid $HDUSER --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
 	    log_success_msg "$NAME is not running."
 	else
 	    log_success_msg "$NAME is running."

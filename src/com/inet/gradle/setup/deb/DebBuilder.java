@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -123,16 +124,34 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			controlBuilder.addTailScriptFragment( Script.PRERM, "case \"$1\" in remove|purge)" );    			
     			if( executable != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )" );
+    					if(task.getDaemonUser().equalsIgnoreCase("root")) {
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )" );
+    					} else {
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + "' )" );
+    					}
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )" );	
+    					if(task.getDaemonUser().equalsIgnoreCase("root")) {
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )" );
+    					} else {
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "su " + task.getDaemonUser() + " -c '" + task.getInstallationRoot() + "\" && " + executable + "' )" );	
+    					}
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
-    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")");
+    					if(task.getDaemonUser().equalsIgnoreCase("root")) {	
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")");
+    					} else {
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + "' )");
+    					}
+    					
     				} else {
-    					controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")");	
+    					if(task.getDaemonUser().equalsIgnoreCase("root")) {	
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")");
+    					} else {
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + "' )");
+    					}
+    						
     				}
     			}
     			controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
@@ -263,6 +282,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         initScript.setPlaceholder( "majorversion", version.substring(0, version.indexOf('.')) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
+        initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
         initScript.setPlaceholder( "wait", "2" );
         
         if( workingDir != null ) {
@@ -278,6 +298,24 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
                                    "-cp "+ mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
+        
+        
+        String daemonuser = task.getDaemonUser(); 
+        if(!daemonuser.equalsIgnoreCase("root")) {
+        	controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " || true \n"
+        			+ "\n"
+        			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + installationRoot + "'\n"
+        			+ "chmod -R g+w '" + installationRoot + "'\n"
+        			+ "\n" );
+
+        }
+        if(task.getPamConfigurationFile() != null) {
+        	File pamFile = new File (task.getPamConfigurationFile());         	
+        	File pamDestFile = new File(buildDir.getAbsolutePath(),  "/etc/pam.d/" + pamFile.getName());
+        	pamDestFile.mkdirs();
+        	Files.copy(pamFile.toPath(), pamDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);        	
+    	}
+        
         controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  update-rc.d "+serviceUnixName+" defaults 91 09 >/dev/null\nfi" );
         controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" start \nfi");
         controlBuilder.addTailScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" stop \nfi");

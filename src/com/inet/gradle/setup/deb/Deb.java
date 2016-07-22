@@ -47,6 +47,10 @@ public class Deb extends AbstractSetupTask {
     private String				   changes;
     
     private String				   installationRoot;
+    
+    private String				   daemonUser = "root";
+
+	private String 				   pamConfigurationFile;
 	
     public Deb() {
         super( "deb" );
@@ -179,5 +183,41 @@ public class Deb extends AbstractSetupTask {
 	 */
 	public void setInstallationRoot(String installationRoot) {		
 		this.installationRoot = installationRoot.endsWith("/") ? installationRoot.substring(0, installationRoot.length()-1) : installationRoot;
+	}
+	
+	
+	/**
+	 * Returns the user with which the daemon should be running. If no user was specified the default root user will be used. 
+	 * @return the user for the daemon
+	 */
+	public String getDaemonUser() {
+		if(daemonUser.trim().isEmpty()) {
+			return "root";
+		} else {
+			return daemonUser;
+		}
+	}
+
+	/**
+	 * Sets the user with which the daemon should be running.
+	 */
+	public void setDaemonUser(String daemonUser) {
+		this.daemonUser = daemonUser;
+	}
+	
+	/**
+	 * Returns the name with path of the PAM configuration file that should be installed 
+	 * @return the name with path of the PAM configuration file
+	 */
+	public String getPamConfigurationFile() {
+		return pamConfigurationFile;
+	}
+
+	/**
+	 * Sets the name of the PAM configuration file
+	 * @param pamConfigurationFile the name of the PAM configuration file
+	 */
+	public void setPamConfigurationFile(String pamConfigurationFile) {
+		this.pamConfigurationFile = pamConfigurationFile;
 	}
 }
