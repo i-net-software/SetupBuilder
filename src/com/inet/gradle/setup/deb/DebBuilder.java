@@ -182,6 +182,17 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
      */
     private void addScriptsToControlFiles() {
     	
+    	String daemonuser = task.getDaemonUser(); 
+        if(!daemonuser.equalsIgnoreCase("root")) {
+        	controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " || true \n"
+        			+ "\n"
+        			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
+        			+ "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
+        			+ "\n" );
+
+        }
+    	
+    	
     	ArrayList<String> preinsts = task.getPreinst();
     	for (String preinst : preinsts) {
     		controlBuilder.addTailScriptFragment( Script.PREINST, preinst );	
@@ -299,16 +310,6 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         
-        
-        String daemonuser = task.getDaemonUser(); 
-        if(!daemonuser.equalsIgnoreCase("root")) {
-        	controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " || true \n"
-        			+ "\n"
-        			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + installationRoot + "'\n"
-        			+ "chmod -R g+w '" + installationRoot + "'\n"
-        			+ "\n" );
-
-        }
         if(task.getPamConfigurationFile() != null) {
         	File pamFile = new File (task.getPamConfigurationFile());         	
         	File pamDestFile = new File(buildDir.getAbsolutePath(),  "/etc/pam.d/" + pamFile.getName());
