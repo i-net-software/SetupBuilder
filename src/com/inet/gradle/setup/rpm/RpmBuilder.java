@@ -102,6 +102,11 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
                 setupStarter( starter );
             }
             
+
+    		if(!daemonuser.equalsIgnoreCase("root")) {
+    			controlBuilder.addScriptFragment( Script.POSTRM,   "userdel -r " + daemonuser + " || true \n");	
+            }
+            
             // copy the license files
             for( LocalizedResource license : setup.getLicenseFiles()) {
             	File licensetarget = new File(buildDir.getAbsolutePath() + "/BUILD/usr/share/licenses/" + setup.getApplication() + "/" + license.getResource().getName());
@@ -182,8 +187,9 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
     	}
         
         controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" start \nfi");
-        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" stop \nfi");
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start \nfi");
+        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
+
         controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --del "+serviceUnixName+ "\nfi");
     }
     

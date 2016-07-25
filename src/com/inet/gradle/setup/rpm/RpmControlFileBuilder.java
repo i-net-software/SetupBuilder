@@ -278,16 +278,16 @@ class RpmControlFileBuilder {
 	 */
 	private void putPost(OutputStreamWriter controlWriter) throws IOException {
 		controlWriter.write(NEWLINE + "%post" + NEWLINE);
-		ArrayList<String> posts = rpm.getPost();
-		for (String post : posts) {
-			controlWriter.write(post + NEWLINE);	
-		}	
 		
 		StringBuilder post_script = scriptMap.get( Script.POSTINST );
 		if(post_script != null) {
 			controlWriter.write(post_script.toString() + NEWLINE);
 		}
 		
+		ArrayList<String> posts = rpm.getPost();
+		for (String post : posts) {
+			controlWriter.write(post + NEWLINE);	
+		}	
 		
 		DesktopStarter starter = setup.getRunAfter();
 		if(starter != null ) {
