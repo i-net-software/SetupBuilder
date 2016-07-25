@@ -125,31 +125,31 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     			if( executable != null ) {
     				if( workingDir != null ) {
     					if(task.getDaemonUser().equalsIgnoreCase("root")) {
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " )" );
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " " + runBeforeUninstall.getStartArguments() + " )" );
     					} else {
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + "' )" );
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && " + executable + " " + runBeforeUninstall.getStartArguments() +  "' )" );
     					}
     				} else {
     					if(task.getDaemonUser().equalsIgnoreCase("root")) {
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " )" );
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && " + executable + " " + runBeforeUninstall.getStartArguments() +  " )" );
     					} else {
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "su " + task.getDaemonUser() + " -c '" + task.getInstallationRoot() + "\" && " + executable + "' )" );	
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "su " + task.getDaemonUser() + " -c '" + task.getInstallationRoot() + "\" && " + executable + " " + runBeforeUninstall.getStartArguments() +  "' )" );	
     					}
     				}
     				
     			} else if( mainClass != null ) {
     				if( workingDir != null ) {
     					if(task.getDaemonUser().equalsIgnoreCase("root")) {	
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + ")");
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + " " + runBeforeUninstall.getStartArguments() + ")");
     					} else {
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + "' )");
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "/" + workingDir + "\" && java -cp " + runBeforeUninstall.getMainJar()  + " " +  mainClass + " " + runBeforeUninstall.getStartArguments() + "' )");
     					}
     					
     				} else {
     					if(task.getDaemonUser().equalsIgnoreCase("root")) {	
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + ")");
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + " " + runBeforeUninstall.getStartArguments() + ")");
     					} else {
-    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + "' )");
+    						controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + task.getInstallationRoot() + "\" && java -cp \"" + runBeforeUninstall.getMainJar()  + "\" " +  mainClass + " " + runBeforeUninstall.getStartArguments() + "' )");
     					}
     						
     				}
@@ -212,7 +212,9 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
 		}
 		
 		if(!daemonuser.equalsIgnoreCase("root")) {
-        	controlBuilder.addTailScriptFragment( Script.POSTRM, "userdel -r " + daemonuser + " || true \n");
+			controlBuilder.addTailScriptFragment( Script.POSTRM,   "if [ \"$1\" = \"purge\" ] ; then\n" + 
+		            "    userdel -r " + daemonuser + " || true \n" + 
+		            "fi" );	
         }
     	
 	}
