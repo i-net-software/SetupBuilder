@@ -184,7 +184,7 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
     	
     	String daemonuser = task.getDaemonUser(); 
         if(!daemonuser.equalsIgnoreCase("root")) {
-        	controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " || true \n"
+        	controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m -s /bin/bash " + daemonuser + " || true \n"
         			+ "\n"
         			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
         			+ "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
