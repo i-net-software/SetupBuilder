@@ -210,6 +210,11 @@ public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
 		for (String postrm : postrms) {
 			controlBuilder.addTailScriptFragment( Script.POSTRM, postrm );	
 		}
+		
+		if(!daemonuser.equalsIgnoreCase("root")) {
+        	controlBuilder.addTailScriptFragment( Script.POSTRM, "userdel -r " + daemonuser + " || true \n");
+        }
+    	
 	}
 
 	private void setupEula() throws IOException {
