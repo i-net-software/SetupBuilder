@@ -170,6 +170,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         } );
 
         setMinimumOsVersion();
+        setOnly32BitCondition();
         saveLoadLastInstallDir();
         addMultiInstanceTransforms();
         addBundleJre();
@@ -199,7 +200,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( version == 0 ) {
             return;
         }
-        Element condition = getOrCreateChild( product, "Condition" );
         int intVersion = 100 * (int)version + (int)((version * 10) % 10);
         String os;
         switch( intVersion ) {
@@ -231,8 +231,20 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 throw new RuntimeException("Unsupported minimum OS version: " + version + ", " + intVersion );
         }
         String msg = java.text.MessageFormat.format( "{0} is only supported on {1}, or higher.", setup.getApplication(), os );
-        addAttributeIfNotExists( condition, "Message", msg );
+        Element condition = getOrCreateChildByKeyValue( product, "Condition", "Message", msg );
         condition.setTextContent( "Installed OR (VersionNT >= " + intVersion + ")" );
+    }
+
+    /**
+     * Add condition for 32 bit only if needed.
+     */
+    private void setOnly32BitCondition() {
+        if( !task.isOnly32Bit() ) {
+            return;
+        }
+        String msg = "You are attempting to run the 32-bit installer on a 64-bit version of Windows.";
+        Element condition = getOrCreateChildByKeyValue( product, "Condition", "Message", msg );
+        condition.setTextContent( "NOT Msix64" );
     }
 
     /**

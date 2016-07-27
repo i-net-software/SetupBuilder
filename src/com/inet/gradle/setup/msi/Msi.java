@@ -42,6 +42,8 @@ public class Msi extends AbstractSetupTask {
 
     private String   arch;
 
+    private boolean  only32bit;
+
     private Object   bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript;
 
     private List<String> languages;
@@ -83,6 +85,15 @@ public class Msi extends AbstractSetupTask {
     }
 
     /**
+     * If this installer should run only on windows 32 bit versions.
+     * 
+     * @return true, if only 32 bit
+     */
+    boolean isOnly32Bit() {
+        return only32bit;
+    }
+
+    /**
      * Get the architecture of the installer.
      * @return the architecture
      */
@@ -99,12 +110,19 @@ public class Msi extends AbstractSetupTask {
      * <li>x86
      * <li>x64
      * <li>ia64
+     * <li>x86-only - does not run on a 64 bit system
      * </ul>
      * 
      * @param arch the architecture
      */
     public void setArch( String arch ) {
-        this.arch = arch;
+        if( "x86-only".equals( arch ) ) {
+            this.arch = "x86";
+            this.only32bit = true;
+        } else {
+            this.arch = arch;
+            this.only32bit = false;
+        }
     }
 
     /**
