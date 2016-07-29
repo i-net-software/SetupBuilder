@@ -78,6 +78,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
         ProjectInternal project = (ProjectInternal)getProject();
         setupBuilder = project.getExtensions().getByType( setupType );
+        setGroup( "build" ); // for displaying in buildship
     }
 
     /**
