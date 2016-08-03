@@ -379,8 +379,8 @@ public class Rpm extends AbstractSetupTask {
 	 * Sets the value for the '%pre' entry in the SPEC file.
 	 * @param pre the value for the entry
 	 */
-	public void setPre(ArrayList<String> pre) {
-		this.pre = pre;
+	public void setPre(String pre) {
+		this.pre.add(pre);
 	}
 
 	/**
