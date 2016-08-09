@@ -15,6 +15,8 @@
  */
 package com.inet.gradle.setup.deb;
 
+import java.io.File;
+
 import org.gradle.api.internal.project.ProjectInternal;
 
 import com.inet.gradle.setup.AbstractSetupTask;
@@ -51,6 +53,8 @@ public class Deb extends AbstractSetupTask {
     private String				   daemonUser = "root";
 
 	private String 				   pamConfigurationFile;
+	
+	private Object 				   defaultServiceFile;
 	
     public Deb() {
         super( "deb" );
@@ -219,5 +223,26 @@ public class Deb extends AbstractSetupTask {
 	 */
 	public void setPamConfigurationFile(String pamConfigurationFile) {
 		this.pamConfigurationFile = pamConfigurationFile;
+	}
+
+	/**
+	 * Returns the a default service configuration file
+	 * This will be included in the service starter
+	 * @return the default service file
+	 */
+	public File getDefaultServiceFile() {
+		if ( defaultServiceFile != null ) {
+			return getProject().file( defaultServiceFile );
+		}
+		return null;
+	}
+
+	/**
+	 * Set the default service configuration file
+	 * The file will be put at the "/etc/default/<service>" location
+	 * @param defaultServiceFile
+	 */
+	public void setDefaultServiceFile(Object defaultServiceFile) {
+		this.defaultServiceFile = defaultServiceFile;
 	}
 }
