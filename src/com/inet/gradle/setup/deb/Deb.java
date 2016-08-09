@@ -239,7 +239,7 @@ public class Deb extends AbstractSetupTask {
 
 	/**
 	 * Set the default service configuration file
-	 * The file will be put at the "/etc/default/<service>" location
+	 * The file will be put at the "/etc/default/$service$" location
 	 * @param defaultServiceFile
 	 */
 	public void setDefaultServiceFile(Object defaultServiceFile) {

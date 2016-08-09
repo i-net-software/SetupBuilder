@@ -15,6 +15,7 @@
  */
 package com.inet.gradle.setup.rpm;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.project.ProjectInternal;
@@ -65,6 +66,8 @@ public class Rpm extends AbstractSetupTask {
 	private ArrayList<String> 		preun = new ArrayList<String>();
 	
 	private ArrayList<String> 		postun = new ArrayList<String>();
+
+	private Object defaultServiceFile;
 
 	
 
@@ -403,5 +406,26 @@ public class Rpm extends AbstractSetupTask {
 	public void setInstallationRoot(String installationRoot) {		
 		this.installationRoot = installationRoot.endsWith("/") ? installationRoot.substring(0, installationRoot.length()-1) : installationRoot;
 	}
-    
+
+
+	/**
+	 * Returns the a default service configuration file
+	 * This will be included in the service starter
+	 * @return the default service file
+	 */
+	public File getDefaultServiceFile() {
+		if ( defaultServiceFile != null ) {
+			return getProject().file( defaultServiceFile );
+		}
+		return null;
+	}
+
+	/**
+	 * Set the default service configuration file
+	 * The file will be put at the "/etc/default/$service$" location
+	 * @param defaultServiceFile
+	 */
+	public void setDefaultServiceFile(Object defaultServiceFile) {
+		this.defaultServiceFile = defaultServiceFile;
+	}
 }

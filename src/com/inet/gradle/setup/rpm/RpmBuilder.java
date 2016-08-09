@@ -179,6 +179,13 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         		+ "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/"+serviceUnixName 
         		+ "\nfi" );
         
+        // copy a default service file if set 
+        if ( task.getDefaultServiceFile() != null ) {
+        	File serviceDestFile = new File(buildDir.getAbsolutePath(),  "/etc/default/" + serviceUnixName);
+        	serviceDestFile.mkdirs();
+        	Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        }
+        
         if(task.getPamConfigurationFile() != null) {
         	File pamFile = new File (task.getPamConfigurationFile());         	
         	File pamDestFile = new File(buildDir.getAbsolutePath() + "/BUILD/etc/pam.d/" + pamFile.getName());
