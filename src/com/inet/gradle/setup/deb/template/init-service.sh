@@ -35,6 +35,8 @@ WORKINGDIR='{{workdir}}'
 # and status_of_proc is working.
 . /lib/lsb/init-functions
 
+# Make sure, that the locale is set. Specifically if started after boot
+[ -r /etc/default/locale ] && . /etc/default/locale && export LANG
 
 # Function that starts the daemon/service
 #
