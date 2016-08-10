@@ -183,7 +183,7 @@ class RpmControlFileBuilder {
         controlWriter.write( NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE );
         controlWriter.write( NEWLINE + "echo \"preun step\"" + NEWLINE );
 
-        ArrayList<String> preuns = rpm.getPreun();
+        ArrayList<String> preuns = rpm.getPrerm();
         for( String preun : preuns ) {
             controlWriter.write( preun + NEWLINE );
         }
@@ -252,7 +252,7 @@ class RpmControlFileBuilder {
      */
     private void putPre( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%pre" + NEWLINE );
-        ArrayList<String> pres = rpm.getPre();
+        ArrayList<String> pres = rpm.getPreinst();
         for( String pre : pres ) {
             controlWriter.write( pre + NEWLINE );
         }
@@ -289,7 +289,7 @@ class RpmControlFileBuilder {
             controlWriter.write( post_script.toString() + NEWLINE );
         }
 
-        ArrayList<String> posts = rpm.getPost();
+        ArrayList<String> posts = rpm.getPostinst();
         for( String post : posts ) {
             controlWriter.write( post + NEWLINE );
         }
@@ -327,11 +327,11 @@ class RpmControlFileBuilder {
      */
     private void putPostun( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%postun" + NEWLINE );
-        if( rpm.getPostun().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
+        if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
             controlWriter.write( NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE );
         }
 
-        ArrayList<String> posts = rpm.getPostun();
+        ArrayList<String> posts = rpm.getPostrm();
         for( String post : posts ) {
             controlWriter.write( post + NEWLINE );
         }
@@ -339,7 +339,7 @@ class RpmControlFileBuilder {
         if( postun_script != null ) {
             controlWriter.write( postun_script.toString() + NEWLINE );
         }
-        if( rpm.getPostun().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
+        if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
             controlWriter.write( NEWLINE + "fi" + NEWLINE );
         }
     }

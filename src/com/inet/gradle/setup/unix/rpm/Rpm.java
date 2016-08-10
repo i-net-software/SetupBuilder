@@ -44,14 +44,6 @@ public class Rpm extends Unix {
 
     private ArrayList<String> clean              = new ArrayList<String>();
 
-    private ArrayList<String> pre                = new ArrayList<String>();
-
-    private ArrayList<String> post               = new ArrayList<String>();
-
-    private ArrayList<String> preun              = new ArrayList<String>();
-
-    private ArrayList<String> postun             = new ArrayList<String>();
-
     /**
      * the default constructor
      */
@@ -167,63 +159,6 @@ public class Rpm extends Unix {
     }
 
     /**
-     * Returns the preun that should be used in the '%preun' entry in the SPEC file.
-     * 
-     * @return the preun specified in the gradle script
-     */
-    public ArrayList<String> getPreun() {
-        return preun;
-    }
-
-    /**
-     * Sets the value for the '%preun' entry in the SPEC file.
-     * 
-     * @param preun
-     *            the value for the entry
-     */
-    public void setPreun( String preun ) {
-        this.preun.add( preun );
-    }
-
-    /**
-     * Returns the post that should be used in the '%post' entry in the SPEC file.
-     * 
-     * @return the post specified in the gradle script
-     */
-    public ArrayList<String> getPost() {
-        return post;
-    }
-
-    /**
-     * Sets the value for the '%post' entry in the SPEC file.
-     * 
-     * @param post
-     *            the value for the entry
-     */
-    public void setPost( String post ) {
-        this.post.add( post );
-    }
-
-    /**
-     * Returns the postun that should be used in the '%postun' entry in the SPEC file.
-     * 
-     * @return the postun specified in the gradle script
-     */
-    public ArrayList<String> getPostun() {
-        return postun;
-    }
-
-    /**
-     * Sets the value for the '%postun' entry in the SPEC file.
-     * 
-     * @param postun
-     *            the value for the entry
-     */
-    public void setPostun( String postun ) {
-        this.postun.add( postun );
-    }
-
-    /**
      * Returns the clean that should be used in the '%clean' entry in the SPEC file.
      * 
      * @return the clean specified in the gradle script
@@ -278,24 +213,5 @@ public class Rpm extends Unix {
      */
     public void setBuild( String build ) {
         this.build.add( build );
-    }
-
-    /**
-     * Returns the pre that should be used in the '%pre' entry in the SPEC file.
-     * 
-     * @return the pre specified in the gradle script
-     */
-    public ArrayList<String> getPre() {
-        return pre;
-    }
-
-    /**
-     * Sets the value for the '%pre' entry in the SPEC file.
-     * 
-     * @param pre
-     *            the value for the entry
-     */
-    public void setPre( String pre ) {
-        this.pre.add( pre );
     }
 }
