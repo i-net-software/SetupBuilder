@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,12 +34,12 @@ import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
 
-public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
-	
-	
-	private RpmControlFileBuilder  controlBuilder;
-	private SetupBuilder setup;
-	
+public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
+
+    private RpmControlFileBuilder controlBuilder;
+
+    private SetupBuilder          setup;
+
     /**
      * Create a new instance
      * 
@@ -55,71 +55,67 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
     /**
      * Build the RedHat package in different steps with the 'rpmbuild'.
      * 
-     *  <dl>
-     * 		<dt>copy files</dt>
- 	 * 			<dd>copy the files specified in the gradle script to the BUILD/usr/share/archivesBaseName directory.</dd>
- 	 * 			<dd>The files must be in the BUILD directory because the 'prep' step will copy all the files from there to the BUILDROOT directory.</dd>
- 	 * 			<dd>The 'rpmbuild' deletes the BUILDROOT directory before building the package. Thats why we need to copy the files into it. </dd>
- 	 * 		<dt>SPEC file creation</dt>
- 	 * 			<dd>The 'rpmbuild' requires a configuration files ending with .spec.</dd>
- 	 * 			<dd>This spec file contains all required informations (like name, version, dependencies) and scripts that are executed during the creation and installing of the package.</dd>
-  	 * 		<dt>change file permissions</dt>
- 	 * 			<dd>Before the package is created the permissions of all files need to be set correctly.</dd>
- 	 * 			<dd>All directories and executables will be changed to 755 permission and other files to 644.</dd>
-  	 * 		<dt>create the package</dt>
- 	 * 			<dd>Creates the package with 'rpmbuild'</dd>
-  	 * </dl>
+     * <dl>
+     * <dt>copy files</dt>
+     * <dd>copy the files specified in the gradle script to the BUILD/usr/share/archivesBaseName directory.</dd>
+     * <dd>The files must be in the BUILD directory because the 'prep' step will copy all the files from there to the BUILDROOT directory.</dd>
+     * <dd>The 'rpmbuild' deletes the BUILDROOT directory before building the package. Thats why we need to copy the files into it.</dd>
+     * <dt>SPEC file creation</dt>
+     * <dd>The 'rpmbuild' requires a configuration files ending with .spec.</dd>
+     * <dd>This spec file contains all required informations (like name, version, dependencies) and scripts that are executed during the creation and installing of the package.</dd>
+     * <dt>change file permissions</dt>
+     * <dd>Before the package is created the permissions of all files need to be set correctly.</dd>
+     * <dd>All directories and executables will be changed to 755 permission and other files to 644.</dd>
+     * <dt>create the package</dt>
+     * <dd>Creates the package with 'rpmbuild'</dd>
+     * </dl>
      */
     public void build() {
-    	try {
-    		String release = task.getRelease();
-    		if(release == null || release.length() == 0) {
-    			release = "1";
-    		}
+        try {
+            String release = task.getRelease();
+            if( release == null || release.length() == 0 ) {
+                release = "1";
+            }
             File filesPath = new File( buildDir.getAbsolutePath() + "/BUILD" + task.getInstallationRoot() );
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
-
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
 
-            String daemonuser = task.getDaemonUser(); 
-            if(!daemonuser.equalsIgnoreCase("root")) {
-            	controlBuilder.addScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + "\n"
-            			+ "\n"
-            			+ "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
-            			+ "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
-            			+ "\n" );
+            String daemonuser = task.getDaemonUser();
+            if( !daemonuser.equalsIgnoreCase( "root" ) ) {
+                controlBuilder.addScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + "\n"
+                                + "\n"
+                                + "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
+                                + "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
+                                + "\n" );
 
             }
 
-            
             for( Service service : setup.getServices() ) {
                 setupService( service );
             }
-            
+
             for( DesktopStarter starter : setup.getDesktopStarters() ) {
                 setupStarter( starter );
             }
-            
 
-    		if(!daemonuser.equalsIgnoreCase("root")) {
-    			controlBuilder.addScriptFragment( Script.POSTRM,   "userdel -r " + daemonuser + " || true \n");	
+            if( !daemonuser.equalsIgnoreCase( "root" ) ) {
+                controlBuilder.addScriptFragment( Script.POSTRM, "userdel -r " + daemonuser + " || true \n" );
             }
-            
+
             // copy the license files
-            for( LocalizedResource license : setup.getLicenseFiles()) {
-            	File licensetarget = new File(buildDir.getAbsolutePath() + "/BUILD/usr/share/licenses/" + setup.getApplication() + "/" + license.getResource().getName());
-            	licensetarget.mkdirs();
-            	Files.copy(license.getResource().toPath(), licensetarget.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            for( LocalizedResource license : setup.getLicenseFiles() ) {
+                File licensetarget = new File( buildDir.getAbsolutePath() + "/BUILD/usr/share/licenses/" + setup.getApplication() + "/" + license.getResource().getName() );
+                licensetarget.mkdirs();
+                Files.copy( license.getResource().toPath(), licensetarget.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             }
-            
+
             controlBuilder.build();
 
             changeDirectoryPermissionsTo755( buildDir );
 
             createRpmPackage();
-
 
         } catch( RuntimeException ex ) {
             throw ex;
@@ -127,40 +123,39 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
             throw new RuntimeException( ex );
         }
     }
-    
-    
+
     /**
      * Creates the files and the corresponding script section for the specified service.
+     * 
      * @param service the service
      * @throws IOException on errors during creating or writing a file
      */
     private void setupService( Service service ) throws IOException {
-    	String workingDir = null;
-    	DesktopStarter starter = setup.getRunAfter();
-        if(starter != null ) {
-        	workingDir = starter.getWorkDir();
-        }	
-    	String serviceUnixName = service.getId();
+        String workingDir = null;
+        DesktopStarter starter = setup.getRunAfter();
+        if( starter != null ) {
+            workingDir = starter.getWorkDir();
+        }
+        String serviceUnixName = service.getId();
         String mainJarPath;
-        
-        		
+
         Template initScript = new Template( "rpm/template/init-service.sh" );
         String installationRoot = task.getInstallationRoot();
-        
+
         if( workingDir != null ) {
-			initScript.setPlaceholder( "workdir", (installationRoot + "/" + workingDir).replace(" ", "\\ ") );
-    		mainJarPath = installationRoot + "/" + workingDir + "/" + service.getMainJar();
-    	} else {	
-    		initScript.setPlaceholder( "workdir", installationRoot.replace(" ", "\\ ") );
-    		mainJarPath = installationRoot + "/" + service.getMainJar();
-    	}
-        
+            initScript.setPlaceholder( "workdir", (installationRoot + "/" + workingDir).replace( " ", "\\ " ) );
+            mainJarPath = installationRoot + "/" + workingDir + "/" + service.getMainJar();
+        } else {
+            initScript.setPlaceholder( "workdir", installationRoot.replace( " ", "\\ " ) );
+            mainJarPath = installationRoot + "/" + service.getMainJar();
+        }
+
         // under unix the spaces in the path must be encoded with an \ before
-        mainJarPath = mainJarPath.replace(" ", "\\ ");
-        
+        mainJarPath = mainJarPath.replace( " ", "\\ " );
+
         initScript.setPlaceholder( "name", serviceUnixName );
         String version = setup.getVersion();
-        initScript.setPlaceholder( "majorversion", version.substring(0, version.indexOf('.')) );
+        initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
@@ -171,43 +166,37 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
-        
-        controlBuilder.addScriptFragment( Script.PREINST,  "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  \"/etc/init.d/"+serviceUnixName+ "\" stop \nfi");
-        
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
-        		+ "echo replace path\n"
-        		+ "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/"+serviceUnixName 
-        		+ "\nfi" );
-        
-        // copy a default service file if set 
-        if ( task.getDefaultServiceFile() != null ) {
-        	File serviceDestFile = new File(buildDir.getAbsolutePath(),  "/etc/default/" + serviceUnixName);
-        	serviceDestFile.mkdirs();
-        	Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-        }
-        
-        if(task.getPamConfigurationFile() != null) {
-        	File pamFile = new File (task.getPamConfigurationFile());         	
-        	File pamDestFile = new File(buildDir.getAbsolutePath() + "/BUILD/etc/pam.d/" + pamFile.getName());
-        	pamDestFile.mkdirs();
-        	Files.copy(pamFile.toPath(), pamDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);        	
-    	}
-        
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --add "+serviceUnixName+"\nfi" );
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " start \nfi");
-        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  service "+serviceUnixName+ " stop \nfi");
 
-        controlBuilder.addScriptFragment( Script.PRERM,    "if [ -f \"/etc/init.d/"+serviceUnixName+"\" ]; then\n  chkconfig --del "+serviceUnixName+ "\nfi");
+        controlBuilder.addScriptFragment( Script.PREINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  \"/etc/init.d/" + serviceUnixName + "\" stop \nfi" );
+
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
+                        + "echo replace path\n"
+                        + "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
+                        + "\nfi" );
+
+        // copy a default service file if set 
+        if( task.getDefaultServiceFile() != null ) {
+            File serviceDestFile = new File( buildDir.getAbsolutePath(), "/etc/default/" + serviceUnixName );
+            serviceDestFile.mkdirs();
+            Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        }
+
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  chkconfig --add " + serviceUnixName + "\nfi" );
+        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  service " + serviceUnixName + " start \nfi" );
+        controlBuilder.addScriptFragment( Script.PRERM, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  service " + serviceUnixName + " stop \nfi" );
+
+        controlBuilder.addScriptFragment( Script.PRERM, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  chkconfig --del " + serviceUnixName + "\nfi" );
     }
-    
+
     /**
      * Changes the permissions of all directories recursively inside the specified path to 755.
+     * 
      * @param path the path
      * @throws IOException on I/O failures
      */
     // share
     private void changeDirectoryPermissionsTo755( File path ) throws IOException {
-     	setPermissions( path, true );
+        setPermissions( path, true );
         for( File file : path.listFiles() ) {
             if( file.isDirectory() ) {
                 changeDirectoryPermissionsTo755( file );
@@ -217,6 +206,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
 
     /**
      * Changes the permissions of all files recursively inside the specified path to 644.
+     * 
      * @param path the path
      * @throws IOException on I/O failures
      */
@@ -226,18 +216,19 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
             if( file.isDirectory() ) {
                 changeFilePermissionsTo644( file );
             } else {
-            	if( file.getName().endsWith(".sh")  ) {
-            		setPermissions( file, true );
-            	} else {
-            		setPermissions( file, false );
-            	}
+                if( file.getName().endsWith( ".sh" ) ) {
+                    setPermissions( file, true );
+                } else {
+                    setPermissions( file, false );
+                }
             }
         }
     }
-    
+
     /**
      * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
-     * @param file the file 
+     * 
+     * @param file the file
      * @param executable if set to <tt>true</tt> the executable bit will be set
      * @throws IOException on errors when setting the permissions
      */
@@ -255,84 +246,82 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         }
         Files.setPosixFilePermissions( file.toPath(), perms );
     }
-    
-    
+
     /**
      * Creates the files and the corresponding scripts for the specified desktop starter.
+     * 
      * @param starter the desktop starter
      * @throws IOException on errors during creating or writing a file
      */
     // share
     private void setupStarter( DesktopStarter starter ) throws IOException {
-        String unixName = starter.getDisplayName(); 
+        String unixName = starter.getDisplayName();
         String consoleStarterPath = "/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
             fw.write( "#!/bin/bash\n" );
-            if(starter.getExecutable() != null) {
-            	fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
+            if( starter.getExecutable() != null ) {
+                fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-            	fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
-            			+ starter.getStartArguments() + " \"$@\"" );
+                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
+                                + starter.getStartArguments() + " \"$@\"" );
             }
         }
-        
 
-        
         int[] iconSizes = { 16, 32, 48, 64, 128, 256, 512 };
 
         String iconName = "";
-        if(starter.getIcons() != null) {
-    		iconName = starter.getIcons().toString();
-    		int index = iconName.lastIndexOf('/'); 
-    		if(index > -1) {
-    			iconName = iconName.substring(index+1);
-    		}
-    		// icons must be png files and should named like that 
-    		if(!iconName.endsWith(".png")) {
-    			index = iconName.lastIndexOf('.'); 
-        		if(index > -1) {
-        			iconName = iconName.substring(0,index);
-        		}
-        		iconName = iconName + ".png";
-    		}
+        if( starter.getIcons() != null ) {
+            iconName = starter.getIcons().toString();
+            int index = iconName.lastIndexOf( '/' );
+            if( index > -1 ) {
+                iconName = iconName.substring( index + 1 );
+            }
+            // icons must be png files and should named like that 
+            if( !iconName.endsWith( ".png" ) ) {
+                index = iconName.lastIndexOf( '.' );
+                if( index > -1 ) {
+                    iconName = iconName.substring( 0, index );
+                }
+                iconName = iconName + ".png";
+            }
         }
-        
+
         for( int size : iconSizes ) {
             File iconDir = new File( buildDir, "BUILD/usr/share/icons/hicolor/" + size + "x" + size + "/apps/" );
             iconDir.mkdirs();
             File scaledFile = setup.getIconForType( iconDir, "png" + size );
             if( scaledFile != null ) {
-            	File iconFile;
-            	if(starter.getIcons() != null) {
-            		
-            		iconFile = new File( iconDir, iconName );
-            	} else {
-            		iconFile = new File( iconDir, unixName + ".png" );
-            	}
+                File iconFile;
+                if( starter.getIcons() != null ) {
+
+                    iconFile = new File( iconDir, iconName );
+                } else {
+                    iconFile = new File( iconDir, unixName + ".png" );
+                }
 
                 scaledFile.renameTo( iconFile );
                 setPermissions( iconFile, false );
             }
         }
-        
+
         try (FileWriter fw = new FileWriter( createFile( "BUILD/usr/share/applications/" + unixName + ".desktop", false ) )) {
             fw.write( "[Desktop Entry]\n" );
             fw.write( "Name=" + starter.getDisplayName() + "\n" );
             fw.write( "Comment=" + starter.getDescription().replace( '\n', ' ' ) + "\n" );
-            if(starter.getExecutable() != null) {
-            	fw.write( "Exec=\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\"\n" );
+            if( starter.getExecutable() != null ) {
+                fw.write( "Exec=\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\"\n" );
             } else {
-            	fw.write( "Exec=\"/" + consoleStarterPath + "\" %F\n" );
+                fw.write( "Exec=\"/" + consoleStarterPath + "\" %F\n" );
             }
-            if(starter.getIcons() != null) {
-            	int index = iconName.lastIndexOf('.'); 
-        		if(index > -1) {
-        			iconName = iconName.substring(0,index); // as of the Icon Theme Specification the icon name should be without extension
-        		}
-            	fw.write( "Icon=" + iconName + "\n" );
-        	} else {
-        		fw.write( "Icon=" + unixName + "\n" );
-        	}
+            if( starter.getIcons() != null ) {
+                int index = iconName.lastIndexOf( '.' );
+                if( index > -1 ) {
+                    iconName = iconName.substring( 0, index ); // as of the Icon Theme Specification the icon name should be without extension
+                }
+                fw.write( "Icon=" + iconName + "\n" );
+            } else {
+                fw.write( "Icon=" + unixName + "\n" );
+            }
 
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
@@ -343,11 +332,12 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
             if( starter.getCategories() != null ) {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
-        }        
+        }
     }
-    
+
     /**
      * Creates a file in the build path structure.
+     * 
      * @param path the path relative to the root of the build path
      * @param executable if set to <tt>true</tt> the executable bit will be set in the permission flags
      * @return the created file
@@ -364,7 +354,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         setPermissions( file, executable );
         return file;
     }
-    
+
     /**
      * execute the command to generate the RPM package
      * 
@@ -372,8 +362,8 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
      * 
      */
     private void createRpmPackage() {
-    	
-    	ArrayList<String> command = new ArrayList<>();
+
+        ArrayList<String> command = new ArrayList<>();
         command.add( "rpmbuild" );
         command.add( "-ba" );
         command.add( "-v" );
@@ -382,6 +372,5 @@ public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
         command.add( "SPECS/" + setup.getAppIdentifier() + ".spec" );
         exec( command );
     }
-
 
 }
