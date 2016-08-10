@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup.rpm;
+package com.inet.gradle.setup.unix.rpm;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -32,7 +32,7 @@ import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.rpm.RpmControlFileBuilder.Script;
+import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
 
 public class RpmBuilder extends AbstractBuilder<Rpm,SetupBuilder> {
 	

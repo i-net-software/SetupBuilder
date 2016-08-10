@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup.deb;
+package com.inet.gradle.setup.unix.deb;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,7 +31,7 @@ import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.deb.DebControlFileBuilder.Script;
+import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
 
 public class DebBuilder extends AbstractBuilder<Deb,SetupBuilder> {
 
