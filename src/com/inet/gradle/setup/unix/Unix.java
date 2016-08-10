@@ -46,6 +46,14 @@ public abstract class Unix extends AbstractSetupTask {
         super( format );
     }
 
+    public String getVariablesTemplate() {
+        String variables = "";
+        variables += "APPLICATION_DISPLAY_NAME=\"" + getSetupBuilder().getApplication() + "\"\n";
+        variables += "DAEMON_USER=\"" + getDaemonUser() + "\"\n";
+        variables += "INSTALLATION_ROOT=\"" + getInstallationRoot() + "\"\n";
+        return variables;
+    }
+
     /**
      * Returns the section that specifies the 'Group' entry in the SPEC file. Default is Applications/Productivity
      * 

@@ -15,6 +15,8 @@ set -e
 
 . /usr/share/debconf/confmodule
 
+{{variables}}
+
 {{head}}
 
 case "$1" in

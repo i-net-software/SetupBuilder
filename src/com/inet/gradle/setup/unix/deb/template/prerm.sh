@@ -16,6 +16,8 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+{{variables}}
+
 {{head}}
 
 case "$1" in

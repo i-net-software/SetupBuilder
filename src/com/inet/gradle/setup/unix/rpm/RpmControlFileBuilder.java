@@ -183,6 +183,9 @@ class RpmControlFileBuilder {
         controlWriter.write( NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE );
         controlWriter.write( NEWLINE + "echo \"preun step\"" + NEWLINE );
 
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+
         ArrayList<String> preuns = rpm.getPrerm();
         for( String preun : preuns ) {
             controlWriter.write( preun + NEWLINE );
@@ -252,6 +255,10 @@ class RpmControlFileBuilder {
      */
     private void putPre( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%pre" + NEWLINE );
+
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+
         ArrayList<String> pres = rpm.getPreinst();
         for( String pre : pres ) {
             controlWriter.write( pre + NEWLINE );
@@ -283,6 +290,9 @@ class RpmControlFileBuilder {
      */
     private void putPost( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%post" + NEWLINE );
+
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
 
         StringBuilder post_script = scriptMap.get( Script.POSTINST );
         if( post_script != null ) {
@@ -327,10 +337,14 @@ class RpmControlFileBuilder {
      */
     private void putPostun( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%postun" + NEWLINE );
+
         if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
             controlWriter.write( NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE );
         }
 
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+        
         ArrayList<String> posts = rpm.getPostrm();
         for( String post : posts ) {
             controlWriter.write( post + NEWLINE );
@@ -390,6 +404,10 @@ class RpmControlFileBuilder {
         }
         controlWriter.write( "cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm '" + setup.getDestinationDir().getAbsolutePath() + "'" + NEWLINE );
         controlWriter.write( "mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm '" + rpm.getSetupFile() + "'" + NEWLINE );
+
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+
         ArrayList<String> cleans = rpm.getClean();
         for( String clean : cleans ) {
             controlWriter.write( clean + NEWLINE );
@@ -410,6 +428,10 @@ class RpmControlFileBuilder {
         //		if(setup.getServices() != null && setup.getServices().size() > 0) {
         //			controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);	
         //		}
+
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+
         ArrayList<String> installs = rpm.getInstall();
         for( String install : installs ) {
             controlWriter.write( install + NEWLINE );
@@ -424,6 +446,10 @@ class RpmControlFileBuilder {
      */
     private void putBuild( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%build" + NEWLINE );
+
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+
         ArrayList<String> builds = rpm.getBuild();
         for( String build : builds ) {
             controlWriter.write( build + NEWLINE );
@@ -438,6 +464,10 @@ class RpmControlFileBuilder {
      */
     private void putPrep( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%prep" + NEWLINE );
+
+        //Set some variables to begin with
+        controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
+
         ArrayList<String> preps = rpm.getPrep();
         for( String prep : preps ) {
             controlWriter.write( prep + NEWLINE );

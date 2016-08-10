@@ -417,6 +417,8 @@ class DebControlFileBuilder {
                 continue;
             }
 
+            tmpl.setPlaceholder( "variables", deb.getVariablesTemplate() );
+
             if( head != null ) {
                 tmpl.setPlaceholder( "head", head.toString() );
             } else {

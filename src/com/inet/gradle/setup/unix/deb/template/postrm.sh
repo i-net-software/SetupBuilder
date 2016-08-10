@@ -21,6 +21,8 @@ set -e
 # confmodule is required for further commands like db_purge, db_input, db_get ...
 . /usr/share/debconf/confmodule
 
+{{variables}}
+
 {{head}}
 
 case "$1" in
