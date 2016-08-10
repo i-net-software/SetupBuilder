@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # prerm script for {{baseName}}
 #
 # see: dh_installdeb(1)

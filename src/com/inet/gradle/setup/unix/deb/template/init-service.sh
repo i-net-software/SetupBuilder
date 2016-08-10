@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 ### BEGIN INIT INFO
 # Provides:          {{name}}{{majorversion}}
 # Required-Start:    $local_fs $network $remote_fs $syslog

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postrm script for {{baseName}}
 #
 # see: dh_installdeb(1)
