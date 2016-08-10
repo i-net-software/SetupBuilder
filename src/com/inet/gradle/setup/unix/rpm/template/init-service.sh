@@ -9,21 +9,13 @@
 . /etc/init.d/functions
 
 NAME={{name}}
-HDUSER={{daemonUser}}
+DAEMON_USER={{daemonUser}}
 PIDFILE=/var/run/$NAME.pid
-EXEC=/usr/bin/java
-WORKINGDIR={{workdir}}
-MAINARCHIVE={{mainJar}}
+DAEMON=/usr/bin/java
+WORKINGDIR="{{workdir}}"
+MAINARCHIVE="{{mainJar}}"
 MAINCLASS={{mainClass}}
-STARTARGUMENTS={{startArguments}}
-
-if [ "$STARTARGUMENTS" ]; then
-    PROC="$EXEC -cp ${MAINARCHIVE} ${MAINCLASS} ${STARTARGUMENTS}"
-else
-    PROC="$EXEC -cp ${MAINARCHIVE} ${MAINCLASS}"
-fi
-
-
+STARTARGUMENTS="{{startArguments}}"
 
 # Output colors
 RED='\033[0;31m'
@@ -32,6 +24,12 @@ NC='\033[0m' # No Color
 
 # Source config
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+
+if [ ! -z "$STARTARGUMENTS" ]; then
+    PROC="$DAEMON -cp ${MAINARCHIVE} ${MAINCLASS} ${STARTARGUMENTS}"
+else
+    PROC="$DAEMON -cp ${MAINARCHIVE} ${MAINCLASS}"
+fi
 
 eval_cmd() {
   local rc=$1
@@ -53,20 +51,11 @@ start() {
   fi
   printf "%-50s%s" "Starting $NAME: " ''
   cd "${WORKINGDIR}"
-  if [[ "${HDUSER}" = "root" ]]; then
-    if [ "$STARTARGUMENTS" ]; then
-        ${EXEC} -cp "${MAINARCHIVE}" "${MAINCLASS}" "${STARTARGUMENTS}" &
-    else
-        ${EXEC} -cp "${MAINARCHIVE}" "${MAINCLASS}" &
-    fi
+  if [[ "${DAEMON_USER}" = "root" ]]; then
+    $PROC &
   else
-    if [ "$STARTARGUMENTS" ]; then
-        su ${HDUSER} -c "${EXEC} -cp '${MAINARCHIVE}' '${MAINCLASS}' '${STARTARGUMENTS}' &"
-    else
-        su ${HDUSER} -c "${EXEC} -cp '${MAINARCHIVE}' '${MAINCLASS}' &"
-    fi
+    su ${DAEMON_USER} -c "$PROC &"
   fi
-  
 
   # save pid to file if you want
   echo $! > $PIDFILE
