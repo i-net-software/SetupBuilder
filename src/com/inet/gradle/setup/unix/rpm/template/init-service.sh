@@ -31,9 +31,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 # Source config
-if [ -f /etc/sysconfig/$NAME ] ; then
-    . /etc/sysconfig/$NAME
-fi
+[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
 eval_cmd() {
   local rc=$1

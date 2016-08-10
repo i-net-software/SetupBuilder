@@ -366,7 +366,7 @@ class RpmControlFileBuilder {
         }
 
         if( rpm.getDefaultServiceFile() != null ) {
-            controlWriter.write( "/etc/default/*" + NEWLINE );
+            controlWriter.write( "/etc/sysconfig/*" + NEWLINE );
         }
 
         if( setup.getLicenseFiles() != null && setup.getLicenseFiles().size() > 0 ) {
