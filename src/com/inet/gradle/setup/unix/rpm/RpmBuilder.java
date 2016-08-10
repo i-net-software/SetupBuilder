@@ -139,7 +139,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         String serviceUnixName = service.getId();
         String mainJarPath;
 
-        Template initScript = new Template( "rpm/template/init-service.sh" );
+        Template initScript = new Template( "unix/rpm/template/init-service.sh" );
         String installationRoot = task.getInstallationRoot();
 
         if( workingDir != null ) {

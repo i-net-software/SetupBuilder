@@ -409,7 +409,7 @@ class DebControlFileBuilder {
     private void createScripts() throws IOException {
         for( Script script : Script.values() ) {
             String scriptName = script.toString().toLowerCase();
-            Template tmpl = new Template( "deb/template/" + scriptName + ".sh" );
+            Template tmpl = new Template( "unix/deb/template/" + scriptName + ".sh" );
             StringBuilder head = scriptHeadMap.get( script );
             StringBuilder tail = scriptTailMap.get( script );
 
