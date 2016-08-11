@@ -261,14 +261,16 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      *             on errors during creating or writing a file
      */
     private void setupService( Service service ) throws IOException {
-        String workingDir = null;
-        DesktopStarter starter = setup.getRunAfter();
-        if( starter != null ) {
-            workingDir = starter.getWorkDir();
-        }
         String serviceUnixName = service.getId();
         String installationRoot = task.getInstallationRoot();
-        String mainJarPath;
+        String workingDir = installationRoot;
+
+        DesktopStarter starter = setup.getRunAfter();
+        if( starter != null ) {
+            workingDir += ( starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "" );
+        }
+        String mainJarPath = workingDir + "/" + service.getMainJar();
+
         Template initScript = new Template( "unix/deb/template/init-service.sh" );
         initScript.setPlaceholder( "name", serviceUnixName );
         String version = setup.getVersion();
@@ -278,16 +280,10 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
         initScript.setPlaceholder( "wait", "2" );
 
-        if( workingDir != null ) {
-            initScript.setPlaceholder( "workdir", installationRoot + "/" + workingDir );
-            mainJarPath = "'" + installationRoot + "/" + workingDir + "/" + service.getMainJar() + "'";
-        } else {
-            initScript.setPlaceholder( "workdir", installationRoot );
-            mainJarPath = "'" + installationRoot + "/" + service.getMainJar() + "'";
-        }
-
+        initScript.setPlaceholder( "workdir", workingDir );
         initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "startArguments", "-cp " + mainJarPath + " " + service.getMainClass() + " " + service.getStartArguments() );
+        initScript.setPlaceholder( "startArguments", "-cp '" + mainJarPath + "' " + service.getMainClass() + " " + service.getStartArguments() );
+        
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
 
