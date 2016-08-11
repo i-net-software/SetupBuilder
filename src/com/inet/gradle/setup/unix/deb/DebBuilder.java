@@ -254,12 +254,14 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
-        initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
         initScript.setPlaceholder( "wait", "2" );
 
         initScript.setPlaceholder( "workdir", workingDir );
         initScript.setPlaceholder( "mainJar", mainJarPath );
         initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+
+        initScript.setPlaceholder( "mainClass", service.getMainClass() );
+        initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
         
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );

@@ -17,6 +17,7 @@ WAIT={{wait}}
 DAEMON_USER={{daemonUser}}
 DAEMON=/usr/bin/java
 MAINARCHIVE="{{mainJar}}"
+MAINCLASS="{{mainClass}}"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 WORKINGDIR="{{workdir}}"
@@ -29,10 +30,10 @@ STARTARGUMENTS="{{startArguments}}"
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-if [ ! -z "$STARTARGUMENTS" ]; then
-    STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS} ${STARTARGUMENTS}"
-else
+if [ -z "$STARTARGUMENTS" ]; then
     STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS}"
+else
+    STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS} ${STARTARGUMENTS}"
 fi
 
 # Load the VERBOSE setting and other rcS variables
