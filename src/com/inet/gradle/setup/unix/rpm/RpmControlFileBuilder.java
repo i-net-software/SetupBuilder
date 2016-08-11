@@ -573,8 +573,7 @@ class RpmControlFileBuilder {
     }
 
     /**
-     * Write the dependencies to the file. If no dependencies are specified, the 'java-devel >= 1.8' dependencies will be used.
-     * If a service is specified the 'daemonize' dependency will also be added.
+     * Write the dependencies to the file.
      * 
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
@@ -587,6 +586,9 @@ class RpmControlFileBuilder {
         if( setup.getServices() != null && setup.getServices().size() > 0 ) {
             //	    	depends = depends; // + ", daemonize, initscripts";
         }
+
+        // Add process tasks to the requirements 
+        depends += (depends.trim().length()>0?",":"") + "procps-ng";
         if( depends.trim().length() > 0 ) {
             controlWriter.write( "Requires: " + depends + NEWLINE );
         }
