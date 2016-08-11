@@ -97,13 +97,13 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 controlBuilder.addTailScriptFragment( Script.PRERM, "rm -R -f \"" + task.getInstallationRoot() + "/" + folder + "\"\n" );
             }
 
-            DesktopStarter starter = setup.getRunAfter();
+            DesktopStarter runAfterStarter = setup.getRunAfter();
             String installationRoot = task.getInstallationRoot();
-            if( starter != null ) {
-                String executable = starter.getExecutable();
-                String mainClass = starter.getMainClass();
-                String workingDir = installationRoot + ( starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "" );
-                String mainJarPath = workingDir + "/" + starter.getMainJar();
+            if( runAfterStarter != null ) {
+                String executable = runAfterStarter.getExecutable();
+                String mainClass = runAfterStarter.getMainClass();
+                String workingDir = installationRoot + ( runAfterStarter.getWorkDir() != null ? "/" + runAfterStarter.getWorkDir() : "" );
+                String mainJarPath = workingDir + "/" + runAfterStarter.getMainJar();
                 
                 if( executable != null ) {
                     controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " & )\n" );

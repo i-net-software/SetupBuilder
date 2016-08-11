@@ -287,11 +287,11 @@ class RpmControlFileBuilder {
             controlWriter.write( post + NEWLINE );
         }
 
-        DesktopStarter starter = setup.getRunAfter();
-        if( starter != null ) {
-            String executable = starter.getExecutable();
-            String mainClass = starter.getMainClass();
-            String workingDir = starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "";
+        DesktopStarter runAfterStarter = setup.getRunAfter();
+        if( runAfterStarter != null ) {
+            String executable = runAfterStarter.getExecutable();
+            String mainClass = runAfterStarter.getMainClass();
+            String workingDir = runAfterStarter.getWorkDir() != null ? "/" + runAfterStarter.getWorkDir() : "";
             if( executable != null ) {
                 controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " & )" + NEWLINE );
             } else if( mainClass != null ) {
