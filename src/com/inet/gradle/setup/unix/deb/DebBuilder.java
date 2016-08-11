@@ -240,12 +240,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
     private void setupService( Service service ) throws IOException {
         String serviceUnixName = service.getId();
         String installationRoot = task.getInstallationRoot();
-        String workingDir = installationRoot;
-
-        DesktopStarter starter = setup.getRunAfter();
-        if( starter != null ) {
-            workingDir += ( starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "" );
-        }
+        String workingDir = installationRoot + ( service.getWorkDir() != null ? "/" + service.getWorkDir() : "" );
         String mainJarPath = workingDir + "/" + service.getMainJar();
 
         Template initScript = new Template( "unix/deb/template/init-service.sh" );
