@@ -23,18 +23,11 @@ SCRIPTNAME=/etc/init.d/$NAME
 WORKINGDIR="{{workdir}}"
 STARTARGUMENTS="{{startArguments}}"
 
-
 # Exit if the package is not installed
-[ ! -f "$MAINARCHIVE" ] && exit 0
+[ ! -f "$MAINARCHIVE" ] && echo "File '$MAINARCHIVE' not found" && exit 1
 
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
-
-if [ -z "$STARTARGUMENTS" ]; then
-    STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS}"
-else
-    STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS} ${STARTARGUMENTS}"
-fi
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -64,7 +57,7 @@ do_start()
     fi
     
     start-stop-daemon  --chuid $DAEMON_USER $BACKGROUND --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
-        $STARTARGUMENTS \
+        -cp "${MAINARCHIVE}" ${MAINCLASS} ${STARTARGUMENTS} \
         || return 2
 	
 	if [ ! -z "$1" ]; then
