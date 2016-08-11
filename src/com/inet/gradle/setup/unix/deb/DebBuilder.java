@@ -108,7 +108,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 if( executable != null ) {
                     controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " & )\n" );
                 } else if( mainClass != null ) {
-                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && java -cp " + mainJarPath + " " + mainClass + " )\n" );
+                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " )\n" );
                 }
             }
 
@@ -130,9 +130,9 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                     }
                 } else if( mainClass != null ) {
                     if( task.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && java -cp " + mainJarPath + " " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
                     } else {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && java -cp " + mainJarPath + " " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
                     }
                 }
                 controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
