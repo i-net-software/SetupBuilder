@@ -169,7 +169,6 @@ class RpmControlFileBuilder {
             controlWriter.write( NEWLINE + "%define _binary_filedigest_algorithm 1" + NEWLINE );
             controlWriter.write( NEWLINE + "%define _source_filedigest_algorithm 1" + NEWLINE );
         }
-
     }
 
     /**
@@ -211,35 +210,19 @@ class RpmControlFileBuilder {
             controlWriter.write( NEWLINE );
             String executable = starter.getExecutable();
             String mainClass = starter.getMainClass();
-            String workingDir = starter.getWorkDir();
+            String workingDir = starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "";
             if( executable != null ) {
-                if( workingDir != null ) {
-                    if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " " + starter.getStartArguments() + " )" + NEWLINE );
-                    } else {
-                        controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " " + starter.getStartArguments() + "' )" + NEWLINE );
-                    }
+                if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
+                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " " + starter.getStartArguments() + " )" + NEWLINE );
                 } else {
-                    if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " " + starter.getStartArguments() + " )" + NEWLINE );
-                    } else {
-                        controlWriter.write( "su " + rpm.getDaemonUser() + " -c '( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " " + starter.getStartArguments() + "' )" + NEWLINE );
-                    }
+                    controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " " + starter.getStartArguments() + "' )" + NEWLINE );
                 }
 
             } else if( mainClass != null ) {
-                if( workingDir != null ) {
-                    if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar() + " " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
-                    } else {
-                        controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar() + " " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
-                    }
+                if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
+                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && java -cp " + starter.getMainJar() + " " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
                 } else {
-                    if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar() + " " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
-                    } else {
-                        controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar() + " " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
-                    }
+                    controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp '" + starter.getMainJar() + "' " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
                 }
             }
             controlWriter.write( NEWLINE );
@@ -308,20 +291,11 @@ class RpmControlFileBuilder {
         if( starter != null ) {
             String executable = starter.getExecutable();
             String mainClass = starter.getMainClass();
-            String workingDir = starter.getWorkDir();
+            String workingDir = starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "";
             if( executable != null ) {
-                if( workingDir != null ) {
-                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && " + executable + " & )" + NEWLINE );
-                } else {
-                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}\" && " + executable + " & )" + NEWLINE );
-                }
-
+                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " & )" + NEWLINE );
             } else if( mainClass != null ) {
-                if( workingDir != null ) {
-                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp " + starter.getMainJar() + " " + mainClass + " )" + NEWLINE );
-                } else {
-                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}\" && java -cp " + starter.getMainJar() + " " + mainClass + " )" + NEWLINE );
-                }
+                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && java -cp '" + starter.getMainJar() + "' " + mainClass + " )" + NEWLINE );
             }
         }
 

@@ -131,37 +131,29 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupService( Service service ) throws IOException {
-        String workingDir = null;
+        String serviceUnixName = service.getId();
+        String installationRoot = task.getInstallationRoot();
+        String workingDir = installationRoot;
+
         DesktopStarter starter = setup.getRunAfter();
         if( starter != null ) {
-            workingDir = starter.getWorkDir();
+            workingDir += (starter.getWorkDir() != null ? "/" + starter.getWorkDir() : "");
         }
-        String serviceUnixName = service.getId();
-        String mainJarPath;
+        String mainJarPath = workingDir + "/" + service.getMainJar();
 
         Template initScript = new Template( "unix/rpm/template/init-service.sh" );
-        String installationRoot = task.getInstallationRoot();
-
-        if( workingDir != null ) {
-            initScript.setPlaceholder( "workdir", (installationRoot + "/" + workingDir).replace( " ", "\\ " ) );
-            mainJarPath = installationRoot + "/" + workingDir + "/" + service.getMainJar();
-        } else {
-            initScript.setPlaceholder( "workdir", installationRoot.replace( " ", "\\ " ) );
-            mainJarPath = installationRoot + "/" + service.getMainJar();
-        }
-
-        // under unix the spaces in the path must be encoded with an \ before
-        mainJarPath = mainJarPath.replace( " ", "\\ " );
-
         initScript.setPlaceholder( "name", serviceUnixName );
         String version = setup.getVersion();
         initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
         initScript.setPlaceholder( "wait", "2" );
+
+        initScript.setPlaceholder( "workdir", workingDir );
         initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+
+        initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
@@ -262,8 +254,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " "
-                                + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
 

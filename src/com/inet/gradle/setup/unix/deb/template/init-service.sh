@@ -29,6 +29,12 @@ STARTARGUMENTS="{{startArguments}}"
 # Read configuration variable file if it is present
 [ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
+if [ ! -z "$STARTARGUMENTS" ]; then
+    STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS} ${STARTARGUMENTS}"
+else
+    STARTARGUMENTS="-cp '${MAINARCHIVE}' ${MAINCLASS}"
+fi
+
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
 

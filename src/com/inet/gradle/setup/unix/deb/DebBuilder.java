@@ -259,7 +259,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
         initScript.setPlaceholder( "workdir", workingDir );
         initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "startArguments", "-cp '" + mainJarPath + "' " + service.getMainClass() + " " + service.getStartArguments() );
+        initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
         
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
