@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,15 +23,19 @@ import com.inet.gradle.setup.image.ImageFactory;
 
 /**
  * Generic application wrapper
+ * 
  * @author gamma
  */
 public class Application {
-	protected final AbstractSetupBuilder    setup;
-	private String 							displayName, mainJar, mainClass, executable, description, workDir;
-	private Object icons;
+    protected final AbstractSetupBuilder setup;
 
-	/**
+    private String                       displayName, mainJar, mainClass, executable, description, workDir;
+
+    private Object                       icons;
+
+    /**
      * Create a new DesktopStarter
+     * 
      * @param setup current SetupBuilder
      */
     public Application( AbstractSetupBuilder setup ) {
@@ -40,6 +44,7 @@ public class Application {
 
     /**
      * get the displayName of the application.
+     * 
      * @return the display name
      */
     public String getDisplayName() {
@@ -47,18 +52,20 @@ public class Application {
             return displayName;
         }
         return setup.getApplication();
-	}
+    }
 
     /**
      * Set the displayName of the application.
+     * 
      * @param displayName the name to set
      */
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
+    public void setDisplayName( String displayName ) {
+        this.displayName = displayName;
+    }
 
-	/**
+    /**
      * Returns the description
+     * 
      * @return the description
      */
     public String getDescription() {
@@ -70,6 +77,7 @@ public class Application {
 
     /**
      * Sets the description.
+     * 
      * @param description the description to set
      */
     public void setDescription( String description ) {
@@ -78,20 +86,22 @@ public class Application {
 
     /**
      * Get an executable
+     * 
      * @return the executable
      */
     public String getExecutable() {
-    	return executable;
+        return executable;
     }
 
     /**
      * Set the executable file. If this is a relative pfad then it is relative to the install directory.
+     * 
      * @param executable Set the executable file.
      */
     public void setExecutable( String executable ) {
         this.executable = executable;
     }
- 
+
     /**
      * Get the main jar file.
      * 
@@ -136,6 +146,7 @@ public class Application {
 
     /**
      * Get the icons for this desktop/shortcut entry.
+     * 
      * @return the icons
      */
     public Object getIcons() {
@@ -147,13 +158,14 @@ public class Application {
 
     /**
      * Retrieve a specific icon from the icons set for the setup
+     * 
      * @param buildDir directory in which to put the icon
      * @param type of the icon to retrieve
      * @return the icon file
      * @throws IOException if an error occurs on reading the image files
      */
     public File getIconForType( File buildDir, String type ) throws IOException {
-		return ImageFactory.getImageFile( setup.getProject(), getIcons(), buildDir, type);
+        return ImageFactory.getImageFile( setup.getProject(), getIcons(), buildDir, type );
     }
 
     /**
@@ -168,6 +180,7 @@ public class Application {
 
     /**
      * Get the working directory of this desktop/shortcut entry.
+     * 
      * @return the working directory
      */
     public String getWorkDir() {
@@ -176,6 +189,7 @@ public class Application {
 
     /**
      * Set the working directory. If not set then the installation directory is used.
+     * 
      * @param workDir the work directory.
      */
     public void setWorkDir( String workDir ) {
