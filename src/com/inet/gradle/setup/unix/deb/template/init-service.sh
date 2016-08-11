@@ -27,15 +27,15 @@ STARTARGUMENTS="{{startArguments}}"
 [ ! -f "$MAINARCHIVE" ] && echo "File '$MAINARCHIVE' not found" && exit 1
 
 # Read configuration variable file if it is present
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+[ -r "/etc/default/$NAME" ] && . /etc/default/$NAME
 
 # Load the VERBOSE setting and other rcS variables
-. /lib/init/vars.sh
+[ -r "/lib/init/vars.sh" ] && . /lib/init/vars.sh
 
 # Define LSB log_* functions.
 # Depend on lsb-base (>= 3.2-14) to ensure that this file is present
 # and status_of_proc is working.
-. /lib/lsb/init-functions
+[ -r "/lib/lsb/init-functions"] && . /lib/lsb/init-functions
 
 # Make sure, that the locale is set. Specifically if started after boot
 [ -r /etc/default/locale ] && . /etc/default/locale && export LANG

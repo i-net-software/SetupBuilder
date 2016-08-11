@@ -6,7 +6,7 @@
 #
 
 # Source function library.
-. /etc/init.d/functions
+[ -r "/etc/init.d/functions" ] && . /etc/init.d/functions
 
 NAME={{name}}
 DAEMON_USER={{daemonUser}}
