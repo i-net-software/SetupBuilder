@@ -163,8 +163,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
         // copy a default service file if set 
         if( task.getDefaultServiceFile() != null ) {
-            File serviceDestFile = new File( buildDir.getAbsolutePath(), "/etc/sysconfig/" + serviceUnixName );
-            serviceDestFile.mkdirs();
+            File serviceDestFile = createFile(  "BUILD/etc/sysconfig/" + serviceUnixName, true );
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
 
