@@ -298,10 +298,10 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
 
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  update-rc.d " + serviceUnixName + " defaults 91 09 >/dev/null\nfi" );
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  service " + serviceUnixName + " start \nfi" );
-        controlBuilder.addTailScriptFragment( Script.PRERM, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]; then\n  service " + serviceUnixName + " stop \nfi" );
-        controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "    update-rc.d " + serviceUnixName + " remove >/dev/null\n" + "fi" );
+        controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && update-rc.d " + serviceUnixName + " defaults 91 09 >/dev/null || true" );
+        controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " start || true" );
+        controlBuilder.addTailScriptFragment( Script.PRERM, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " stop || true" );
+        controlBuilder.addTailScriptFragment( Script.POSTRM, "[ \"$1\" = \"purge\" ] && update-rc.d " + serviceUnixName + " remove >/dev/null || true " );
     }
 
     /**
