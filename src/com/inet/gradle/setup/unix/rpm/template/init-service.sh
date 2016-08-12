@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Description:       {{description}}
+# Description: {{description}}
 #
 # chkconfig: - 80 20
 #
@@ -25,90 +25,66 @@ NC='\033[0m' # No Color
 # Source config
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
-if [ ! -z "$STARTARGUMENTS" ]; then
-    PROC="$DAEMON -cp ${MAINARCHIVE} ${MAINCLASS} ${STARTARGUMENTS}"
-else
-    PROC="$DAEMON -cp ${MAINARCHIVE} ${MAINCLASS}"
-fi
-
 eval_cmd() {
-  local rc=$1
-  if [ $rc -eq 0 ]; then
-    printf "[  ${GREEN}OK${NC}  ]\n"
-  else
-    printf "[${RED}FAILED${NC}]\n"
-  fi
-  return $rc
+    local rc=$1
+    if [ $rc -eq 0 ]; then
+        printf "[  ${GREEN}OK${NC}  ]\n"
+    else
+        printf "[  ${RED}FAILED${NC}  ]\n"
+    fi
+    return $rc
 }
 
 start() {
-  # see if running
-  local pids=$(pgrep -f "$PROC")
+    # see if running
+    ([ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0) || :
 
-  if [ -n "$pids" ]; then
-    echo "$NAME (pid $pids) is already running"
-    return 0
-  fi
-  printf "%-50s%s" "Starting $NAME: " ''
-  cd "${WORKINGDIR}"
-  if [[ "${DAEMON_USER}" = "root" ]]; then
-    $PROC &
-  else
-    su ${DAEMON_USER} -c "$PROC &"
-  fi
+    printf "%-50s%s" "Starting $NAME: " ''
+    cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} &"
 
-  # save pid to file if you want
-  echo $! > $PIDFILE
+    # save pid to file if you want
+    echo $! > $PIDFILE
 
-  # check again if running
-  sleep 5
-  pgrep -f "$PROC" >/dev/null 2>&1
-  eval_cmd $?
+    # check again if running
+    sleep 5
+    pgrep -F "$PIDFILE"
+    eval_cmd $?
 }
 
 stop() {
-  # see if running
-  local pids=$(pgrep -f "$PROC")
+    # see if running
+    (([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0) || :
 
-  if [ -z "$pids" ]; then
-    echo "$NAME not running"
-    return 0
-  fi
-  printf "%-50s%s" "Stopping $NAME: " ''
-  rm -f $PIDFILE
-  kill -9 $pids
-  eval_cmd $?
+    printf "%-50s%s" "Stopping $NAME: " ''
+    kill -9 `pgrep -F "$PIDFILE"`
+    eval_cmd $?
+    rm -f $PIDFILE
 }
 
 status() {
-  # see if running
-  local pids=$(pgrep -f "$PROC")
-
-  if [ -n "$pids" ]; then
-    echo "$NAME (pid $pids) is running"
-  else
-    echo "$NAME is stopped"
-  fi
+    # see if running
+    (([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0) || :
+    ([ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME is running with pid $(cat "$PIDFILE")" && return 0) || :
 }
 
 case $1 in
-  start)
-    start
-    ;;
-  stop)
-    stop
-    ;;
-  status)
-    status
-    ;;
-  restart)
-    stop
-    sleep 1
-    start
-    ;;
-  *)
-    echo "Usage: $0 {start|stop|status|restart}"
-    exit 1
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    restart)
+        stop
+        sleep 1
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|restart}"
+        exit 1
 esac
 
 exit $?
