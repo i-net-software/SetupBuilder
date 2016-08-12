@@ -44,12 +44,12 @@ STARTARGUMENTS="{{startArguments}}"
 #
 do_start()
 {
-	# Return
-	#   0 if daemon has been started
-	#   1 if daemon was already running
-	#   2 if daemon could not be started
-	start-stop-daemon --chuid $DAEMON_USER --start --chdir "$WORKINGDIR" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
-		|| return 1
+    # Return
+    #   0 if daemon has been started
+    #   1 if daemon was already running
+    #   2 if daemon could not be started
+    start-stop-daemon --chuid $DAEMON_USER --start --chdir "$WORKINGDIR" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+        || return 1
 
     BACKGROUND=""
     if [ -z "$1" ]; then
@@ -59,8 +59,8 @@ do_start()
     start-stop-daemon  --chuid $DAEMON_USER $BACKGROUND --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
         -cp "${MAINARCHIVE}" ${MAINCLASS} ${STARTARGUMENTS} \
         || return 2
-	
-	if [ ! -z "$1" ]; then
+    
+    if [ ! -z "$1" ]; then
         sleep $WAIT
         if start-stop-daemon  --chuid $DAEMON_USER --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
             if [ -f "$PIDFILE" ]; then
@@ -80,16 +80,16 @@ do_start()
 #
 do_stop()
 {
-	# Return
-	#   0 if daemon has been stopped
-	#   1 if daemon was already stopped
-	#   2 if daemon could not be stopped
-	#   other if a failure occurred
-	start-stop-daemon  --chuid $DAEMON_USER --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE 
-	RETVAL="$?"
-	[ "$RETVAL" = 2 ] && return 2
-	rm -f $PIDFILE
-	return "$RETVAL"
+    # Return
+    #   0 if daemon has been stopped
+    #   1 if daemon was already stopped
+    #   2 if daemon could not be stopped
+    #   other if a failure occurred
+    start-stop-daemon  --chuid $DAEMON_USER --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE 
+    RETVAL="$?"
+    [ "$RETVAL" = 2 ] && return 2
+    rm -f $PIDFILE
+    return "$RETVAL"
 }
  
 case "$1" in
@@ -111,46 +111,46 @@ case "$1" in
     esac
     ;;
   stop)
-	log_daemon_msg "Stopping" "$NAME"
-	do_stop
-	case "$?" in
-		0|1) log_end_msg 0 ;;
-		2) log_end_msg 1 ;;
-	esac
-	;;
+    log_daemon_msg "Stopping" "$NAME"
+    do_stop
+    case "$?" in
+        0|1) log_end_msg 0 ;;
+        2) log_end_msg 1 ;;
+    esac
+    ;;
   status)
-	if start-stop-daemon  --chuid $DAEMON_USER --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
-	    log_success_msg "$NAME is not running."
-	else
-	    log_success_msg "$NAME is running."
-	fi
-	;;
+    if start-stop-daemon  --chuid $DAEMON_USER --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
+        log_success_msg "$NAME is not running."
+    else
+        log_success_msg "$NAME is running."
+    fi
+    ;;
   restart|force-reload)
-	#
-	# If the "reload" option is implemented then remove the
-	# 'force-reload' alias
-	#
-	log_daemon_msg "Restarting" "$NAME"
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
-		esac
-		;;
-	  *)
-		# Failed to stop
-		log_end_msg 1
-		;;
-	esac
-	;;
+    #
+    # If the "reload" option is implemented then remove the
+    # 'force-reload' alias
+    #
+    log_daemon_msg "Restarting" "$NAME"
+    do_stop
+    case "$?" in
+      0|1)
+        do_start
+        case "$?" in
+            0) log_end_msg 0 ;;
+            1) log_end_msg 1 ;; # Old process is still running
+            *) log_end_msg 1 ;; # Failed to start
+        esac
+        ;;
+      *)
+        # Failed to stop
+        log_end_msg 1
+        ;;
+    esac
+    ;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|daemon}" >&2
-	exit 3
-	;;
+    echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|daemon}" >&2
+    exit 3
+    ;;
 esac
 
 :
