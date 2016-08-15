@@ -37,23 +37,23 @@ eval_cmd() {
 
 start() {
     # see if running
-    ([ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0) || :
+    [ -f "$PIDFILE" ] && [ ! -z `pgrep -F "$PIDFILE" 2>1` ] && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0 || :
 
     printf "%-50s%s" "Starting $NAME: " ''
-    cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} &"
+    cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$NAME.out\"& echo \$! > \"/tmp/$NAME.pid\""
 
     # save pid to file if you want
-    echo $! > $PIDFILE
+    ([ -f "/tmp/$NAME.pid" ] && cat "/tmp/$NAME.pid" > "$PIDFILE" && rm "/tmp/$NAME.pid" ) || echo "PID-file ($PIDFILE) could not be created"
 
     # check again if running
     sleep 5
-    pgrep -F "$PIDFILE"
+    pgrep -F "$PIDFILE" 2>1 &>dev/null
     eval_cmd $?
 }
 
 stop() {
     # see if running
-    (([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0) || :
+    ([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0 || :
 
     printf "%-50s%s" "Stopping $NAME: " ''
     kill -9 `pgrep -F "$PIDFILE"`
@@ -63,8 +63,8 @@ stop() {
 
 status() {
     # see if running
-    (([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0) || :
-    ([ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME is running with pid $(cat "$PIDFILE")" && return 0) || :
+    ([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0 || :
+    [ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME is running with pid $(cat "$PIDFILE")" && return 0 || :
 }
 
 case $1 in
