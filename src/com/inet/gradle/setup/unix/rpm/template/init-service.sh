@@ -47,7 +47,7 @@ start() {
 
     # check again if running
     sleep 5
-    pgrep -F "$PIDFILE" 2>1 &>dev/null
+    RES=`pgrep -F "$PIDFILE" 2>1`
     eval_cmd $?
 }
 
