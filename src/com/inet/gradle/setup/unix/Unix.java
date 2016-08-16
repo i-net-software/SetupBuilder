@@ -111,7 +111,7 @@ public abstract class Unix extends AbstractSetupTask {
      */
     public String getInstallationRoot() {
         if( installationRoot == null ) {
-            return "/usr/share/" + getSetupBuilder().getApplication();
+            return "/usr/share/" + getSetupBuilder().getApplication().toLowerCase().replaceAll("^a-z0-9-_]", "");
         } else {
             return installationRoot;
         }
