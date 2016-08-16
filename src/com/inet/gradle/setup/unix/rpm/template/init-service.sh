@@ -27,7 +27,7 @@ NC='\033[0m' # No Color
 
 LINESTATE=""
 prep_cmd() {
-    LINESTATE=$1
+    LINESTATE="$1"
     printf "\r%s" $LINESTATE 
 }
 
