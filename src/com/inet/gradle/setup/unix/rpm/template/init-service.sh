@@ -40,7 +40,7 @@ eval_cmd() {
         STATE="[ ${RED}FAILED${NC} ]"
     fi
 
-    printf "\r%*s\r%s\n" $(tput cols) "$STATE" "$LINESTATE"
+    printf "\r%*s\r%s\n" $(tput cols) "$(printf "$STATE")" "$LINESTATE"
     LINESTATE=""
     return $rc
 }
