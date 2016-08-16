@@ -55,11 +55,11 @@ do_start()
     if [ -z "$1" ]; then
         BACKGROUND="-b"
     fi
-    
+
     start-stop-daemon  --chuid $DAEMON_USER $BACKGROUND --chdir "$WORKINGDIR" --make-pidfile --start --pidfile $PIDFILE --exec $DAEMON -- \
         -cp "${MAINARCHIVE}" ${MAINCLASS} ${STARTARGUMENTS} \
         || return 2
-    
+
     if [ ! -z "$1" ]; then
         sleep $WAIT
         if start-stop-daemon  --chuid $DAEMON_USER --test --start --chdir "$WORKINGDIR" --pidfile "$PIDFILE" --exec $DAEMON >/dev/null; then
@@ -91,7 +91,9 @@ do_stop()
     rm -f $PIDFILE
     return "$RETVAL"
 }
- 
+
+{{additionalServiceScript}}
+
 case "$1" in
   start)
     log_daemon_msg "Starting" "$NAME"

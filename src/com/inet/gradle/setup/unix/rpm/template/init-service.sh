@@ -45,12 +45,20 @@ eval_cmd() {
     return $rc
 }
 
+# Source config
+[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+
 start() {
     # see if running
     [ -f "$PIDFILE" ] && [ ! -z `pgrep -F "$PIDFILE" 2>1` ] && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0 || :
 
+    BACKGROUND="&&"
+    if [ -z "$1" ]; then
+        BACKGROUND="&"
+    fi
+
     prep_cmd "Starting $NAME:"
-    cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$NAME.out\"& echo \$! > \"/tmp/$NAME.pid\""
+    cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$NAME.out\" $BACKGROUND echo \$! > \"/tmp/$NAME.pid\""
 
     # save pid to file if you want
     ([ -f "/tmp/$NAME.pid" ] && cat "/tmp/$NAME.pid" > "$PIDFILE" && rm "/tmp/$NAME.pid" ) || echo "PID-file ($PIDFILE) could not be created"
@@ -77,9 +85,14 @@ status() {
     [ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME is running with pid $(cat "$PIDFILE")" && return 0 || :
 }
 
+{{additionalServiceScript}}
+
 case $1 in
     start)
         start
+        ;;
+    daemon)
+        start daemon
         ;;
     stop)
         stop
@@ -87,7 +100,7 @@ case $1 in
     status)
         status
         ;;
-    restart)
+    restart|force-reload)
         stop
         sleep 1
         start

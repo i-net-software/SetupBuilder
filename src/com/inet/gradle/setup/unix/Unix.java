@@ -42,6 +42,8 @@ public abstract class Unix extends AbstractSetupTask {
 
     private Object defaultServiceFile;
 
+    private String additionalServiceScript;
+
     public Unix( String format ) {
         super( format );
     }
@@ -167,5 +169,22 @@ public abstract class Unix extends AbstractSetupTask {
      */
     public void setDefaultServiceFile( Object defaultServiceFile ) {
         this.defaultServiceFile = defaultServiceFile;
+    }
+
+    /**
+     * Returns the additional service script that will be included into the original one.
+     * This allows to modify and enhance the service.
+     * @return the additional service file
+     */
+    public String getAdditionalServiceScript() {
+        return additionalServiceScript != null ? additionalServiceScript : "" ;
+    }
+
+    /**
+     * Set an additional service script that will be included into the original one.
+     * @param additionalServiceScript
+     */
+    public void setAdditionalServiceScript( String additionalServiceScript ) {
+        this.additionalServiceScript = additionalServiceScript;
     }
 }

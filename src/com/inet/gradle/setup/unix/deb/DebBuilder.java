@@ -257,7 +257,8 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
-        
+        initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
 

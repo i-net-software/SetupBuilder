@@ -150,6 +150,8 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
