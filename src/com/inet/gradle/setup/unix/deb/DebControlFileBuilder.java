@@ -203,7 +203,11 @@ class DebControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putPreDepends( OutputStreamWriter controlWriter ) throws IOException {
-        controlWriter.write( "Pre-Depends: debconf, libgtk2-perl" + NEWLINE );
+        String depends = deb.getDepends();
+        if( depends == null || depends.length() == 0 ) {
+            depends = "debconf";
+        }
+        controlWriter.write( "Pre-Depends: " + depends + NEWLINE );
     }
 
     /**
@@ -215,7 +219,7 @@ class DebControlFileBuilder {
     private void putRecommends( OutputStreamWriter controlWriter ) throws IOException {
         String recommends = deb.getRecommends();
         if( recommends == null || recommends.length() == 0 ) {
-            recommends = "openjdk-8-jre | openjdk-8-jdk | default-jre | default-jdk";
+            recommends = "openjdk-8-jre | openjdk-8-jdk | default-jre | default-jdk, libgtk2-perl";
         }
         controlWriter.write( "Recommends: " + recommends + NEWLINE );
     }
