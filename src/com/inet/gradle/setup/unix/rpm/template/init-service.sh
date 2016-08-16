@@ -25,13 +25,23 @@ NC='\033[0m' # No Color
 # Source config
 [ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
 
+LINESTATE=""
+prep_cmd() {
+    LINESTATE=$1
+    printf "\r%s" $LINESTATE 
+}
+
 eval_cmd() {
     local rc=$1
+
     if [ $rc -eq 0 ]; then
-        printf "[  ${GREEN}OK${NC}  ]\n"
+        STATE="[ ${GREEN}OK${NC} ]"
     else
-        printf "[  ${RED}FAILED${NC}  ]\n"
+        STATE="[ ${RED}FAILED${NC} ]"
     fi
+
+    printf "\r%*s\r%s\n" $(tput cols) "$STATE" "$LINESTATE"
+    LINESTATE=""
     return $rc
 }
 
@@ -39,7 +49,7 @@ start() {
     # see if running
     [ -f "$PIDFILE" ] && [ ! -z `pgrep -F "$PIDFILE" 2>1` ] && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0 || :
 
-    printf "%-50s%s" "Starting $NAME: " ''
+    prep_cmd "Starting $NAME:"
     cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$NAME.out\"& echo \$! > \"/tmp/$NAME.pid\""
 
     # save pid to file if you want
@@ -55,7 +65,7 @@ stop() {
     # see if running
     ([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0 || :
 
-    printf "%-50s%s" "Stopping $NAME: " ''
+    prep_cmd "Stopping $NAME:"
     kill -9 `pgrep -F "$PIDFILE"`
     eval_cmd $?
     rm -f $PIDFILE
