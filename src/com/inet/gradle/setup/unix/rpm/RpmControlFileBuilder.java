@@ -277,14 +277,14 @@ class RpmControlFileBuilder {
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
 
-        StringBuilder post_script = scriptMap.get( Script.POSTINST );
-        if( post_script != null ) {
-            controlWriter.write( post_script.toString() + NEWLINE );
-        }
-
         ArrayList<String> posts = rpm.getPostinst();
         for( String post : posts ) {
             controlWriter.write( post + NEWLINE );
+        }
+
+        StringBuilder post_script = scriptMap.get( Script.POSTINST );
+        if( post_script != null ) {
+            controlWriter.write( post_script.toString() + NEWLINE );
         }
 
         DesktopStarter runAfterStarter = setup.getRunAfter();
