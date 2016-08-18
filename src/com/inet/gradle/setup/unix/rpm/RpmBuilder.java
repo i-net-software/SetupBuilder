@@ -84,7 +84,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
             String daemonuser = task.getDaemonUser();
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-                controlBuilder.addScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + "\n"
+                controlBuilder.addScriptFragment( Script.POSTINSTHEAD, "useradd -r -m " + daemonuser + "\n"
                                 + "\n"
                                 + "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
                                 + "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
@@ -101,7 +101,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             }
 
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-                controlBuilder.addScriptFragment( Script.POSTRM, "userdel -r " + daemonuser + " || true \n" );
+                controlBuilder.addScriptFragment( Script.POSTRMTAIL, "userdel -r " + daemonuser + " || true \n" );
             }
 
             // copy the license files
@@ -156,9 +156,9 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         initScript.writeTo( createFile( initScriptFile, true ) );
         controlBuilder.addConfFile( initScriptFile );
 
-        controlBuilder.addScriptFragment( Script.PREINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
+        controlBuilder.addScriptFragment( Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
 
-        controlBuilder.addScriptFragment( Script.POSTINST, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
+        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
                         + "echo replace path\n"
                         + "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
                         + "\nfi" );
@@ -169,11 +169,11 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
 
-        controlBuilder.addScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " || true" );
-        controlBuilder.addScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
+        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " || true" );
+        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
 
-        controlBuilder.addScriptFragment( Script.PRERM, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
-        controlBuilder.addScriptFragment( Script.PRERM, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --del " + serviceUnixName + " || true" );
+        controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
+        controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --del " + serviceUnixName + " || true" );
     }
 
     /**

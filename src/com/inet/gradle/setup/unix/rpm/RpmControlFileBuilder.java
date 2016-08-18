@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.apache.tools.ant.taskdefs.optional.ejb.BorlandDeploymentTool;
+
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;
@@ -51,7 +53,7 @@ class RpmControlFileBuilder {
     private Collection<String> confFiles = new ArrayList<>();
 
     enum Script {
-        PREINST, POSTINST, PRERM, POSTRM
+        PREINSTHEAD, PREINSTTAIL, POSTINSTHEAD, POSTINSTTAIL, PRERMHEAD, PRERMTAIL, POSTRMHEAD, POSTRMTAIL
     }
 
     Map<Script, StringBuilder> scriptMap = new HashMap<>();
@@ -185,14 +187,8 @@ class RpmControlFileBuilder {
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
 
-        ArrayList<String> preuns = rpm.getPrerm();
-        for( String preun : preuns ) {
-            controlWriter.write( preun + NEWLINE );
-        }
-        StringBuilder prep_script = scriptMap.get( Script.PRERM );
-        if( prep_script != null ) {
-            controlWriter.write( prep_script.toString() + NEWLINE );
-        }
+        // Write the content
+        writeHeadContentTail( controlWriter, Script.PRERMHEAD, rpm.getPrerm(), Script.PRERMTAIL );
 
         // removes only the files in the installation path
         List<String> del_files = setup.getDeleteFiles();
@@ -242,15 +238,8 @@ class RpmControlFileBuilder {
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
 
-        ArrayList<String> pres = rpm.getPreinst();
-        for( String pre : pres ) {
-            controlWriter.write( pre + NEWLINE );
-        }
-
-        StringBuilder pre_script = scriptMap.get( Script.PREINST );
-        if( pre_script != null ) {
-            controlWriter.write( pre_script.toString() + NEWLINE );
-        }
+        // Write the content
+        writeHeadContentTail( controlWriter, Script.PREINSTHEAD, rpm.getPreinst(), Script.PREINSTTAIL );
 
         // removes only the files in the installation path
         List<String> del_files = setup.getDeleteFiles();
@@ -277,15 +266,8 @@ class RpmControlFileBuilder {
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
 
-        ArrayList<String> posts = rpm.getPostinst();
-        for( String post : posts ) {
-            controlWriter.write( post + NEWLINE );
-        }
-
-        StringBuilder post_script = scriptMap.get( Script.POSTINST );
-        if( post_script != null ) {
-            controlWriter.write( post_script.toString() + NEWLINE );
-        }
+        // Write the content
+        writeHeadContentTail( controlWriter, Script.POSTINSTHEAD, rpm.getPostinst(), Script.POSTINSTTAIL );
 
         DesktopStarter runAfterStarter = setup.getRunAfter();
         if( runAfterStarter != null ) {
@@ -312,22 +294,17 @@ class RpmControlFileBuilder {
     private void putPostun( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%postun" + NEWLINE );
 
-        if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
+        if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRMHEAD ) != null || scriptMap.get( Script.POSTRMTAIL ) != null ) {
             controlWriter.write( NEWLINE + "if [ $1 -eq 0 ]; then" + NEWLINE );
         }
 
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
-        
-        ArrayList<String> posts = rpm.getPostrm();
-        for( String post : posts ) {
-            controlWriter.write( post + NEWLINE );
-        }
-        StringBuilder postun_script = scriptMap.get( Script.POSTRM );
-        if( postun_script != null ) {
-            controlWriter.write( postun_script.toString() + NEWLINE );
-        }
-        if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRM ) != null ) {
+
+        // Write the content
+        writeHeadContentTail( controlWriter, Script.POSTRMHEAD, rpm.getPostrm(), Script.POSTRMTAIL );
+
+        if( rpm.getPostrm().size() > 0 || scriptMap.get( Script.POSTRMHEAD ) != null || scriptMap.get( Script.POSTRMTAIL ) != null ) {
             controlWriter.write( NEWLINE + "fi" + NEWLINE );
         }
     }
@@ -693,4 +670,28 @@ class RpmControlFileBuilder {
         sb.append( scriptFragment );
     }
 
+
+    /**
+     * Writes the head, body and tail sections to the controlWriter
+     * @param controlWriter the writer
+     * @param headSection constant for the head
+     * @param bodySection the list of strings for the body
+     * @param tailSection constant for the tail
+     * @throws IOException in case of errors
+     */
+    private void writeHeadContentTail( OutputStreamWriter controlWriter, Script headSection, ArrayList<String> bodySection, Script tailSection ) throws IOException {
+        StringBuilder head = scriptMap.get( headSection);
+        if( head != null ) {
+            controlWriter.write( head.toString() + NEWLINE );
+        }
+
+        for( String body : bodySection ) {
+            controlWriter.write( body + NEWLINE );
+        }
+
+        StringBuilder tail = scriptMap.get( tailSection );
+        if( tail != null ) {
+            controlWriter.write( tail.toString() + NEWLINE );
+        }
+    }
 }
