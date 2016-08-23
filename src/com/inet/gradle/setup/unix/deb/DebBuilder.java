@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -102,13 +102,13 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             if( runAfterStarter != null ) {
                 String executable = runAfterStarter.getExecutable();
                 String mainClass = runAfterStarter.getMainClass();
-                String workingDir = installationRoot + ( runAfterStarter.getWorkDir() != null ? "/" + runAfterStarter.getWorkDir() : "" );
+                String workingDir = installationRoot + (runAfterStarter.getWorkDir() != null ? "/" + runAfterStarter.getWorkDir() : "");
                 String mainJarPath = workingDir + "/" + runAfterStarter.getMainJar();
-                
+
                 if( executable != null ) {
-                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " & )\n" );
+                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )\n" );
                 } else if( mainClass != null ) {
-                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " )\n" );
+                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
                 }
             }
 
@@ -118,7 +118,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             if( runBeforeUninstall != null ) {
                 String executable = runBeforeUninstall.getExecutable();
                 String mainClass = runBeforeUninstall.getMainClass();
-                String workingDir = installationRoot + ( runBeforeUninstall.getWorkDir() != null ? "/" + runBeforeUninstall.getWorkDir() : "" );
+                String workingDir = installationRoot + (runBeforeUninstall.getWorkDir() != null ? "/" + runBeforeUninstall.getWorkDir() : "");
                 String mainJarPath = workingDir + "/" + runBeforeUninstall.getMainJar();
 
                 controlBuilder.addTailScriptFragment( Script.PRERM, "case \"$1\" in remove|purge)" );
@@ -240,7 +240,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
     private void setupService( Service service ) throws IOException {
         String serviceUnixName = service.getId();
         String installationRoot = task.getInstallationRoot();
-        String workingDir = installationRoot + ( service.getWorkDir() != null ? "/" + service.getWorkDir() : "" );
+        String workingDir = installationRoot + (service.getWorkDir() != null ? "/" + service.getWorkDir() : "");
         String mainJarPath = workingDir + "/" + service.getMainJar();
 
         Template initScript = new Template( "unix/deb/template/init-service.sh" );

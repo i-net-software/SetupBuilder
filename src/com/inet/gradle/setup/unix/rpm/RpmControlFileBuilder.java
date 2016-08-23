@@ -275,9 +275,9 @@ class RpmControlFileBuilder {
             String mainClass = runAfterStarter.getMainClass();
             String workingDir = runAfterStarter.getWorkDir() != null ? "/" + runAfterStarter.getWorkDir() : "";
             if( executable != null ) {
-                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " & )" + NEWLINE );
+                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )" + NEWLINE );
             } else if( mainClass != null ) {
-                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && java -cp \"" + runAfterStarter.getMainJar() + "\" " + mainClass + " )" + NEWLINE );
+                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && java -cp \"" + runAfterStarter.getMainJar() + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + " )" + NEWLINE );
             }
         }
 
