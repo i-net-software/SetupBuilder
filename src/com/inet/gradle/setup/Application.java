@@ -29,7 +29,7 @@ import com.inet.gradle.setup.image.ImageFactory;
 public class Application {
     protected final AbstractSetupBuilder setup;
 
-    private String                       displayName, mainJar, mainClass, executable, description, workDir;
+    private String                       displayName, mainJar, mainClass, executable, description, workDir, startArguments;
 
     private Object                       icons;
 
@@ -194,5 +194,27 @@ public class Application {
      */
     public void setWorkDir( String workDir ) {
         this.workDir = workDir;
+    }
+
+
+    /**
+     * Returns the command-line arguments for starting.
+     * 
+     * @return the command-line arguments for starting
+     */
+    public String getStartArguments() {
+        if( startArguments == null ) {
+            return "";
+        }
+        return startArguments;
+    }
+
+    /**
+     * Sets the command-line arguments for starting .
+     * 
+     * @param startArguments the command-line arguments for starting
+     */
+    public void setStartArguments( String startArguments ) {
+        this.startArguments = startArguments;
     }
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,10 +46,11 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  * 
  * @author Volker Berlin
  */
-public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
+public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
-	private String applicationName, applicationIdentifier, imageSourceRoot;
-	private SetupBuilder setup;
+    private String       applicationName, applicationIdentifier, imageSourceRoot;
+
+    private SetupBuilder setup;
 
     /**
      * Create a new instance
@@ -64,56 +65,59 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
     }
 
     /**
-     * Build the dmg file. 
-     * @throws RuntimeException if any error occur 
+     * Build the dmg file.
+     * 
+     * @throws RuntimeException if any error occur
      */
     public void build() throws RuntimeException {
 
         try {
-        	if ( setup.getServices().isEmpty() && setup.getDesktopStarters().isEmpty() ) {
-        		throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
-        	}
-        	
-        	// Build all services 
-        	for (Service service : setup.getServices() ) {
-        		 new OSXApplicationBuilder( task, setup, fileResolver ).buildService( service );
-			}
-        	
-        	// Build all standalone applications
-        	for (DesktopStarter application : setup.getDesktopStarters() ) {
-        		 new OSXApplicationBuilder( task, setup, fileResolver ).buildApplication( application );
-			}
+            if( setup.getServices().isEmpty() && setup.getDesktopStarters().isEmpty() ) {
+                throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
+            }
+
+            // Build all services 
+            for( Service service : setup.getServices() ) {
+                new OSXApplicationBuilder( task, setup, fileResolver ).buildService( service );
+            }
+
+            // Build all standalone applications
+            for( DesktopStarter application : setup.getDesktopStarters() ) {
+                new OSXApplicationBuilder( task, setup, fileResolver ).buildApplication( application );
+            }
 
             applicationIdentifier = setup.getAppIdentifier();
             applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString() + "/" + setup.getApplication() + ".app";
 
-        	if ( !setup.getServices().isEmpty() ) {
-        		// Create installer package
-        		createPackageFromApp();
-        	}
+            if( !setup.getServices().isEmpty() ) {
+                // Create installer package
+                createPackageFromApp();
+            }
 
-/*
-        	new File ( task.getSetupFile().toString() ).createNewFile();
-/*/
-        	createBinary();
-//*/        
+            /*
+             * new File ( task.getSetupFile().toString() ).createNewFile();
+             * /
+             */
+            createBinary();
+            //*/        
         } catch( RuntimeException ex ) {
             ex.printStackTrace();
             throw ex;
         } catch( Exception ex ) {
             throw new RuntimeException( ex );
-	    } catch( Throwable ex ) {
-	        ex.printStackTrace();
+        } catch( Throwable ex ) {
+            ex.printStackTrace();
         }
     }
 
     /**
      * Create the binary with native tools.
-     * @throws Throwable 
+     * 
+     * @throws Throwable
      */
     private void createBinary() throws Throwable {
-    	
+
         createTempImage();
         attach();
 
@@ -122,81 +126,76 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
         detach();
         finalImage();
-        
+
         new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
     }
-    
+
     /**
      * Create the service files and the pre- and post installer scripts
+     * 
      * @throws IOException in case of errors
      */
-    private void createServiceFiles( ) throws IOException {
-    	
-    	Application core = new Application(setup);
-    	
-    	// Create Pre and Post install scripts
-    	DesktopStarter runAfter = setup.getRunAfter();
-    	DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
+    private void createServiceFiles() throws IOException {
+
+        Application core = new Application( setup );
+
+        // Create Pre and Post install scripts
+        DesktopStarter runAfter = setup.getRunAfter();
+        DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
 
         OSXScriptBuilder preinstall = new OSXScriptBuilder( core, "template/preinstall.txt" );
-		preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ));
-		
-		OSXScriptBuilder postinstall = new OSXScriptBuilder( core, "template/postinstall.txt" );
-		preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ));
+        preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ) );
+
+        OSXScriptBuilder postinstall = new OSXScriptBuilder( core, "template/postinstall.txt" );
+        preinstall.addScript( new OSXScriptBuilder( task.getPostinst() ) );
 
         OSXScriptBuilder uninstall = new OSXScriptBuilder( core, "template/uninstall.txt" );
-        
-        uninstall.addScript( new OSXScriptBuilder( task.getPrerm() ));
+
+        uninstall.addScript( new OSXScriptBuilder( task.getPrerm() ) );
         OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
 
-        for (Service service : setup.getServices() ) {
-			
-    		if ( runBeforeUninstall != null ) {
-    			runBeforeUninstall.setDisplayName(service.getDisplayName());
-    			uninstall.addScript(new OSXScriptBuilder(runBeforeUninstall, "template/runBeforeAfter.txt" )
-    					.setPlaceholder( "installationSubdirectory" , installationSubdirectory())
-    					.setPlaceholder("inBackground", "NO")
-    					.setPlaceholder("startArgument", runBeforeUninstall.getStartArguments()));
-    		}
+        for( Service service : setup.getServices() ) {
 
-			preinstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
-			postinstall.addScript(new OSXScriptBuilder(service, "template/postinstall.install-service.txt" )
-					.setPlaceholder( "installationSubdirectory" , installationSubdirectory()));
+            if( runBeforeUninstall != null ) {
+                runBeforeUninstall.setDisplayName( service.getDisplayName() );
+                uninstall.addScript( new OSXScriptBuilder( runBeforeUninstall, "template/runBeforeAfter.txt" ).setPlaceholder( "installationSubdirectory", installationSubdirectory() ).setPlaceholder( "inBackground", "NO" ).setPlaceholder( "startArgument", runBeforeUninstall.getStartArguments() ) );
+            }
 
-			// Unload service in uninstall as well.
-			uninstall.addScript(new OSXScriptBuilder(service, "template/preinstall.remove-service.txt" ));
+            preinstall.addScript( new OSXScriptBuilder( service, "template/preinstall.remove-service.txt" ) );
+            postinstall.addScript( new OSXScriptBuilder( service, "template/postinstall.install-service.txt" ).setPlaceholder( "installationSubdirectory", installationSubdirectory() ) );
 
-			// patch runafter
-			if ( runAfter != null ) {
-				runAfter.setDisplayName(service.getDisplayName());
-				postinstall.addScript(new OSXScriptBuilder(runAfter, "template/runBeforeAfter.txt" )
-						.setPlaceholder( "installationSubdirectory" , installationSubdirectory())
-    					.setPlaceholder("startArgument", runAfter.getStartArguments()));
-			}
-		}
+            // Unload service in uninstall as well.
+            uninstall.addScript( new OSXScriptBuilder( service, "template/preinstall.remove-service.txt" ) );
 
-        uninstall.addScript( new OSXScriptBuilder( task.getPostrm() ));
-    	uninstall.writeTo( TempPath.getTempFile("scripts", "uninstall.sh" ) );
-    	watchUninstall.writeTo( TempPath.getTempFile("scripts", "watchuninstall.plist" ) );
-    	preinstall.writeTo( TempPath.getTempFile("scripts", "preinstall"));
-    	postinstall.writeTo( TempPath.getTempFile("scripts", "postinstall"));
+            // patch runafter
+            if( runAfter != null ) {
+                runAfter.setDisplayName( service.getDisplayName() );
+                postinstall.addScript( new OSXScriptBuilder( runAfter, "template/runBeforeAfter.txt" ).setPlaceholder( "installationSubdirectory", installationSubdirectory() ).setPlaceholder( "startArgument", runAfter.getStartArguments() ) );
+            }
+        }
+
+        uninstall.addScript( new OSXScriptBuilder( task.getPostrm() ) );
+        uninstall.writeTo( TempPath.getTempFile( "scripts", "uninstall.sh" ) );
+        watchUninstall.writeTo( TempPath.getTempFile( "scripts", "watchuninstall.plist" ) );
+        preinstall.writeTo( TempPath.getTempFile( "scripts", "preinstall" ) );
+        postinstall.writeTo( TempPath.getTempFile( "scripts", "postinstall" ) );
     }
-    
 
     /**
      * Create a package from the specified app files
+     * 
      * @throws Throwable in case of errors
      */
     private void createPackageFromApp() throws Throwable {
-		
-    	createServiceFiles();
+
+        createServiceFiles();
         extractApplicationInformation();
         createAndPatchDistributionXML();
-    	
-        imageSourceRoot = TempPath.get( "distribution" ).toString();
-        File resultingPackage = new File(imageSourceRoot, applicationIdentifier + ".pkg");
 
-		// Build Product for packaging
+        imageSourceRoot = TempPath.get( "distribution" ).toString();
+        File resultingPackage = new File( imageSourceRoot, applicationIdentifier + ".pkg" );
+
+        // Build Product for packaging
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/productbuild" );
         command.add( "--distribution" );
@@ -205,34 +204,35 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( TempPath.get( "packages" ).toString() );
         command.add( "--resources" );
         command.add( TempPath.get( "resources" ).toString() );
-        
+
         // Sign the final package
         command.add( resultingPackage.getAbsolutePath() );
-    	exec( command );
+        exec( command );
 
-		if ( task.getCodeSign() != null ) {
-        	task.getCodeSign().signProduct( resultingPackage );
+        if( task.getCodeSign() != null ) {
+            task.getCodeSign().signProduct( resultingPackage );
         }
 
-    	packageApplescript();
-    	Files.copy( resultingPackage.toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        packageApplescript();
+        Files.copy( resultingPackage.toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
      * Extract the application information to use for the package builder
+     * 
      * @throws IOException in case of errors
      */
-	private void extractApplicationInformation() throws IOException {
-		// Create application information plist
+    private void extractApplicationInformation() throws IOException {
+        // Create application information plist
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/pkgbuild" );
         command.add( "--analyze" );
         command.add( "--root" );
         command.add( buildDir.toString() );
         command.add( TempPath.getTempString( applicationIdentifier + ".plist" ) );
-    	exec( command );
-    	
-    	// set identifier, create package
+        exec( command );
+
+        // set identifier, create package
         command = new ArrayList<>();
         command.add( "/usr/bin/pkgbuild" );
         command.add( "--root" );
@@ -246,52 +246,55 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( "--scripts" );
         command.add( TempPath.get( "scripts" ).toString() );
         command.add( "--install-location" );
-        
+
         // Application as default directory except there are more application parts to install.
         command.add( "/Applications/" + installationSubdirectory() );
-        command.add(  TempPath.getTempString( "packages", applicationIdentifier + ".pkg" ) );
-    	exec( command );
-    	
-    	Files.copy( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toPath() , new File(setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-	}
+        command.add( TempPath.getTempString( "packages", applicationIdentifier + ".pkg" ) );
+        exec( command );
 
-	/**
-	 * Returns a subdirectory if needed because of the installation
-	 * @return subdirectory or ""
-	 */
-	private String installationSubdirectory() {
-		return (setup.getServices().size()+setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "");
-	}
+        Files.copy( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+    }
 
-	/**
-	 * Create and patch the ditribution xml file that defines the package 
-	 * @throws Throwable in case of error
-	 */
-	private void createAndPatchDistributionXML() throws Throwable {
-		ArrayList<String> command;
-		// Synthesize Distribution xml
+    /**
+     * Returns a subdirectory if needed because of the installation
+     * 
+     * @return subdirectory or ""
+     */
+    private String installationSubdirectory() {
+        return (setup.getServices().size() + setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "");
+    }
+
+    /**
+     * Create and patch the ditribution xml file that defines the package
+     * 
+     * @throws Throwable in case of error
+     */
+    private void createAndPatchDistributionXML() throws Throwable {
+        ArrayList<String> command;
+        // Synthesize Distribution xml
         command = new ArrayList<>();
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg").toString() );
+        command.add( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toString() );
         command.add( TempPath.getTempFile( "distribution.xml" ).toString() );
-    	exec( command );
+        exec( command );
 
         patchDistributionXML();
-	}
+    }
 
-	/**
-	 * Patch the distriubiton file with custom settings 
-	 * @throws Throwable in case of errors
-	 */
-	private void patchDistributionXML() throws Throwable {
+    /**
+     * Patch the distriubiton file with custom settings
+     * 
+     * @throws Throwable in case of errors
+     */
+    private void patchDistributionXML() throws Throwable {
 
         File xml = TempPath.getTempFile( "distribution.xml" );
         URL url = xml.toURI().toURL();
-		@SuppressWarnings("rawtypes")
-		XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>(task, setup, xml, buildDir, url);
-        
+        @SuppressWarnings( "rawtypes" )
+        XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>( task, setup, xml, buildDir, url );
+
         Element distribution = (Element)xmlFile.doc.getFirstChild();
         if( !"installer-gui-script".equals( distribution.getTagName() ) ) {
             throw new IllegalArgumentException( "Template does not contain an installer-gui-script root: " + distribution.getTagName() );
@@ -299,75 +302,76 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
         // The title of the installer
         Element title = xmlFile.getOrCreateChild( distribution, "title" );
-        xmlFile.addNodeText( title, applicationName);
+        xmlFile.addNodeText( title, applicationName );
 
         // Product node
         File backgroundImage = task.getSetupBackgroundImage();
-        if ( backgroundImage != null ) {
-        	Files.copy( backgroundImage.toPath(), TempPath.getTempFile("resources", backgroundImage.getName()).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-	        Element background = xmlFile.getOrCreateChild( distribution, "background", false );
-	        xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
-	        xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
-	        xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
+        if( backgroundImage != null ) {
+            Files.copy( backgroundImage.toPath(), TempPath.getTempFile( "resources", backgroundImage.getName() ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            Element background = xmlFile.getOrCreateChild( distribution, "background", false );
+            xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
+            xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
+            xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
         }
 
         // Welcome Node
         List<LocalizedResource> welcomePages = task.getWelcomePages();
-        for (LocalizedResource localizedResource : welcomePages) {
+        for( LocalizedResource localizedResource : welcomePages ) {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
-            if ( welcomePage != null ) {
-            	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLanguage()+".lproj", "Welcome").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            	Element license = xmlFile.getOrCreateChild( distribution, "license", false );
-            	xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
+            if( welcomePage != null ) {
+                Files.copy( welcomePage.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "Welcome" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+                Element license = xmlFile.getOrCreateChild( distribution, "license", false );
+                xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
             }
-		}
-        
+        }
+
         // License node
         List<LocalizedResource> licenseFiles = setup.getLicenseFiles();
-        for (LocalizedResource localizedResource : licenseFiles) {
+        for( LocalizedResource localizedResource : licenseFiles ) {
             File licenseFile = checkSetupTextFile( localizedResource.getResource() );
-            if ( licenseFile != null ) {
-            	Files.copy( licenseFile.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLanguage()+".lproj", "License").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            	Element license = xmlFile.getOrCreateChild( distribution, "license", false );
-            	xmlFile.addAttributeIfNotExists( license, "file", "License" );
+            if( licenseFile != null ) {
+                Files.copy( licenseFile.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "License" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+                Element license = xmlFile.getOrCreateChild( distribution, "license", false );
+                xmlFile.addAttributeIfNotExists( license, "file", "License" );
             }
-		}
+        }
 
         // Conclusion Node
         List<LocalizedResource> conclusionPages = task.getConclusionPages();
-        for (LocalizedResource localizedResource : conclusionPages) {
+        for( LocalizedResource localizedResource : conclusionPages ) {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
-            if ( welcomePage != null ) {
-            	Files.copy( welcomePage.toPath(), TempPath.getTempFile("resources/"+localizedResource.getLocale().getLanguage()+".lproj", "Conclusion").toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            	Element license = xmlFile.getOrCreateChild( distribution, "conclusion", false );
-            	xmlFile.addAttributeIfNotExists( license, "file", "Conclusion" );
+            if( welcomePage != null ) {
+                Files.copy( welcomePage.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLocale().getLanguage() + ".lproj", "Conclusion" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+                Element license = xmlFile.getOrCreateChild( distribution, "conclusion", false );
+                xmlFile.addAttributeIfNotExists( license, "file", "Conclusion" );
             }
-		}   
+        }
         xmlFile.save();
-	}
+    }
 
-	/**
-	 * Check a file for the correct setup text-resource type
-	 * @param file to check
-	 * @return file if ok, or null
-	 */
-	private File checkSetupTextFile(File file) {
-		
-		if ( file != null ) {
-			
-			String name = file.getName();
-			for (String format : new String[] { "txt", "rtf", "rtfd", "html"}) {
-				if ( name.toLowerCase().endsWith( "." + format ) ) {
-					return file;
-				}
-			}
-			System.err.println( "The provided file must be of type: txt, rtf, rtfd or html. File was: " + name );
-		}
-		
-		return null;
-	}
-	
-	/**
+    /**
+     * Check a file for the correct setup text-resource type
+     * 
+     * @param file to check
+     * @return file if ok, or null
+     */
+    private File checkSetupTextFile( File file ) {
+
+        if( file != null ) {
+
+            String name = file.getName();
+            for( String format : new String[] { "txt", "rtf", "rtfd", "html" } ) {
+                if( name.toLowerCase().endsWith( "." + format ) ) {
+                    return file;
+                }
+            }
+            System.err.println( "The provided file must be of type: txt, rtf, rtfd or html. File was: " + name );
+        }
+
+        return null;
+    }
+
+    /**
      * Call hdiutil to create a temporary image.
      */
     private void createTempImage() {
@@ -375,7 +379,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
         command.add( "/usr/bin/hdiutil" );
         command.add( "create" );
         command.add( "-srcfolder" );
-		command.add( imageSourceRoot );
+        command.add( imageSourceRoot );
         command.add( "-format" );
         command.add( "UDRW" );
         command.add( "-volname" );
@@ -386,6 +390,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
     /**
      * Call hdiutil to mount temporary image
+     * 
      * @throws IOException in case of errors
      */
     private void attach() throws IOException {
@@ -415,62 +420,64 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
     /**
      * Call SetFile to set the volume icon.
+     * 
      * @throws IOException IOException
      */
     private void setVolumeIcon() throws IOException {
-        
-    	// Copy Icon as file icon into attached container 
-        File iconDestination = TempPath.getTempFile(applicationName, ".VolumeIcon.icns" );
+
+        // Copy Icon as file icon into attached container 
+        File iconDestination = TempPath.getTempFile( applicationName, ".VolumeIcon.icns" );
         File icons = setup.getIconForType( buildDir, "icns" );
-        if ( icons == null ) {
+        if( icons == null ) {
             throw new IllegalArgumentException( "You have to specify a valid icon file" );
         }
         Files.copy( icons.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-    	
-    	ArrayList<String> command = new ArrayList<>();
+
+        ArrayList<String> command = new ArrayList<>();
         command.add( "SetFile" );
         command.add( "-a" );
         command.add( "C" );
         command.add( iconDestination.getParent() );
         exec( command, null, null, true );
-        
-        if ( task.getBackgroundImage() != null ) {
-        	String name = task.getBackgroundImage().getName();
-            File backgroundDestination = TempPath.getTempFile(applicationName, "/.resources/background" + name.substring(name.lastIndexOf('.')) );
-            Files.createDirectories(backgroundDestination.getParentFile().toPath(), new FileAttribute[0]);
-        	Files.copy(task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        	BufferedImage image = ImageIO.read( backgroundDestination );
-        	
-        	// Override the values to use the acutal image size
-        	task.setWindowWidth(image.getWidth());
-        	task.setWindowHeight(image.getHeight());
+
+        if( task.getBackgroundImage() != null ) {
+            String name = task.getBackgroundImage().getName();
+            File backgroundDestination = TempPath.getTempFile( applicationName, "/.resources/background" + name.substring( name.lastIndexOf( '.' ) ) );
+            Files.createDirectories( backgroundDestination.getParentFile().toPath(), new FileAttribute[0] );
+            Files.copy( task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            BufferedImage image = ImageIO.read( backgroundDestination );
+
+            // Override the values to use the acutal image size
+            task.setWindowWidth( image.getWidth() );
+            task.setWindowHeight( image.getHeight() );
         }
     }
 
     /**
      * Run an apple script using the applescript.txt template
      * This will set up the layout of the DMG window
+     * 
      * @throws IOException in case of errors
      */
     private void applescript() throws IOException {
-    	
-    	Template applescript = new Template( "dmg/template/applescript.txt" );
-    	applescript.setPlaceholder("displayName", setup.getApplication() );
-    	applescript.setPlaceholder("executable", setup.getApplication() );
 
-    	applescript.setPlaceholder("windowWidth", task.getWindowWidth().toString() );
-    	applescript.setPlaceholder("windowHeight", task.getWindowHeight().toString() );
-    	applescript.setPlaceholder("iconSize",  task.getIconSize().toString() );
-    	applescript.setPlaceholder("fontSize", task.getFontSize().toString() );
-    	
-        if ( task.getBackgroundImage() != null ) {
-        	String name = task.getBackgroundImage().getName();
-        	applescript.setPlaceholder("backgroundExt", name.substring(name.lastIndexOf('.')) );
+        Template applescript = new Template( "dmg/template/applescript.txt" );
+        applescript.setPlaceholder( "displayName", setup.getApplication() );
+        applescript.setPlaceholder( "executable", setup.getApplication() );
+
+        applescript.setPlaceholder( "windowWidth", task.getWindowWidth().toString() );
+        applescript.setPlaceholder( "windowHeight", task.getWindowHeight().toString() );
+        applescript.setPlaceholder( "iconSize", task.getIconSize().toString() );
+        applescript.setPlaceholder( "fontSize", task.getFontSize().toString() );
+
+        if( task.getBackgroundImage() != null ) {
+            String name = task.getBackgroundImage().getName();
+            applescript.setPlaceholder( "backgroundExt", name.substring( name.lastIndexOf( '.' ) ) );
         }
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
-        
+
         System.out.println( "Setting DMG display options." );
         System.out.println( applescript );
         exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
@@ -478,28 +485,29 @@ public class DmgBuilder extends AbstractBuilder<Dmg,SetupBuilder> {
 
     /**
      * run a Script for the Package.
+     * 
      * @throws IOException exception
      */
     private void packageApplescript() throws IOException {
-    	
-    	Template applescript = new Template( "dmg/template/package.applescript.txt" );
-    	applescript.setPlaceholder("icon", ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns").getAbsolutePath() ); 
-    	applescript.setPlaceholder("package", new File(imageSourceRoot, applicationIdentifier + ".pkg").getAbsolutePath() );
 
-    	ArrayList<String> command = new ArrayList<>();
+        Template applescript = new Template( "dmg/template/package.applescript.txt" );
+        applescript.setPlaceholder( "icon", ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns" ).getAbsolutePath() );
+        applescript.setPlaceholder( "package", new File( imageSourceRoot, applicationIdentifier + ".pkg" ).getAbsolutePath() );
+
+        ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
-        
+
         System.out.println( "Setting DMG display options." );
         System.out.println( applescript );
         exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
-    
+
     /**
      * convert to final image
      */
     private void finalImage() {
 
-    	ArrayList<String> command = new ArrayList<>();
+        ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "convert" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );

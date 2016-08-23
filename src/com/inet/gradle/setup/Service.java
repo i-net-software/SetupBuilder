@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,12 @@ package com.inet.gradle.setup;
  */
 public class Service extends Application {
     private boolean startOnBoot = true, keepAlive = false;
-    private String  startArguments, id, wrapper;
+
+    private String  id, wrapper;
 
     /**
      * Create a new Service
+     * 
      * @param setup current SetupBuilder
      */
     public Service( SetupBuilder setup ) {
@@ -33,6 +35,7 @@ public class Service extends Application {
 
     /**
      * Returns a boolean flag indicating whether the service is started when the system is booted.
+     * 
      * @return boolean flag indicating whether the service is started when the system is booted
      */
     public boolean isStartOnBoot() {
@@ -41,6 +44,7 @@ public class Service extends Application {
 
     /**
      * Sets a boolean flag indicating whether the service is started when the system is booted.
+     * 
      * @param startOnBoot boolean flag indicating whether the service is started when the system is booted
      */
     public void setStartOnBoot( boolean startOnBoot ) {
@@ -48,79 +52,66 @@ public class Service extends Application {
     }
 
     /**
-     * Returns the command-line arguments for starting the service.
-     * @return the command-line arguments for starting the service
-     */
-    public String getStartArguments() {
-        if (startArguments == null) {
-            return "";
-        }
-        return startArguments;
-    }
-
-    /**
-     * Sets the command-line arguments for starting the service.
-     * @param startArguments the command-line arguments for starting the service
-     */
-    public void setStartArguments( String startArguments ) {
-        this.startArguments = startArguments;
-    }
-
-    /**
-     * Returns the serviceID which should be a short version of the application name 
+     * Returns the serviceID which should be a short version of the application name
+     * 
      * @return the serviceID
      */
-	public String getId() {
+    public String getId() {
         if( id == null ) {
-        	return setup.getAppIdentifier();
+            return setup.getAppIdentifier();
         }
-        
+
         return id;
-	}
+    }
 
-	/**
-	 * Set the serviceID which should be a short version of the application name
-	 * It must not contain spaces.
+    /**
+     * Set the serviceID which should be a short version of the application name
+     * It must not contain spaces.
+     * 
      * @param serviceID the id
-	 */
-	public void setId(String serviceID) {
-		this.id = serviceID;
-	}
+     */
+    public void setId( String serviceID ) {
+        this.id = serviceID;
+    }
 
-	/**
-	 * Name of the daemon wrapper, or the program that should be run as daemon 
-	 * @return daemon wrapper
-	 */
-	public String getWrapper() {
-		String newWrapper = wrapper;
-		if( newWrapper == null ) {
-			newWrapper = setup.getAppIdentifier() + "-service";
+    /**
+     * Name of the daemon wrapper, or the program that should be run as daemon
+     * 
+     * @return daemon wrapper
+     */
+    public String getWrapper() {
+        String newWrapper = wrapper;
+        if( newWrapper == null ) {
+            newWrapper = setup.getAppIdentifier() + "-service";
         }
-        
+
         return newWrapper.toLowerCase().replace( ' ', '-' );
-	}
+    }
 
-	/**
-	 * Name of the daemon wrapper, or the program that should be run as daemon
-	 * @param wrapper daemon name
-	 */
-	public void setWrapper(String wrapper) {
-		this.wrapper = wrapper;
-	}
+    /**
+     * Name of the daemon wrapper, or the program that should be run as daemon
+     * 
+     * @param wrapper daemon name
+     */
+    public void setWrapper( String wrapper ) {
+        this.wrapper = wrapper;
+    }
 
-	/**
-	 * Return true the job should always be running
-	 * @return true the job should always be running
-	 */
-	public boolean isKeepAlive() {
-		return keepAlive;
-	}
+    /**
+     * Return true the job should always be running
+     * 
+     * @return true the job should always be running
+     */
+    public boolean isKeepAlive() {
+        return keepAlive;
+    }
 
-	/**
-	 * Set if the job should always be running, even if it crashes
-	 * @param keepAlive if the job should always be running, even if it crashes
-	 */
-	public void setKeepAlive(boolean keepAlive) {
-		this.keepAlive = keepAlive;
-	}
+    /**
+     * Set if the job should always be running, even if it crashes
+     * 
+     * @param keepAlive if the job should always be running, even if it crashes
+     */
+    public void setKeepAlive( boolean keepAlive ) {
+        this.keepAlive = keepAlive;
+    }
 }
