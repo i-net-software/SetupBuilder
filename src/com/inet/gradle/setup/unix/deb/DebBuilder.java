@@ -395,6 +395,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      * execute the command to generate the Debian package
      */
     private void createDebianPackage() {
+        try {
         ArrayList<String> command = new ArrayList<>();
         command.add( "fakeroot" );
         command.add( "dpkg-deb" );
@@ -402,6 +403,15 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         command.add( buildDir.getAbsolutePath() );
         command.add( task.getSetupFile().getPath() );
         exec( command );
+        } catch( Throwable e ) {
+            System.out.println( "Error. Control File was:" );
+            try {
+                System.out.println( String.join( "\n", Files.readAllLines( new File(buildDir.getAbsolutePath(), "DEBIAN/control" ).toPath() ) ) );
+            } catch( IOException e1 ) {
+                e1.printStackTrace();
+            }
+            throw e;
+        }
     }
 
     /**
