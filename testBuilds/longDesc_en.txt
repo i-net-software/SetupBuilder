@@ -1,9 +1,9 @@
 This package installs i-net HelpDesk in 2 steps.
  
-First, the program files are copied to /usr/share/i-net HelpDesk.
+First, the program files are copied to /usr/share/i-net-helpdesk.
 Then the installer will automatically attempt to open the browser to configure
 the server (i.e. set up the database, the proxy, etc.). Depending on your environment
 and package installer, this may not work - if the browser does not automatically open up,
-please check the file /usr/share/i-net HelpDesk/Server/webconfig.txt and enter
+please check the file /usr/share/i-net-helpdesk/Server/webconfig.txt and enter
 the UUID there in the server web configuration page at http://localhost:8002/setup
 (note that if a different port than 8002 is specified in the webconfig.txt, use this one).
