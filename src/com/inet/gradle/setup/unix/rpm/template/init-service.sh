@@ -23,7 +23,7 @@ GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 # Source config
-[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+[ -r "/etc/sysconfig/$NAME" ] && . "/etc/sysconfig/$NAME"
 
 LINESTATE=""
 prep_cmd() {
@@ -45,12 +45,14 @@ eval_cmd() {
     return $rc
 }
 
-# Source config
-[ -r /etc/sysconfig/$NAME ] && . /etc/sysconfig/$NAME
+# check if PID from PIDFILE is a process
+check_pid_exists() {
+    [ -f "$PIDFILE" ] && [ -n "$(ps hp $(head -n1 "$PIDFILE"))" ] 
+}
 
 start() {
     # see if running
-    [ -f "$PIDFILE" ] && [ ! -z `pgrep -F "$PIDFILE" 2>1` ] && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0 || :
+    check_pid_exists && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0 || :
 
     BACKGROUND="&&"
     if [ -z "$1" ]; then
@@ -65,13 +67,13 @@ start() {
 
     # check again if running
     sleep 5
-    RES=`pgrep -F "$PIDFILE" 2>1`
+    check_pid_exists
     eval_cmd $?
 }
 
 stop() {
     # see if running
-    ([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0 || :
+    check_pid_exists || echo "$NAME is not running" && return 0
 
     prep_cmd "Stopping $NAME:"
     kill -9 `pgrep -F "$PIDFILE"`
@@ -81,8 +83,7 @@ stop() {
 
 status() {
     # see if running
-    ([ ! -f "$PIDFILE" ] || [ -z `pgrep -F "$PIDFILE"` ]) && echo "$NAME is not running" && return 0 || :
-    [ -f "$PIDFILE" ] && [ `pgrep -F "$PIDFILE"` ] && echo "$NAME is running with pid $(cat "$PIDFILE")" && return 0 || :
+    check_pid_exists && echo "$NAME is running with pid $(cat "$PIDFILE")" || echo "$NAME is not running"
 }
 
 {{additionalServiceScript}}

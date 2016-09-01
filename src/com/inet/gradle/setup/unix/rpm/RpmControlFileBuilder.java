@@ -564,8 +564,6 @@ class RpmControlFileBuilder {
             //	    	depends = depends; // + ", daemonize, initscripts";
         }
 
-        // Add process tasks to the requirements 
-        depends += (depends.trim().length()>0?",":"") + "procps-ng";
         if( depends.trim().length() > 0 ) {
             controlWriter.write( "Requires: " + depends + NEWLINE );
         }
