@@ -3,10 +3,11 @@
 # Description: {{description}}
 #
 # chkconfig: - 80 20
+# pidfile: /var/run/{{name}}.pid
 #
 
 # Source function library.
-[ -r "/etc/init.d/functions" ] && . /etc/init.d/functions
+[ ! -r "/etc/init.d/functions" ] && echo "/etc/init.d/functions is mising" && exit 1 || . /etc/init.d/functions
 
 NAME={{name}}
 DAEMON_USER={{daemonUser}}
@@ -17,73 +18,37 @@ MAINARCHIVE="{{mainJar}}"
 MAINCLASS={{mainClass}}
 STARTARGUMENTS="{{startArguments}}"
 
-# Output colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+# check for daemon program to be present
+[ ! -x "$DAEMON" ] && echo "The program '$DAEMON' does not exist" && exit 1 || :
 
 # Source config
 [ -r "/etc/sysconfig/$NAME" ] && . "/etc/sysconfig/$NAME"
 
-LINESTATE=""
-prep_cmd() {
-    LINESTATE="$1"
-    printf "\r%s" $LINESTATE 
-}
-
-eval_cmd() {
-    local rc=$1
-
-    if [ $rc -eq 0 ]; then
-        STATE="[ ${GREEN}OK${NC} ]"
-    else
-        STATE="[ ${RED}FAILED${NC} ]"
-    fi
-
-    printf "\r%*s\r%s\n" $(tput cols) "$(printf "$STATE")" "$LINESTATE"
-    LINESTATE=""
-    return $rc
-}
-
-# check if PID from PIDFILE is a process
-check_pid_exists() {
-    [ -f "$PIDFILE" ] && [ -n "$(ps hp $(head -n1 "$PIDFILE"))" ] 
-}
+RETVAL=0
 
 start() {
-    # see if running
-    check_pid_exists && echo "$NAME (pid $(cat "$PIDFILE")) is already running" && return 0 || :
-
-    BACKGROUND="&&"
-    if [ -z "$1" ]; then
-        BACKGROUND="&"
-    fi
-
-    prep_cmd "Starting $NAME:"
-    cd "${WORKINGDIR}" && su ${DAEMON_USER} -c "$DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$NAME.out\" $BACKGROUND echo \$! > \"/tmp/$NAME.pid\""
-
+    daemon --check "$NAME" --user "$DAEMON_USER" --pidfile "$PIDFILE" "cd \"${WORKINGDIR}\" ; $DAEMON -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$NAME.out\" & echo \$! > \"/tmp/$NAME.pid\""
+    RETVAL=$?
+    
     # save pid to file if you want
     ([ -f "/tmp/$NAME.pid" ] && cat "/tmp/$NAME.pid" > "$PIDFILE" && rm "/tmp/$NAME.pid" ) || echo "PID-file ($PIDFILE) could not be created"
 
-    # check again if running
-    sleep 5
-    check_pid_exists
-    eval_cmd $?
+    echo
+    return "$RETVAL"
 }
 
 stop() {
-    # see if running
-    check_pid_exists || echo "$NAME is not running" && return 0
+    killproc -p "$PIDFILE" "$NAME"
+    RETVAL=$?
+    echo
 
-    prep_cmd "Stopping $NAME:"
-    kill -9 `cat "$PIDFILE"`
-    eval_cmd $?
-    rm -f $PIDFILE
+    [ $RETVAL = 0 ] && rm -f "$PIDFILE"
+    return "$RETVAL"
 }
 
 status() {
     # see if running
-    check_pid_exists && echo "$NAME is running with pid $(cat "$PIDFILE")" || echo "$NAME is not running"
+    [ -f "$PIDFILE" ] && [ -n "$(ps hp $(head -n1 "$PIDFILE"))" ] &&  echo "$NAME is running with pid $(cat "$PIDFILE")" || echo $"$NAME is not running"
 }
 
 {{additionalServiceScript}}
@@ -91,9 +56,6 @@ status() {
 case $1 in
     start)
         start
-        ;;
-    daemon)
-        start daemon
         ;;
     stop)
         stop
