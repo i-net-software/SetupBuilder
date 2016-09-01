@@ -22,10 +22,10 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.plugins.BasePlugin;
 
-import com.inet.gradle.setup.deb.Deb;
 import com.inet.gradle.setup.dmg.Dmg;
 import com.inet.gradle.setup.msi.Msi;
-import com.inet.gradle.setup.rpm.Rpm;
+import com.inet.gradle.setup.unix.deb.Deb;
+import com.inet.gradle.setup.unix.rpm.Rpm;
 
 /**
  * The central plugin class of this Gradle plugin.

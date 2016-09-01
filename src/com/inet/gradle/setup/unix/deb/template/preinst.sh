@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # preinst script for {{baseName}}
 #
 # see: dh_installdeb(1)
@@ -14,6 +14,8 @@ set -e
 # the debian-policy package
 
 . /usr/share/debconf/confmodule
+
+{{variables}}
 
 {{head}}
 

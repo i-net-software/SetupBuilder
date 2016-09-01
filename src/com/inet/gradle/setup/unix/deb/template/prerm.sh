@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # prerm script for {{baseName}}
 #
 # see: dh_installdeb(1)
@@ -15,6 +15,8 @@ set -e
 #          <conflicting-package> <version>
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
+
+{{variables}}
 
 {{head}}
 

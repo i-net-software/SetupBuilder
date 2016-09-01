@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # postrm script for {{baseName}}
 #
 # see: dh_installdeb(1)
@@ -20,6 +20,8 @@ set -e
 
 # confmodule is required for further commands like db_purge, db_input, db_get ...
 . /usr/share/debconf/confmodule
+
+{{variables}}
 
 {{head}}
 
