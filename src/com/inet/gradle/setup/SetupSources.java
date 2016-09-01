@@ -240,4 +240,14 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     default CopySpec with( CopySpec... arg0 ) {
         return getRootSpec().with( arg0 );
     }
+
+    @Override
+    default String getFilteringCharset() {
+        return getRootSpec().getFilteringCharset();
+    }
+
+    @Override
+    default void setFilteringCharset( String charset ) {
+        getRootSpec().setFilteringCharset( charset );
+    }
 }
