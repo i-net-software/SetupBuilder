@@ -76,7 +76,7 @@ stop() {
     check_pid_exists || echo "$NAME is not running" && return 0
 
     prep_cmd "Stopping $NAME:"
-    kill -9 `pgrep -F "$PIDFILE"`
+    kill -9 `cat "$PIDFILE"`
     eval_cmd $?
     rm -f $PIDFILE
 }
