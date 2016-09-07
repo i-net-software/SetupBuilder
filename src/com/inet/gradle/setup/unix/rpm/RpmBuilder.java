@@ -23,6 +23,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -136,7 +137,8 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         String workingDir = installationRoot + (service.getWorkDir() != null ? "/" + service.getWorkDir() : "");
         String mainJarPath = workingDir + "/" + service.getMainJar();
 
-        Template initScript = new Template( "unix/rpm/template/init-service.sh" );
+        String initTemplate = "unix/init-service.sh";
+        Template initScript = new Template( initTemplate  );
         initScript.setPlaceholder( "name", serviceUnixName );
         String version = setup.getVersion();
         initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
@@ -153,7 +155,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
-        initScript.writeTo( createFile( initScriptFile, true ) );
+        initScript.writeTo( createFile( initScriptFile , true ) );
         controlBuilder.addConfFile( initScriptFile );
 
         controlBuilder.addScriptFragment( Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
@@ -360,4 +362,27 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         exec( command );
     }
 
+    /**
+     * A consumer interface that can throw exceptions further up the chain.
+     * @author gamma
+     *
+     * @param <T> first element that will be accepted 
+     * @param <P> second element that will be accepted
+     */
+    @FunctionalInterface
+    private interface ThrowingBiConsumer<T,P> extends BiConsumer<T,P> {
+
+        @Override
+        default void accept(final T elem, final P mele) {
+            try {
+                acceptThrows(elem, mele);
+            } catch (final Exception e) {
+                /* Do whatever here ... */
+                System.out.println("handling an exception...");
+                throw new RuntimeException(e);
+            }
+        }
+
+        void acceptThrows(T elem, P mele) throws Exception;
+    }
 }
