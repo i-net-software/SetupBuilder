@@ -166,7 +166,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " 2> /dev/null || true\n"
                             + "[ \"$(id " + daemonuser + " 2> /dev/null; echo $?)\" == \"0\" ]"
                             + " && chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'"
-                            + " && chmod -R g+w '" + task.getInstallationRoot() + " || true \n\n"
+                            + " && chmod -R g+w '" + task.getInstallationRoot() + "' || true \n\n"
                             );
         }
 

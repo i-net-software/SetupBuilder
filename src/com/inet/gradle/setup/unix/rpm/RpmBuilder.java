@@ -88,7 +88,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 controlBuilder.addScriptFragment( Script.POSTINSTHEAD, "useradd -r -m " + daemonuser + " 2> /dev/null || true\n"
                                 + "[ \"$(id " + daemonuser + " 2> /dev/null; echo $?)\" == \"0\" ]"
                                 + " && chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'"
-                                + " && chmod -R g+w '" + task.getInstallationRoot() + " || true \n\n" );
+                                + " && chmod -R g+w '" + task.getInstallationRoot() + "' || true \n\n" );
             }
 
             for( Service service : setup.getServices() ) {
