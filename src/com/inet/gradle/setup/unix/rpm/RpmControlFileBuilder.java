@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import org.apache.tools.ant.taskdefs.optional.ejb.BorlandDeploymentTool;
-
 import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;

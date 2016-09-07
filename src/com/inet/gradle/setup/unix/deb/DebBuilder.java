@@ -163,8 +163,11 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
         String daemonuser = task.getDaemonUser();
         if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-            controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m -s /bin/bash " + daemonuser + " || true \n" + "\n" + "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n" + "chmod -R g+w '" + task.getInstallationRoot() + "'\n" + "\n" );
-
+            controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " 2> /dev/null || true\n"
+                            + "[ \"$(id " + daemonuser + " 2> /dev/null; echo $?)\" == \"0\" ]"
+                            + " && chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'"
+                            + " && chmod -R g+w '" + task.getInstallationRoot() + " || true \n\n"
+                            );
         }
 
         ArrayList<String> preinsts = task.getPreinst();
@@ -186,7 +189,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         }
 
         if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-            controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "    userdel -r " + daemonuser + " || true \n" + "fi" );
+            controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "userdel -r " + daemonuser + " 2> /dev/null || true \n" + "fi" );
         }
 
     }

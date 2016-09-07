@@ -85,12 +85,10 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
             String daemonuser = task.getDaemonUser();
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-                controlBuilder.addScriptFragment( Script.POSTINSTHEAD, "useradd -r -m " + daemonuser + "\n"
-                                + "\n"
-                                + "chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'\n"
-                                + "chmod -R g+w '" + task.getInstallationRoot() + "'\n"
-                                + "\n" );
-
+                controlBuilder.addScriptFragment( Script.POSTINSTHEAD, "useradd -r -m " + daemonuser + " 2> /dev/null || true\n"
+                                + "[ \"$(id " + daemonuser + " 2> /dev/null; echo $?)\" == \"0\" ]"
+                                + " && chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'"
+                                + " && chmod -R g+w '" + task.getInstallationRoot() + " || true \n\n" );
             }
 
             for( Service service : setup.getServices() ) {
@@ -102,7 +100,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             }
 
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-                controlBuilder.addScriptFragment( Script.POSTRMTAIL, "userdel -r " + daemonuser + " || true \n" );
+                controlBuilder.addScriptFragment( Script.POSTRMTAIL, "userdel -r " + daemonuser + " 2> /dev/null || true \n" );
             }
 
             // copy the license files
