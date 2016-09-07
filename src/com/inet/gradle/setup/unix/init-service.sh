@@ -300,6 +300,8 @@ stop() {
     return $RETVAL
 }
 
+{{additionalServiceScript}}
+
 case "$1" in
     start)
         start
