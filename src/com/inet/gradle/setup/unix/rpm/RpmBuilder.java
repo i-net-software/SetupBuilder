@@ -83,6 +83,11 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
 
+            controlBuilder.addScriptFragment( Script.PREINSTHEAD, "# check for java. the service woll need it and other parts probably too"
+                            + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
+                            + "\n\n"
+                            );
+
             String daemonuser = task.getDaemonUser();
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
                 controlBuilder.addScriptFragment( Script.POSTINSTHEAD, "useradd -r -m " + daemonuser + " 2> /dev/null || true\n"
