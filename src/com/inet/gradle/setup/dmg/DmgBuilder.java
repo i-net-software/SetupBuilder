@@ -19,11 +19,13 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -159,12 +161,15 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         if( task.getDaemonUser() != "root" ) {
             // Create
             OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" );
-            createUser.setPlaceholder( "USER", task.getDaemonUser() );
-            preinstall.addScript( createUser );
 
             // Remove
             OSXScriptBuilder removeUser = new OSXScriptBuilder( core, "template/postuninstall.remove.user.txt" );
-            removeUser.setPlaceholder( "USER", task.getDaemonUser() );
+
+            // Set the daemonUser on each object
+            OSXScriptBuilder[] list = { createUser, removeUser, postinstall };
+            Arrays.asList( list ).forEach( item -> item.setPlaceholder( "daemonUser", task.getDaemonUser() ) );
+
+            preinstall.addScript( createUser );
             uninstall.addScript( removeUser );
         }
 

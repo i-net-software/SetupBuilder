@@ -1,5 +1,5 @@
 
-USER="_helpdesk"
+DEAMON_USER="{{daemonUser}}"
 
-dscl . -delete "/Users/${USER}"
-dscl . -delete "/Groups/${USER}"
+dscl . -delete "/Users/${DEAMON_USER}"
+dscl . -delete "/Groups/${DEAMON_USER}"

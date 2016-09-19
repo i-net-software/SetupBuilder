@@ -5,6 +5,7 @@ SCRIPT_PATH=`dirname "$0"`
 TARGET_LOCATION=${2%/}
 UNINSTALL_WATCH="$SCRIPT_PATH/watchuninstall.plist"
 AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
+DEAMON_USER="{{daemonUser}}"
 
 set -e
 
