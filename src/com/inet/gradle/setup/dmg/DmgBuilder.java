@@ -19,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -160,7 +159,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         // Set the daemon user, so that it can be created and removed.
         if( task.getDaemonUser() != "root" ) {
             // Create
-            OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" );
+            OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" ).setPlaceholder( "installationDirectory", "/Applications/" + installationSubdirectory() );
 
             // Remove
             OSXScriptBuilder removeUser = new OSXScriptBuilder( core, "template/postuninstall.remove.user.txt" );
