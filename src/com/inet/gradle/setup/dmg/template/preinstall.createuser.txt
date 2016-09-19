@@ -3,9 +3,10 @@ USER="_helpdesk"
 INSTALLATION_DIRECTORY="/Applications/i-net HelpDesk Server.app"
 SERVICE_DESCRIPTION="i-net HelpDesk Server"
 
-# find the next UID and GID that is below 500, so taht we can create the service user
-NEXTUID=$(dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
-NEXTGID=$(dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+# find the next UID and GID that is below 500, so that we can create the service user
+# if the user or group already exists, it will use this existing ID and still do the rest. We might have changes to commit.
+NEXTUID=$(ID=`dscl . -read "/Users/${USER}" UniqueID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+NEXTGID=$(ID=`dscl . -read "/Groups/${USER}" PrimaryGroupID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
 
 echo "Will use '$NEXTUID' as UserID and '$NEXTGID' as group ID for User '$USER'"
 
@@ -20,12 +21,12 @@ sudo dscl . -create "/Users/${USER}" RealName "${SERVICE_DESCRIPTION} Administra
 
 # Unusable password for standard users
 sudo dscl . -create "/Users/${USER}" Password \*
-dscl . -read "/Users/${USER}"
+# dscl . -read "/Users/${USER}"
 #########################################################################################################
 
 #########################################################################################################
 sudo dscl . -create "/Groups/${USER}" PrimaryGroupID "${NEXTGID}"
 # Unusable password for standard users
 sudo dscl . -create "/Groups/${USER}" Password \*
-dscl . -read "/Groups/${USER}"
+# dscl . -read "/Groups/${USER}"
 #########################################################################################################

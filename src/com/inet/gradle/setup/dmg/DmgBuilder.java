@@ -144,6 +144,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
 
         OSXScriptBuilder preinstall = new OSXScriptBuilder( core, "template/preinstall.txt" );
+
         preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ) );
 
         OSXScriptBuilder postinstall = new OSXScriptBuilder( core, "template/postinstall.txt" );
@@ -153,6 +154,19 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         uninstall.addScript( new OSXScriptBuilder( task.getPrerm() ) );
         OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
+
+        // Set the daemon user, so that it can be created and removed.
+        if( task.getDaemonUser() != "root" ) {
+            // Create
+            OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" );
+            createUser.setPlaceholder( "USER", task.getDaemonUser() );
+            preinstall.addScript( createUser );
+
+            // Remove
+            OSXScriptBuilder removeUser = new OSXScriptBuilder( core, "template/postuninstall.remove.user.txt" );
+            removeUser.setPlaceholder( "USER", task.getDaemonUser() );
+            uninstall.addScript( removeUser );
+        }
 
         for( Service service : setup.getServices() ) {
 
