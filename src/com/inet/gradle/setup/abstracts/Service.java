@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.inet.gradle.setup;
+package com.inet.gradle.setup.abstracts;
+
+import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * Definition of a service to be installed on the target system.

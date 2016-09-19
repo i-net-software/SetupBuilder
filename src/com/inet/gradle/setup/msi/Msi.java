@@ -30,8 +30,8 @@ import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
-import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.abstracts.AbstractSetupTask;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.

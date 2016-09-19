@@ -1,0 +1,31 @@
+
+USER="_helpdesk"
+INSTALLATION_DIRECTORY="/Applications/i-net HelpDesk Server.app"
+SERVICE_DESCRIPTION="i-net HelpDesk Server"
+
+# find the next UID and GID that is below 500, so taht we can create the service user
+NEXTUID=$(dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+NEXTGID=$(dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+
+echo "Will use '$NEXTUID' as UserID and '$NEXTGID' as group ID for User '$USER'"
+
+#########################################################################################################
+sudo dscl . -create "/Users/${USER}" UniqueID "${NEXTUID}"
+sudo dscl . -create "/Users/${USER}" PrimaryGroupID "${NEXTGID}"
+sudo dscl . -create "/Users/${USER}" HomeDirectory "${INSTALLATION_DIRECTORY}"
+
+# Can't login as standard user
+sudo dscl . -create "/Users/${USER}" UserShell /usr/bin/false
+sudo dscl . -create "/Users/${USER}" RealName "${SERVICE_DESCRIPTION} Administrator"
+
+# Unusable password for standard users
+sudo dscl . -create "/Users/${USER}" Password \*
+dscl . -read "/Users/${USER}"
+#########################################################################################################
+
+#########################################################################################################
+sudo dscl . -create "/Groups/${USER}" PrimaryGroupID "${NEXTGID}"
+# Unusable password for standard users
+sudo dscl . -create "/Groups/${USER}" Password \*
+dscl . -read "/Groups/${USER}"
+#########################################################################################################

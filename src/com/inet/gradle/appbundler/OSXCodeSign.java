@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.AbstractSetupBuilder;
-import com.inet.gradle.setup.AbstractTask;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
+import com.inet.gradle.setup.abstracts.AbstractTask;
 
 /**
  * Create code signature for packages. Deep Signing. 

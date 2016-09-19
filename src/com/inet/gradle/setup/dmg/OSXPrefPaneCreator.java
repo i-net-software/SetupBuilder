@@ -13,8 +13,8 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.ReplacingInputStream;
 import com.inet.gradle.setup.util.ResourceUtils;
 

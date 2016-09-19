@@ -31,9 +31,9 @@ import org.gradle.api.GradleException;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.util.ResourceUtils;
 
 /**

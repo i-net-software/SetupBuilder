@@ -20,8 +20,8 @@ import java.io.IOException;
 
 import org.w3c.dom.Element;
 
-import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**

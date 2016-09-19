@@ -1,0 +1,5 @@
+
+USER="_helpdesk"
+
+dscl . -delete "/Users/${USER}"
+dscl . -delete "/Groups/${USER}"

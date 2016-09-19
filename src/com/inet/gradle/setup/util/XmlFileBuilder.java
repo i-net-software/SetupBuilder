@@ -31,8 +31,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.inet.gradle.setup.AbstractSetupTask;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.AbstractSetupTask;
 
 /**
  * Build an XML.

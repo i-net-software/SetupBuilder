@@ -18,8 +18,8 @@ package com.inet.gradle.appbundler;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 
 /**
  * Actual implementation to create the application bundle

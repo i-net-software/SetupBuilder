@@ -26,11 +26,11 @@ import java.util.List;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
 
 public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {

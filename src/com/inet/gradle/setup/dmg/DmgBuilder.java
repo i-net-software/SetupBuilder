@@ -31,13 +31,13 @@ import javax.imageio.ImageIO;
 import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.Application;
-import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.LocalizedResource;
-import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.Application;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
+import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 

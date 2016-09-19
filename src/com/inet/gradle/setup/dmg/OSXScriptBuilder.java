@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.inet.gradle.setup.Application;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.abstracts.Application;
 
 /**
  * Create scripts from templates and replace placeholders

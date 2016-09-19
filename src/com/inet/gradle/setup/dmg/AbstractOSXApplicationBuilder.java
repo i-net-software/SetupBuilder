@@ -26,11 +26,11 @@ import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.AbstractSetupBuilder;
-import com.inet.gradle.setup.AbstractTask;
-import com.inet.gradle.setup.Application;
-import com.inet.gradle.setup.DocumentType;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
+import com.inet.gradle.setup.abstracts.AbstractTask;
+import com.inet.gradle.setup.abstracts.Application;
+import com.inet.gradle.setup.abstracts.DocumentType;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
