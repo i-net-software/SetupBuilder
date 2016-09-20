@@ -24,9 +24,9 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
     private Project project;
 
-    protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver ) {
+    protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver ) throws IOException {
         super( task, setup, fileResolver );
-        buildDir = task.getTemporaryDir();
+        buildDir = Files.createTempDirectory( "pref-pane" ).toFile();
         project = task.getProject();
     }
 
