@@ -159,14 +159,18 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         // Set the daemon user, so that it can be created and removed.
         if( task.getDaemonUser() != "root" ) {
             // Create
-            OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" ).setPlaceholder( "installationDirectory", "/Applications/" + installationSubdirectory() );
+            String home = "/Library/Application Support/" + setup.getAppIdentifier();
+            OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" );
 
             // Remove
             OSXScriptBuilder removeUser = new OSXScriptBuilder( core, "template/postuninstall.remove.user.txt" );
 
             // Set the daemonUser on each object
             OSXScriptBuilder[] list = { createUser, removeUser, postinstall };
-            Arrays.asList( list ).forEach( item -> item.setPlaceholder( "daemonUser", task.getDaemonUser() ) );
+            Arrays.asList( list ).forEach( item -> {
+                item.setPlaceholder( "daemonUser", task.getDaemonUser() );
+                item.setPlaceholder( "homeDirectory", home);
+            } );
 
             preinstall.addScript( createUser );
             uninstall.addScript( removeUser );

@@ -1,6 +1,6 @@
 
 DEAMON_USER="{{daemonUser}}"
-INSTALLATION_DIRECTORY="{{installationDirectory}}"
+HOME_DIRECTORY="{{homeDirectory}}"
 SERVICE_DESCRIPTION="{{displayName}}"
 
 # find the next UID and GID that is below 500, so that we can create the service user
@@ -13,7 +13,7 @@ echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${D
 #########################################################################################################
 sudo dscl . -create "/Users/${DEAMON_USER}" UniqueID "${NEXTUID}"
 sudo dscl . -create "/Users/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
-sudo dscl . -create "/Users/${DEAMON_USER}" HomeDirectory "${INSTALLATION_DIRECTORY}"
+sudo dscl . -create "/Users/${DEAMON_USER}" HomeDirectory "${HOME_DIRECTORY}"
 
 # Can't login as standard user
 sudo dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false
@@ -30,3 +30,6 @@ sudo dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
 sudo dscl . -create "/Groups/${DEAMON_USER}" Password \*
 # dscl . -read "/Groups/${DEAMON_USER}"
 #########################################################################################################
+
+# make home directory
+mkdir -p "${HOME_DIRECTORY}" && chown "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}" || true
