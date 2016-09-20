@@ -24,9 +24,9 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
     private Project project;
 
-    protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver ) throws IOException {
+    protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver ) {
         super( task, setup, fileResolver );
-        buildDir = Files.createTempDirectory( "pref-pane" ).toFile();
+        buildDir = task.getTemporaryDir();
         project = task.getProject();
     }
 
@@ -39,7 +39,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
      * @return the file to the created exe.
      * @throws Exception if any error occur
      */
-    File create( Service service ) throws Exception {
+    void create( Service service ) throws Exception {
 
         String displayName = service.getDisplayName();
         String internalName = displayName.replaceAll( "[^A-Za-z0-9]", "" );
@@ -102,7 +102,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf( service.isStartOnBoot() ) );
         setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
 
-        if ( task.getDaemonUser() != "root" ) {
+        if( task.getDaemonUser() != "root" ) {
             // Root by default, will only set if not.
             addPlistProperty( servicePLIST, ":UserName", "String", task.getDaemonUser() );
             addPlistProperty( servicePLIST, ":GroupName", "String", task.getDaemonUser() );
@@ -125,14 +125,13 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
             addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "bool", preferencesLink.isRunAsRoot() ? "YES" : "NO" );
         }
 
-        return prefPaneBinary;
+        ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
     }
 
     /**
      * Download and unpack the preferences pane setup files
      * 
-     * @param project current project
-     * @param buildDir the build directory
+     * @param internalName to unpack it now
      * @return file to prefpane sources
      * @throws IOException if an error occurs
      */
