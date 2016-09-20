@@ -8,7 +8,7 @@ SERVICE_DESCRIPTION="{{displayName}}"
 NEXTUID=$(ID=`dscl . -read "/Users/${DEAMON_USER}" UniqueID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
 NEXTGID=$(ID=`dscl . -read "/Groups/${DEAMON_USER}" PrimaryGroupID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
 
-echo "Will use '$NEXTUID' as UserID and '$NEXTGID' as group ID for User '$USER'"
+echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${DEAMON_USER}'"
 
 #########################################################################################################
 sudo dscl . -create "/Users/${DEAMON_USER}" UniqueID "${NEXTUID}"
