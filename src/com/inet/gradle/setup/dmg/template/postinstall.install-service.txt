@@ -7,6 +7,11 @@ RESOURCE_LOCATION="$SERVICE_APP_LOCATION/Contents/Resources"
 SERVICE_PLIST="$RESOURCE_LOCATION/{{displayName}}.prefPane/Contents/Resources/service.plist"
 COMMAND="$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}}.app/Contents/MacOS/{{executable}}"
 
+# change owner of the whole application.
+if [ ! -z "${DAEMON_USER}" ]; then
+    chown -R "${DAEMON_USER}:${DAEMON_USER}" "${SERVICE_APP_LOCATION}"
+fi
+
 # Link prefpane
 if [ -L "$PREFPANE_DESTINATION" ]; then
 	rm "$PREFPANE_DESTINATION"
