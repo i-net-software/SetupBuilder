@@ -102,6 +102,12 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf( service.isStartOnBoot() ) );
         setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
 
+        if ( task.getDaemonUser() != "root" ) {
+            // Root by default, will only set if not.
+            addPlistProperty( servicePLIST, ":UserName", "String", task.getDaemonUser() );
+            addPlistProperty( servicePLIST, ":GroupName", "String", task.getDaemonUser() );
+        }
+
         // Reset the plist.
         deletePlistProperty( servicePLIST, ":starter" );
 
