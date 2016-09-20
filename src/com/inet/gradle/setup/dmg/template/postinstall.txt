@@ -5,7 +5,7 @@ SCRIPT_PATH=`dirname "$0"`
 TARGET_LOCATION=${2%/}
 UNINSTALL_WATCH="$SCRIPT_PATH/watchuninstall.plist"
 AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
-DEAMON_USER="{{daemonUser}}"
+DAEMON_USER="{{daemonUser}}"
 
 set -e
 
@@ -13,6 +13,7 @@ echo "SCRIPT_PATH: '$SCRIPT_PATH'"
 echo "TARGET_LOCATION: '$TARGET_LOCATION'"
 echo "UNINSTALL_WATCH: '$UNINSTALL_WATCH'"
 echo "AGENT_DESTINATION: '$AGENT_DESTINATION'"
+echo "DAEMON_USER: '$DAEMON_USER'"
 echo "I am Batman, or: $(whoami)"
 
 {{script}}
