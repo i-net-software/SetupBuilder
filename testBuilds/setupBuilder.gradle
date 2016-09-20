@@ -88,7 +88,7 @@ dmg {
         action = "echo Another World, hello"
     }
 
-
+    daemonUser = "testingUser"
 //    codeSign {
 //        identity = 'Developer ID Application'
 //    }
