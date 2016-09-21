@@ -11,23 +11,23 @@ NEXTGID=$(ID=`dscl . -read "/Groups/${DEAMON_USER}" PrimaryGroupID 2> /dev/null 
 echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${DEAMON_USER}'"
 
 #########################################################################################################
-sudo dscl . -create "/Users/${DEAMON_USER}" UniqueID "${NEXTUID}"
-sudo dscl . -create "/Users/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
-sudo dscl . -create "/Users/${DEAMON_USER}" HomeDirectory "${HOME_DIRECTORY}"
+dscl . -create "/Users/${DEAMON_USER}" UniqueID "${NEXTUID}"
+dscl . -create "/Users/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
+dscl . -create "/Users/${DEAMON_USER}" NFSHomeDirectory "${HOME_DIRECTORY}"
 
 # Can't login as standard user
-sudo dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false
-sudo dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"
+dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false
+dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"
 
 # Unusable password for standard users
-sudo dscl . -create "/Users/${DEAMON_USER}" Password \*
+dscl . -create "/Users/${DEAMON_USER}" Password \*
 # dscl . -read "/Users/${DEAMON_USER}"
 #########################################################################################################
 
 #########################################################################################################
-sudo dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
+dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
 # Unusable password for standard users
-sudo dscl . -create "/Groups/${DEAMON_USER}" Password \*
+dscl . -create "/Groups/${DEAMON_USER}" Password \*
 # dscl . -read "/Groups/${DEAMON_USER}"
 #########################################################################################################
 
