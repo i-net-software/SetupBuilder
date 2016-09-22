@@ -28,6 +28,10 @@ dscl . -create "/Users/${DEAMON_USER}" NFSHomeDirectory "${HOME_DIRECTORY}"
 dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false
 dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"
 
+# Revoke Rights
+dscl . -delete /Users/_helpdesk PasswordPolicyOptions
+dscl . -delete /Users/_helpdesk AuthenticationAuthority
+
 # Unusable password for standard users
 dscl . -create "/Users/${DEAMON_USER}" Password \*
 # dscl . -read "/Users/${DEAMON_USER}"
