@@ -241,33 +241,4 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         return getRootSpec().with( arg0 );
     }
 
-    @Override
-    default String getFilteringCharset() {
-        return getRootSpec().getFilteringCharset();
-    }
-
-    @Override
-    default void setFilteringCharset( String charset ) {
-        getRootSpec().setFilteringCharset( charset );
-    }
-
-    @Override
-    default CopySpec filter( Transformer<String, String> arg0 ) {
-        return getRootSpec().filter( arg0 );
-    }
-
-    @Override
-    default CopySpec from( Object arg0, Action<? super CopySpec> arg1 ){
-        return getRootSpec().from( arg0, arg1 );
-    }
-
-    @Override
-    default CopySpec into( Object arg0, Action<? super CopySpec> arg1 ){
-        return getRootSpec().into( arg0, arg1 );
-    }
-
-    @Override
-    default CopySpec rename( Transformer<String, String> arg0 ){
-        return getRootSpec().rename( arg0 );
-    }
 }
