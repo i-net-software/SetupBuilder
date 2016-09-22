@@ -41,4 +41,4 @@ dscl . -create "/Groups/${DEAMON_USER}" Password \*
 #########################################################################################################
 
 # make home directory
-mkdir -p "${HOME_DIRECTORY}" && chown "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}" || true
+mkdir -p "${HOME_DIRECTORY}/Library/Preferences" && chown -R "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}" || true
