@@ -1,9 +1,6 @@
 #!/bin/bash
-
 #
-# chkconfig: 80 20
-# Description: {{description}}
-
+# chkconfig: 2345 80 20
 ### BEGIN INIT INFO
 # Provides:          {{name}}{{majorversion}}
 # Required-Start:    $local_fs $network $remote_fs $syslog
@@ -299,6 +296,8 @@ stop() {
 
     return $RETVAL
 }
+
+{{additionalServiceScript}}
 
 case "$1" in
     start)

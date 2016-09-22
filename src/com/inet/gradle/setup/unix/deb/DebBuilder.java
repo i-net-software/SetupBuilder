@@ -161,9 +161,14 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      */
     private void addScriptsToControlFiles() {
 
+        controlBuilder.addHeadScriptFragment( Script.PREINST, "# check for java. the service woll need it and other parts probably too"
+                        + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
+                        + "\n\n"
+                        );
+
         String daemonuser = task.getDaemonUser();
         if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-            controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m " + daemonuser + " 2> /dev/null || true\n"
+            controlBuilder.addTailScriptFragment( Script.POSTINST, "useradd -r -m -U " + daemonuser + " 2> /dev/null || true\n"
                             + "[ \"$(id " + daemonuser + " 2> /dev/null 1>&2; echo $?)\" == \"0\" ]"
                             + " && chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'"
                             + " && chmod -R g+w '" + task.getInstallationRoot() + "' || true \n\n"
@@ -189,7 +194,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         }
 
         if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-            controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "userdel -r " + daemonuser + " 2> /dev/null || true \n" + "fi" );
+            controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "userdel -r " + daemonuser + " 2> /dev/null || true \n" + "groupdel " + daemonuser + " 2> /dev/null || true \n" + "fi" );
         }
 
     }
