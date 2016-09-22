@@ -15,7 +15,7 @@
  */
 package com.inet.gradle.setup.msi;
 
-import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 
 /**
  * Get the parts of a windows command line.

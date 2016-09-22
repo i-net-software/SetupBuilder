@@ -18,8 +18,8 @@ package com.inet.gradle.appbundler;
 
 import org.gradle.api.Project;
 
-import com.inet.gradle.setup.AbstractSetupBuilder;
-import com.inet.gradle.setup.SetupSources;
+import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
+import com.inet.gradle.setup.abstracts.SetupSources;
 
 /**
  * The Gradle extension for appBundler task.

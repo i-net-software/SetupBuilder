@@ -23,7 +23,7 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
-import com.inet.gradle.setup.AbstractTask;
+import com.inet.gradle.setup.abstracts.AbstractTask;
 
 import groovy.lang.Closure;
 

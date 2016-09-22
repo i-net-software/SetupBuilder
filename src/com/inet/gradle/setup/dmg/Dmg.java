@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,9 +23,9 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.appbundler.OSXCodeSign;
-import com.inet.gradle.setup.AbstractSetupTask;
-import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
 
 import groovy.lang.Closure;
 
@@ -34,17 +34,21 @@ import groovy.lang.Closure;
  * 
  * @author Volker Berlin
  */
-public class Dmg extends AbstractSetupTask {
+public class Dmg extends AbstractUnixSetupTask {
 
-    private Object backgroundImage, setupBackground, setupIcon;
-    private Integer windowWidth = 400, windowHeight = 300, iconSize = 128, fontSize = 14;
-	private OSXCodeSign<Dmg,SetupBuilder> codeSign;
-	
-	private List<LocalizedResource> welcomePages =  new ArrayList<>();
-	private List<LocalizedResource> conclusionPages =  new ArrayList<>();
-	private List<PreferencesLink> preferencesLink = new ArrayList<>();
+    private Object                         backgroundImage, setupBackground, setupIcon;
 
-	/**
+    private Integer                        windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14;
+
+    private OSXCodeSign<Dmg, SetupBuilder> codeSign;
+
+    private List<LocalizedResource>        welcomePages    = new ArrayList<>();
+
+    private List<LocalizedResource>        conclusionPages = new ArrayList<>();
+
+    private List<PreferencesLink>          preferencesLink = new ArrayList<>();
+
+    /**
      * Create the task.
      */
     public Dmg() {
@@ -62,96 +66,105 @@ public class Dmg extends AbstractSetupTask {
 
     /**
      * Return width of Finder view
+     * 
      * @return width of Finder view
      */
     public Integer getWindowWidth() {
-		return windowWidth;
-	}
+        return windowWidth;
+    }
 
     /**
      * Set width of Finder view
-     * @param windowWidth width of Finder view 
+     * 
+     * @param windowWidth width of Finder view
      */
-	public void setWindowWidth(Integer windowWidth) {
-		this.windowWidth = windowWidth;
-	}
+    public void setWindowWidth( Integer windowWidth ) {
+        this.windowWidth = windowWidth;
+    }
 
     /**
      * Return height of Finder view
+     * 
      * @return height of Finder view
      */
-	public Integer getWindowHeight() {
-		return windowHeight;
-	}
+    public Integer getWindowHeight() {
+        return windowHeight;
+    }
 
     /**
      * Set height of Finder view
+     * 
      * @param windowHeight of Finder view
      */
-	public void setWindowHeight(Integer windowHeight) {
-		this.windowHeight = windowHeight;
-	}
+    public void setWindowHeight( Integer windowHeight ) {
+        this.windowHeight = windowHeight;
+    }
 
     /**
      * Return size of icons in Finder view
+     * 
      * @return size of icons in Finder view
      */
-	public Integer getIconSize() {
-		return iconSize;
-	}
+    public Integer getIconSize() {
+        return iconSize;
+    }
 
     /**
      * Set size of icons in Finder view
+     * 
      * @param iconSize of icons in Finder view
      */
-	public void setIconSize(Integer iconSize) {
-		this.iconSize = iconSize;
-	}
+    public void setIconSize( Integer iconSize ) {
+        this.iconSize = iconSize;
+    }
 
     /**
      * Return background Image for Finder View
+     * 
      * @return background Image for Finder View
      */
-	public File getBackgroundImage() {
-		if ( backgroundImage != null ) {
-			return getProject().file( backgroundImage );
-		}
-		return null;
-	}
+    public File getBackgroundImage() {
+        if( backgroundImage != null ) {
+            return getProject().file( backgroundImage );
+        }
+        return null;
+    }
 
     /**
      * Set background Image for Finder View
+     * 
      * @param backgroundFile Image for Finder View
      */
-	public void setBackgroundImage(File backgroundFile) {
-		this.backgroundImage = backgroundFile;
-	}
+    public void setBackgroundImage( File backgroundFile ) {
+        this.backgroundImage = backgroundFile;
+    }
 
     /**
      * Return font size for Finder View
+     * 
      * @return font size for Finder View
      */
-	public Integer getFontSize() {
-		return fontSize;
-	}
+    public Integer getFontSize() {
+        return fontSize;
+    }
 
-	/**
+    /**
      * Set font size for Finder View
+     * 
      * @param fontSize size for Finder View
      */
-	public void setFontSize(Integer fontSize) {
-		this.fontSize = fontSize;
-	}
+    public void setFontSize( Integer fontSize ) {
+        this.fontSize = fontSize;
+    }
 
-    
     /**
      * Set the needed information for signing the setup.
      * 
      * @param closue the data for signing
      */
-    public void setCodeSign( Closure<OSXCodeSign<Dmg,SetupBuilder>> closue ) {
+    public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closue ) {
         ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<Dmg,SetupBuilder>(this, project.getFileResolver()) );
+        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<Dmg, SetupBuilder>( this, project.getFileResolver() ) );
     }
 
     /**
@@ -159,13 +172,14 @@ public class Dmg extends AbstractSetupTask {
      * 
      * @return the settings or null
      */
-    public OSXCodeSign<Dmg,SetupBuilder> getCodeSign() {
+    public OSXCodeSign<Dmg, SetupBuilder> getCodeSign() {
         return codeSign;
     }
 
     /**
      * Return the welcome page list
      * Allowed Format: rtf, rtfd, txt, html
+     * 
      * @return welcome page
      */
     public List<LocalizedResource> getConclusionPages() {
@@ -175,15 +189,17 @@ public class Dmg extends AbstractSetupTask {
     /**
      * Set the welcome page
      * Allowed Format: rtf, rtfd, txt, html
+     * 
      * @param conclusionPage which is shown at the end
      */
     public void conclusionPage( Object conclusionPage ) {
-    	LocalizedResource.addLocalizedResource(getSetupBuilder(), conclusionPages, conclusionPage);
+        LocalizedResource.addLocalizedResource( getSetupBuilder(), conclusionPages, conclusionPage );
     }
-    
+
     /**
      * Return the welcome page list
      * Allowed Format: rtf, rtfd, txt, html
+     * 
      * @return welcome page
      */
     public List<LocalizedResource> getWelcomePages() {
@@ -193,50 +209,54 @@ public class Dmg extends AbstractSetupTask {
     /**
      * Set the welcome page
      * Allowed Format: rtf, rtfd, txt, html
+     * 
      * @param welcomePage welcome page file
      */
     public void welcomePage( Object welcomePage ) {
-    	LocalizedResource.addLocalizedResource(getSetupBuilder(), welcomePages, welcomePage);
+        LocalizedResource.addLocalizedResource( getSetupBuilder(), welcomePages, welcomePage );
     }
-    
-	/**
-	 * Return the background image for the setup
-	 * @return background image
-	 */
-	public File getSetupBackgroundImage() {
-		if ( setupBackground != null ) {
-			return getProject().file( setupBackground );
-		}
-		return null;
-	}
 
-	/**
-	 * Set the background image for the setup 
-	 * @param setupBackground to set
-	 */
-	public void setSetupBackgroundImage( Object setupBackground ) {
-		this.setupBackground = setupBackground;
-	}
+    /**
+     * Return the background image for the setup
+     * 
+     * @return background image
+     */
+    public File getSetupBackgroundImage() {
+        if( setupBackground != null ) {
+            return getProject().file( setupBackground );
+        }
+        return null;
+    }
 
-	/**
-	 * @return the setupIcon
-	 */
-	public Object getSetupIcon() {
-		if ( setupIcon == null ) {
-			return getSetupBuilder().getIcons();
-		}
-		return setupIcon;
-	}
+    /**
+     * Set the background image for the setup
+     * 
+     * @param setupBackground to set
+     */
+    public void setSetupBackgroundImage( Object setupBackground ) {
+        this.setupBackground = setupBackground;
+    }
 
-	/**
-	 * @param setupIcon the setupIcon to set
-	 */
-	public void setSetupIcon(Object setupIcon) {
-		this.setupIcon = setupIcon;
-	}
+    /**
+     * @return the setupIcon
+     */
+    public Object getSetupIcon() {
+        if( setupIcon == null ) {
+            return getSetupBuilder().getIcons();
+        }
+        return setupIcon;
+    }
+
+    /**
+     * @param setupIcon the setupIcon to set
+     */
+    public void setSetupIcon( Object setupIcon ) {
+        this.setupIcon = setupIcon;
+    }
 
     /**
      * Return the list of preferences links
+     * 
      * @return preferences links
      */
     public List<PreferencesLink> getPreferencesLinks() {
@@ -245,9 +265,10 @@ public class Dmg extends AbstractSetupTask {
 
     /**
      * Set a preferences link
+     * 
      * @param link the link
      */
     public void preferencesLink( Object link ) {
-    	preferencesLink.add( ConfigureUtil.configure((Closure<?>)link, new PreferencesLink()) );
+        preferencesLink.add( ConfigureUtil.configure( (Closure<?>)link, new PreferencesLink() ) );
     }
 }

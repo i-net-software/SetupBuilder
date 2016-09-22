@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.inet.gradle.setup;
+package com.inet.gradle.setup.abstracts;
 
 import java.util.ArrayList;
+
+import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * Base task for all setup builder tasks.

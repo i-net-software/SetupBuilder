@@ -1,0 +1,13 @@
+
+DAEMON_USER="{{daemonUser}}"
+HOME_DIRECTORY="{{homeDirectory}}"
+
+dscl . -delete "/Users/${DAEMON_USER}"
+dscl . -delete "/Groups/${DAEMON_USER}"
+
+if [ ! -z "${HOME_DIRECTORY}" ] && [ -d "${HOME_DIRECTORY}" ] && [[ "${HOME_DIRECTORY}" =~ "/Library/Application Support/" ]]; then
+    echo "Removing the Users '${DAEMON_USER}' home directory '${HOME_DIRECTORY}'."
+    rm -r "${HOME_DIRECTORY}"
+else
+    echo "Will not remove the Users '${DAEMON_USER}' home directory '${HOME_DIRECTORY}'."
+fi

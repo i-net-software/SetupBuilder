@@ -20,7 +20,7 @@ import java.io.File;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.DesktopStarter;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.dmg.AbstractOSXApplicationBuilder;
 
 /**

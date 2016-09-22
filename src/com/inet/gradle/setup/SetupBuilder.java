@@ -23,6 +23,12 @@ import java.util.List;
 import org.gradle.api.Project;
 import org.gradle.util.ConfigureUtil;
 
+import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
+import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.abstracts.SetupSources;
+
 import groovy.lang.Closure;
 
 /**

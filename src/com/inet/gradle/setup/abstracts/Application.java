@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.inet.gradle.setup;
+package com.inet.gradle.setup.abstracts;
 
 import java.io.File;
 import java.io.IOException;

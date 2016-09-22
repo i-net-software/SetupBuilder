@@ -1,10 +1,12 @@
-package com.inet.gradle.setup;
+package com.inet.gradle.setup.abstracts;
 
 import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
 import org.gradle.util.ConfigureUtil;
+
+import com.inet.gradle.setup.SetupBuilder;
 
 import groovy.lang.Closure;
 

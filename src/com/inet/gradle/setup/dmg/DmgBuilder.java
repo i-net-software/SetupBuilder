@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -31,13 +32,13 @@ import javax.imageio.ImageIO;
 import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.Application;
-import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.LocalizedResource;
-import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.Application;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
+import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
@@ -144,6 +145,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         DesktopStarter runBeforeUninstall = setup.getRunBeforeUninstall();
 
         OSXScriptBuilder preinstall = new OSXScriptBuilder( core, "template/preinstall.txt" );
+
         preinstall.addScript( new OSXScriptBuilder( task.getPreinst() ) );
 
         OSXScriptBuilder postinstall = new OSXScriptBuilder( core, "template/postinstall.txt" );
@@ -153,6 +155,26 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         uninstall.addScript( new OSXScriptBuilder( task.getPrerm() ) );
         OSXScriptBuilder watchUninstall = new OSXScriptBuilder( core, "service/watchuninstall.plist" );
+
+        // Set the daemon user, so that it can be created and removed.
+        if( task.getDaemonUser() != "root" ) {
+            // Create
+            String home = "/Library/Application Support/" + setup.getApplication();
+            OSXScriptBuilder createUser = new OSXScriptBuilder( core, "template/preinstall.createuser.txt" );
+
+            // Remove
+            OSXScriptBuilder removeUser = new OSXScriptBuilder( core, "template/postuninstall.remove.user.txt" );
+
+            // Set the daemonUser on each object
+            OSXScriptBuilder[] list = { createUser, removeUser, postinstall };
+            Arrays.asList( list ).forEach( item -> {
+                item.setPlaceholder( "daemonUser", task.getDaemonUser() );
+                item.setPlaceholder( "homeDirectory", home);
+            } );
+
+            preinstall.addScript( createUser );
+            uninstall.addScript( removeUser );
+        }
 
         for( Service service : setup.getServices() ) {
 

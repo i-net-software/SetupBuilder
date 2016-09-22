@@ -17,14 +17,14 @@ package com.inet.gradle.setup.unix;
 
 import java.io.File;
 
-import com.inet.gradle.setup.AbstractSetupTask;
+import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
 
 /**
  * The unix Gradle base.
  * 
  * @author Gerry Weissbach
  */
-public abstract class Unix extends AbstractSetupTask {
+public abstract class Unix extends AbstractUnixSetupTask {
 
     private String section;
 
@@ -37,8 +37,6 @@ public abstract class Unix extends AbstractSetupTask {
     private String homepage;
 
     private String installationRoot;
-
-    private String daemonUser = "root";
 
     private Object defaultServiceFile;
 
@@ -127,27 +125,6 @@ public abstract class Unix extends AbstractSetupTask {
     public void setInstallationRoot( String installationRoot ) {
         this.installationRoot = installationRoot.endsWith( "/" )
                         ? installationRoot.substring( 0, installationRoot.length() - 1 ) : installationRoot;
-    }
-
-    /**
-     * Returns the user with which the daemon should be running. If no user was specified the default root user will be
-     * used.
-     * 
-     * @return the user for the daemon
-     */
-    public String getDaemonUser() {
-        if( daemonUser.trim().isEmpty() ) {
-            return "root";
-        } else {
-            return daemonUser;
-        }
-    }
-
-    /**
-     * Sets the user with which the daemon should be running.
-     */
-    public void setDaemonUser( String daemonUser ) {
-        this.daemonUser = daemonUser;
     }
 
     /**

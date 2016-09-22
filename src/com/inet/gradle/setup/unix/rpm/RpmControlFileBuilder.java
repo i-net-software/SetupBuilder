@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.LocalizedResource;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
 
 /**
  * Builder for the SPEC file, that is required for the Redhat package tool.

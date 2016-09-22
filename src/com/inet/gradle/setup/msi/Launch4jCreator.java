@@ -28,8 +28,8 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 
-import com.inet.gradle.setup.DesktopStarter;
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.util.ResourceUtils;
 
 /**

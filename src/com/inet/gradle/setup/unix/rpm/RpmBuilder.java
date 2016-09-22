@@ -27,12 +27,12 @@ import java.util.function.BiConsumer;
 
 import org.gradle.api.internal.file.FileResolver;
 
-import com.inet.gradle.setup.AbstractBuilder;
-import com.inet.gradle.setup.DesktopStarter;
-import com.inet.gradle.setup.LocalizedResource;
-import com.inet.gradle.setup.Service;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.abstracts.AbstractBuilder;
+import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
+import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
 
 public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
