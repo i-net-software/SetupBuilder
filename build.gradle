@@ -9,6 +9,9 @@ group = 'de.inetsoftware'
 version = '1.8.0'
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
+def LIB_GRADLE_VERSION = '3.1'
+
+println 'Gradle version: ' + gradle.gradleVersion
 
 repositories {
     jcenter()
@@ -37,11 +40,12 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     preparePublish.dependsOn 'jar'
     preparePublish.dependsOn 'publishPluginJar'
     println "Uploading into internal Repository 'fileserver'"
-    
+
     if ( System.getProperty("snapshot") ) {
         version += '-SNAPSHOT' // setting version to snapshot
     }
-    
+
+    wrapper.gradleVersion = LIB_GRADLE_VERSION
 } else {
     println "Uploading into local '../repo'"
     version += '-SNAPSHOT' // setting version to snapshot
@@ -51,6 +55,10 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
                 repository(url: uri('../repo'))
             }
         }
+    }
+
+    task wrapper(type: Wrapper) {
+       gradleVersion = LIB_GRADLE_VERSION
     }
 }
 
@@ -71,8 +79,4 @@ pluginBundle {
       tags = ['app']
     }
   }
-}
-
-task wrapper(type: Wrapper) {
-   gradleVersion = '3.1'
 }
