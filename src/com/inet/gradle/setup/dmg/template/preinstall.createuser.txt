@@ -3,6 +3,15 @@ DEAMON_USER="{{daemonUser}}"
 HOME_DIRECTORY="{{homeDirectory}}"
 SERVICE_DESCRIPTION="{{displayName}}"
 
+if [ -z "${DEAMON_USER}" ]; then
+    echo "The User that you want to create has to be set."
+    exit 1
+fi
+
+if [ -z "${HOME_DIRECTORY}" ]; then
+    HOME_DIRECTORY="/Users/${DEAMON_USER}"
+fi
+
 # find the next UID and GID that is below 500, so that we can create the service user
 # if the user or group already exists, it will use this existing ID and still do the rest. We might have changes to commit.
 NEXTUID=$(ID=`dscl . -read "/Users/${DEAMON_USER}" UniqueID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
