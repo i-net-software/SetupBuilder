@@ -10,7 +10,7 @@ COMMAND="$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}}.app/Conten
 # change owner of the whole application.
 if [ ! -z "$DAEMON_USER" ]; then
     echo "Changing user of '$SERVICE_APP_LOCATION' to $DAEMON_USER"
-    chown -R "$DAEMON_USER:$DAEMON_USER" "$SERVICE_APP_LOCATION"
+    chown -R "$DAEMON_USER:$DAEMON_USER" "$SERVICE_APP_LOCATION/Contents/Java"
 else
     echo "Will not change the user of '$SERVICE_APP_LOCATION' because it is not set ('$DAEMON_USER')."
 fi
