@@ -10,13 +10,20 @@ System Requirements
 ----
 | Platform  | Requirement                                                          |
 | :---------| :------------------------------------------------------------------- |
-| all       | Plugin Version <= 1.5 Gradle 2.3 - 2.11                              |
-| all       | Plugin Version >= 1.6 Gradle 2.12 or higher                          |
 | all       | Java 8 or higher. Gradle must run with Java 8                        |
 | Windows   | Wix Toolset or WixEdit must be installed                             |
 | Linux     | Lintian, FakeRoot <br> on Ubuntu: `apt-get install lintian fakeroot` |
 | Linux     | dpkg for creating Debian packages: `apt-get install dpkg`         |
 | Linux     | rpm for creating RPM packages: `apt-get install rpm`              |
+
+Plugin and Gradle Version
+----
+| Plugin Version | Gradle Version |
+| :--------------| :------------- |
+| <= 1.5         | 2.3 - 2.11     |
+| 1.6            | 2.12 - 2.13    |
+| 1.7            | 2.12 - 2.14    |
+| 1.8            | 3.0            |
 
 Tasks
 ----
@@ -30,7 +37,7 @@ Sample Usage
 ----
 ### Base Sample
     plugins {
-        id "de.inetsoftware.setupbuilder" version "1.6"
+        id "de.inetsoftware.setupbuilder" version "1.8"
     }
     
     setupBuilder {

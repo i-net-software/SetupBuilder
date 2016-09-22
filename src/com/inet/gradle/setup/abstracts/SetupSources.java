@@ -23,13 +23,13 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.gradle.api.Action;
+import org.gradle.api.Transformer;
 import org.gradle.api.file.CopyProcessingSpec;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileTreeElement;
-import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.api.internal.file.copy.CopySpecSource;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
@@ -239,5 +239,35 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     @Override
     default CopySpec with( CopySpec... arg0 ) {
         return getRootSpec().with( arg0 );
+    }
+
+    @Override
+    default String getFilteringCharset() {
+        return getRootSpec().getFilteringCharset();
+    }
+
+    @Override
+    default void setFilteringCharset( String charset ) {
+        getRootSpec().setFilteringCharset( charset );
+    }
+
+    @Override
+    default CopySpec filter( Transformer<String, String> arg0 ) {
+        return getRootSpec().filter( arg0 );
+    }
+
+    @Override
+    default CopySpec from( Object arg0, Action<? super CopySpec> arg1 ){
+        return getRootSpec().from( arg0, arg1 );
+    }
+
+    @Override
+    default CopySpec into( Object arg0, Action<? super CopySpec> arg1 ){
+        return getRootSpec().into( arg0, arg1 );
+    }
+
+    @Override
+    default CopySpec rename( Transformer<String, String> arg0 ){
+        return getRootSpec().rename( arg0 );
     }
 }
