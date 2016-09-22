@@ -270,4 +270,15 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     default CopySpec rename( Transformer<String, String> arg0 ){
         return getRootSpec().rename( arg0 );
     }
+
+    // methods for Gradle 3.1
+    @Override
+    default CopySpec filesMatching( Iterable<String> arg0, Action<? super FileCopyDetails> arg1 ) {
+        return getRootSpec().filesMatching( arg0, arg1 );
+    }
+
+    @Override
+    default CopySpec filesNotMatching( Iterable<String> arg0, Action<? super FileCopyDetails> arg1 ) {
+        return getRootSpec().filesMatching( arg0, arg1 );
+    }
 }
