@@ -251,15 +251,31 @@ checkstatus() {
 start() {
     checkstatus && log_warning_msg "$APPNAME already running, can't start it" && log_end_msg 0 && return 1 || :
 
+    # this should be a background process by default.
+    BACKGROUND="& echo \$! > \"/tmp/${APPNAME}.pid\""
+    if [ ! -z "$1" ]; then
+        # if a parameter is set, this is NOT a background daemon 
+        BACKGROUND=""
+    fi
+
     log_daemon_msg "Starting" "$APPNAME"
     if checkfunc "start-stop-daemon"; then
-        start-stop-daemon  --chuid "$DAEMON_USER" -b --chdir "$WORKINGDIR" --make-pidfile --start --pidfile "$PIDFILE" --exec $DAEMON_EXEC -- -cp "${MAINARCHIVE}" ${MAINCLASS} ${STARTARGUMENTS}
+        if [ ! -z "${BACKGROUND}" ]; then
+            BACKGROUND="-b"
+        fi
+        start-stop-daemon  --chuid "$DAEMON_USER" ${BACKGROUND} --chdir "$WORKINGDIR" --make-pidfile --start --pidfile "$PIDFILE" --exec $DAEMON_EXEC -- ${STARTARGUMENTS} -cp "${MAINARCHIVE}" ${MAINCLASS}
     elif checkfunc "start_daemon"; then
-        start_daemon -u "$DAEMON_USER" /bin/bash -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$APPNAME.out\" & echo \$! > \"/tmp/$APPNAME.pid\""
+        start_daemon -u "$DAEMON_USER" /bin/bash -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${STARTARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} > \"/tmp/$APPNAME.out\" ${BACKGROUND}"
     elif checkfunc "daemon"; then
-        daemon -u "$DAEMON_USER" "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/$APPNAME.out\" & echo \$! > \"/tmp/$APPNAME.pid\""
+        daemon -u "$DAEMON_USER" "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${STARTARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} > \"/tmp/$APPNAME.out\" ${BACKGROUND}"
     else
-        su - --shell=/bin/bash $DAEMON_USER -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/${APPNAME}.out\" & echo \$! > \"/tmp/${APPNAME}.pid\""
+        su - --shell=/bin/bash $DAEMON_USER -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${STARTARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} > \"/tmp/${APPNAME}.out\" ${BACKGROUND}"
+    fi
+
+    # return if this was not a background process
+    if [ -z "${BACKGROUND}" ]; then
+        log_end_msg 0
+        return 0
     fi
 
     # only wait if it did start OK
@@ -306,6 +322,9 @@ case "$1" in
         ;;
      stop)
         stop
+        ;;
+    daemon)
+        start daemon
         ;;
      restart)
         stop
