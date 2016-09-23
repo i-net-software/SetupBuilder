@@ -236,7 +236,8 @@ fi
 [ -r "/lib/init/vars.sh" ] && . "/lib/init/vars.sh" || :
 
 # Read configuration variable file if it is present
-[ -r "/etc/default/$APPNAME" ] && . "/etc/default/$APPNAME" || [ -r "/etc/sysconfig/$APPNAME" ] && . "/etc/sysconfig/$APPNAME" || :
+[ -r "/etc/default/$APPNAME" ] && . "/etc/default/$APPNAME" || :
+[ -r "/etc/sysconfig/$APPNAME" ] && . "/etc/sysconfig/$APPNAME" || :
 
 checkstatus() {
     if checkfunc "start-stop-daemon"; then
