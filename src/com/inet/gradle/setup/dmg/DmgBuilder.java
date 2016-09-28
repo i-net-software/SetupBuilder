@@ -519,7 +519,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
 
-        System.out.println( "Setting DMG display options." );
+        System.out.println( "Setting display options for package." );
         System.out.println( applescript );
         exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
