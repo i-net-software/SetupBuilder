@@ -29,8 +29,8 @@ dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false
 dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"
 
 # Revoke Rights
-dscl . -delete /Users/_helpdesk PasswordPolicyOptions
-dscl . -delete /Users/_helpdesk AuthenticationAuthority
+dscl . -delete "/Users/${DEAMON_USER}" PasswordPolicyOptions
+dscl . -delete "/Users/${DEAMON_USER}" AuthenticationAuthority
 
 # Unusable password for standard users
 dscl . -create "/Users/${DEAMON_USER}" Password \*
