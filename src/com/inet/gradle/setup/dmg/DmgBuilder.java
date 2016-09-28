@@ -215,7 +215,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         createAndPatchDistributionXML();
 
         imageSourceRoot = TempPath.get( "distribution" ).toString();
-        File resultingPackage = new File( imageSourceRoot, applicationIdentifier + ".pkg" );
+        File resultingPackage = new File( imageSourceRoot, applicationName + ".pkg" );
 
         // Build Product for packaging
         ArrayList<String> command = new ArrayList<>();
@@ -236,7 +236,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         }
 
         packageApplescript();
-        Files.copy( resultingPackage.toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( resultingPackage.toPath(), new File( setup.getDestinationDir(), "/" + applicationName + ".pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
@@ -271,10 +271,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         // Application as default directory except there are more application parts to install.
         command.add( "/Applications/" + installationSubdirectory() );
-        command.add( TempPath.getTempString( "packages", applicationIdentifier + ".pkg" ) );
+        command.add( TempPath.getTempString( "packages", applicationName + ".pkg" ) );
         exec( command );
 
-        Files.copy( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( TempPath.getTempFile( "packages", applicationName + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
@@ -298,7 +298,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( TempPath.getTempFile( "packages", applicationIdentifier + ".pkg" ).toString() );
+        command.add( TempPath.getTempFile( "packages", applicationName + ".pkg" ).toString() );
         command.add( TempPath.getTempFile( "distribution.xml" ).toString() );
         exec( command );
 
@@ -514,7 +514,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         Template applescript = new Template( "dmg/template/package.applescript.txt" );
         applescript.setPlaceholder( "icon", ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns" ).getAbsolutePath() );
-        applescript.setPlaceholder( "package", new File( imageSourceRoot, applicationIdentifier + ".pkg" ).getAbsolutePath() );
+        applescript.setPlaceholder( "package", new File( imageSourceRoot, applicationName + ".pkg" ).getAbsolutePath() );
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
