@@ -29,7 +29,7 @@ try
 
             set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0
             set appXPos to windowWidth - ourXPos
-            set yPos to (windowHeight - iconSize) / 2.0
+            set yPos to (windowHeight - iconSize) / 3.0 * 2.0
             
 			try
             	set position of item "{{executable}}.app" of container window to {ourXPos, yPos}
