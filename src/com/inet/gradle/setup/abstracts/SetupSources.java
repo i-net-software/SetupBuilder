@@ -15,15 +15,12 @@
  */
 package com.inet.gradle.setup.abstracts;
 
-import groovy.lang.Closure;
-
 import java.io.FilterReader;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.gradle.api.Action;
-import org.gradle.api.Transformer;
 import org.gradle.api.file.CopyProcessingSpec;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.DuplicatesStrategy;
@@ -33,6 +30,8 @@ import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.internal.file.copy.CopySpecSource;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
+
+import groovy.lang.Closure;
 
 /**
  * Implementation of the CopySpec interface.
@@ -241,4 +240,13 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         return getRootSpec().with( arg0 );
     }
 
+    @Override
+    default void setFilteringCharset( String arg0 ) {
+        getRootSpec().setFilteringCharset( arg0 );
+    }
+    
+    @Override
+    default String getFilteringCharset() {
+        return getRootSpec().getFilteringCharset();
+    }
 }

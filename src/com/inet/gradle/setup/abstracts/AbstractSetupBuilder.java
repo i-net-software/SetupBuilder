@@ -37,7 +37,7 @@ import groovy.lang.Closure;
  * The Gradle extension for all setup tasks.
  * @author Volker Berlin
  */
-public class AbstractSetupBuilder implements SetupSources {
+public abstract class AbstractSetupBuilder implements SetupSources {
 
     protected final Project        project;
 
