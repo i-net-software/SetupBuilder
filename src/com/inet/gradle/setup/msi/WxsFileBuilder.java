@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -416,19 +417,30 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             if( !java.isDirectory() ) {
                 throw new GradleException( "No installed Java VMs found: " + java );
             }
-            List<File> versions = getDirectories( java, "jre" + jre );
-            if( versions.size() == 0 ) {
-                // if the java version is like "1.8" then search also for "jre8"
-                String jreStr = jre.toString();
-                if( jreStr.length() > 2 && jreStr.startsWith( "1." ) ) {
-                    versions = getDirectories( java, "jre" + jreStr.substring( 2 ) );
-                }
+
+            List<File> versions = new ArrayList<File>();
+            String [] s = { "jre", "jdk" };
+            Arrays.asList( s ).forEach( prefix -> {
+                versions.addAll( getDirectories( java, prefix + jre ) );
                 if( versions.size() == 0 ) {
-                    throw new GradleException( "bundleJre version " + jre + " can not be found in: '" + java + "' Its search for an folder that starts with: jre" + jre );
+                    // if the java version is like "1.8" then search also for "jre8"
+                    String jreStr = jre.toString();
+                    if( jreStr.length() > 2 && jreStr.startsWith( "1." ) ) {
+                        versions.addAll( getDirectories( java, "jre" + jreStr.substring( 2 ) ) );
+                    }
                 }
+            });
+
+            if( versions.size() == 0 ) {
+                throw new GradleException( "bundleJre version " + jre + " can not be found in: '" + java + "' Its search for an folder that starts with: jre" + jre );
             }
+
             Collections.sort( versions );
             jreDir = versions.get( versions.size() - 1 );
+            if ( jreDir.getName().startsWith( "jdk" ) ) {
+                // if this was a jdk, we have to use the jre subdirectory
+                jreDir = new File( jreDir, "jre" );
+            }
         }
 
         task.getProject().getLogger().lifecycle( "\tbundle jre: " + jreDir );
