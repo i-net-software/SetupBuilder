@@ -22,6 +22,7 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
  */
 class CommandLine {
 
+    final String relativTarget; // executable inside the installation
     final String target;
     final String arguments;
     final String full;
@@ -47,15 +48,17 @@ class CommandLine {
         }
         if( target == null || target.isEmpty() ) {
             if( javaDir != null ) {
-                target = "[INSTALLDIR]" + javaDir + "\\bin\\javaw.exe";
+                dir = "[INSTALLDIR]";
+                target = javaDir + "\\bin\\javaw.exe";
             } else {
                 target = "javaw.exe";
+                dir = "";
             }
-            dir = "";
             arguments = "-cp \"[INSTALLDIR]" + workDir + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
         } else {
             if( !target.startsWith( "[" ) ) {
-                dir = "[INSTALLDIR]" + workDir;
+                dir = "[INSTALLDIR]";
+                target = workDir + target;
             } else {
                 dir = "";
             }
@@ -67,6 +70,7 @@ class CommandLine {
             full = target + ' ' + arguments;
         }
 
+        this.relativTarget = target;
         this.target = dir + target;
         this.arguments = arguments;
         this.full = full;
