@@ -65,6 +65,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     private String                 mainJar;
 
+    @Deprecated
     private List<DocumentType>     documentTypes   = new ArrayList<>();
 
     private boolean                failOnEmptyFrom = true;
@@ -352,7 +353,10 @@ public class AbstractSetupBuilder implements SetupSources {
      * 
      * @param closue document type
      */
+    @Deprecated
     public void documentType( Closure<?> closue ) {
+        System.err.println("WARNING: documentType is deprecated in setupBuilder. Move it into a desktopStarter.");
+        project.getLogger().warn( "WARNING: documentType is deprecated in setupBuilder. Move it into desktopStarter." );
         DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( this ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
             throw new GradleException( "documentType must contains minimum one fileExtension." );
@@ -364,6 +368,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * Get the list of document types.
      * @return the list
      */
+    @Deprecated
     public List<DocumentType> getDocumentType() {
         return documentTypes;
     }
