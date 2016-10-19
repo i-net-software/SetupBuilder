@@ -46,6 +46,7 @@ import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.ResourceUtils;
 import com.inet.gradle.setup.util.XmlFileBuilder;
@@ -318,7 +319,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param file the file to add.
      * @param segments the segments of the path in the target. The last segment contains the file name.
      */
-    private void addFile( File file, String[] segments ) {
+    private String addFile( File file, String[] segments ) {
         Element parent = getDirectory( segments );
 
         String pathID = id( segments, segments.length - 1 );
@@ -326,7 +327,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element component = getComponent( parent, compID );
 
         String name = segments[segments.length - 1];
-        addFile( component, file, pathID, name );
+        String id = addFile( component, file, pathID, name );
 
         // save the jvm.dll position
         if( name.equals( "jvm.dll" ) ) {
@@ -339,6 +340,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
             jvmDll = jvm.toString();
         }
+        return id;
     }
 
     /**
@@ -349,8 +351,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param pathID an ID of the parent path
      * @param name the target file name
      */
-    private void addFile( Element component, File file, String pathID, String name ) {
-        addFile( component, file, pathID, name, isAddFiles );
+    private String addFile( Element component, File file, String pathID, String name ) {
+        return addFile( component, file, pathID, name, isAddFiles );
     }
 
     /**
@@ -363,15 +365,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param isAddFiles if the file should added or not. On creating the multi language translations the files will not
      *            added to improve the performance.
      */
-    private void addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
+    private String addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
+        String id = id( pathID + '_' + name );
         if( isAddFiles ) {
-            String id = id( pathID + '_' + name );
             Element fileEl = getOrCreateChildById( component, "File", id );
             addAttributeIfNotExists( fileEl, "Source", file.getAbsolutePath() );
             addAttributeIfNotExists( fileEl, "Name", name );
         } else {
             getOrCreateChild( component, "CreateFolder" );
         }
+        return id;
     }
 
     /**
@@ -818,6 +821,44 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 linkLocation += starter.getWorkDir();
             }
             renameFileIfDynamic( id, linkLocation, name + ".lnk", starter.getDisplayName() + ".lnk" );
+
+            registerFileExtension( starter, cmd );
+        }
+    }
+
+    /**
+     * Register file extension.
+     * 
+     * @param starter desktop starter
+     * @param cmd the command line to execute
+     * @throws IOException if any IOException occur
+     */
+    private void registerFileExtension( DesktopStarter starter, CommandLine cmd ) throws IOException {
+        if( isAddFiles ) {
+            for( DocumentType docType : starter.getDocumentType() ) {
+                for( String fileExtension : docType.getFileExtension() ) {
+                    if( fileExtension.startsWith( "." ) ) {
+                        fileExtension = fileExtension.substring( 1 );
+                    }
+                    String pID = id( setup.getAppIdentifier() + "." + fileExtension );
+                    Element component = getComponent( installDir, "_file_extension" );
+                    getOrCreateChild( component, "CreateFolder" );
+                    Element progID = getOrCreateChildById( component, "ProgId", pID );
+                    addAttributeIfNotExists( progID, "Description", docType.getName() );
+
+                    File iconFile = starter.getIconForType( buildDir, "ico" );
+                    if( iconFile != null ) {
+                        String iconID = addFile( iconFile, new String[] { iconFile.getName() } );
+                        addAttributeIfNotExists( progID, "Icon", iconID );
+                    }
+                    Element extension = getOrCreateChildById( progID, "Extension", fileExtension );
+                    Element verb = getOrCreateChildById( extension, "Verb", "open" );
+                    addRegistryValue( component, "HKCR", pID + "\\shell\\open", "FriendlyAppName", "string", setup.getApplication() );
+                    String[] segments = segments( cmd.relativTarget );
+                    addAttributeIfNotExists( verb, "TargetFile", id( segments, segments.length ) );
+                    addAttributeIfNotExists( verb, "Argument", cmd.arguments + "\"%1\"" );
+                }
+            }
         }
     }
 
@@ -1009,6 +1050,28 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private Element addRegistryValue( Element regkey, String name, String type, String value ) {
         Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name );
+        addAttributeIfNotExists( regValue, "Type", type );
+        addAttributeIfNotExists( regValue, "Value", value );
+        return addRegistryValue( regkey, null, null, name, type, value );
+    }
+
+    /**
+     * Add a registry value to a component.
+     * 
+     * @param component parent component
+     * @param root The root of the key like HKLM, HKCU, HKMU
+     * @param key the key
+     * @param name the value name, null use the default value of a key
+     * @param type the type
+     * @param value the value
+     * @return the value node
+     */
+    private Element addRegistryValue( Element component, String root, String key, String name, String type, String value ) {
+        Element regValue = getOrCreateChildByKeyValue( component, "RegistryValue", "Name", name );
+        if( root != null ) {
+            addAttributeIfNotExists( regValue, "Root", root );
+            addAttributeIfNotExists( regValue, "Key", key );
+        }
         addAttributeIfNotExists( regValue, "Type", type );
         addAttributeIfNotExists( regValue, "Value", value );
         return regValue;
