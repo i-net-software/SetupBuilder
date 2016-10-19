@@ -73,9 +73,13 @@ public class ImageFactory {
             }
         }
 
+        String baseFileName = null;
         ArrayList<BufferedImage> images = new ArrayList<>();
         for( File file : files ) {
             String extension = file.getName();
+            if( baseFileName == null ) {
+                baseFileName = extension.substring( 0, extension.lastIndexOf( '.' ) + 1 );
+            }
             extension = extension.substring( extension.lastIndexOf( '.' ) + 1 );
             switch( extension ) {
                 case "ico":
@@ -91,7 +95,10 @@ public class ImageFactory {
             }
         }
 
-        File file = new File( dir, "icon." + format );
+        if( baseFileName == null ) {
+            baseFileName = "icon.";
+        }
+        File file = new File( dir, baseFileName + format );
         switch( format ) {
             case "ico":
                 try( FileOutputStream fos = new FileOutputStream( file ) ) {
