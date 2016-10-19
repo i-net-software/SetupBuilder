@@ -251,6 +251,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         getRootSpec().setFilteringCharset( charset );
     }
 
+    // methods for Gradle 3.0
     @Override
     default CopySpec filter( Transformer<String, String> arg0 ) {
         return getRootSpec().filter( arg0 );
