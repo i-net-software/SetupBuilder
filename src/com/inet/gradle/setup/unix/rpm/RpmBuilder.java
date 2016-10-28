@@ -31,6 +31,7 @@ import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
@@ -326,6 +327,52 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
         }
+        
+        // register the mime type and the default app for the extensions
+        for( DocumentType docType : starter.getDocumentType() ) {
+            for( String extension : docType.getFileExtension() ) {
+                String simpleVendor = setup.getVendor();
+                simpleVendor = simpleVendor.replaceAll( "\\W", "" );
+                try (FileWriter fw = new FileWriter( createFile( "BUILD/" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml", false ) )) {
+                    fw.write( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" );
+                    fw.write( "<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\">\n" );
+                    
+                    // if there was a mime type for the starter it will override the mime types of the documentType
+                    if( starter.getMimeTypes() != null ) {
+                        fw.write( "    <mime-type type=\"" + starter.getMimeTypes() + "\">\n" );
+                    } else {
+                        fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );                        
+                    }
+                    
+                    fw.write( "        <comment>" + setup.getApplication() + "</comment>\n" );
+                    fw.write( "        <glob-deleteall/>\n" );
+                    fw.write( "        <glob pattern=\"*." + extension + "\"/>\n" );
+                    fw.write( "    </mime-type>\n" );
+                    fw.write( "</mime-info>\n" );                    
+                }
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
+                controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-mime uninstall \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
+                
+                String iconame = unixName;
+                if( starter.getIcons() != null ) {
+                    iconame = iconName;
+                }
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-icon-resource install --context mimetypes --novendor --size 48 /usr/share/icons/hicolor/48x48/apps/" + iconame + ".png " + iconame + " || true" );
+                controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-icon-resource uninstall --context mimetypes --size 48 " + iconame + " || true" );
+                
+                String mimetypes = docType.getMimetype();
+                if( starter.getMimeTypes() != null ) {
+                    mimetypes = starter.getMimeTypes();
+                }
+                
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "if [ -z \"$SUDO_USER\" ]; then" );
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $LOGNAME -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "else" );
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $SUDO_USER -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
+                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "fi" );
+            }
+        }
+
     }
 
     /**
