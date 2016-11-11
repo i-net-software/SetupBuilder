@@ -852,8 +852,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                         addAttributeIfNotExists( progID, "Icon", iconID );
                     }
                     Element extension = getOrCreateChildById( progID, "Extension", fileExtension );
+                    addAttributeIfNotExists( extension, "ContentType", docType.getMimetype() );
                     Element verb = getOrCreateChildById( extension, "Verb", "open" );
-                    addRegistryValue( component, "HKCR", pID + "\\shell\\open", "FriendlyAppName", "string", setup.getApplication() );
+                    Element reg = addRegistryKey( component, "HKCR", id(pID + "\\shell\\open"), pID + "\\shell\\open" );
+                    addRegistryValue( reg, "FriendlyAppName", "string", setup.getApplication() );
                     String[] segments = segments( cmd.relativTarget );
                     addAttributeIfNotExists( verb, "TargetFile", id( segments, segments.length ) );
                     addAttributeIfNotExists( verb, "Argument", cmd.arguments + "\"%1\"" );
@@ -1050,28 +1052,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private Element addRegistryValue( Element regkey, String name, String type, String value ) {
         Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name );
-        addAttributeIfNotExists( regValue, "Type", type );
-        addAttributeIfNotExists( regValue, "Value", value );
-        return addRegistryValue( regkey, null, null, name, type, value );
-    }
-
-    /**
-     * Add a registry value to a component.
-     * 
-     * @param component parent component
-     * @param root The root of the key like HKLM, HKCU, HKMU
-     * @param key the key
-     * @param name the value name, null use the default value of a key
-     * @param type the type
-     * @param value the value
-     * @return the value node
-     */
-    private Element addRegistryValue( Element component, String root, String key, String name, String type, String value ) {
-        Element regValue = getOrCreateChildByKeyValue( component, "RegistryValue", "Name", name );
-        if( root != null ) {
-            addAttributeIfNotExists( regValue, "Root", root );
-            addAttributeIfNotExists( regValue, "Key", key );
-        }
         addAttributeIfNotExists( regValue, "Type", type );
         addAttributeIfNotExists( regValue, "Value", value );
         return regValue;
