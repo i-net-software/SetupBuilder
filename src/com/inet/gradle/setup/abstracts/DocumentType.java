@@ -30,8 +30,10 @@ public class DocumentType {
 	private List<String> extensions;
 
 	private String name;
+	
+	private String mimetype;
 
-	private String role = "Viewer";
+    private String role = "Viewer";
 
 	private Object icons;
 
@@ -98,6 +100,28 @@ public class DocumentType {
     public void setName( String name ) {
         this.name = name;
     }
+    
+    /**
+     * Returns the mime type for the document type. If none mime type was specified it will return 'application/&lt;the first extension&gt;'.
+     * @return the mime type for the document type
+     */
+    public String getMimetype() {
+        if( mimetype != null && mimetype.trim().length() > 0) {
+            return mimetype;            
+        } else {
+            List<String> ext = getFileExtension();
+            return "application/" + ext.get( 0 );
+        }
+    }
+
+    /**
+     * Sets the mime type of the document type
+     * @param mimetype the mime type
+     */
+    public void setMimetype( String mimetype ) {
+        this.mimetype = mimetype;
+    }
+    
 
     public String getRole() {
         return role;
