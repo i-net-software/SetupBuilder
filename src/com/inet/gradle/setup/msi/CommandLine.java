@@ -63,17 +63,14 @@ class CommandLine {
                 dir = "";
             }
         }
-        String full;
-        if( target.indexOf( ' ' ) >=  0 || target.indexOf( '[' ) >=  0 ) {
-            full = '\"' + target + "\" " + arguments;
-        } else {
-            full = target + ' ' + arguments;
-        }
-
         this.relativTarget = target;
         this.target = dir + target;
         this.arguments = arguments;
-        this.full = full;
+        if( this.target.indexOf( ' ' ) >=  0 || this.target.indexOf( '[' ) >=  0 ) {
+            this.full = '\"' + this.target + "\" " + arguments;
+        } else {
+            this.full = this.target + ' ' + arguments;
+        }
         this.workDir = workDir;
     }
 }
