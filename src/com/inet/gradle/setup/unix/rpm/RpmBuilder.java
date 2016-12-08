@@ -316,7 +316,14 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             } else {
                 fw.write( "Icon=" + unixName + "\n" );
             }
-
+            String cwd = starter.getWorkDir();
+            if( cwd != null ) {
+                if( cwd.isEmpty() || cwd.equals( "." )) {
+                    fw.write( "Path=" + task.getInstallationRoot() + "\n" );
+                } else {
+                    fw.write( "Path=" + cwd + "\n" );    
+                }
+            }
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
