@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 i-net software
+ * Copyright 2015 - 2017 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -911,7 +911,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             } else {
                 targetID = id;
                 dllEntry = "CAQuietExec";
-                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.full + '\"';
+                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.relativTarget + ' ' + cmd.arguments + '\"';
             }
         } else {
             addAttributeIfNotExists( action, "Directory", getWoringDirID( run ) );
