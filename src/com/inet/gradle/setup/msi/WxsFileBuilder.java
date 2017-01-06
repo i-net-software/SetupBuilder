@@ -911,7 +911,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             } else {
                 targetID = id;
                 dllEntry = "CAQuietExec";
-                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.relativTarget + ' ' + cmd.arguments + '\"';
+                command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.relativFull + '\"';
             }
         } else {
             addAttributeIfNotExists( action, "Directory", getWoringDirID( run ) );

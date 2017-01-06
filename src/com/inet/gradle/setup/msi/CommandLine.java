@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2017 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
 class CommandLine {
 
     final String relativTarget; // executable inside the installation
+    final String relativFull;   // executable inside the installation
     final String target;
     final String arguments;
     final String full;
@@ -48,12 +49,11 @@ class CommandLine {
         }
         if( target == null || target.isEmpty() ) {
             if( javaDir != null ) {
-                dir = "[INSTALLDIR]";
-                target = javaDir + "\\bin\\javaw.exe";
+                target = "[INSTALLDIR]" + javaDir + "\\bin\\javaw.exe";
             } else {
                 target = "javaw.exe";
-                dir = "";
             }
+            dir = "";
             arguments = "-cp \"[INSTALLDIR]" + workDir + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
         } else {
             if( !target.startsWith( "[" ) ) {
@@ -70,6 +70,11 @@ class CommandLine {
             this.full = '\"' + this.target + "\" " + arguments;
         } else {
             this.full = this.target + ' ' + arguments;
+        }
+        if( this.relativTarget.indexOf( ' ' ) >=  0 || this.relativTarget.indexOf( '[' ) >=  0 ) {
+            this.relativFull = '\"' + this.relativTarget + "\" " + arguments;
+        } else {
+            this.relativFull = this.relativTarget + ' ' + arguments;
         }
         this.workDir = workDir;
     }
