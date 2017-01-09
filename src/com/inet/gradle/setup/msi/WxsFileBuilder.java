@@ -856,7 +856,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     Element verb = getOrCreateChildById( extension, "Verb", "open" );
                     Element reg = addRegistryKey( component, "HKCR", id(pID + "\\shell\\open"), pID + "\\shell\\open" );
                     addRegistryValue( reg, "FriendlyAppName", "string", setup.getApplication() );
-                    String[] segments = segments( cmd.relativTarget );
+                    String targetFile = cmd.relativTarget;
+                    if( targetFile.startsWith( "[INSTALLDIR]" ) ) {
+                        targetFile = targetFile.substring( "[INSTALLDIR]".length() ); // für id we need to cut the [INSTALLDIR]. For java command there is ever a directory
+                    }
+                    String[] segments = segments( targetFile );
                     addAttributeIfNotExists( verb, "TargetFile", id( segments, segments.length ) );
                     addAttributeIfNotExists( verb, "Argument", cmd.arguments + "\"%1\"" );
                 }
