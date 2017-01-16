@@ -98,4 +98,13 @@ public class Deb extends Unix {
     public void setChanges( String changes ) {
         this.changes = changes;
     }
+
+    @Override
+    public String getArchitecture() {
+        String architecture = super.getArchitecture();
+        if( architecture == null || architecture.length() == 0 ) {
+            architecture = "all";
+        }
+        return architecture;
+    }
 }

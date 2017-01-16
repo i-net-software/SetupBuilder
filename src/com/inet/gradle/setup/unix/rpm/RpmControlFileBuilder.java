@@ -351,8 +351,9 @@ class RpmControlFileBuilder {
         if( release == null || release.length() == 0 ) {
             release = "1";
         }
+
         controlWriter.write( "cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm '" + setup.getDestinationDir().getAbsolutePath() + "'" + NEWLINE );
-        controlWriter.write( "mv -f ../RPMS/noarch/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".noarch.rpm '" + rpm.getSetupFile() + "'" + NEWLINE );
+        controlWriter.write( "mv -f ../RPMS/" + rpm.getArchitecture() + "/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + "." + rpm.getArchitecture() + ".rpm '" + rpm.getSetupFile() + "'" + NEWLINE );
 
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
@@ -574,11 +575,7 @@ class RpmControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putArchitecture( OutputStreamWriter controlWriter ) throws IOException {
-        String architecture = rpm.getArchitecture();
-        if( architecture == null || architecture.length() == 0 ) {
-            architecture = "noarch";
-        }
-        controlWriter.write( "BuildArchitectures: " + architecture + NEWLINE );
+        controlWriter.write( "BuildArchitectures: " + rpm.getArchitecture() + NEWLINE );
     }
 
     /**
