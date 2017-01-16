@@ -259,11 +259,7 @@ class DebControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putArchitecture( OutputStreamWriter controlWriter ) throws IOException {
-        String architecture = deb.getArchitecture();
-        if( architecture == null || architecture.length() == 0 ) {
-            architecture = "all";
-        }
-        controlWriter.write( "Architecture: " + architecture + NEWLINE );
+        controlWriter.write( "Architecture: " + deb.getArchitecture() + NEWLINE );
     }
 
     /**

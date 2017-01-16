@@ -214,4 +214,13 @@ public class Rpm extends Unix {
     public void setBuild( String build ) {
         this.build.add( build );
     }
+
+    @Override
+    public String getArchitecture() {
+        String architecture = super.getArchitecture();
+        if( architecture == null || architecture.length() == 0 ) {
+            architecture = "noarch";
+        }
+        return architecture;
+    }
 }
