@@ -367,16 +367,18 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-icon-resource install --context mimetypes --novendor --size 48 /usr/share/icons/hicolor/48x48/apps/" + iconame + ".png " + iconame + " || true" );
                 controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-icon-resource uninstall --context mimetypes --size 48 " + iconame + " || true" );
                 
-                String mimetypes = docType.getMimetype();
-                if( starter.getMimeTypes() != null ) {
-                    mimetypes = starter.getMimeTypes();
-                }
-                
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "if [ -z \"$SUDO_USER\" ]; then" );
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $LOGNAME -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "else" );
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $SUDO_USER -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "fi" );
+                // we don't want to overwrite the default application and it seems that doing it per hand is the proper way under unix.
+                // so we don't do it here.
+//                String mimetypes = docType.getMimetype();
+//                if( starter.getMimeTypes() != null ) {
+//                    mimetypes = starter.getMimeTypes();
+//                }
+//                
+//                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "if [ -z \"$SUDO_USER\" ]; then" );
+//                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $LOGNAME -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
+//                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "else" );
+//                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $SUDO_USER -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
+//                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "fi" );
             }
         }
 
