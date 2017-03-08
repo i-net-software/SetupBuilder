@@ -39,6 +39,7 @@ dscl . -create "/Users/${DEAMON_USER}" Password \*
 
 #########################################################################################################
 dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
+dseditgroup -o edit -a "${DEAMON_USER}" -t user staff
 # Unusable password for standard users
 dscl . -create "/Groups/${DEAMON_USER}" Password \*
 # dscl . -read "/Groups/${DEAMON_USER}"
