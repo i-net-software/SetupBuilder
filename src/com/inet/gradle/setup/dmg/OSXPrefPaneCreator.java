@@ -122,6 +122,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
             addPlistProperty( servicePLIST, ":starter:", "dict", null );
             addPlistProperty( servicePLIST, ":starter:" + i + ":title", "string", preferencesLink.getTitle() );
             addPlistProperty( servicePLIST, ":starter:" + i + ":action", "string", preferencesLink.getAction() );
+            addPlistProperty( servicePLIST, ":starter:" + i + ":asuser", "string", task.getDaemonUser() );
             addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "bool", preferencesLink.isRunAsRoot() ? "YES" : "NO" );
         }
 
@@ -135,6 +136,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
      * @return file to prefpane sources
      * @throws IOException if an error occurs
      */
+    @SuppressWarnings( "serial" )
     private File unpackAndPatchPrefPaneSource( String internalName ) throws IOException {
 
         // Create Config and load Dependencies.
