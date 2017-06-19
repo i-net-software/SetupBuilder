@@ -15,8 +15,6 @@
  */
 package com.inet.gradle.setup.abstracts;
 
-import groovy.lang.Closure;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +49,8 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
 import org.gradle.internal.nativeplatform.filesystem.FileSystem;
 import org.gradle.internal.reflect.Instantiator;
+
+import groovy.lang.Closure;
 
 /**
  * Base class for all setup task.
@@ -159,7 +159,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             }
         }
 
-        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
+        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem(), true );
         CopyAction copyAction = new CopyAction() {
             @Override
             public WorkResult execute( CopyActionProcessingStream stream ) {
