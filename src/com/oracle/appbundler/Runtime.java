@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
 public class Runtime extends FileSet {
@@ -83,7 +84,7 @@ public class Runtime extends FileSet {
         }
     }
 
-    void copyTo(File targetDir) throws IOException {
+    void copyTo(File targetDir, Project project) throws IOException {
         detectType();
         
         File runtimeHomeDirectory = getDir();
@@ -110,7 +111,7 @@ public class Runtime extends FileSet {
         // Copy included contents of Home directory
         File pluginHomeDirectory = new File(pluginContentsDirectory, runtimeHomeDirectory.getName());
 
-        DirectoryScanner directoryScanner = getDirectoryScanner(getProject());
+        DirectoryScanner directoryScanner = getDirectoryScanner(project);
         String[] includedFiles = directoryScanner.getIncludedFiles();
 
         for (int i = 0; i < includedFiles.length; i++) {
