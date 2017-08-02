@@ -49,7 +49,7 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
-    private String       applicationName, applicationIdentifier, imageSourceRoot;
+    private String       applicationName, applicationIdentifier, imageSourceRoot, firstExecutableName;
 
     private SetupBuilder setup;
 
@@ -80,16 +80,27 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             // Build all services 
             for( Service service : setup.getServices() ) {
                 new OSXApplicationBuilder( task, setup, fileResolver ).buildService( service );
+                if ( firstExecutableName == null ) {
+                    firstExecutableName = service.getDisplayName();
+                }
             }
 
             // Build all standalone applications
             for( DesktopStarter application : setup.getDesktopStarters() ) {
                 new OSXApplicationBuilder( task, setup, fileResolver ).buildApplication( application );
+                if ( firstExecutableName == null ) {
+                    firstExecutableName = application.getDisplayName();
+                }
             }
 
             applicationIdentifier = setup.getAppIdentifier();
             applicationName = setup.getApplication();
-            imageSourceRoot = buildDir.toString() + "/" + setup.getApplication() + ".app";
+            imageSourceRoot = buildDir.toString(); // + "/" + setup.getApplication() + ".app";
+
+            // Just in case. If it still has not been set, we do not know what the user itends. 
+            if ( firstExecutableName == null ) {
+                firstExecutableName = applicationName;
+            }
 
             if( !setup.getServices().isEmpty() ) {
                 // Create installer package
@@ -485,7 +496,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         Template applescript = new Template( "dmg/template/applescript.txt" );
         applescript.setPlaceholder( "displayName", setup.getApplication() );
-        applescript.setPlaceholder( "executable", setup.getApplication() );
+
+        // Only works with the first executable in the list
+        applescript.setPlaceholder( "executable", firstExecutableName );
 
         applescript.setPlaceholder( "windowWidth", task.getWindowWidth().toString() );
         applescript.setPlaceholder( "windowHeight", task.getWindowHeight().toString() );

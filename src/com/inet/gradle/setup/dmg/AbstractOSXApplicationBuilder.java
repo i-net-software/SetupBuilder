@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 
@@ -34,6 +33,7 @@ import com.inet.gradle.setup.abstracts.DocumentType;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
+import com.oracle.appbundler.Runtime;
 
 /**
  * Abstract implementation for creating the resulting app bundler image
@@ -169,9 +169,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
             }
         }
         task.getProject().getLogger().lifecycle( "\tbundle JRE: " + jreDir );
-        FileSet fileSet = new FileSet();
-        fileSet.setDir( jreDir );
-
+/*
         fileSet.appendIncludes( new String[] { "jre/*", "jre/lib/",
                         "jre/bin/java" } );
 
@@ -179,8 +177,11 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
                         "jre/lib/deploy.jar", "jre/lib/javaws.jar",
                         "jre/lib/libdeploy.dylib", "jre/lib/libnpjp2.dylib",
                         "jre/lib/plugin.jar", "jre/lib/security/javaws.policy" } );
+*/
+        Runtime runtime = new Runtime();
+        runtime.setDir( jreDir );
 
-        appBundler.addConfiguredRuntime( fileSet );
+        appBundler.addConfiguredRuntime( runtime );
     }
 
     /**
