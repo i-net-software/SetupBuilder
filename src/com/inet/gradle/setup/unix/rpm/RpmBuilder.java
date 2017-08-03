@@ -178,7 +178,9 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         }
 
         controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " || true" );
-        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
+        if ( task.shouldStartDefaultService() ) {
+            controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
+        }
 
         controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
         controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --del " + serviceUnixName + " || true" );

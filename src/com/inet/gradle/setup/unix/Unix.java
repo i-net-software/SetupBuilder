@@ -40,6 +40,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     private Object defaultServiceFile;
 
+    private boolean startDefaultService = true;
+
     private String additionalServiceScript;
 
     public Unix( String format ) {
@@ -163,5 +165,21 @@ public abstract class Unix extends AbstractUnixSetupTask {
      */
     public void setAdditionalServiceScript( String additionalServiceScript ) {
         this.additionalServiceScript = additionalServiceScript;
+    }
+
+    /**
+     * Check if the default service should be started during the setup
+     * @return true if there is a default service an if it should be started
+     */
+    public boolean shouldStartDefaultService() {
+        return startDefaultService && getDefaultServiceFile() != null;
+    }
+
+    /**
+     * Determine if the default service should be started.
+     * @param startDefaultService true by default, so only setting false makes sense here.
+     */
+    public void setStartDefaultService( boolean startDefaultService ) {
+        this.startDefaultService = startDefaultService;
     }
 }

@@ -280,7 +280,10 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         }
 
         controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && update-rc.d " + serviceUnixName + " defaults 91 09 >/dev/null || true" );
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " start || true" );
+        if ( task.shouldStartDefaultService() ) {
+            controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " start || true" );
+        }
+
         controlBuilder.addTailScriptFragment( Script.PRERM, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " stop || true" );
         controlBuilder.addTailScriptFragment( Script.POSTRM, "[ \"$1\" = \"purge\" ] && update-rc.d " + serviceUnixName + " remove >/dev/null || true " );
     }
