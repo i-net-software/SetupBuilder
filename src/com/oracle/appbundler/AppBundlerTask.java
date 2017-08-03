@@ -57,6 +57,8 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
 
+import com.inet.gradle.setup.util.Logging;
+
 /**
  * App bundler Ant task.
  */
@@ -394,7 +396,7 @@ public class AppBundlerTask extends Task {
 
         // Create the app bundle
         try {
-            System.out.println("Creating app bundle: " + name);
+            Logging.sysout("Creating app bundle: " + name);
 
             // Create directory structure
             File rootDirectory = new File(outputDirectory, name + ".app");

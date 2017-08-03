@@ -33,6 +33,7 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
+import com.inet.gradle.setup.util.Logging;
 
 public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
@@ -474,9 +475,9 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         command.add( task.getSetupFile().getPath() );
         exec( command );
         } catch( Throwable e ) {
-            System.out.println( "Error. Control File was:" );
+            Logging.syserr( "Error. Control File was:" );
             try {
-                System.out.println( String.join( "\n", Files.readAllLines( new File(buildDir.getAbsolutePath(), "DEBIAN/control" ).toPath() ) ) );
+                Logging.syserr( String.join( "\n", Files.readAllLines( new File(buildDir.getAbsolutePath(), "DEBIAN/control" ).toPath() ) ) );
             } catch( IOException e1 ) {
                 e1.printStackTrace();
             }

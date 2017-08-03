@@ -30,6 +30,7 @@ import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.Logging;
 
 import groovy.lang.Closure;
 
@@ -84,7 +85,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
         //init default location
         setDestinationDir( new File( "distributions" ) );
-		System.out.println( "setting default Destination to: " + getDestinationDir() );
+        Logging.sysout( "setting default Destination to: " + getDestinationDir() );
     }
 
     @Override

@@ -35,6 +35,7 @@ import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
+import com.inet.gradle.setup.util.Logging;
 
 public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
@@ -438,7 +439,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 acceptThrows(elem, mele);
             } catch (final Exception e) {
                 /* Do whatever here ... */
-                System.out.println("handling an exception...");
+                Logging.syserr("handling an exception...");
                 throw new RuntimeException(e);
             }
         }

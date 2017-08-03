@@ -15,6 +15,7 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.util.Logging;
 import com.inet.gradle.setup.util.ReplacingInputStream;
 import com.inet.gradle.setup.util.ResourceUtils;
 
@@ -71,7 +72,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         Files.copy( iconPath, new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/Resources/applet.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Files.move( new File( prefPaneContents, "MacOS/" + internalName ).toPath(), new File( prefPaneContents, "MacOS/" + displayName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), new File( prefPaneContents, "Resources/" + displayName + ".app" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        System.out.println( "Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
+        Logging.sysout( "Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
         // Make executable
         setApplicationFilePermissions( new File( prefPaneContents, "Resources/" + displayName + ".app/Contents/MacOS/applet" ) );

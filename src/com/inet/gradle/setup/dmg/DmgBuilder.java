@@ -40,6 +40,7 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
+import com.inet.gradle.setup.util.Logging;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
@@ -513,8 +514,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
 
-        System.out.println( "Setting DMG display options." );
-        System.out.println( applescript );
+        Logging.sysout( "Setting DMG display options." );
+        Logging.sysout( applescript.toString() );
         exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
 
@@ -532,8 +533,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
 
-        System.out.println( "Setting display options for package." );
-        System.out.println( applescript );
+        Logging.sysout( "Setting display options for package." );
+        Logging.sysout( applescript.toString() );
         exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
     }
 

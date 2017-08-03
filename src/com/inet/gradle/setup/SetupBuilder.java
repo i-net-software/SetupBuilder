@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,32 +38,34 @@ import groovy.lang.Closure;
  */
 public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
-    private List<LocalizedResource>    licenseFiles    = new ArrayList<>();
+    private List<LocalizedResource>    licenseFiles            = new ArrayList<>();
 
-    private List<LocalizedResource>    longDescription    = new ArrayList<>();
-    
+    private List<LocalizedResource>    longDescription         = new ArrayList<>();
+
     private String                     defaultResourceLanguage = "en";
 
     private DesktopStarter             runAfter, runBeforeUninstall;
 
-    private List<Service>              services        = new ArrayList<>();
+    private List<Service>              services                = new ArrayList<>();
 
-    private final List<DesktopStarter> desktopStarters = new ArrayList<>();
+    private final List<DesktopStarter> desktopStarters         = new ArrayList<>();
 
-    private List<String>               deleteFiles     = new ArrayList<>();
+    private List<String>               deleteFiles             = new ArrayList<>();
 
-    private List<String>               deleteFolders   = new ArrayList<>();
+    private List<String>               deleteFolders           = new ArrayList<>();
 
     /**
      * Create a new instance.
+     * 
      * @param project current project
      */
     public SetupBuilder( Project project ) {
-    	super(project);
+        super( project );
     }
 
     /**
      * Return the license files
+     * 
      * @return licenseFiles list of license files
      */
     public List<LocalizedResource> getLicenseFiles() {
@@ -72,15 +74,17 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Return the license file for a specific locale
+     * 
      * @param locale for which to get the file
      * @return license file
      */
     public File getLicenseFile( String locale ) {
-        return LocalizedResource.getLocalizedResourceFile(licenseFiles, locale);
+        return LocalizedResource.getLocalizedResourceFile( licenseFiles, locale );
     }
 
     /**
      * Set the license file
+     * 
      * @param license license file or closure
      */
     public void setLicenseFile( Object license ) {
@@ -90,14 +94,16 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Add a license file
+     * 
      * @param license license file or closure
      */
     public void licenseFile( Object license ) {
-        LocalizedResource.addLocalizedResource(this, licenseFiles, license);
+        LocalizedResource.addLocalizedResource( this, licenseFiles, license );
     }
 
     /**
      * A command that run after the installer.
+     * 
      * @return the command or null
      */
     public DesktopStarter getRunAfter() {
@@ -106,6 +112,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run after the installer.
+     * 
      * @param runAfter the command
      */
     public void setRunAfter( String runAfter ) {
@@ -115,6 +122,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run after the installer.
+     * 
      * @param closue the command
      */
     public void runAfter( Closure<?> closue ) {
@@ -123,6 +131,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * A command that run before the uninstaller.
+     * 
      * @return the command or null
      */
     public DesktopStarter getRunBeforeUninstall() {
@@ -131,6 +140,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run before the uninstaller.
+     * 
      * @param runAfter the command
      */
     public void setRunBeforeUninstall( String runAfter ) {
@@ -140,6 +150,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run run before the uninstaller.
+     * 
      * @param closue the command
      */
     public void runBeforeUninstall( Closure<DesktopStarter> closue ) {
@@ -185,7 +196,8 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
     }
 
     /**
-     * Get the list pattern for files that should be deleted. 
+     * Get the list pattern for files that should be deleted.
+     * 
      * @return the list
      */
     public List<String> getDeleteFiles() {
@@ -194,6 +206,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Add a file pattern to delete files before install and after uninstall.
+     * 
      * @param pattern the patter. Can contains * and ? characters
      */
     public void deleteFiles( String pattern ) {
@@ -205,6 +218,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the list of folders to delete.
+     * 
      * @return the list
      */
     public List<String> getDeleteFolders() {
@@ -213,28 +227,30 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Add a folder to delete before install and after uninstall. It delete the folder with all sub directories.
+     * 
      * @param folder the folder
      */
     public void deleteFolder( String folder ) {
         this.deleteFolders.add( folder );
     }
 
-	/**
-	 * @return the defaultResourceLanguage
-	 */
-	public String getDefaultResourceLanguage() {
-		return defaultResourceLanguage;
-	}
+    /**
+     * @return the defaultResourceLanguage
+     */
+    public String getDefaultResourceLanguage() {
+        return defaultResourceLanguage;
+    }
 
-	/**
-	 * @param defaultResourceLanguage the defaultResourceLanguage to set
-	 */
-	public void setDefaultResourceLanguage(String defaultResourceLanguage) {
-		this.defaultResourceLanguage = defaultResourceLanguage;
-	}
+    /**
+     * @param defaultResourceLanguage the defaultResourceLanguage to set
+     */
+    public void setDefaultResourceLanguage( String defaultResourceLanguage ) {
+        this.defaultResourceLanguage = defaultResourceLanguage;
+    }
 
     /**
      * Return the description files
+     * 
      * @return licenseFiles list of license files
      */
     public List<LocalizedResource> getLongDescriptions() {
@@ -243,18 +259,20 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Return the description file for a specific locale
+     * 
      * @param locale for which to get the file
      * @return license file
      */
     public File getLongDescription( String locale ) {
-    	return LocalizedResource.getLocalizedResourceFile(longDescription, locale);
+        return LocalizedResource.getLocalizedResourceFile( longDescription, locale );
     }
 
     /**
      * Set the description file
+     * 
      * @param description file or closure
      */
     public void longDescription( Object description ) {
-    	LocalizedResource.addLocalizedResource(this, longDescription, description);
+        LocalizedResource.addLocalizedResource( this, longDescription, description );
     }
 }

@@ -30,6 +30,7 @@ import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
 import com.inet.gradle.setup.abstracts.Application;
 import com.inet.gradle.setup.abstracts.DocumentType;
+import com.inet.gradle.setup.util.Logging;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.BundleDocument;
@@ -70,7 +71,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
      */
     protected void prepareApplication( Application application ) throws Exception {
 
-        System.out.println( "BuildDir now: " + buildDir );
+        Logging.sysout( "BuildDir now: " + buildDir );
         appBundler.setOutputDirectory( buildDir );
         appBundler.setName( application.getDisplayName() );
         appBundler.setDisplayName( application.getDisplayName() );

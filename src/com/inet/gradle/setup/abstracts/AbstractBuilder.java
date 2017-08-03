@@ -35,17 +35,17 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
  */
 public abstract class AbstractBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> {
 
-	protected T task;
+    protected T task;
 
-	protected FileResolver fileResolver;
+    protected FileResolver fileResolver;
 
-	protected File buildDir;
+    protected File buildDir;
 
-	/**
-	 * Builder abstraction
-	 * @param task concrete task
-	 * @param fileResolver resolver for files
-	 */
+    /**
+     * Builder abstraction
+     * @param task concrete task
+     * @param fileResolver resolver for files
+     */
     protected AbstractBuilder( T task, FileResolver fileResolver ) {
         this.task = task;
         this.fileResolver = fileResolver;
@@ -85,15 +85,15 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         // print command line to the log
         StringBuilder log = new StringBuilder( "\t" );
         for( String para : parameters ) {
-        	
+    
         	if ( para == null ) {
         		task.getProject().getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
         	} else {
-	            log.append( '\"' ).append( para );
-	            if( para.endsWith( "\\" ) ) {
-	                log.append( '\\' );
-	            }
-	            log.append( "\" " );
+                log.append( '\"' ).append( para );
+                if( para.endsWith( "\\" ) ) {
+                    log.append( '\\' );
+                }
+                log.append( "\" " );
         	}
         }
         task.getProject().getLogger().lifecycle( log.toString() );

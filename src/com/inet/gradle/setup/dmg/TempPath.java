@@ -9,6 +9,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 
+import com.inet.gradle.setup.util.Logging;
+
 /**
  * Automatically create and tear down a temporary directory
  * Also create additional directories when needed.
@@ -36,7 +38,7 @@ public class TempPath {
             @Override
             public void run() {
                 try {
-                    // clearTemporaryFolder();
+                    clearTemporaryFolder();
                 } catch( Exception e ) {
                     System.err.println( "Could not remove temporary Resources" );
                     e.printStackTrace();
@@ -66,7 +68,7 @@ public class TempPath {
         Path destination = new File( tmp.toFile(), directory ).toPath();
         if( Files.notExists( destination ) ) {
             Files.createDirectories( destination, new FileAttribute[0] );
-            System.out.println( "Created temporary directory: " + tmp );
+            Logging.sysout( "Created temporary directory: " + tmp );
         }
 
         return destination;
@@ -137,7 +139,7 @@ public class TempPath {
             }
         } );
 
-        System.out.println( "Removed the temporary content at: " + tmp.toString() );
+        Logging.sysout( "Removed the temporary content at: " + tmp.toString() );
         tmp = null;
     }
 }
