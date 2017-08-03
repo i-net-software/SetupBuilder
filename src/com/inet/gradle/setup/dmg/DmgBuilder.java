@@ -353,7 +353,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
             if( welcomePage != null ) {
                 Files.copy( welcomePage.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "Welcome" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-                Element license = xmlFile.getOrCreateChild( distribution, "license", false );
+                Element license = xmlFile.getOrCreateChild( distribution, "welcome", false );
                 xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
             }
         }
