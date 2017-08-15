@@ -224,6 +224,10 @@ log_action_end_msg_post () { :; }
 
 fi
 
+# Read configuration variable file if it is present
+[ -r "/etc/default/$APPNAME" ] && . "/etc/default/$APPNAME" || :
+[ -r "/etc/sysconfig/$APPNAME" ] && . "/etc/sysconfig/$APPNAME" || :
+
 [ "$(id $DAEMON_USER 2> /dev/null; echo $?)" == "0" ] && log_failure_msg "'$DAEMON_USER' is not a user.  Please create a user account first." && exit 1 || :
 
 # check for daemon program to be present
@@ -234,10 +238,6 @@ fi
 
 # Load the VERBOSE setting and other rcS variables
 [ -r "/lib/init/vars.sh" ] && . "/lib/init/vars.sh" || :
-
-# Read configuration variable file if it is present
-[ -r "/etc/default/$APPNAME" ] && . "/etc/default/$APPNAME" || :
-[ -r "/etc/sysconfig/$APPNAME" ] && . "/etc/sysconfig/$APPNAME" || :
 
 checkstatus() {
     if checkfunc "start-stop-daemon"; then
