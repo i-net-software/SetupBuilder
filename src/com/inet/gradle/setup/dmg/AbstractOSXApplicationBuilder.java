@@ -170,16 +170,9 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
             }
         }
         task.getProject().getLogger().lifecycle( "\tbundle JRE: " + jreDir );
-/*
-        fileSet.appendIncludes( new String[] { "jre/*", "jre/lib/",
-                        "jre/bin/java" } );
 
-        fileSet.appendExcludes( new String[] { "jre/lib/deploy/",
-                        "jre/lib/deploy.jar", "jre/lib/javaws.jar",
-                        "jre/lib/libdeploy.dylib", "jre/lib/libnpjp2.dylib",
-                        "jre/lib/plugin.jar", "jre/lib/security/javaws.policy" } );
-*/
         Runtime runtime = new Runtime();
+        runtime.appendIncludes( new String[] { "jre/bin/java" } );
         runtime.setDir( jreDir );
 
         appBundler.addConfiguredRuntime( runtime );
