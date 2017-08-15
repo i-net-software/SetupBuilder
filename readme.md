@@ -88,6 +88,6 @@ Apache License, Version 2.0
 
 [setupBuilder]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/SetupBuilder.java
 [msi]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/msi/Msi.java
-[deb]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/deb/Deb.java
-[rpm]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/rpm/Rpm.java
+[deb]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/unix/deb/Deb.java
+[rpm]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/unix/rpm/Rpm.java
 [dmg]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/dmg/Dmg.java
