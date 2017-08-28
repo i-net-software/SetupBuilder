@@ -172,7 +172,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * @return true if there is a default service an if it should be started
      */
     public boolean shouldStartDefaultService() {
-        return startDefaultService && getDefaultServiceFile() != null;
+        return startDefaultService;
     }
 
     /**
