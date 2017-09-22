@@ -482,8 +482,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     private void addGUI() throws Exception {
         Element wixUiInstalldir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR" );
         addAttributeIfNotExists( wixUiInstalldir, "Value", "INSTALLDIR" );
-        Element uiRef = getOrCreateChild( product, "UIRef" );
-        addAttributeIfNotExists( uiRef, "Id", "WixUI_InstallDir" );
+        getOrCreateChildById( product, "UIRef", "WixUI_ErrorProgressText" ); // https://stackoverflow.com/questions/44844248/wix-progressdlg-not-showing-status-info-properly
+        Element uiRef = getOrCreateChildById( product, "UIRef", "WixUI_InstallDir" );
 
         boolean isLicense = addLicense( product );
         if( !isLicense ) {
