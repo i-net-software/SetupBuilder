@@ -6,12 +6,22 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'de.inetsoftware'
-version = '1.9.0'
+
+def minorVersion = '8' // default minor version
+def buildVersion = '1' // build version
+
+// gradle version switch, depends the API level
+println 'Gradle version: ' + gradle.gradleVersion
+def gVersion = VersionNumber.parse( gradle.gradleVersion )
+if( gVersion >= VersionNumber.parse( '3.4' ) ) minorVersion = '9'
+
+version = '1.' + minorVersion + '.' + buildVersion
+println 'SetupBuilder version: ' + version
+
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 def LIB_GRADLE_VERSION = '3.5'
 
-println 'Gradle version: ' + gradle.gradleVersion
 
 repositories {
     jcenter()
