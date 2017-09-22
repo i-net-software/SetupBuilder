@@ -151,7 +151,7 @@ class DebControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
-        String description = setup.getApplication();
+        String description = setup.getDescription();
 
         String secondLine = "";
         File longDescription = setup.getLongDescription( setup.getDefaultResourceLanguage() );
@@ -159,13 +159,13 @@ class DebControlFileBuilder {
             try (Scanner scanner = new Scanner( longDescription, "UTF8" )) {
                 secondLine = scanner.useDelimiter( "\\A" ).next();
             }
+
+            if( secondLine.trim().length() > 0 ) {
+                secondLine = NEWLINE + " " + secondLine;
+            }
         }
 
-        if( secondLine.trim().length() == 0 ) {
-            secondLine = setup.getDescription();
-        }
-
-        controlWriter.write( "Description: " + description + NEWLINE + " " + secondLine + NEWLINE );
+        controlWriter.write( "Description: " + description + secondLine + NEWLINE );
     }
 
     /**
