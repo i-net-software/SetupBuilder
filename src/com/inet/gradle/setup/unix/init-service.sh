@@ -228,7 +228,7 @@ fi
 [ -r "/etc/default/$APPNAME" ] && . "/etc/default/$APPNAME" || :
 [ -r "/etc/sysconfig/$APPNAME" ] && . "/etc/sysconfig/$APPNAME" || :
 
-[ "$(id $DAEMON_USER 2> /dev/null; echo $?)" == "0" ] && log_failure_msg "'$DAEMON_USER' is not a user.  Please create a user account first." && exit 1 || :
+[ "$(id $DAEMON_USER 2> /dev/null; echo $?)" == "0" ] && log_failure_msg "'$DAEMON_USER' is not a user. Please create a user account first." && exit 1 || :
 
 # check for daemon program to be present
 [ ! -x "$DAEMON_EXEC" ] && log_failure_msg "The program '$DAEMON_EXEC' does not exist" && exit 1 || :
