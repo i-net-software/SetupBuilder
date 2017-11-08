@@ -8,20 +8,22 @@ apply from: 'javapreprocessor.gradle'
 
 group = 'de.inetsoftware'
 
-def minorVersion = '8' // default minor version
-def buildVersion = '1' // build version
+def LIB_GRADLE_VERSION = '3.5'  // Gradle version for the wrapper
+def buildVersion = '1'          // build version
+
+version = '3.0'                 // Base Version to build, depends on gradle version.
 
 // gradle version switch, depends the API level
 println 'Gradle version: ' + gradle.gradleVersion
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
-if( gVersion >= VersionNumber.parse( '3.4' ) ) minorVersion = '9'
+if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
+if( gVersion >= VersionNumber.parse( '3.5' ) ) version = '3.5'
 
-version = '1.' + minorVersion + '.' + buildVersion
+version += '.' + buildVersion
 println 'SetupBuilder version: ' + version
 
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
-def LIB_GRADLE_VERSION = '3.5'
 
 repositories {
     jcenter()
