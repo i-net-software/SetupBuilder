@@ -1,0 +1,231 @@
+/*
+ javapreprocessor.gradle
+
+ Provides the following function:
+ - JPP.setJPPSources( "SOURCE/FOLDER", [ "today" : "${productVersion.LastModified}"] );
+
+ The syntax is explained below.
+*/
+
+import java.util.StringTokenizer;
+import java.util.regex.*;
+
+/**
+ * Java Preprocessor.
+ * The JPP allows replacement of variables at compile time and conditional compilation.
+ */
+class JPPTask extends DefaultTask {
+
+    /* Variable-Replacement
+     * 
+     * ${jpp:<property>} 
+     * 
+     *    Sucht zunächst in den angegeben, danach in den System-Properties.
+     * 
+     * Bedingte Kompilierung:
+     * 
+     *  CMD     <PREFIX> IF <EXPR> 
+     *          <PREFIX> ELSE
+     *          <PREFIX> ELIF <EXPR>
+     *          <PREFIX> END
+     * 
+     *  PREFIX  (alle Werte haben 4 Zeichen, ohne Leerzeichen)
+     *          / / / /
+     *          / * / /
+     *          * / / /
+     * 
+     *  EXPR    <VARIABLE> <OP> <LITERAL>
+     * 
+     *  OP  >
+     *      <
+     *      =
+     *      ==
+     *      !=
+     *      >=
+     *      <=
+     *      
+     * LITERAL ein beliebiger constanter Ausdruck (Zahlen, Strings nur == und != )
+     * A command may be prefixed only by whitespace and is interpreted until end of line
+     */
+
+    private Pattern pattern = Pattern.compile("[ \t]*(////|/\\*//|\\*///)[ \t]*(if[ \t]|else|elif[ \t]|endif)[ \t]*(.*)");
+    private Pattern pattern2 = Pattern.compile( '\\$\\{jpp\\:([a-z0-9_.]*)\\}' );
+
+    class Conditional {
+        boolean wasTrue = false;
+        boolean isTrue = false;
+        final Conditional parent;
+        private HashMap<String, String> props = null;
+
+        Conditional(HashMap<String, String> props) {
+            this.props = props
+            wasTrue=isTrue=true;
+            parent = null;
+        }
+
+        Conditional(Conditional parent, String expr, HashMap<String, String> props) {
+            this.props = props;
+            this.parent = parent;
+            wasTrue = isTrue = parent.isTrue && eval(expr);
+        }
+
+        private boolean eval(String expr) {
+            StringTokenizer st = new StringTokenizer(expr," ");
+            String var = st.nextToken();
+            String op = st.nextToken();
+            String lit = st.nextToken();
+            String varContent = props.get(var);
+//            println "compare: "+var+"("+varContent+")"+op+lit;
+            if (op.equals("=") || op.equals("==")) {
+                return lit.equals(varContent);
+            } else if (op.equals("!=")) {
+                return !lit.equals(varContent);
+            } else if (op.equals(">")) {
+                double vd = parseDouble(varContent);
+                double ld = parseDouble(lit);
+                return vd>ld;
+            } else if (op.equals("<")) {
+                double vd = parseDouble(varContent);
+                double ld = parseDouble(lit);
+                return vd<ld;
+            } else if (op.equals(">=")) {
+                double vd = parseDouble(varContent);
+                double ld = parseDouble(lit);
+                return vd>=ld;
+            } else if (op.equals("<=")) {
+                double vd = parseDouble(varContent);
+                double ld = parseDouble(lit);
+                return vd<=ld;
+            } else {
+                throw new UnsupportedOperationException(op);
+            }
+        }
+
+        private double parseDouble(String lit) {
+            int f = lit.indexOf('.');
+            int s = lit.indexOf('.',f+1);
+            if (s>=0) {
+                lit = lit.substring(0,s);
+            }
+            return Double.parseDouble(lit);
+        }
+
+        void doElse() {
+            wasTrue |= isTrue = parent.isTrue && !wasTrue;
+        }
+
+        void doElseIf(String expr) {
+            wasTrue |= isTrue = parent.isTrue && (!wasTrue && eval(expr));
+        }
+    }
+
+    public void processFile( File file, HashMap<String,String> props ) {
+
+        boolean isChanged = false;
+        Stack conditionals = new Stack();
+        conditionals.add(new Conditional(props));
+        final List lines = new ArrayList();
+
+        BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        for (String line = input.readLine(); line != null; line = input.readLine()) {
+            Matcher m2 = pattern2.matcher(line);
+            while (m2.find()) {
+                String var = m2.group(1);
+                line = m2.replaceFirst(props.get(var)?:'');
+                println ""+file+": "+line;
+                isChanged = true;
+                m2 = pattern2.matcher(line); // muss neu gematcht werden, weil sonst bei mehreren jpp in einer zeile es zu einem Endlosloop kommen kann z.B. PDFC mit Base_Version
+            }
+
+            final Matcher matcher = pattern.matcher(line);
+            if (matcher.matches()) {
+                String command = matcher.group(2);
+                String expr = matcher.group(3);
+                println ""+file+": "+command+" - "+expr;
+                if (command.equals("if ") || command.equals("if\t")) {
+                    conditionals.add(new Conditional((Conditional) conditionals.peek(),expr, props));
+                } else if (command.equals("else")) {
+                    ((Conditional)conditionals.peek()).doElse();
+                } else if (command.equals("elif ")||command.equals("elif\t")) {
+                    ((Conditional)conditionals.peek()).doElseIf(expr);
+                } else if (command.equals("endif")) {
+                    conditionals.pop();
+                } else {
+                    println ""+file+": invalid command: "+command;
+                }
+                isChanged = true;
+                lines.add("// "+command+" "+expr);
+            } else {
+                if (((Conditional)conditionals.peek()).isTrue) {
+                    lines.add(line);
+                } else {
+                    isChanged = true;
+                    lines.add("// "+line);
+                }
+            }
+        }
+        input.close();
+
+        if (isChanged) {
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file)));
+            for (int i = 0; i < lines.size(); i++) {
+                out.println(lines.get(i));
+            }
+            out.close();
+            //log(skip + " asserts removed from " + file);
+        }
+    }
+
+    private HashMap<String,HashMap<String,String>> jppSources = []
+
+    void setJPPSources( String sourceDirectory, HashMap<String,String> extraProps ) {
+
+        this.jppSources.put( sourceDirectory, extraProps )
+        getProject().getTasks().JPP.enabled = true
+    }
+
+    HashMap<String,HashMap<String, String>> getJPPSources() {
+        return jppSources;
+    }
+}
+
+compileJava.dependsOn( 'JPP' )
+
+task JPP ( type : JPPTask) {
+
+    description '===  Pre-Process Java sources  ==='
+    JPP.enabled = false
+
+    doLast {
+
+        println JPPSources
+
+        JPPSources.each { String rootDirectory, HashMap<String,String> extraProps ->
+            def output = extraProps.get('outputDirectory')?:rootDirectory
+            extraProps.remove('outputDirectory')
+            println "Checking: " + rootDirectory
+            println "Properties: " + extraProps
+
+            if ( !rootDirectory.equalsIgnoreCase( output ) ) {
+                def outFile = file( output )
+                println "Output will be in: " + output
+                if ( outFile.exists() ) { 
+                    outFile.deleteDir()
+                }
+
+                outFile.mkdirs()
+                copy {
+                    from rootDirectory
+                    into outFile
+                    include "**/*.java"
+                }
+            }
+
+            fileTree( output ).matching {
+                include "**/*.java"
+            }.each {
+                processFile( it, extraProps)
+            }
+        }
+    }
+}

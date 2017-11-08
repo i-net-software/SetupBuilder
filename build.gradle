@@ -4,6 +4,7 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply from: 'javapreprocessor.gradle'
 
 group = 'de.inetsoftware'
 
@@ -22,7 +23,6 @@ sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 def LIB_GRADLE_VERSION = '3.5'
 
-
 repositories {
     jcenter()
 }
@@ -34,7 +34,7 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs = ['src']
+            srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
         }
         resources {
             srcDirs = ['src']
@@ -43,6 +43,12 @@ sourceSets {
         }
     }
 }
+
+/* Configure for ClearReports Version and copy files if needed */
+JPP.setJPPSources( "src", [ 
+    "gradleVersion" : "${gVersion}",
+    "outputDirectory" : "${buildDir}/preparedSrc-${gVersion}"
+]);
 
 if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
