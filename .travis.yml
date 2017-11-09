@@ -1,19 +1,33 @@
 language: groovy
 jdk:
-  - oraclejdk8
+- oraclejdk8
 env:
-  - "LIB_GRADLE_VERSION=2.14.1"
-  - "LIB_GRADLE_VERSION=3.0"
-  - "LIB_GRADLE_VERSION=3.1"
-  - "LIB_GRADLE_VERSION=3.3"
-  - "LIB_GRADLE_VERSION=3.4.1"
-  - "LIB_GRADLE_VERSION=3.5.1"
-  - "LIB_GRADLE_VERSION=4.0.1"
-  - "LIB_GRADLE_VERSION=4.1"
-  - "LIB_GRADLE_VERSION=4.2.1"
+- LIB_GRADLE_VERSION=2.14.1 DEPLOY=true
+- LIB_GRADLE_VERSION=3.0 DEPLOY=true
+- LIB_GRADLE_VERSION=3.1 DEPLOY=true
+- LIB_GRADLE_VERSION=3.3
+- LIB_GRADLE_VERSION=3.4.1 DEPLOY=true
+- LIB_GRADLE_VERSION=3.5.1
+- LIB_GRADLE_VERSION=4.0.1
+- LIB_GRADLE_VERSION=4.1
+- LIB_GRADLE_VERSION=4.2.1
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y fakeroot
+- sudo apt-get -qq update
+- sudo apt-get install -y fakeroot
 install:
-  - gradle wrapper
-  - ./gradlew uploadArchives
+- gradle wrapper
+- ./gradlew uploadArchives
+before_deploy:
+- echo -e 'gradle.publish.key=$gradlePublishKey\ngradle.publish.secret=$gradlePublishSecret'
+  > gradle.properties
+deploy:
+  provider: releases
+  api_key:
+    secure: $GIT_API_KEY
+  file: '**/build/libs/SetupBuilder-*'
+  on:
+    repo: i-net-software/SetupBuilder
+    tags: true
+    condition: "$DEPLOY = true"
+after_deploy
+- ./gradlew publishPlugin
