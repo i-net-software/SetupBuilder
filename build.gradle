@@ -8,17 +8,17 @@ apply from: 'javapreprocessor.gradle'
 
 group = 'de.inetsoftware'
 
-def LIB_GRADLE_VERSION = '3.5'  // Gradle version for the wrapper
-def buildVersion = '1'          // build version
-def baseVersion = '3.0'
+def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '3.5'   // Gradle version for the wrapper
+def buildVersion = '1'                                                  // build version
+def baseVersion = '3.0'                                                 // Base Version to build, depends on gradle version.
 
-version = baseVersion          // Base Version to build, depends on gradle version.
+version = baseVersion
 
 // gradle version switch, depends the API level
 println 'Gradle version: ' + gradle.gradleVersion
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
 if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
-if( gVersion >= VersionNumber.parse( '3.5' ) ) version = '3.5'
+// if( gVersion >= VersionNumber.parse( '3.5' ) ) version = '3.5'
 
 version += '.' + buildVersion
 baseVersion += '.' + buildVersion
@@ -47,6 +47,14 @@ sourceSets {
             srcDirs = ['src']
             exclude '**/*.java'
             exclude '**/package.html'
+        }
+    }
+    test { 
+        java {
+            srcDirs = ['src']
+            if ( !version.equalsIgnoreCase(baseVersion) ) {
+                srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
+            }
         }
     }
 }
@@ -82,6 +90,11 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
         }
     }
 
+    clean.doLast {
+        println "Cleaning local repository folder"
+        file('../repo').deleteDir()
+    }
+
     task wrapper(type: Wrapper) {
        gradleVersion = LIB_GRADLE_VERSION
     }
@@ -104,4 +117,20 @@ pluginBundle {
       tags = ['app']
     }
   }
+}
+
+// Check for the current operating system to load the specific build task
+import org.apache.tools.ant.taskdefs.condition.Os
+def dependingTask = 'deb'
+if (Os.isFamily(Os.FAMILY_MAC)) {
+    dependingTask = 'dmg'
+} else if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    dependingTask = 'msi'
+}
+
+// run the following task as a deoendency to the "check"-task.
+task runSetupBuilderTestTasks(type: GradleBuild) {
+    check.dependsOn runSetupBuilderTestTasks
+    buildFile = 'testBuilds/setupBuilder.gradle'
+    tasks = ['clean', dependingTask]
 }
