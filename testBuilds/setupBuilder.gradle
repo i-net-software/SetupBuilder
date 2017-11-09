@@ -1,6 +1,6 @@
 /*
 plugins {
-	id "de.inetsoftware.setupbuilder" version "1.6.0"
+    id "de.inetsoftware.setupbuilder" version "1.6.0"
 }
 /*/
 buildscript {
@@ -27,41 +27,37 @@ apply plugin: 'de.inetsoftware.setupbuilder'
 apply plugin: 'java'
 
 sourceSets {
-	main {
-		java {
-			srcDirs 'src'
-		}
-	}
+    main {
+        java {
+            srcDirs 'src'
+        }
+    }
 }
 
 setupBuilder {
 
-	application = "Setup Builder Test"
-	description = 'Build a test Programm.'
-	icons = "test-icon.icns"
+    application = "Setup Builder Test"
+    description = 'Build a test Programm.'
+    icons = "test-icon.icns"
 
     licenseFile "license_en.txt"
-	licenseFile {
-	   locale = "de"
-	   resource = "license_de.txt"
-	}
+    licenseFile {
+       locale = "de"
+       resource = "license_de.txt"
+    }
 
-	from jar.outputs
+    from jar.outputs
 
     bundleJre = 1.8
     mainClass = 'com.inet.testapplication.TestLauncher'
     mainJar = 'testBuilds.jar'
-/*
-    desktopStarter {
-        displayName = "Setup Builder Test"
-    }
-*/    
+
     runBeforeUninstall {
         mainClass = 'com.inet.testapplication.TestLauncher'
     }
     service {
-	    displayName = "i-net TestLaunch Server"
-	    id = "helpdesk"
+        displayName = "i-net TestLaunch Server"
+        id = "helpdesk"
     }
 }
 
@@ -69,11 +65,11 @@ configure( [ deb, rpm ] ) {
     doFirst {
         setupBuilder {
             defaultResourceLanguage "de"
-		    longDescription "longDesc_de.txt"
-		    longDescription {
-		        locale = "en"
-		        resource = "longDesc_en.txt"
-		    }
+            longDescription "longDesc_de.txt"
+            longDescription {
+                locale = "en"
+                resource = "longDesc_en.txt"
+            }
         }
     }
 }
@@ -89,12 +85,23 @@ dmg {
     }
 
     daemonUser = "testingUser"
-//    codeSign {
-//        identity = 'Developer ID Application'
-//    }
 }
 
 dmg.dependsOn jar
 deb.dependsOn jar
 rpm.dependsOn jar
 msi.dependsOn jar
+
+// If the 'dmg' task is to be build, make sure that the pref pane exists as well
+import org.apache.tools.ant.taskdefs.condition.Os
+task preparePrefPane(type: GradleBuild) {
+
+    buildFile '../../SetupBuilderOSXPrefPane/build.gradle'
+    tasks = ['clean', 'uploadArchives']
+
+    processResources.dependsOn 'preparePrefPane'
+
+    onlyIf {
+        file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
+    }
+}
