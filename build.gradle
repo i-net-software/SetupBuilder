@@ -10,15 +10,16 @@ group = 'de.inetsoftware'
 
 def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '3.5'   // Gradle version for the wrapper
 def buildVersion = '1'                                                  // build version
-def baseVersion = '3.0'                                                 // Base Version to build, depends on gradle version.
+def baseVersion = '2.0'                                                 // Base Version to build, depends on gradle version.
 
 version = baseVersion
 
 // gradle version switch, depends the API level
 println 'Gradle version: ' + gradle.gradleVersion
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
+if( gVersion >= VersionNumber.parse( '3.0' ) ) version = '3.0'
+if( gVersion >= VersionNumber.parse( '3.1' ) ) version = '3.1'
 if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
-// if( gVersion >= VersionNumber.parse( '3.5' ) ) version = '3.5'
 
 version += '.' + buildVersion
 baseVersion += '.' + buildVersion

@@ -2,7 +2,9 @@ language: groovy
 jdk:
   - oraclejdk8
 env:
+  - "LIB_GRADLE_VERSION=2.14.1"
   - "LIB_GRADLE_VERSION=3.0"
+  - "LIB_GRADLE_VERSION=3.1"
   - "LIB_GRADLE_VERSION=3.3"
   - "LIB_GRADLE_VERSION=3.4.1"
   - "LIB_GRADLE_VERSION=3.5.1"

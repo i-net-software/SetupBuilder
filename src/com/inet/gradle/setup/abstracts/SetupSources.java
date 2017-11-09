@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.gradle.api.Action;
-import org.gradle.api.Transformer;
 import org.gradle.api.file.CopyProcessingSpec;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.DuplicatesStrategy;
@@ -33,6 +32,10 @@ import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.internal.file.copy.CopySpecSource;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
+
+/*// if gradleVersion >= 3.0
+import org.gradle.api.Transformer;
+*/// endif
 
 /**
  * Implementation of the CopySpec interface.
@@ -251,7 +254,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         getRootSpec().setFilteringCharset( charset );
     }
 
-    // methods for Gradle 3.0
+    /*// if gradleVersion >= 3.0
     @Override
     default CopySpec filter( Transformer<String, String> arg0 ) {
         return getRootSpec().filter( arg0 );
@@ -271,8 +274,9 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     default CopySpec rename( Transformer<String, String> arg0 ){
         return getRootSpec().rename( arg0 );
     }
+    */// endif
 
-    // methods for Gradle 3.1
+    /*// if gradleVersion >= 3.1
     @Override
     default CopySpec filesMatching( Iterable<String> arg0, Action<? super FileCopyDetails> arg1 ) {
         return getRootSpec().filesMatching( arg0, arg1 );
@@ -282,4 +286,5 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     default CopySpec filesNotMatching( Iterable<String> arg0, Action<? super FileCopyDetails> arg1 ) {
         return getRootSpec().filesMatching( arg0, arg1 );
     }
+    */// endif
 }
