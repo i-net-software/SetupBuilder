@@ -1,15 +1,18 @@
-Dieses Paket istalliert den i-net HelpDesk in 2 Schritten.
- 
-Zuerst werden die Programmdateien nach /usr/share/i-net-helpdesk kopiert.
-Danach sollte vom Installer automatisch der Browser mit der Weboberflache
-zur Konfiguration (Datenbankeinrichtung, Proxy) geöffnet werden. Dies kann
-aber in Abhängigkeit vom System und Paketinstaller nicht funktionieren.
- 
-Sollte kein Browser mit der Weboberfläche geöffnet werden, öffnen sie bitte
-die /usr/share/i-net-helpdesk/Server/webconfig.txt Datei. In dieser Datei
-finden Sie alle notwendigen Daten um auf die Weboberfläche zuzugreifen.
-Standardmäßig läuft der HelpDesk auf http://localhost:8002.
- 
-Öffnen Sie nun die Weboberfläche für die Konfiguration selbst mit http://localhost:8002/setup
-Dort müssen sie die UUID aus der webconfig.txt eintragen.
-(Hinweis: Wenn in der webconfig.txt ein anderer Port angegeben ist, benutzen Sie bitte diesen.)
+ Dieses Paket istalliert den i-net Clear Reports Server in 2 Schritten.
+ ==========================================================
+ Zuerst werden die Programmdateien nach /usr/share/i-net-clear-reports kopiert.
+ Danach sollte vom Installer automatisch der Browser mit der Weboberflache
+ zur Konfiguration (z.B. Proxy) geöffnet werden. Dies kann
+ aber in Abhängigkeit vom System und Paketinstaller nicht funktionieren.
+ |
+ Sollte kein Browser mit der Weboberfläche geöffnet werden, öffnen sie bitte
+ die /usr/share/i-net-clear-reports/webconfig.txt Datei. In dieser Datei
+ finden Sie alle notwendigen Daten um auf die Weboberfläche zuzugreifen.
+ Standardmäßig läuft der i-net Clear Reports Server auf http://localhost:9000.
+ |
+ Öffnen Sie nun die Weboberfläche für die Konfiguration selbst mit http://localhost:9000/setup
+ Dort müssen sie die UUID aus der webconfig.txt eintragen.
+ (Hinweis: Wenn in der webconfig.txt ein anderer Port angegeben ist, benutzen Sie bitte diesen.)
+ |
+ Hinweis: Dieses Paket funktioniert nicht mit allen grafischen Paket-Managern. Wir empfehlen zur Installation
+ die Kommandozeilentools.
