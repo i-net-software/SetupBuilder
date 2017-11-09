@@ -12,7 +12,7 @@ env:
 - LIB_GRADLE_VERSION=4.1
 - LIB_GRADLE_VERSION=4.2.1
 before_install:
-- echo "Tag: $TRAVIS_TAG"
+- echo $TRAVIS_TAG
 - sudo apt-get -qq update
 - sudo apt-get install -y fakeroot
 install:
@@ -25,7 +25,8 @@ deploy:
   provider: releases
   api_key:
     secure: $GIT_API_KEY
-  file: '**/build/libs/SetupBuilder-*'
+  file_glob: true
+  file: './build/libs/SetupBuilder-*'
   skip_cleanup: true
   overwrite: true
   on:
