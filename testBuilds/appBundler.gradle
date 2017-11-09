@@ -1,6 +1,6 @@
 /*
 plugins {
-	id "de.inetsoftware.setupbuilder" version "1.4.7"
+    id "de.inetsoftware.setupbuilder" version "1.4.7"
 }
 /*/
 buildscript {
@@ -20,20 +20,20 @@ apply plugin: 'de.inetsoftware.appbundler'
 apply plugin: 'java'
 
 sourceSets {
-	main {
-		java {
-			srcDirs 'src'
-		}
-	}
+    main {
+        java {
+            srcDirs 'src'
+        }
+    }
 }
 
 appBundler {
 
-	application = "appBundler Test Build"
-	description = 'Build a test programm.'
-	icons = "test-icon.icns"
-	
-	from jar.outputs
+    application = "appBundler Test Build"
+    description = 'Build a test programm.'
+    icons = "test-icon.icns"
+
+    from jar.outputs
 
     bundleJre = 1.8
     mainClass = 'com.inet.testapplication.TestLauncher'
@@ -41,8 +41,7 @@ appBundler {
 }
 
 bundleApp {
-	dependsOn jar
-	
+    dependsOn jar
     codeSign {
         identity = 'Developer ID Application'
     }
