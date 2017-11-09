@@ -28,6 +28,6 @@ deploy:
   on:
     repo: i-net-software/SetupBuilder
     tags: true
-    condition: "$DEPLOY = true"
+    condition: $DEPLOY = true
 after_deploy:
 - ./gradlew publishPlugin
