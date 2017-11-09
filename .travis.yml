@@ -24,7 +24,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: $GIT_API_KEY
+    secure: "$GIT_API_KEY"
   file_glob: true
   file: './build/libs/SetupBuilder-*'
   skip_cleanup: true
