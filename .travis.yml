@@ -13,7 +13,7 @@ env:
   - "LIB_GRADLE_VERSION=4.2.1"
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y fakeroot
+  - sudo apt-get install -y fakeroot lintian
 install:
   - gradle wrapper
   - ./gradlew uploadArchives
