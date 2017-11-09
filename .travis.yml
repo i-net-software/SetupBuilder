@@ -11,3 +11,4 @@ env:
   - "LIB_GRADLE_VERSION=4.2.1"
 install:
   - gradle wrapper
+  - ./gradlew uploadArchives
