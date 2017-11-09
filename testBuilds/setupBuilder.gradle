@@ -105,3 +105,17 @@ task preparePrefPane(type: GradleBuild) {
         file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
     }
 }
+
+// run the following task as a dependency to the "check"-task.
+task runAppBundlerTest(type: GradleBuild) {
+    preparePrefPane.finalizedBy 'runAppBundlerTest'
+    buildFile = './appBundler.gradle'
+    tasks = ['clean', 'bundleApp']
+}
+
+// run the following task as a dependency to the "check"-task.
+task runJNLPBundlerTest(type: GradleBuild) {
+    preparePrefPane.finalizedBy 'runJNLPBundlerTest'
+    buildFile = './jnlpBundler.gradle'
+    tasks = ['clean', 'bundleApp']
+}
