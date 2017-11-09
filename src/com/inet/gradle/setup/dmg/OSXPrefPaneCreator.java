@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.gradle.api.GradleException;
@@ -12,6 +12,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.tasks.GradleBuild;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.Service;
@@ -46,12 +47,11 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         String internalName = displayName.replaceAll( "[^A-Za-z0-9]", "" );
         File prefPaneSource = unpackAndPatchPrefPaneSource( internalName );
 
-        ArrayList<String> command = new ArrayList<String>();
-        command.add( "gradle" );
-        command.add( "-b" );
-        command.add( new File( prefPaneSource, "build.gradle" ).getAbsolutePath() );
-        command.add( "xcodebuild" );
-        exec( command );
+        GradleBuild gradleBuild = project.getTasks().create("OSXPrefPaneBuildTask", GradleBuild.class);
+        gradleBuild.setDescription( "Run the xcodebuild task for the prefpane." );
+        gradleBuild.setBuildFile( new File( prefPaneSource, "build.gradle" ) );
+        gradleBuild.setTasks( Arrays.asList( "clean", "xcodebuild" ) );
+        gradleBuild.execute();
 
         File prefPaneBinary = new File( prefPaneSource, "build/sym/Release/" + internalName + ".prefPane" );
 
