@@ -74,6 +74,10 @@ configure( [ deb, rpm ] ) {
     }
 }
 
+deb {
+    checkPackage = false
+}
+
 dmg {
     preferencesLink {
         title = "Testing Link"
