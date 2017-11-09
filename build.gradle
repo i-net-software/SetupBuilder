@@ -10,8 +10,9 @@ group = 'de.inetsoftware'
 
 def LIB_GRADLE_VERSION = '3.5'  // Gradle version for the wrapper
 def buildVersion = '1'          // build version
+def baseVersion = '3.0'
 
-version = '3.0'                 // Base Version to build, depends on gradle version.
+version = baseVersion          // Base Version to build, depends on gradle version.
 
 // gradle version switch, depends the API level
 println 'Gradle version: ' + gradle.gradleVersion
@@ -20,6 +21,7 @@ if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
 if( gVersion >= VersionNumber.parse( '3.5' ) ) version = '3.5'
 
 version += '.' + buildVersion
+baseVersion += '.' + buildVersion
 println 'SetupBuilder version: ' + version
 
 sourceCompatibility = 1.8
@@ -36,7 +38,10 @@ dependencies {
 sourceSets {
     main {
         java {
-            srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
+            srcDirs = ['src']
+            if ( !version.equalsIgnoreCase(baseVersion) ) {
+                srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
+            }
         }
         resources {
             srcDirs = ['src']
@@ -47,10 +52,12 @@ sourceSets {
 }
 
 /* Configure for ClearReports Version and copy files if needed */
-JPP.setJPPSources( "src", [ 
-    "gradleVersion" : "${gVersion}",
-    "outputDirectory" : "${buildDir}/preparedSrc-${gVersion}"
-]);
+if ( !version.equalsIgnoreCase(baseVersion) ) {
+    JPP.setJPPSources( "src", [
+        "gradleVersion" : "${gVersion}",
+        "outputDirectory" : "${buildDir}/preparedSrc-${gVersion}"
+    ]);
+}
 
 if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
