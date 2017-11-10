@@ -1,32 +1,37 @@
 language: groovy
 jdk:
-- oraclejdk8
+  - oraclejdk8
 env:
-- LIB_GRADLE_VERSION=2.14.1 DEPLOY=true
-- LIB_GRADLE_VERSION=3.0 DEPLOY=true
-- LIB_GRADLE_VERSION=3.1 DEPLOY=true
-- LIB_GRADLE_VERSION=3.3
-- LIB_GRADLE_VERSION=3.4.1 DEPLOY=true
-- LIB_GRADLE_VERSION=3.5.1
-- LIB_GRADLE_VERSION=4.0.1
-- LIB_GRADLE_VERSION=4.1
-- LIB_GRADLE_VERSION=4.2.1
+  matrix:
+   - LIB_GRADLE_VERSION=2.14.1 DEPLOY=true
+   - LIB_GRADLE_VERSION=3.0 DEPLOY=true
+   - LIB_GRADLE_VERSION=3.1 DEPLOY=true
+   - LIB_GRADLE_VERSION=3.3
+   - LIB_GRADLE_VERSION=3.4.1 DEPLOY=true
+   - LIB_GRADLE_VERSION=3.5.1
+   - LIB_GRADLE_VERSION=4.0.1
+   - LIB_GRADLE_VERSION=4.1
+   - LIB_GRADLE_VERSION=4.2.1
+  global:
+    # The next declaration is the encrypted gradlePublishKey
+    - secure: tzRoJbjW38G0YcSRuf53+koo/ZixIrA1vHJ9StOfafZOJzKyoASkbFa2EpUKmp3CXBWvUSTVo59j7ywUSyWW+L+G+CRnYqkDTktySJ/LAHjR0CH5dJCUodwcwtZkBje/RQZ//ZuPO2I7wY/aqHfj/E8pg2h9Y+nOd2v9R904/5b5gck9nM1Tr74YE2dJDm3h0QKrMqx6/oT7KVTWQpTNeLxcdrdNn5yxllqn4YDF70gEksoSuJeFR2l5lwSlTTseKI7Q7mGYI1Tg/PSZoxlPz3DGFmSe+9sewRnN9ZnjQDEY06/GmrGQHGv9MV1azvenlFHrt9lIbHnEo0GBqxNpeFfMd4+B9oeEmL8roapNSq0TCgVvOzda/G5KyY8TgLEi+k7WrZaWGvbW+AorU5ntenWEzSWz3b5lpwnwXxrPyyRnaKd3R5mRYj+LL10hlHAiWpvXn+v6ptD2OunE6l3JEm+wln+6wZjJBqBhl1jsv3LOd5siezFGqqOzC6FN6UgkTZqsgMfROzoqklFv3Ko8fU4e6oo9VzI/cJGcFHFO4M+dOHyYZbKl8hfvi1Bf44UpYo914sdwmWGIAZ8J6V2xtCqTnyN1bi/EQuKAkE2400laduCt/rnGyR8IefcM6iFxjufR5jCXpXBhbQ0cQ//pUT0eW4ssjqKvt9RrJmt/Mew=
+    # The next declaration is the encrypted gradlePublishSecret
+    - secure: Z9rf5KL9USpw7n05xJ+6hLSxgwgepXEw+f5ZwUx9cqKr/TdjSHimjHaGrYizBjjqXxa5fXwoAXmh8dvxyp0khKvtRrhN9JU2WRJt/Kweu/hrW5F+EkrzGBIeDoAtQvLqwOVQH5usRxVBHz3OEcwiFZKldcnvpMaCJcPVpO3YGfDVoX9+dlRYJRAPYFH0LsxJFiZYFzDN3x+eeVfnucgwXkRco+8R04gJ/LGF4rQhn6FupQWk8AepvnmAhAg1HhEvWUSwmD/sQ86xHw9WqMX/PxdSb21tM8VYrj6+ZGFh8C1g7NAVkOSFQjjYSqHb1wDUBHmxMvyUw3KZiBkhFjweTpuxoPHVwbQqhFKH/WXYtnuYKoIlebR7c7CtZ11Xp9ba98PA3ADIzRvOQrPn42iyvXvqg78AROb2OtOa639znxu3lckDoU3PH/n5jHmy9awlwEZSoNkw0dM+RtJGO+X4l1kPQGoOMZVjlA/vvkfhHJqCOwZHX8O9bW/yv328jmgRMdTo8uTV9IrzqgJJgg+v7iEJ1DpBph46dFn7zPliUQWXDDCxXqXSy9V1BVFB1fTKzP9fosrbCCu3CjaTdiXBdPvKpjLE+gVJRt12rzQOKAzOcIt5GtJIkkElo2v3ofSJPdx9aET/nYJepiKW5NMxoPkq/HsMRbeQiyEs3WXqaCQ=
 before_install:
-- echo $TRAVIS_TAG
-- sudo apt-get -qq update
-- sudo apt-get install -y fakeroot
+  - echo $TRAVIS_TAG
+  - sudo apt-get -qq update
+  - sudo apt-get install -y fakeroot
 install:
-- gradle wrapper
-- ./gradlew uploadArchives
+  - gradle wrapper
+  - ./gradlew uploadArchives
 before_deploy:
-- echo -e 'gradle.publish.key=$gradlePublishKey\ngradle.publish.secret=$gradlePublishSecret'
-  > gradle.properties
+ - echo -e 'gradle.publish.key=$gradlePublishKey\ngradle.publish.secret=$gradlePublishSecret' > gradle.properties
 deploy:
   provider: releases
   api_key:
-    secure: $GIT_API_KEY
+    secure: a4iPNWvd9I09Qv/ld8dyWx/GveraMARYRzXPxlhZ+bggjgU5lgXfWNpgX83TiFh2Rrd7nq0PVscc8ffyRGUbXs7KrA2VC/fqWD6I5pJ6ny2XrITNrHgnWj5FZoMuBL/E0XWzdSYXN/Xn/OYXYSxv6KX3OVGAk1OqtvAq0KgR59GAp9JP0wuI0gQzj+oIZH+Mq2S+7zWGyIbMMkLDORPVXX571plqPs1p70Dg9s7BkREVS3ENoA872KSP8uCTen6lE4ogGoQa/rZRXtg+C0iIZNC6McVaVgTqiUDOGSDGocoSQxgEhV89vjsNXcGm6Evu6O680e1gXLgRaOKUEjumtksozqo92774zrUPw4GsB31VVT5NIXwxSTqSTu3JvXsqbNwt0r7JsPmcJZsjtk2kH3uggFPsGrcmy97cCOCNulZtt3hTUgH+U4zwh5cXOR8L+x1VY2PKdnKRKd1JKAuBMsudJNpObK+RDGSs+GjVyspTw6kOVlYq6RRdHBs4ds2TGANiuQeJjKErJV3eU0nNlJIT4hOl6c8ZgckaiP2W7uYiQyIpCMd/4ep2iUsS9AK4YzGW1Bz5dFq+fifs9GW6Mo+7gu/p7EVFf6+RaQCQJ2B895AnUGaG9e4aBSJv15BtDU3N0/Rbn/pOqvOX1XNyD5a+QQeFM2UWxrnhKxXPHVE=
   file_glob: true
-  file: './build/libs/SetupBuilder-*'
+  file: ./build/libs/SetupBuilder-*
   skip_cleanup: true
   overwrite: true
   on:
@@ -34,4 +39,4 @@ deploy:
     tags: true
     condition: $DEPLOY = true
 after_deploy:
-- ./gradlew publishPlugin
+  - ./gradlew publishPlugin
