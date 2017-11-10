@@ -37,5 +37,4 @@ deploy:
     tags: true
     condition: $DEPLOY = true
 after_deploy:
-  - echo -e 'gradle.publish.key=$gradlePublishKey\ngradle.publish.secret=$gradlePublishSecret' >> $USER_HOME/.gradle/gradle.properties
   - ./gradlew publishPlugin

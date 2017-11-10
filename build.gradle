@@ -120,6 +120,24 @@ pluginBundle {
   }
 }
 
+// see https://discuss.gradle.org/t/add-apikey-and-apisecret-to-pluginbundle-extension-for-plugin-publish-plugin/8636/3
+task setupPluginUpload {
+
+    publishPlugins.dependsOn 'setupPluginUpload'
+    doLast {
+        def key=System.env.gradlePublishKey
+        def secret = System.env.gradlePublishSecret
+
+        if( !key || !secret)
+        {
+            throw new RuntimeException("gradlePublishKey and/or gradlePublishSecret are not defined environment variables")
+        }
+
+        System.properties.setProperty("gradle.publish.key", key)
+        System.properties.setProperty("gradle.publish.secret", secret)
+    }
+}
+
 // Check for the current operating system to load the specific build task
 import org.apache.tools.ant.taskdefs.condition.Os
 def dependingTask = 'deb'
