@@ -82,7 +82,7 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     wrapper.gradleVersion = LIB_GRADLE_VERSION
 } else {
     println "Uploading into local '../repo'"
-    version += '-SNAPSHOT' // setting version to snapshot
+    version += System.getenv('DEPLOY') != null ?'':'-SNAPSHOT' // setting version to snapshot
     uploadArchives {
         repositories {
             mavenDeployer {
