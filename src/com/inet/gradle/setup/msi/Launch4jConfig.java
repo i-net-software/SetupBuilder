@@ -74,7 +74,9 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
 
         //        <manifest>hd.manifest</manifest>
         File ico = launch.getIconForType( buildDir, "ico" );
-        getOrCreateChild( launch4jConfig, "icon" ).setTextContent( ico.getAbsolutePath() );
+        if ( ico != null ) {
+            getOrCreateChild( launch4jConfig, "icon" ).setTextContent( ico.getAbsolutePath() );
+        }
 
         Element jre = getOrCreateChild( launch4jConfig, "jre" );
         Object bundleJRE = setup.getBundleJre();
