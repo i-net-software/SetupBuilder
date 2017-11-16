@@ -619,7 +619,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install" );
             addAttributeIfNotExists( install, "Name", name );
             addAttributeIfNotExists( install, "DisplayName", service.getDisplayName() );
-            addAttributeIfNotExists( install, "Description", service.getDescription() );
+            if( !service.getDescription().isEmpty() ) {
+                addAttributeIfNotExists( install, "Description", service.getDescription() );
+            }
             addAttributeIfNotExists( install, "Start", service.isStartOnBoot() ? "auto" : "demand" );
             addAttributeIfNotExists( install, "Type", "ownProcess" );
             addAttributeIfNotExists( install, "ErrorControl", "normal" );
@@ -768,7 +770,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element shortcut = getOrCreateChildById( component, "Shortcut", id );
             String name = starter.getDisplayName().replace( '[', '_' ).replace( ']', '_' );
             addAttributeIfNotExists( shortcut, "Name", name );
-            addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
+
+            if( !starter.getDescription().isEmpty() ) {
+                addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
+            }
 
             addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter ) );
 
@@ -844,7 +849,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     Element component = getComponent( installDir, "_file_extension" );
                     getOrCreateChild( component, "CreateFolder" );
                     Element progID = getOrCreateChildById( component, "ProgId", pID );
-                    addAttributeIfNotExists( progID, "Description", docType.getName() );
+                    if( !docType.getName().isEmpty() ) {
+                        addAttributeIfNotExists( progID, "Description", docType.getName() );
+                    }
 
                     File iconFile = starter.getIconForType( buildDir, "ico" );
                     if( iconFile != null ) {
