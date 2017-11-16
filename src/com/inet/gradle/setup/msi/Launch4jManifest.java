@@ -31,7 +31,7 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  */
 class Launch4jManifest extends XmlFileBuilder<Msi> {
 
-    private DesktopStarter launch;
+    private Launch4j launch;
 
     /**
      * Create a instance.
@@ -41,7 +41,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
      * @param setup the SetupBuilder
      * @throws Exception if any error occur
      */
-    Launch4jManifest( DesktopStarter launch, Msi task, SetupBuilder setup ) throws Exception {
+    Launch4jManifest( Launch4j launch, Msi task, SetupBuilder setup ) throws Exception {
         super( task, setup, File.createTempFile( "launch4j", ".manifest", task.getTemporaryDir() ), task.getTemporaryDir(), null );
         this.launch = launch;
     }
@@ -79,7 +79,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
 
         Element security = getOrCreateChild( trustInfo, "security" );
         Element requestedPrivileges = getOrCreateChild( security, "requestedPrivileges" );
-        Element requestedExecutionLevel = getOrCreateChildByKeyValue( requestedPrivileges, "requestedExecutionLevel", "level", "requireAdministrator" );
+        Element requestedExecutionLevel = getOrCreateChildByKeyValue( requestedPrivileges, "requestedExecutionLevel", "level", launch.getRequestedExecutionLevel() );
         addAttributeIfNotExists( requestedExecutionLevel, "uiAccess", "false" );
     }
 }

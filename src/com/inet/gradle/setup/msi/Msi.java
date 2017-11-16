@@ -52,7 +52,7 @@ public class Msi extends AbstractSetupTask {
 
     private double minOS;
 
-    private List<DesktopStarter> launch4j = new ArrayList<>();
+    private List<Launch4j> launch4j = new ArrayList<>();
 
     private int multiInstanceCount = 1;
 
@@ -320,8 +320,8 @@ public class Msi extends AbstractSetupTask {
      * 
      * @param closue the closure of the launch4j definition
      */
-    public void launch4j( Closure<DesktopStarter> closue ) {
-        DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( getSetupBuilder() ) );
+    public void launch4j( Closure<Launch4j> closue ) {
+        Launch4j service = ConfigureUtil.configure( closue, new Launch4j( getSetupBuilder() ) );
         launch4j.add( service );
     }
 
@@ -330,7 +330,7 @@ public class Msi extends AbstractSetupTask {
      * 
      * @return the registered services
      */
-    public List<DesktopStarter> getLaunch4js() {
+    public List<Launch4j> getLaunch4js() {
         return launch4j;
     }
 

@@ -118,7 +118,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
     private void buildLauch4j() throws Exception {
         if( task.getLaunch4js().size() > 0 ) {
             Launch4jCreator creator = new Launch4jCreator();
-            for( DesktopStarter launch : task.getLaunch4js() ) {
+            for( Launch4j launch : task.getLaunch4js() ) {
                 File file = creator.create( launch, task, setup );
                 signTool( file );
                 CopySpec copySpec = task.getProject().copySpec( (Closure<CopySpec>)null );

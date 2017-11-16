@@ -30,7 +30,7 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  */
 class Launch4jConfig extends XmlFileBuilder<Msi> {
 
-    private DesktopStarter launch;
+    private Launch4j launch;
 
     /**
      * Create a instance.
@@ -40,7 +40,7 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
      * @param setup the SetupBuilder
      * @throws Exception if any error occur
      */
-    Launch4jConfig( DesktopStarter launch, Msi task, SetupBuilder setup ) throws Exception {
+    Launch4jConfig( Launch4j launch, Msi task, SetupBuilder setup ) throws Exception {
         super( task, setup, File.createTempFile( "launch4j", ".xml", task.getTemporaryDir() ), task.getTemporaryDir(), null );
         this.launch = launch;
     }

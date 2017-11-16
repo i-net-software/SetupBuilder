@@ -50,7 +50,7 @@ public class Launch4jCreator {
      * @return the file to the created exe.
      * @throws Exception if any error occur
      */
-    File create( DesktopStarter launch, Msi task, SetupBuilder setup ) throws Exception {
+    File create( Launch4j launch, Msi task, SetupBuilder setup ) throws Exception {
         Launch4jConfig config = new Launch4jConfig( launch, task, setup );
         File outfile = config.build();
         config.save();
