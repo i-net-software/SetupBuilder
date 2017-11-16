@@ -23,7 +23,9 @@ Plugin and Gradle Version
 | <= 1.5         | 2.3 - 2.11     |
 | 1.6            | 2.12 - 2.13    |
 | 1.7            | 2.14           |
-| 1.8            | 3.0            |
+| 1.8, 3.0.x     | 3.0            |
+| 3.1.x          | 3.1 - 3.3      |
+| 3.4.x          | >= 3.4         |
 
 Tasks
 ----
@@ -63,6 +65,8 @@ Sample Usage
         }
     }
 
+More samples can be found in the [testBuilds][testBuilds] folder of the project.
+
 More properties can be found in the sources of [setupBuilder][setupBuilder], [msi][msi], [deb][deb], [rpm][rpm] and [dmg][dmg].
 
 ### Zip Sample
@@ -86,6 +90,7 @@ License
 ----
 Apache License, Version 2.0
 
+[testBuilds]: https://github.com/i-net-software/SetupBuilder/blob/master/testBuilds/setupBuilder.gradle
 [setupBuilder]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/SetupBuilder.java
 [msi]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/msi/Msi.java
 [deb]: https://github.com/i-net-software/SetupBuilder/blob/master/src/com/inet/gradle/setup/unix/deb/Deb.java
