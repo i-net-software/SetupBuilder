@@ -69,7 +69,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
      * @param output optional OutputStream for the process
      */
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output ) {
-    	exec( parameters, input, output, false);
+        exec( parameters, input, output, false);
     }
 
     /**
@@ -85,16 +85,16 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         // print command line to the log
         StringBuilder log = new StringBuilder( "\t" );
         for( String para : parameters ) {
-    
-        	if ( para == null ) {
-        		task.getProject().getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
-        	} else {
+
+            if ( para == null ) {
+                task.getProject().getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
+            } else {
                 log.append( '\"' ).append( para );
                 if( para.endsWith( "\\" ) ) {
                     log.append( '\\' );
                 }
                 log.append( "\" " );
-        	}
+            }
         }
         task.getProject().getLogger().lifecycle( log.toString() );
 
@@ -116,12 +116,12 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
             throw new RuntimeException( th );
         }
     }
-    
+
     /**
      * Returns the concrete task
      * @return the task
      */
     protected T getTask() {
-    	return task;
+        return task;
     }
 }

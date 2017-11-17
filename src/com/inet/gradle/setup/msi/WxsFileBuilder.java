@@ -542,7 +542,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws Exception if any exception occur
      */
     private boolean addLicense( Element product ) throws Exception {
-    	// TODO: Internationalize
+        // TODO: Internationalize
         File license = setup.getLicenseFile( "en" );
         if( license == null ) {
             return false;
@@ -807,7 +807,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             if( iconID != null ) {
                 addAttributeIfNotExists( shortcut, "Icon", iconID );
             }
-
 
             String linkLocation;
             switch( starter.getLocation() ) {

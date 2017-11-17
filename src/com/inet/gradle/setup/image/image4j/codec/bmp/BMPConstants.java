@@ -14,14 +14,14 @@ package com.inet.gradle.setup.image.image4j.codec.bmp;
  * @author Ian McDonagh
  */
 public class BMPConstants {
-  
+
   private BMPConstants() { }
-  
+
   /**
    * The signature for the BMP format header "BM".
    */
   public static final String FILE_HEADER = "BM";
-  
+
   /**
    * Specifies no compression.
    * @see InfoHeader#iCompression InfoHeader

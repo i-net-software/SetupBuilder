@@ -26,17 +26,17 @@ import java.util.Scanner;
  */
 public class Template {
     private String template;
-    
+
     /**
      * Creates an instance and loads the specified file from the classpath as template.
      * @param file the file in classpath relative to the package of this class
      * @throws IOException on errors during reading the file
      */
     public Template( String file ) throws IOException {
-    	
-    	try ( Scanner scanner = new Scanner( getClass().getResourceAsStream( file ), "UTF8" ) ) {
-    		template = scanner.useDelimiter("\\A").next();
-		}
+
+        try ( Scanner scanner = new Scanner( getClass().getResourceAsStream( file ), "UTF8" ) ) {
+            template = scanner.useDelimiter("\\A").next();
+        }
     }
 
     /**
@@ -44,9 +44,9 @@ public class Template {
      * @param script input lines
      */
     public Template( ArrayList<String> script ) {
-    	template = script != null && !script.isEmpty() ? String.join("\n", script) : "";
+        template = script != null && !script.isEmpty() ? String.join("\n", script) : "";
     }
-    
+
     /**
      * Replaces occurences of the placeholder <tt>{{NAME}}</tt> to the specified content.
      * @param placeholder the name of the placerholder
@@ -54,13 +54,13 @@ public class Template {
      * @return template
      */
     public Template setPlaceholder(String placeholder, String content) {
-    	if ( content == null ) {
-    		content = ""; // Remove if not set.
-    	}
+        if ( content == null ) {
+            content = ""; // Remove if not set.
+        }
         template = template.replace( "{{" + placeholder + "}}", content );
         return this;
     }
-    
+
     /**
      * Writes the template with replaced placeholder to the specified file.
      * @param file the file to write to
@@ -71,9 +71,9 @@ public class Template {
             writer.write( template );
         }
     }
-    
+
     @Override
     public String toString() {
-    	return template.replaceAll( "\\{\\{.*?\\}\\}", "" );
+        return template.replaceAll( "\\{\\{.*?\\}\\}", "" );
     }
 }

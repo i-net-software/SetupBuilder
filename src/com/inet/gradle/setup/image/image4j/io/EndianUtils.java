@@ -5,7 +5,7 @@ package com.inet.gradle.setup.image.image4j.io;
  * @author Ian McDonagh
  */
 public class EndianUtils {
-  
+
   /**
    * Reverses the byte order of the source <tt>short</tt> value
    * @param value the source value
@@ -19,7 +19,7 @@ public class EndianUtils {
         )
         ;
   }
-  
+
   /**
    * Reverses the byte order of the source <tt>int</tt> value
    * @param value the source value
@@ -33,7 +33,7 @@ public class EndianUtils {
         | ((value & 0x000000FF) << 24)
         ;
   }
-  
+
   /**
    * Reverses the byte order of the source <tt>long</tt> value
    * @param value the source value
@@ -51,7 +51,7 @@ public class EndianUtils {
         | ((value & 0x00000000000000FFL) << 56)
         ;
   }
-  
+
   /**
    * Reverses the byte order of the source <tt>float</tt> value
    * @param value the source value
@@ -62,7 +62,7 @@ public class EndianUtils {
     i = swapInteger(i);
     return Float.intBitsToFloat(i);
   }
-  
+
   /**
    * Reverses the byte order of the source <tt>double</tt> value
    * @param value the source value

@@ -98,13 +98,13 @@ public class Launch4jCreator {
                         name = name.substring( 0, name.length() - 4 ); // remove ".jar"
                         //binary files must be extracted
                         final String internalName = name;
-            			ResourceUtils.unZipIt(file, libDir, (entryName) -> {
+                        ResourceUtils.unZipIt(file, libDir, (entryName) -> {
                             if( entryName.startsWith( internalName ) ) {
                                 entryName = entryName.substring( internalName.length() + 1 );
                             }
-            				return entryName;
-        				});
-                        
+                            return entryName;
+                        });
+
                     } else {
                         File target = new File( libDir, file.getName() );
                         Files.copy( file.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING );

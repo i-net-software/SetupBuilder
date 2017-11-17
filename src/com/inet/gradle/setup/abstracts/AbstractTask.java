@@ -59,20 +59,20 @@ import groovy.lang.Closure;
  */
 public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
-	private final CopySpecInternal rootSpec;
+    private final CopySpecInternal rootSpec;
 
-	private AbstractSetupBuilder setupBuilder;
+    private AbstractSetupBuilder setupBuilder;
 
-	private String extension, classifier;
+    private String extension, classifier;
 
-	/**
-	 * Constructor with indication to artifact result
-	 * Runs with the default SetupBuilder for dmg, msi ...
-	 * @param extension of the setup
-	 * @param setupType the class of the SetupBuilder
-	 */
+    /**
+     * Constructor with indication to artifact result
+     * Runs with the default SetupBuilder for dmg, msi ...
+     * @param extension of the setup
+     * @param setupType the class of the SetupBuilder
+     */
     @SuppressWarnings("unchecked")
-	public AbstractTask( String extension, Class<? extends AbstractSetupBuilder> setupType ) {
+    public AbstractTask( String extension, Class<? extends AbstractSetupBuilder> setupType ) {
         this.extension = extension;
         this.rootSpec = (CopySpecInternal)getProject().copySpec( (Closure<CopySpec>)null );
 
@@ -106,16 +106,16 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 //                details.copyTo( details.getRelativePath().getFile( target ) ); // didn't work with mounted smb devises under Unix
                 if( !details.isDirectory() ) {
                     try {
-                    	File f = details.getRelativePath().getFile( target );
-                    	if(!f.getParentFile().exists()) {
-                    		f.getParentFile().mkdirs(); // the parent directory must be created, else the copy fails
-                    	}
+                        File f = details.getRelativePath().getFile( target );
+                        if(!f.getParentFile().exists()) {
+                            f.getParentFile().mkdirs(); // the parent directory must be created, else the copy fails
+                        }
                         try( InputStream input = details.open() ) {
                             Files.copy( input, f.toPath(), StandardCopyOption.REPLACE_EXISTING );
                         }
-					} catch (IOException ex) {
-						throw new RuntimeException(ex);
-					}
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         } );
@@ -230,9 +230,9 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
     @InputFiles
     public FileTree getSetupSource() {
         try {
-        	return setupBuilder.getSource();
+            return setupBuilder.getSource();
         } catch ( Throwable e ) {
-        	throw new IllegalArgumentException( "You have to specify input sources for your application", e ); 
+            throw new IllegalArgumentException( "You have to specify input sources for your application", e ); 
         }
     }
 

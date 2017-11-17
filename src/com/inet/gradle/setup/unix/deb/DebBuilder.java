@@ -67,7 +67,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
-            // 	create the package config files in the DEBIAN subfolder
+            // create the package config files in the DEBIAN subfolder
 
             controlBuilder = new DebControlFileBuilder( super.task, setup, new File( buildDir, "DEBIAN" ) );
 
@@ -351,7 +351,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             } else {
                 fw.write( "Exec=\"/" + consoleStarterPath + "\" %F\n" );
             }
-            
+
             if( starter.getIcons() != null ) {
                 int index = iconName.lastIndexOf( '.' );
                 if( index > -1 ) {
@@ -379,7 +379,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
         }
-        
+
         // register the mime type and the default app for the extensions
         for( DocumentType docType : starter.getDocumentType() ) {
             for( String extension : docType.getFileExtension() ) {
@@ -388,21 +388,21 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 try (FileWriter fw = new FileWriter( createFile( task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml", false ) )) {
                     fw.write( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" );
                     fw.write( "<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\">\n" );
-                    
+
                     // if there was a mime type for the starter it will override the mime types of the documentType
                     if( starter.getMimeTypes() != null ) {
                         fw.write( "    <mime-type type=\"" + starter.getMimeTypes() + "\">\n" );
                     } else {
                         fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );                        
                     }
-                    
+
                     fw.write( "        <comment>" + setup.getApplication() + "</comment>\n" );
                     fw.write( "        <glob-deleteall/>\n" );
                     fw.write( "        <glob pattern=\"*." + extension + "\"/>\n" );
                     fw.write( "    </mime-type>\n" );
                     fw.write( "</mime-info>\n" );                    
                 }
-                
+
                 controlBuilder.addTailScriptFragment( Script.POSTINST, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
                 controlBuilder.addTailScriptFragment( Script.PRERM, "xdg-mime uninstall \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
                 String iconame = unixName;
@@ -411,7 +411,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 }
                 controlBuilder.addTailScriptFragment( Script.POSTINST, "xdg-icon-resource install --context mimetypes --novendor --size 48 /usr/share/icons/hicolor/48x48/apps/" + iconame + ".png " + iconame + " || true" );
                 controlBuilder.addTailScriptFragment( Script.PRERM, "xdg-icon-resource uninstall --context mimetypes --size 48 " + iconame + " || true" );
-                
+
                 // we don't want to overwrite the default application and it seems that doing it per hand is the proper way under unix.
                 // so we don't do it here.
 //                String mimetypes = docType.getMimetype();
@@ -424,7 +424,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 //                controlBuilder.addTailScriptFragment( Script.POSTINST, "else" );
 //                controlBuilder.addTailScriptFragment( Script.POSTINST, "  su $SUDO_USER -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
 //                controlBuilder.addTailScriptFragment( Script.POSTINST, "fi" );
-                
+
             }
         }
     }
@@ -459,7 +459,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         if( task.getCheckPackage() == null || task.getCheckPackage().equalsIgnoreCase( "true" ) ) {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
-            //    		command.add( "-d" );
+//            command.add( "-d" );
             command.add( task.getSetupFile().getPath() );
             exec( command );
         }

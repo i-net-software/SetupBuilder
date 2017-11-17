@@ -28,11 +28,11 @@ import com.inet.gradle.setup.image.image4j.util.ConvertUtil;
  * @author Ian McDonagh
  */
 public class ICOEncoder {
-  
+
   /** Creates a new instance of ICOEncoder */
   private ICOEncoder() {
   }
-  
+
   /**
    * Encodes and writes a single image to file without colour depth conversion.
    * @param image the source image to encode
@@ -42,7 +42,7 @@ public class ICOEncoder {
   public static void write(BufferedImage image, java.io.File file) throws IOException {
     write(image, -1, file);
   }
-  
+
   /**
    * Encodes and writes a single image without colour depth conversion.
    * @param image the source image to encode
@@ -52,7 +52,7 @@ public class ICOEncoder {
   public static void write(BufferedImage image, java.io.OutputStream os) throws IOException {
     write(image, -1, os);
   }
-  
+
   /**
    * Encodes and writes multiple images without colour depth conversion.
    * @param images the list of source images to be encoded
@@ -62,7 +62,7 @@ public class ICOEncoder {
   public static void write(List<BufferedImage> images, java.io.OutputStream os) throws IOException {
     write(images, null, null, os);
   }
-  
+
   /**
    * Encodes and writes multiple images to file without colour depth conversion.
    * @param images the list of source images to encode
@@ -72,7 +72,7 @@ public class ICOEncoder {
   public static void write(List<BufferedImage> images, java.io.File file) throws IOException {
     write(images, null, file);
   }
-  
+
   /**
    * Encodes and writes multiple images to file with the colour depth conversion using the specified values.
    * @param images the list of source images to encode
@@ -83,7 +83,7 @@ public class ICOEncoder {
   public static void write(List<BufferedImage> images, int[] bpp, java.io.File file) throws IOException {
     write(images, bpp, new java.io.FileOutputStream(file));
   }
-  
+
   /**
    * Encodes and outputs a list of images in ICO format.  The first image in the list will be at index #0 in the ICO file, the second at index #1, and so on.
    * @param images List of images to encode, which will be output in the order supplied in the list.
@@ -96,7 +96,7 @@ public class ICOEncoder {
   public static void write(List<BufferedImage> images, int[] bpp, boolean[] compress, java.io.File file) throws IOException {
     write(images, bpp, compress, new java.io.FileOutputStream(file));
   }
-  
+
   /**
    * Encodes and writes a single image to file with colour depth conversion using the specified value.
    * @param image the source image to encode
@@ -107,7 +107,7 @@ public class ICOEncoder {
   public static void write(BufferedImage image, int bpp, java.io.File file) throws IOException {
     write(image, bpp, new java.io.FileOutputStream(file));
   }
-  
+
   /**
    * Encodes and outputs a single image in ICO format.
    * Convenience method, which calls {@link #write(java.util.List,int[],java.io.OutputStream) write(java.util.List,int[],java.io.OutputStream)}.
@@ -121,8 +121,7 @@ public class ICOEncoder {
     list.add(image);
     write(list, new int[] { bpp }, new boolean[] { false }, os);
   }
-  
-   
+
   /**
    * Encodes and outputs a list of images in ICO format.  The first image in the list will be at index #0 in the ICO file, the second at index #1, and so on.
    * @param images List of images to encode, which will be output in the order supplied in the list.
@@ -133,7 +132,7 @@ public class ICOEncoder {
   public static void write(List<BufferedImage> images, int[] bpp, java.io.OutputStream os) throws IOException {
     write(images, bpp, null, os);
   }
-  
+
   /**
    * Encodes and outputs a list of images in ICO format.  The first image in the list will be at index #0 in the ICO file, the second at index #1, and so on.
    * @param images List of images to encode, which will be output in the order supplied in the list.
@@ -145,26 +144,26 @@ public class ICOEncoder {
    */
   public static void write(List<BufferedImage> images, int[] bpp, boolean[] compress, java.io.OutputStream os) throws IOException {
     LittleEndianOutputStream out = new LittleEndianOutputStream(os);
-    
+
     int count = images.size();
-    
+
     //file header 6
     writeFileHeader(count, ICOConstants.TYPE_ICON, out);
-    
+
     //file offset where images start
     int fileOffset = 6 + count * 16;
-    
+
     List<InfoHeader> infoHeaders = new java.util.ArrayList<InfoHeader>(count);
-    
+
     List<BufferedImage> converted = new java.util.ArrayList<BufferedImage>(count);
-    
+
     List<byte[]> compressedImages = null;
     if (compress != null) {
       compressedImages = new java.util.ArrayList<byte[]>(count);
     }
-    
+
     javax.imageio.ImageWriter pngWriter = null;
-    
+
     //icon entries 16 * count
     for (int i = 0; i < count; i++) {
       BufferedImage img = images.get(i);
@@ -176,7 +175,7 @@ public class ICOEncoder {
       InfoHeader ih = BMPEncoder.createInfoHeader(imgc);
       //create icon entry
       IconEntry e = createIconEntry(ih);
-      
+
       if (compress != null) {
         if (compress[i]) {
           if (pngWriter == null) {
@@ -189,24 +188,24 @@ public class ICOEncoder {
           compressedImages.add(null);
         }
       }
-      
+
       ih.iHeight *= 2;
-      
+
       e.iFileOffset = fileOffset;
       fileOffset += e.iSizeInBytes;
-      
+
       e.write(out);
-      
+
       infoHeaders.add(ih);
     }
-    
+
     //images
     for (int i = 0; i < count; i++) {
       BufferedImage img = images.get(i);
       BufferedImage imgc = converted.get(i);
-      
+
       if (compress == null || !compress[i]) {
-        
+
         //info header
         InfoHeader ih = infoHeaders.get(i);
         ih.write(out);
@@ -219,18 +218,18 @@ public class ICOEncoder {
         writeXorBitmap(imgc, ih, out);
         //and bitmap
         writeAndBitmap(img, out);
-        
+
       }
       else {
         byte[] compressedImage = compressedImages.get(i);
         out.write(compressedImage);
       }
-      
+
       //javax.imageio.ImageIO.write(imgc, "png", new java.io.File("test_"+i+".png"));
     }
-    
+
   }
-  
+
   /**
    * Writes the ICO file header for an ICO containing the given number of images.
    * @param count the number of images in the ICO
@@ -247,7 +246,7 @@ public class ICOEncoder {
     //count 2
     out.writeShortLE((short) count);
   }
-  
+
   /**
    * Constructs an <tt>IconEntry</tt> from the given <tt>InfoHeader</tt>
    * structure.
@@ -278,7 +277,7 @@ public class ICOEncoder {
     ret.iFileOffset = 0;
     return ret;
   }
-  
+
   /**
    * Encodes the <em>AND</em> bitmap for the given image according the its alpha channel (transparency) and writes it to the given output.
    * @param img the image to encode as the <em>AND</em> bitmap.
@@ -287,21 +286,21 @@ public class ICOEncoder {
    */
   public static void writeAndBitmap(BufferedImage img, com.inet.gradle.setup.image.image4j.io.LittleEndianOutputStream out) throws IOException {
     WritableRaster alpha = img.getAlphaRaster();
-    
+
     //indexed transparency (eg. GIF files)
     if (img.getColorModel() instanceof IndexColorModel && img.getColorModel().hasAlpha()) {
       int w = img.getWidth();
       int h = img.getHeight();
-      
+
       int bytesPerLine = BMPEncoder.getBytesPerLine1(w);
-      
+
       byte[] line = new byte[bytesPerLine];
-      
+
       IndexColorModel icm = (IndexColorModel) img.getColorModel();
       Raster raster = img.getRaster();
-      
+
       for (int y = h - 1; y >= 0; y--) {
-        
+
         for (int x = 0; x < w; x++) {
           int bi = x / 8;
           int i = x % 8;
@@ -312,7 +311,7 @@ public class ICOEncoder {
           int b = ~a & 1;
           line[bi] = setBit(line[bi], i, b);
         }
-        
+
         out.write(line);
       }
     }
@@ -322,12 +321,12 @@ public class ICOEncoder {
       int w = img.getWidth();
       //calculate number of bytes per line, including 32-bit padding
       int bytesPerLine = BMPEncoder.getBytesPerLine1(w);
-      
+
       byte[] line = new byte[bytesPerLine];
       for (int i = 0; i < bytesPerLine; i++) {
         line[i] = (byte) 0;
       }
-      
+
       for (int y = h - 1; y >= 0; y--) {
         out.write(line);
       }
@@ -335,16 +334,16 @@ public class ICOEncoder {
     //transparency (ARGB, etc. eg. PNG)
     else {
       //BMPEncoder.write1(alpha, cmap, out);
-      
+
       int w = img.getWidth();
       int h = img.getHeight();
-      
+
       int bytesPerLine = BMPEncoder.getBytesPerLine1(w);
-      
+
       byte[] line = new byte[bytesPerLine];
-      
+
       for (int y = h - 1; y >= 0; y--) {
-        
+
         for (int x = 0; x < w; x++) {
           int bi = x / 8;
           int i = x % 8;
@@ -353,20 +352,20 @@ public class ICOEncoder {
           int b = a == 0 ? 1 : 0;
           line[bi] = setBit(line[bi], i, b);
         }
-        
+
         out.write(line);
       }
-      
+
     }
   }
-  
+
   private static byte setBit(byte bits, int index, int bit) {
     int mask = 1 << (7 - index);
     bits &= ~mask;
     bits |= bit << (7 - index);
     return bits;
   }
-  
+
   private static void writeXorBitmap(BufferedImage img, InfoHeader ih, LittleEndianOutputStream out) throws IOException {
     Raster raster = img.getRaster();
     switch (ih.sBitCount) {
@@ -388,7 +387,7 @@ public class ICOEncoder {
         break;
     }
   }
-  
+
   /**
    * Utility method, which converts the given image to the specified colour depth.
    * @param img the image to convert.
@@ -426,7 +425,7 @@ public class ICOEncoder {
     }
     return ret;
   }
-  
+
   /**
    * @since 0.6
    */ 
@@ -438,7 +437,7 @@ public class ICOEncoder {
     }
     return ret;
   }
-  
+
   /**
    * @since 0.6
    */
@@ -451,5 +450,5 @@ public class ICOEncoder {
     byte[] ret = bout.toByteArray();
     return ret;
   }
-  
+
 }

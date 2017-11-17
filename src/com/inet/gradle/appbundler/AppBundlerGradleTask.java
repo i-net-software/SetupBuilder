@@ -33,11 +33,11 @@ import groovy.lang.Closure;
  */
 public class AppBundlerGradleTask extends AbstractTask {
 
-	private OSXCodeSign<AppBundlerGradleTask,AppBundler> codeSign;
+    private OSXCodeSign<AppBundlerGradleTask,AppBundler> codeSign;
 
-	/**
-	 * Construct static as .app
-	 */
+    /**
+     * Construct static as .app
+     */
     public AppBundlerGradleTask() {
         super( "app", AppBundler.class );
     }
@@ -59,7 +59,6 @@ public class AppBundlerGradleTask extends AbstractTask {
         new AppBundlerBuilder( this, getAppBuilder(), project.getFileResolver() ).build();
     }
 
-
     /**
      * The action called from Gradle
      * Will not add an artifact since it would be a directory. 
@@ -72,7 +71,7 @@ public class AppBundlerGradleTask extends AbstractTask {
             throw new GradleException( "Setup file was not created: " + setupFile );
         }
     }    
-    
+
     /**
      * Set the needed information for signing the setup.
      * 

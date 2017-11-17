@@ -27,28 +27,28 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
  */
 public class AppBundlerBuilder extends AbstractBuilder<AppBundlerGradleTask,AppBundler> {
 
-	private AppBundler setup;
+    private AppBundler setup;
 
-	/**
-	 * Setup the creator
-	 * @param task that was called 
-	 * @param setup that was used
-	 * @param fileResolver that we might need
-	 */
-	protected AppBundlerBuilder(AppBundlerGradleTask task, AppBundler setup, FileResolver fileResolver) {
-		super(task, fileResolver);
-		this.setup = setup;
-	}
+    /**
+     * Setup the creator
+     * @param task that was called 
+     * @param setup that was used
+     * @param fileResolver that we might need
+     */
+    protected AppBundlerBuilder(AppBundlerGradleTask task, AppBundler setup, FileResolver fileResolver) {
+        super(task, fileResolver);
+        this.setup = setup;
+    }
 
-	/**
-	 * now build it
-	 */
-	public void build() {
-		AppBundlerApplicationBuilder applicationBuilder = new AppBundlerApplicationBuilder( task, setup, fileResolver );
-		try {
-			applicationBuilder.buildApplication( new DesktopStarter(setup) );
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    /**
+     * now build it
+     */
+    public void build() {
+        AppBundlerApplicationBuilder applicationBuilder = new AppBundlerApplicationBuilder( task, setup, fileResolver );
+        try {
+            applicationBuilder.buildApplication( new DesktopStarter(setup) );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

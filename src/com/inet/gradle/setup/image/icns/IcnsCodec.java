@@ -396,7 +396,6 @@ public class IcnsCodec {
             pixels[i] |= (unpackedData[unpackedIndex++] & 0xFF);
         }
 
-
         return pixels;
     }
 
@@ -418,7 +417,6 @@ public class IcnsCodec {
             // Write new alpha value
             pixels[i] |= (data[i] & 0xFF) << 24;
         }
-
 
         return pixels;
     }

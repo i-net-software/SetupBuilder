@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author Ian McDonagh
  */
 public class LittleEndianOutputStream extends DataOutputStream {
-  
+
   /**
    * Creates a new instance of <tt>LittleEndianOutputStream</tt>, which will write to the specified target.
    * @param out the target <tt>OutputStream</tt>
@@ -25,7 +25,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
   public LittleEndianOutputStream(java.io.OutputStream out) {
     super(out);
   }
-  
+
   /**
    * Writes a little-endian <tt>short</tt> value
    * @param value the source value to convert
@@ -35,7 +35,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
     value = EndianUtils.swapShort(value);
     super.writeShort(value);
   }
-  
+
   /**
    * Writes a little-endian <tt>int</tt> value
    * @param value the source value to convert
@@ -45,7 +45,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
     value = EndianUtils.swapInteger(value);
     super.writeInt(value);
   }
-  
+
   /**
    * Writes a little-endian <tt>float</tt> value
    * @param value the source value to convert
@@ -55,7 +55,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
     value = EndianUtils.swapFloat(value);
     super.writeFloat(value);
   }
-  
+
   /**
    * Writes a little-endian <tt>long</tt> value
    * @param value the source value to convert
@@ -65,7 +65,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
     value = EndianUtils.swapLong(value);
     super.writeLong(value);
   }
-  
+
   /**
    * Writes a little-endian <tt>double</tt> value
    * @param value the source value to convert
@@ -75,7 +75,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
     value = EndianUtils.swapDouble(value);
     super.writeDouble(value);
   }
-  
+
   /**
    * @since 0.6
    */
@@ -84,13 +84,13 @@ public class LittleEndianOutputStream extends DataOutputStream {
     int i2 = (int)((value >> 16) & 0xFF);
     int i3 = (int)((value >> 8) & 0xFF);
     int i4 = (int)(value & 0xFF);
-    
+
     write(i1);
     write(i2);
     write(i3);
     write(i4);
   }
-  
+
   /**
    * @since 0.6
    */
@@ -99,7 +99,7 @@ public class LittleEndianOutputStream extends DataOutputStream {
     int i2 = (int)((value >> 16) & 0xFF);
     int i3 = (int)((value >> 8) & 0xFF);
     int i4 = (int)(value & 0xFF);
-    
+
     write(i4);
     write(i3);
     write(i2);

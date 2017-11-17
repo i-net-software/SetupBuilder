@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Ian McDonagh
  */
 public class InfoHeader {
-  
+
   /**
    * The size of this <tt>InfoHeader</tt> structure in bytes.
    */
@@ -67,12 +67,12 @@ public class InfoHeader {
    * Number of important colours (<tt>0</tt> = all).
    */
   public int iColorsImportant;
-  
+
   /**
    * Calculated number of colours, based on the colour depth specified by {@link #sBitCount sBitCount}.
    */
   public int iNumColors;
-  
+
   /** 
    * Creates an <tt>InfoHeader</tt> structure from the source input.
    * @param in the source input
@@ -81,23 +81,23 @@ public class InfoHeader {
   public InfoHeader(com.inet.gradle.setup.image.image4j.io.LittleEndianInputStream in) throws IOException {
     //Size of InfoHeader structure = 40
     iSize = in.readIntLE();
-    
+
     init(in, iSize);
   }
-  
+
   /**
    * @since 0.6
    */
   public InfoHeader(com.inet.gradle.setup.image.image4j.io.LittleEndianInputStream in, int infoSize) throws IOException {
     init(in, infoSize);
   }
-  
+
   /**
    * @since 0.6
    */
   protected void init(com.inet.gradle.setup.image.image4j.io.LittleEndianInputStream in, int infoSize) throws IOException {
     this.iSize = infoSize;
-    
+
     //Width
     iWidth = in.readIntLE();
     //Height
@@ -106,10 +106,10 @@ public class InfoHeader {
     sPlanes = in.readShortLE();
     //Bit count
     sBitCount = in.readShortLE();
-    
+
     //calculate NumColors
     iNumColors = (int) Math.pow(2, sBitCount);
-    
+
     //Compression
     iCompression = in.readIntLE();
     //Image size - compressed size of image or 0 if Compression = 0
@@ -123,7 +123,7 @@ public class InfoHeader {
     //Colors important - number of important colors 0 = all
     iColorsImportant = in.readIntLE();
   }
-  
+
   /**
    * Creates an <tt>InfoHeader</tt> with default values.
    */
@@ -138,10 +138,10 @@ public class InfoHeader {
     sPlanes = 1;
     //Bit count
     sBitCount = 0;
-    
+
     //caculate NumColors
     iNumColors = 0;
-    
+
     //Compression
     iCompression = BMPConstants.BI_RGB;
     //Image size - compressed size of image or 0 if Compression = 0
@@ -155,7 +155,7 @@ public class InfoHeader {
     //Colors important - number of important colors 0 = all
     iColorsImportant = 0;
   }
-  
+
   /**
    * Creates a copy of the source <tt>InfoHeader</tt>.
    * @param source the source to copy
@@ -173,9 +173,9 @@ public class InfoHeader {
     iYpixelsPerM = source.iYpixelsPerM;
     sBitCount = source.sBitCount;
     sPlanes = source.sPlanes;
-        
+
   }
-  
+
   /**
    * Writes the <tt>InfoHeader</tt> structure to output
    * @param out the output to which the structure will be written
@@ -192,10 +192,10 @@ public class InfoHeader {
     out.writeShortLE(sPlanes);
     //Bit count
     out.writeShortLE(sBitCount);
-    
+
     //caculate NumColors
     //iNumColors = (int) Math.pow(2, sBitCount);
-    
+
     //Compression
     out.writeIntLE(iCompression);
     //Image size - compressed size of image or 0 if Compression = 0

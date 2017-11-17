@@ -44,7 +44,7 @@ public class IconEntry {
    * Position in file where the InfoHeader starts.
    */
   public int iFileOffset;
-  
+
   /**
    * Creates an <tt>IconEntry</tt> structure from the source input
    * @param in the source input
@@ -68,7 +68,7 @@ public class IconEntry {
     //FileOffset 	4 byte 	FilePos, where InfoHeader starts
     iFileOffset = in.readIntLE();
   }
-  
+
   /**
    * Creates and <tt>IconEntry</tt> structure with default values.
    */
@@ -82,7 +82,7 @@ public class IconEntry {
     iSizeInBytes = 0;
     iFileOffset = 0;
   }
-  
+
   /**
    * A string representation of this <tt>IconEntry</tt> structure.
    */
@@ -97,7 +97,7 @@ public class IconEntry {
     sb.append(",colorCount="+bColorCount);
     return sb.toString();
   }
-  
+
   /**
    * Writes the <tt>IconEntry</tt> structure to output
    * @param out the output

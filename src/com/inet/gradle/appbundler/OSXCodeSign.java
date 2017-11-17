@@ -18,116 +18,116 @@ import com.inet.gradle.setup.abstracts.AbstractTask;
  */
 public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
-	private String identity, identifier, keychain, keychainPassword;
-	private boolean ignoreError, deepsign = true;
-	
-	/**
-	 * Setup up the Sign Tool
-	 * @param task task
-	 * @param fileResolver resolver
-	 */
-	public OSXCodeSign(T task, FileResolver fileResolver) {
-		super(task, fileResolver);
-	}
+    private String identity, identifier, keychain, keychainPassword;
+    private boolean ignoreError, deepsign = true;
 
-	/**
-	 * Return the Identity to sign with
-	 * This is the "Common Name" part from the certificate
-	 * @return identity
-	 */
-	public String getIdentity() {
-		if ( identity == null ) {
-			throw new IllegalArgumentException( "You have to define the signing identity" );
-		}
-		return identity;
-	}
+    /**
+     * Setup up the Sign Tool
+     * @param task task
+     * @param fileResolver resolver
+     */
+    public OSXCodeSign(T task, FileResolver fileResolver) {
+        super(task, fileResolver);
+    }
 
-	/**
-	 * Set the Identity to sign with.
-	 * This is the "Common Name" part from the certificate
-	 * @param identity to sign with
-	 */
-	public void setIdentity(String identity) {
-		this.identity = identity;
-	}
+    /**
+     * Return the Identity to sign with
+     * This is the "Common Name" part from the certificate
+     * @return identity
+     */
+    public String getIdentity() {
+        if ( identity == null ) {
+            throw new IllegalArgumentException( "You have to define the signing identity" );
+        }
+        return identity;
+    }
 
-	/**
-	 * Specific Identifier to embed in code (option -i) 
-	 * @return identifier 
-	 */
-	public String getIdentifier() {
-		return identifier;
-	}
+    /**
+     * Set the Identity to sign with.
+     * This is the "Common Name" part from the certificate
+     * @param identity to sign with
+     */
+    public void setIdentity(String identity) {
+        this.identity = identity;
+    }
 
-	/**
-	 * Specific Identifier to embed in code (option -i) 
-	 * @param identifier to set
-	 */
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    /**
+     * Specific Identifier to embed in code (option -i) 
+     * @return identifier 
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	/**
-	 * Key chain to use for signing. It has to be unlocked.
-	 * @return key chain
-	 */
-	public String getKeychain() {
-		return keychain;
-	}
+    /**
+     * Specific Identifier to embed in code (option -i) 
+     * @param identifier to set
+     */
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	/**
-	 * Set Key chain to use for signing. It has to be unlocked. 
-	 * @param keychain key chain
-	 */
-	public void setKeychain(String keychain) {
-		this.keychain = keychain;
-	}
+    /**
+     * Key chain to use for signing. It has to be unlocked.
+     * @return key chain
+     */
+    public String getKeychain() {
+        return keychain;
+    }
 
-	/**
-	 * The password to unlock the keychain
-	 * @return the keychainPassword
-	 */
-	public String getKeychainPassword() {
-		return keychainPassword;
-	}
+    /**
+     * Set Key chain to use for signing. It has to be unlocked. 
+     * @param keychain key chain
+     */
+    public void setKeychain(String keychain) {
+        this.keychain = keychain;
+    }
 
-	/**
-	 * Set the keychain password to unlock the keychain
-	 * @param keychainPassword the keychainPassword to set
-	 */
-	public void setKeychainPassword(String keychainPassword) {
-		this.keychainPassword = keychainPassword;
-	}
+    /**
+     * The password to unlock the keychain
+     * @return the keychainPassword
+     */
+    public String getKeychainPassword() {
+        return keychainPassword;
+    }
 
-	/**
-	 * True if errors during signing should be ignored
-	 * @return ignore errors
-	 */
-	public boolean isIgnoreError() {
-		return ignoreError;
-	}
+    /**
+     * Set the keychain password to unlock the keychain
+     * @param keychainPassword the keychainPassword to set
+     */
+    public void setKeychainPassword(String keychainPassword) {
+        this.keychainPassword = keychainPassword;
+    }
 
-	/**
-	 * Should errors be ignored during signing
-	 * @param ignoreError ignore
-	 */
-	public void setIgnoreError(boolean ignoreError) {
-		this.ignoreError = ignoreError;
-	}
+    /**
+     * True if errors during signing should be ignored
+     * @return ignore errors
+     */
+    public boolean isIgnoreError() {
+        return ignoreError;
+    }
 
-	/**
-	 * Unlocks the keychain if the password is not null.
-	 * Will unlock the default login.keychain if no other is set.
-	 */
-	private void unlockKeychain() {
-		if ( getKeychainPassword() == null ) {
-			return;
-		}
-		
-		String keychain = getKeychain() != null ? getKeychain() : System.getenv("HOME") + "/Library/Keychains/login.keychain";
+    /**
+     * Should errors be ignored during signing
+     * @param ignoreError ignore
+     */
+    public void setIgnoreError(boolean ignoreError) {
+        this.ignoreError = ignoreError;
+    }
 
-		// unlock keychain
-		ArrayList<String> command = new ArrayList<>();
+    /**
+     * Unlocks the keychain if the password is not null.
+     * Will unlock the default login.keychain if no other is set.
+     */
+    private void unlockKeychain() {
+        if ( getKeychainPassword() == null ) {
+            return;
+        }
+
+        String keychain = getKeychain() != null ? getKeychain() : System.getenv("HOME") + "/Library/Keychains/login.keychain";
+
+        // unlock keychain
+        ArrayList<String> command = new ArrayList<>();
         command.add( "security" );
         command.add( "-v" );
         command.add( "unlock-keychain" );
@@ -135,34 +135,34 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( getKeychainPassword() );
         command.add( keychain );
 
-        exec( command, null, null, isIgnoreError() );			
-	}
-	
-	/**
-	 * Signed an application package
-	 * @param path of the application
-	 */
-	public void signApplication( File path ) {
-		
-		unlockKeychain();
-		
-		// Codesign
-		ArrayList<String> command = new ArrayList<>();
+        exec( command, null, null, isIgnoreError() );            
+    }
+
+    /**
+     * Signed an application package
+     * @param path of the application
+     */
+    public void signApplication( File path ) {
+
+        unlockKeychain();
+
+        // Codesign
+        ArrayList<String> command = new ArrayList<>();
         command.add( "codesign" );
         command.add( "-f" );
-        
+
         if ( isDeepsign() ) {
-        	command.add( "--deep" );
+            command.add( "--deep" );
         }
-        
+
         command.add( "-s" );
         command.add( getIdentity() );
-        
+
         if ( getIdentifier() != null ) {
             command.add( "-i" );
             command.add( getIdentifier() );
         }
-        
+
         if ( getKeychain() != null ) {
             command.add( "--keychain" );
             command.add( getKeychain() );
@@ -170,53 +170,52 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         command.add( path.getAbsolutePath() );
         exec( command, null, null, isIgnoreError() );
-	}
+    }
 
-	/**
-	 * Signed a product package
-	 * @param path of the application
-	 */
-	public void signProduct( File path ) {
-		
-		unlockKeychain();
-		
-		// Productsign
-		ArrayList<String> command = new ArrayList<>();
+    /**
+     * Signed a product package
+     * @param path of the application
+     */
+    public void signProduct( File path ) {
+
+        unlockKeychain();
+
+        // Productsign
+        ArrayList<String> command = new ArrayList<>();
         command.add( "productsign" );
         command.add( "--sign" );
         command.add( getIdentity() );
-        
+
         if ( getKeychain() != null ) {
             command.add( "--keychain" );
             command.add( getKeychain() );
         }
 
-        
         command.add( path.getAbsolutePath() );
-        
+
         File output = new File( path.getParentFile(), "signed." + path.getName() ); 
         command.add( output.getAbsolutePath() );
         exec( command, null, null, isIgnoreError() );
 
         // Move to old directory
         if ( output.exists() && path.delete() ) {
-        	output.renameTo( path );
+            output.renameTo( path );
         }
-	}
+    }
 
-	/**
-	 * Should be deep signed?
-	 * @return
-	 */
-	public boolean isDeepsign() {
-		return deepsign;
-	}
+    /**
+     * Should be deep signed?
+     * @return
+     */
+    public boolean isDeepsign() {
+        return deepsign;
+    }
 
-	/**
-	 * Set deep signing
-	 * @param deepsign deep sign?
-	 */
-	public void setDeepsign(boolean deepsign) {
-		this.deepsign = deepsign;
-	}
+    /**
+     * Set deep signing
+     * @param deepsign deep sign?
+     */
+    public void setDeepsign(boolean deepsign) {
+        this.deepsign = deepsign;
+    }
 }

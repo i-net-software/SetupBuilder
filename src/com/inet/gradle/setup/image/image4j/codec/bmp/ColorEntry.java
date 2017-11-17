@@ -16,7 +16,7 @@ import java.io.IOException;
  * @author Ian McDonagh
  */
 public class ColorEntry {
-  
+
   /**
    * The red component, which should be in the range <tt>0..255</tt>.
    */
@@ -33,7 +33,7 @@ public class ColorEntry {
    * Unused.
    */
   public int bReserved;
-  
+
   /** 
    * Reads and creates a colour entry from the source input.
    * @param in the source input
@@ -45,7 +45,7 @@ public class ColorEntry {
     bRed = in.readUnsignedByte();
     bReserved = in.readUnsignedByte();
   }
-  
+
   /**
    * Creates a colour entry with colour components initialized to <tt>0</tt>.
    */
@@ -55,7 +55,7 @@ public class ColorEntry {
     bRed = 0;
     bReserved = 0;
   }
-  
+
   /**
    * Creates a colour entry with the specified colour components.
    * @param r red component
@@ -70,6 +70,4 @@ public class ColorEntry {
     bReserved = a;
   }
 
-  
-  
 }

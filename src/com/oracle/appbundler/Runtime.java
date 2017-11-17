@@ -51,7 +51,7 @@ public class Runtime extends FileSet {
 
     private void detectType() {
         boolean isJDK = new File(getDir(), "jre").isDirectory();
-        
+
         if (isJDK) {
             appendIncludes(new String[] {
                     "jre/lib/",
@@ -86,7 +86,7 @@ public class Runtime extends FileSet {
 
     void copyTo(File targetDir, Project project) throws IOException {
         detectType();
-        
+
         File runtimeHomeDirectory = getDir();
         File runtimeContentsDirectory = runtimeHomeDirectory.getParentFile();
         File runtimeDirectory = runtimeContentsDirectory.getParentFile();
@@ -102,7 +102,6 @@ public class Runtime extends FileSet {
         // Copy MacOS directory
         File runtimeMacOSDirectory = new File(runtimeContentsDirectory, "MacOS");
         AppBundlerTask.copy(runtimeMacOSDirectory, new File(pluginContentsDirectory, runtimeMacOSDirectory.getName()));
-
 
         // Copy Info.plist file
         File runtimeInfoPlistFile = new File(runtimeContentsDirectory, "Info.plist");

@@ -92,7 +92,6 @@ class RunLengthEncoding {
         int in = 0;
         int out = 0;
 
-
         while (in < unpackedData.length) {
             int literalStart = in;
             byte data = unpackedData[in++];

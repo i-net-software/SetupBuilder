@@ -116,9 +116,9 @@ public class AbstractSetupBuilder implements SetupSources {
     public FileTree getSource() {
         FileTree allSource = rootSpec.buildRootResolver().getAllSource();
         if ( allSource == null ) {
-        	throw new IllegalArgumentException( "You have to specify input sources for your application" ); 
+            throw new IllegalArgumentException( "You have to specify input sources for your application" ); 
         }
-		return allSource;
+        return allSource;
     }
 
     /**
@@ -252,7 +252,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * @throws IOException if an error occurs
      */
     public File getIconForType( File buildDir, String type ) throws IOException {
-		return ImageFactory.getImageFile( project, getIcons(), buildDir, type);
+        return ImageFactory.getImageFile( project, getIcons(), buildDir, type);
     }
 
     /**
@@ -411,7 +411,7 @@ public class AbstractSetupBuilder implements SetupSources {
         this.description = description;
     }
 
-	/**
+    /**
      * Get the Copyright information.
      * @return the copyright notice
      */

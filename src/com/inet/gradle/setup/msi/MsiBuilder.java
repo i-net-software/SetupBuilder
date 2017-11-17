@@ -43,8 +43,8 @@ import com.inet.gradle.setup.util.ResourceUtils;
  */
 class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
-	private SetupBuilder setup;
-	
+    private SetupBuilder setup;
+
     /**
      * Create a new instance
      * 

@@ -14,7 +14,7 @@ package com.inet.gradle.setup.image.image4j.codec.ico;
  * @author Ian McDonagh
  */
 public class ICOConstants {
-  
+
   /**
    * Indicates that ICO data represents an icon (.ICO). 
    */
@@ -23,5 +23,5 @@ public class ICOConstants {
    * Indicates that ICO data represents a cursor (.CUR).
    */
   public static final int TYPE_CURSOR = 2;
-  
+
 }

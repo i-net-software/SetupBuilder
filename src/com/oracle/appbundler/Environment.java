@@ -26,5 +26,5 @@
 package com.oracle.appbundler;
 
 public class Environment extends Option {
-    
+
 }

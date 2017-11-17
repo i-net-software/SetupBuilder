@@ -196,7 +196,6 @@ public class Application {
         this.workDir = workDir;
     }
 
-
     /**
      * Returns the command-line arguments for starting.
      * 

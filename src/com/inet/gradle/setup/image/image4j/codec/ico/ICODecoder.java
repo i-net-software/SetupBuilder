@@ -22,16 +22,16 @@ import com.inet.gradle.setup.image.image4j.codec.bmp.InfoHeader;
  * @author Ian McDonagh
  */
 public class ICODecoder {
-  
+
   private static final int PNG_MAGIC = 0x89504E47;
   private static final int PNG_MAGIC_LE = 0x474E5089;
   private static final int PNG_MAGIC2 = 0x0D0A1A0A;
   private static final int PNG_MAGIC2_LE = 0x0A1A0A0D;
-  
+
   //private java.util.List<BufferedImage> img;
-  
+
   private ICODecoder() { }
-  
+
   /**
    * Reads and decodes the given ICO file.  Convenience method equivalent to {@link #read(java.io.InputStream) read(new java.io.FileInputStream(file))}.
    * @param file the source file to read
@@ -41,7 +41,7 @@ public class ICODecoder {
   public static java.util.List<BufferedImage> read(java.io.File file) throws IOException {
     return read(new java.io.FileInputStream(file));
   }
-  
+
   /**
    * Reads and decodes the given ICO file, together with all metadata.  
    * Convenience method equivalent to {@link #readExt(java.io.InputStream) readExt(new java.io.FileInputStream(file))}.
@@ -53,7 +53,7 @@ public class ICODecoder {
   public static java.util.List<ICOImage> readExt(java.io.File file) throws IOException {
     return readExt(new java.io.FileInputStream(file));
   }
-  
+
   /**
    * Reads and decodes ICO data from the given source.
    * The returned list of images is in the order in which they appear in the source ICO data.
@@ -71,7 +71,7 @@ public class ICODecoder {
     }
     return ret;
   }
-  
+
   /**
    * Reads and decodes ICO data from the given source, together with all metadata.
    * The returned list of images is in the order in which they appear in the source ICO data.
@@ -82,32 +82,32 @@ public class ICODecoder {
    */
   public static java.util.List<ICOImage> readExt(java.io.InputStream is) throws IOException {
     //long t = System.currentTimeMillis();
-    
+
     com.inet.gradle.setup.image.image4j.io.LittleEndianInputStream in = new com.inet.gradle.setup.image.image4j.io.LittleEndianInputStream(is);
-    
+
     //Reserved 	2 byte 	=0
     short sReserved = in.readShortLE();
     //Type 	2 byte 	=1
     short sType = in.readShortLE();
     //Count 	2 byte 	Number of Icons in this file
     short sCount = in.readShortLE();
-    
+
     //Entries   Count * 16  list of icons
     IconEntry[] entries = new IconEntry[sCount];
     for (short s = 0; s < sCount; s++) {
       entries[s] = new IconEntry(in);
     }
-    
+
     int i = 0;
     //images    list of bitmap structures in BMP format
     java.util.List<ICOImage> ret = new java.util.ArrayList<ICOImage>(sCount);
-    
+
     try {
       for (i = 0; i < sCount; i++) {
-       
+
         int info = in.readIntLE();
         if (info == 40) {
-          
+
           //read XOR bitmap
           //BMPDecoder bmp = new BMPDecoder(is);
           InfoHeader infoHeader = BMPDecoder.readInfoHeader(in, info);
@@ -115,26 +115,26 @@ public class ICODecoder {
           andHeader.iHeight = (int) (infoHeader.iHeight / 2);
           InfoHeader xorHeader = new InfoHeader(infoHeader);
           xorHeader.iHeight = andHeader.iHeight;
-          
+
           andHeader.sBitCount = 1;
           andHeader.iNumColors = 2;
-          
+
           //for now, just read all the raster data (xor + and)
           // and store as separate images
-          
+
           BufferedImage xor = BMPDecoder.read(xorHeader, in);
           //img.add(xor);
-          
+
           BufferedImage img = new BufferedImage(
               xorHeader.iWidth, xorHeader.iHeight,
               BufferedImage.TYPE_INT_ARGB
               );
-                   
+
           ColorEntry[] andColorTable = new ColorEntry[] {
             new ColorEntry(255, 255, 255, 255),
             new ColorEntry(0, 0, 0, 0)
           };
-          
+
           if (infoHeader.sBitCount == 32) {
             //transparency from alpha
             //ignore bytes after XOR bitmap
@@ -143,7 +143,7 @@ public class ICODecoder {
             // data size = w * h * 4
             int dataSize = xorHeader.iWidth * xorHeader.iHeight * 4;
             int skip = size - infoHeaderSize - dataSize;
-            
+
             //ignore AND bitmap since alpha channel stores transparency
             int skipped = in.skipBytes(skip);
             int s = skip;
@@ -157,12 +157,12 @@ public class ICODecoder {
             ////read AND bitmap
             //BufferedImage and = BMPDecoder.read(andHeader, in, andColorTable);
             //this.img.add(and);
-            
+
             WritableRaster srgb = xor.getRaster();
             WritableRaster salpha = xor.getAlphaRaster();
             WritableRaster rgb = img.getRaster();
             WritableRaster alpha = img.getAlphaRaster();
-            
+
             for (int y = xorHeader.iHeight - 1; y >= 0; y--) {
               for (int x = 0; x < xorHeader.iWidth; x++) {
                 int r = srgb.getSample(x, y, 0);
@@ -175,18 +175,18 @@ public class ICODecoder {
                 alpha.setSample(x, y, 0, a);
               }
             }
-            
+
           } else {
             BufferedImage and = BMPDecoder.read(andHeader, in, andColorTable);
             //img.add(and);
-            
+
             //copy rgb
             WritableRaster srgb = xor.getRaster();
             WritableRaster rgb = img.getRaster();
             //copy alpha
             WritableRaster alpha = img.getAlphaRaster();
             WritableRaster salpha = and.getRaster();
-            
+
             for (int y = 0; y < xorHeader.iHeight; y++) {
               for (int x = 0; x < xorHeader.iWidth; x++) {
                 int r, g, b;
@@ -202,7 +202,7 @@ public class ICODecoder {
                 rgb.setSample(x, y, 2, b);
                 //System.out.println(x+","+y+"="+Integer.toHexString(c));
                 //img.setRGB(x, y, c);
-                
+
                 //alpha
                 int a = and.getRGB(x, y);
                 alpha.setSample(x, y, 0, a);
@@ -218,13 +218,13 @@ public class ICODecoder {
         }
         //check for PNG magic header and that image height and width = 0 = 256 -> Vista format
         else if (info == PNG_MAGIC_LE) {
-          
+
           int info2 = in.readIntLE();
-          
+
           if (info2 != PNG_MAGIC2_LE) {
             throw new IOException("Unrecognized icon format for image #"+i);
           }
-          
+
           IconEntry e = entries[i];
           byte[] pngData = new byte[e.iSizeInBytes - 8];
           int count = in.read(pngData);
@@ -242,7 +242,7 @@ public class ICODecoder {
           javax.imageio.ImageReader reader = getPNGImageReader();
           reader.setInput(input);
           java.awt.image.BufferedImage img = reader.read(0);
-                    
+
           // create ICOImage          
           IconEntry iconEntry = entries[i];
           ICOImage icoImage = new ICOImage(img, null, iconEntry);
@@ -253,9 +253,7 @@ public class ICODecoder {
         else {
           throw new IOException("Unrecognized icon format for image #"+i);
         }
-        
-        
-        
+
       /*
       InfoHeader andInfoHeader = new InfoHeader();
       andInfoHeader.iColorsImportant = 0;
@@ -268,13 +266,13 @@ public class ICODecoder {
     } catch (IOException ex) {
       throw new IOException("Failed to read image # "+i);
     }
-    
+
     //long t2 = System.currentTimeMillis();
     //System.out.println("Loaded ICO file in "+(t2 - t)+"ms");
-    
+
     return ret;
   }
-  
+
   private static javax.imageio.ImageReader getPNGImageReader() {
     javax.imageio.ImageReader ret = null;
     java.util.Iterator<javax.imageio.ImageReader> itr = javax.imageio.ImageIO.getImageReadersByFormatName("png");

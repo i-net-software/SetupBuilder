@@ -25,17 +25,17 @@ import java.util.List;
  */
 public class DocumentType {
 
-	private final AbstractSetupBuilder setup;
+    private final AbstractSetupBuilder setup;
 
-	private List<String> extensions;
+    private List<String> extensions;
 
-	private String name;
-	
-	private String mimetype;
+    private String name;
+
+    private String mimetype;
 
     private String role = "Viewer";
 
-	private Object icons;
+    private Object icons;
 
     DocumentType( AbstractSetupBuilder setup ) {
         this.setup = setup;
@@ -100,7 +100,7 @@ public class DocumentType {
     public void setName( String name ) {
         this.name = name;
     }
-    
+
     /**
      * Returns the mime type for the document type. If none mime type was specified it will return 'application/&lt;the first extension&gt;'.
      * @return the mime type for the document type
@@ -121,7 +121,6 @@ public class DocumentType {
     public void setMimetype( String mimetype ) {
         this.mimetype = mimetype;
     }
-    
 
     public String getRole() {
         return role;

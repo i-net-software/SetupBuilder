@@ -80,7 +80,6 @@ public class ReplacingInputStream extends FilterInputStream {
         }
     });
 
-
     /**
      * Is used for <code>'unreading'</code> data if necessary (e.g. there is a possible situation that the buffer
      * ends with the data that matches to particular replacement start but the data is not enough to understand

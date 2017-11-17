@@ -337,7 +337,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
         }
-        
+
         // register the mime type and the default app for the extensions
         for( DocumentType docType : starter.getDocumentType() ) {
             for( String extension : docType.getFileExtension() ) {
@@ -346,14 +346,14 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 try (FileWriter fw = new FileWriter( createFile( "BUILD/" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml", false ) )) {
                     fw.write( "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" );
                     fw.write( "<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\">\n" );
-                    
+
                     // if there was a mime type for the starter it will override the mime types of the documentType
                     if( starter.getMimeTypes() != null ) {
                         fw.write( "    <mime-type type=\"" + starter.getMimeTypes() + "\">\n" );
                     } else {
                         fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );                        
                     }
-                    
+
                     fw.write( "        <comment>" + setup.getApplication() + "</comment>\n" );
                     fw.write( "        <glob-deleteall/>\n" );
                     fw.write( "        <glob pattern=\"*." + extension + "\"/>\n" );
@@ -362,14 +362,14 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 }
                 controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
                 controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-mime uninstall \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
-                
+
                 String iconame = unixName;
                 if( starter.getIcons() != null ) {
                     iconame = iconName;
                 }
                 controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-icon-resource install --context mimetypes --novendor --size 48 /usr/share/icons/hicolor/48x48/apps/" + iconame + ".png " + iconame + " || true" );
                 controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-icon-resource uninstall --context mimetypes --size 48 " + iconame + " || true" );
-                
+
                 // we don't want to overwrite the default application and it seems that doing it per hand is the proper way under unix.
                 // so we don't do it here.
 //                String mimetypes = docType.getMimetype();

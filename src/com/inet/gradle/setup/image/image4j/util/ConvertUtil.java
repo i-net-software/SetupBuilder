@@ -20,7 +20,7 @@ import java.awt.image.IndexColorModel;
  * @author Ian McDonagh
  */
 public class ConvertUtil {
-  
+
   /**
    * Converts the source to 1-bit colour depth (monochrome).
    * No transparency.
@@ -33,24 +33,24 @@ public class ConvertUtil {
         new byte[] { (byte) 0, (byte) 0xFF },
         new byte[] { (byte) 0, (byte) 0xFF }
     );
-    
+
     BufferedImage dest = new BufferedImage(
         src.getWidth(), src.getHeight(),
         BufferedImage.TYPE_BYTE_BINARY,
         icm
         );
-    
+
     ColorConvertOp cco = new ColorConvertOp(
         src.getColorModel().getColorSpace(),
         dest.getColorModel().getColorSpace(),
         null
         );
-    
+
     cco.filter(src, dest);
-    
+
     return dest;
   }
-  
+
   /**
    * Converts the source image to 4-bit colour
    * using the default 16-colour palette:
@@ -74,7 +74,7 @@ public class ConvertUtil {
     };
     return convert4(src, cmap);
   }
-    
+
   /**
    * Converts the source image to 4-bit colour
    * using the given colour map.  No transparency.
@@ -98,10 +98,10 @@ public class ConvertUtil {
         null
         );
     cco.filter(src, dest);
-    
+
     return dest;
   }
-  
+
   /**
    * Converts the source image to 8-bit colour
    * using the default 256-colour palette. No transparency.
@@ -121,7 +121,7 @@ public class ConvertUtil {
     cco.filter(src, dest);
     return dest;
   }
-  
+
   /**
    * Converts the source image to 24-bit colour (RGB). No transparency.
    * @param src the source image to convert
@@ -140,7 +140,7 @@ public class ConvertUtil {
     cco.filter(src, dest);
     return dest;
   }
-  
+
   /**
    * Converts the source image to 32-bit colour with transparency (ARGB).
    * @param src the source image to convert

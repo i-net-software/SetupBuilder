@@ -17,59 +17,59 @@ import groovy.lang.Closure;
  */
 public class LocalizedResource {
 
-	private Locale locale;
-	private Object resource;
-	private SetupBuilder setup;
-	
-	/**
-	 * Stub Object for localized resources
-	 * @param setup the setup
-	 */
-	public LocalizedResource( SetupBuilder setup ) {
-		this.setup = setup;
-		
-	}
-	
-	/**
-	 * @return the resource as file
-	 */
-	public File getResource() {
-		
-		if ( resource != null ) {
-			return setup.getProject().file( resource );
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * @return the locale
-	 */
-	public Locale getLocale() {
-		return locale;
-	}
-	
-	/**
-	 * @return the language
-	 */
-	public String getLanguage() {
-		return locale.getLanguage();
-	}
+    private Locale locale;
+    private Object resource;
+    private SetupBuilder setup;
 
-	/**
-	 * @param locale the locale to set
-	 */
-	public void setLocale(String locale) {
-		this.locale = new Locale( locale );
-	}
+    /**
+     * Stub Object for localized resources
+     * @param setup the setup
+     */
+    public LocalizedResource( SetupBuilder setup ) {
+        this.setup = setup;
 
-	/**
-	 * @param resource the resource to set
-	 */
-	public void setResource(Object resource) {
-		this.resource = resource;
-	}
-	
+    }
+
+    /**
+     * @return the resource as file
+     */
+    public File getResource() {
+
+        if ( resource != null ) {
+            return setup.getProject().file( resource );
+        }
+
+        return null;
+    }
+
+    /**
+     * @return the locale
+     */
+    public Locale getLocale() {
+        return locale;
+    }
+
+    /**
+     * @return the language
+     */
+    public String getLanguage() {
+        return locale.getLanguage();
+    }
+
+    /**
+     * @param locale the locale to set
+     */
+    public void setLocale(String locale) {
+        this.locale = new Locale( locale );
+    }
+
+    /**
+     * @param resource the resource to set
+     */
+    public void setResource(Object resource) {
+        this.resource = resource;
+    }
+
     /**
      * Return the localized file for a specific locale
      * @param list from which to receive the resource
@@ -77,16 +77,15 @@ public class LocalizedResource {
      * @return license file
      */
     public static File getLocalizedResourceFile( List<LocalizedResource> list, String locale ) {
-    	
-    	for (LocalizedResource res : list) {
-			if ( locale.equalsIgnoreCase( res.getLanguage()) ) {
-				return res.getResource();
-			}
-		}
-    	
+
+        for (LocalizedResource res : list) {
+            if ( locale.equalsIgnoreCase( res.getLanguage()) ) {
+                return res.getResource();
+            }
+        }
+
         return null;
     }
-
 
     /**
      * Set the license file
@@ -95,15 +94,15 @@ public class LocalizedResource {
      * @param resource file file or closure
      */
     public static void addLocalizedResource( SetupBuilder parent, List<LocalizedResource> holder, Object resource ) {
-    	
-    	LocalizedResource res = new LocalizedResource( parent );
-    	if ( resource instanceof Closure<?> ) {
-    		res = ConfigureUtil.configure((Closure<?>)resource, res);
-    	} else {
-        	res.setLocale( parent.getDefaultResourceLanguage() );
-        	res.setResource( resource );
-    	}
-    	
-    	holder.add( res );
+
+        LocalizedResource res = new LocalizedResource( parent );
+        if ( resource instanceof Closure<?> ) {
+            res = ConfigureUtil.configure((Closure<?>)resource, res);
+        } else {
+            res.setLocale( parent.getDefaultResourceLanguage() );
+            res.setResource( resource );
+        }
+
+        holder.add( res );
     }
 }

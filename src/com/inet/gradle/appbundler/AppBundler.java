@@ -29,7 +29,7 @@ import com.inet.gradle.setup.abstracts.SetupSources;
 public class AppBundler extends AbstractSetupBuilder implements SetupSources {
 
     private String jnlpLauncherName;    
-    
+
     /**
      * Create a new instance.
      * @param project current project

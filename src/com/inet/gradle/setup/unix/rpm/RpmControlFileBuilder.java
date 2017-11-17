@@ -375,9 +375,9 @@ class RpmControlFileBuilder {
     private void putInstall( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( NEWLINE + "%install" + NEWLINE );
         controlWriter.write( "cp -R . '%{buildroot}'" + NEWLINE );
-        //		if(setup.getServices() != null && setup.getServices().size() > 0) {
-        //			controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);	
-        //		}
+        //        if(setup.getServices() != null && setup.getServices().size() > 0) {
+        //            controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);    
+        //        }
 
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
@@ -560,7 +560,7 @@ class RpmControlFileBuilder {
             depends = "";
         }
         if( setup.getServices() != null && setup.getServices().size() > 0 ) {
-            //	    	depends = depends; // + ", daemonize, initscripts";
+            //            depends = depends; // + ", daemonize, initscripts";
         }
 
         if( depends.trim().length() > 0 ) {
@@ -662,7 +662,6 @@ class RpmControlFileBuilder {
         }
         sb.append( scriptFragment );
     }
-
 
     /**
      * Writes the head, body and tail sections to the controlWriter
