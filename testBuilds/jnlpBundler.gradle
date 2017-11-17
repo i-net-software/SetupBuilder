@@ -1,6 +1,6 @@
 /*
 plugins {
-    id "de.inetsoftware.setupbuilder" version "1.4.7"
+    id "de.inetsoftware.setupbuilder" version "3.4.3"
 }
 /*/
 buildscript {

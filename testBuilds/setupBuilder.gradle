@@ -1,4 +1,4 @@
-//*
+/*
 plugins {
     id "de.inetsoftware.setupbuilder" version "3.4.3"
 }
