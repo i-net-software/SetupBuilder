@@ -8,9 +8,9 @@ apply from: 'javapreprocessor.gradle'
 
 group = 'de.inetsoftware'
 
-def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '3.5'   // Gradle version for the wrapper
+def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '3.5'    // Gradle version for the wrapper
 def buildVersion = '3a'                                                  // build version
-def baseVersion = '2.0'                                                 // Base Version to build, depends on gradle version.
+def baseVersion = '3.4'                                                  // Base Version to build, depends on gradle version.
 
 version = baseVersion
 
@@ -18,9 +18,10 @@ version = baseVersion
 println 'Gradle version: ' + gradle.gradleVersion
 import org.gradle.util.VersionNumber
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
+if( gVersion < VersionNumber.parse( '3.0' ) ) version = '2.0'
 if( gVersion >= VersionNumber.parse( '3.0' ) ) version = '3.0'
 if( gVersion >= VersionNumber.parse( '3.1' ) ) version = '3.1'
-if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
+if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'          // Current baseVersion for development
 
 version += '.' + buildVersion
 baseVersion += '.' + buildVersion
