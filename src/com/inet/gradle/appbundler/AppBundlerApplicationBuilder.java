@@ -30,39 +30,39 @@ import com.inet.gradle.setup.dmg.AbstractOSXApplicationBuilder;
  */
 public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<AppBundlerGradleTask, AppBundler> {
 
-	/**
-	 * Build the OSX app bundle
-	 * @param task task
-	 * @param setup setup
-	 * @param fileResolver resolver
-	 */
-	protected AppBundlerApplicationBuilder(AppBundlerGradleTask task, AppBundler setup,
-			FileResolver fileResolver) {
-		super(task, setup, fileResolver);
-		buildDir = setup.getDestinationDir();
-	}
+    /**
+     * Build the OSX app bundle
+     * @param task task
+     * @param setup setup
+     * @param fileResolver resolver
+     */
+    protected AppBundlerApplicationBuilder(AppBundlerGradleTask task, AppBundler setup,
+            FileResolver fileResolver) {
+        super(task, setup, fileResolver);
+        buildDir = setup.getDestinationDir();
+    }
 
-	/**
-	 * Create Application
-	 * @param application - the application
-	 * @throws Exception on errors
-	 */
-	void buildApplication(DesktopStarter application) throws Exception {
+    /**
+     * Create Application
+     * @param application - the application
+     * @throws Exception on errors
+     */
+    void buildApplication(DesktopStarter application) throws Exception {
 
-		// We need the executable. It has a different meaning than on other systems.
-		if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
-			application.setExecutable( getSetupBuilder().getAppIdentifier() );
-		}
-		
-		prepareApplication( application );
-		setDocumentTypes( application.getDocumentType() );
-		getAppBundler().setJnlpLauncherName( ((AppBundler)getSetupBuilder()).getJnlpLauncherName() );
-		
-		finishApplication();
-		copyBundleFiles( application );
-		
-		if ( task.getCodeSign() != null ) {
-			task.getCodeSign().signApplication( new File(buildDir, application.getDisplayName() + ".app") );
-		}
-	}	
+        // We need the executable. It has a different meaning than on other systems.
+        if ( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
+            application.setExecutable( getSetupBuilder().getAppIdentifier() );
+        }
+
+        prepareApplication( application );
+        setDocumentTypes( application.getDocumentType() );
+        getAppBundler().setJnlpLauncherName( ((AppBundler)getSetupBuilder()).getJnlpLauncherName() );
+
+        finishApplication();
+        copyBundleFiles( application );
+
+        if ( task.getCodeSign() != null ) {
+            task.getCodeSign().signApplication( new File(buildDir, application.getDisplayName() + ".app") );
+        }
+    }
 }
