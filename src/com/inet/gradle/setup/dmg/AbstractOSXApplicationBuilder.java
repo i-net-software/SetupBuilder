@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.groovy.control.ConfigurationException;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
 
@@ -71,10 +72,12 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
      */
     protected void prepareApplication( Application application ) throws Exception {
 
+        String appName = application.getDisplayName();
+
         Logging.sysout( "BuildDir now: " + buildDir );
         appBundler.setOutputDirectory( buildDir );
-        appBundler.setName( application.getDisplayName() );
-        appBundler.setDisplayName( application.getDisplayName() );
+        appBundler.setName( appName );
+        appBundler.setDisplayName( appName );
 
         String version = setup.getVersion();
         appBundler.setVersion( version );
@@ -97,14 +100,24 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         appBundler.setExecutableName( application.getExecutable() );
 
         String identifier = setup.getAppIdentifier();
-        String appName = application.getDisplayName();
         if( appName != setup.getApplication() ) {
             identifier += "." + appName.replaceAll( "^A-Za-z0-9]", "" );
         }
 
         appBundler.setIdentifier( identifier );
+
+        
+        if ( application.getMainClass() == null ) {
+            throw new ConfigurationException( "A main class is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainClass = 'your.org.main.class'\n\t}\n\n" );
+        }
         appBundler.setMainClassName( application.getMainClass() );
+
+        // Check for mainJar to not be null
+        if ( mainJar == null ) {
+            throw new ConfigurationException( "A main jar file is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainJar = '/path/to/yourMain.jar'\n\t}\n\n" );
+        }
         appBundler.setJarLauncherName( mainJar );
+
         appBundler.setCopyright( setup.getCopyright() );
         appBundler.setIcon( getApplicationIcon() );
         Architecture x86_64 = new Architecture();
@@ -187,7 +200,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
     protected File getApplicationIcon() throws IOException {
         File icons = setup.getIconForType( buildDir, "icns" );
         if( icons == null ) {
-            throw new IllegalArgumentException( "You have to specify a valid icon file" );
+            throw new ConfigurationException( "You have to specify a valid icon file.\n\n\tPlease set the parameter 'icons' of the setupBuilder configuration to an existing '*.icns' file.\n\n" );
         }
         return icons;
     }
