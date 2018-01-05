@@ -54,9 +54,10 @@ public class AppBundlerApplicationBuilder extends AbstractOSXApplicationBuilder<
             application.setExecutable( getSetupBuilder().getAppIdentifier() );
         }
 
-        prepareApplication( application );
+        String jnlpLauncherName = getSetupBuilder().getJnlpLauncherName();
+        prepareApplication( application, jnlpLauncherName != null );
+        getAppBundler().setJnlpLauncherName( jnlpLauncherName );
         setDocumentTypes( application.getDocumentType() );
-        getAppBundler().setJnlpLauncherName( ((AppBundler)getSetupBuilder()).getJnlpLauncherName() );
 
         finishApplication();
         copyBundleFiles( application );

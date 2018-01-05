@@ -23,12 +23,12 @@ import com.inet.gradle.setup.abstracts.SetupSources;
 
 /**
  * The Gradle extension for appBundler task.
- * 
+ *
  * @author Gerry Weißbach
  */
 public class AppBundler extends AbstractSetupBuilder implements SetupSources {
 
-    private String jnlpLauncherName;    
+    private String jnlpLauncherName;
 
     /**
      * Create a new instance.

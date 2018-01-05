@@ -39,7 +39,7 @@ import com.oracle.appbundler.Runtime;
 
 /**
  * Abstract implementation for creating the resulting app bundler image
- * 
+ *
  * @author gamma
  *
  * @param <T> the Task
@@ -53,7 +53,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Setup this builder.
-     * 
+     *
      * @param task - original task
      * @param setup - original setup
      * @param fileResolver - original fileResolver
@@ -66,11 +66,11 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Prepare the basic settings of the application
-     * 
+     *
      * @param application to use
      * @throws Exception on errors
      */
-    protected void prepareApplication( Application application ) throws Exception {
+    protected void prepareApplication( Application application, boolean isJNLPBuild ) throws Exception {
 
         String appName = application.getDisplayName();
 
@@ -106,17 +106,19 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
         appBundler.setIdentifier( identifier );
 
-        
-        if ( application.getMainClass() == null ) {
-            throw new ConfigurationException( "A main class is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainClass = 'your.org.main.class'\n\t}\n\n" );
-        }
-        appBundler.setMainClassName( application.getMainClass() );
+        if ( !isJNLPBuild ) {
+            // Main Class and Jar File are required.
+            if ( application.getMainClass() == null ) {
+                throw new ConfigurationException( "A main class is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainClass = 'your.org.main.class'\n\t}\n\n" );
+            }
+            appBundler.setMainClassName( application.getMainClass() );
 
-        // Check for mainJar to not be null
-        if ( mainJar == null ) {
-            throw new ConfigurationException( "A main jar file is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainJar = '/path/to/yourMain.jar'\n\t}\n\n" );
+            // Check for mainJar to not be null
+            if ( mainJar == null ) {
+                throw new ConfigurationException( "A main jar file is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainJar = '/path/to/yourMain.jar'\n\t}\n\n" );
+            }
+            appBundler.setJarLauncherName( mainJar );
         }
-        appBundler.setJarLauncherName( mainJar );
 
         appBundler.setCopyright( setup.getCopyright() );
         appBundler.setIcon( getApplicationIcon() );
@@ -138,7 +140,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Set the document types from the list
-     * 
+     *
      * @param list of document types
      * @throws IOException on complications with the icon
      */
@@ -193,7 +195,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Returns the icns application icon file
-     * 
+     *
      * @return Icon file
      * @throws IOException when there are errors while getting the file
      */
@@ -207,7 +209,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Modify a plist file
-     * 
+     *
      * @param plist file to modify
      * @param property property to set
      * @param value of property
@@ -226,7 +228,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Add an entry to a plist file
-     * 
+     *
      * @param plist file to modify
      * @param property property to set
      * @param type of property
@@ -246,7 +248,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Add an entry to a plist file
-     * 
+     *
      * @param plist file to modify
      * @param property property to set
      */
@@ -264,7 +266,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Copy the files defined in the gradle script into their final destination
-     * 
+     *
      * @param application the application
      * @throws IOException on errors
      */
@@ -277,7 +279,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Set File permissions to the resulting application
-     * 
+     *
      * @param destination of the files to manipulate
      * @throws IOException on errors
      */
@@ -311,7 +313,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
     /**
      * Return the current AppBundler.
-     * 
+     *
      * @return appBundler
      */
     protected AppBundlerTask getAppBundler() {

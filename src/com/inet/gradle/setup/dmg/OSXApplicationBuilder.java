@@ -10,7 +10,7 @@ import com.inet.gradle.setup.abstracts.Service;
 
 /**
  * Build an OSX Application - service
- * 
+ *
  * @author gamma
  *
  */
@@ -18,7 +18,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
     /**
      * Setup this builder.
-     * 
+     *
      * @param task - original task
      * @param setup - original setup
      * @param fileResolver - original fileResolver
@@ -30,7 +30,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
     /**
      * Create Application from service provided. Also create the preference panel
      * and put it into the application. Will also create the installer wrapper package of this application
-     * 
+     *
      * @param service the service
      * @throws Throwable error.
      */
@@ -42,7 +42,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         }
 
         System.err.println( "Having executable of: '" + service.getExecutable() + "'" );
-        prepareApplication( service );
+        prepareApplication( service, false );
         finishApplication();
         copyBundleFiles( service );
         new OSXPrefPaneCreator( task, getSetupBuilder(), fileResolver ).create( service );
@@ -53,7 +53,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
     /**
      * Create Application from the desktop starter provided
-     * 
+     *
      * @param application - the application
      * @throws Exception on errors
      */
@@ -64,7 +64,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
             application.setExecutable( getSetupBuilder().getAppIdentifier() );
         }
 
-        prepareApplication( application );
+        prepareApplication( application, false );
         setDocumentTypes( application.getDocumentType() );
         finishApplication();
         copyBundleFiles( application );

@@ -42,11 +42,15 @@ import org.gradle.api.internal.file.copy.CopySpecResolver;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.api.internal.tasks.SimpleWorkResult;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
+/*// if gradleVersion < 3.4
+import org.gradle.api.internal.tasks.SimpleWorkResult;
+*/// else
+import org.gradle.api.tasks.WorkResults;
+//// endif
 import org.gradle.internal.nativeplatform.filesystem.FileSystem;
 import org.gradle.internal.reflect.Instantiator;
 
@@ -71,7 +75,6 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      * @param extension of the setup
      * @param setupType the class of the SetupBuilder
      */
-    @SuppressWarnings("unchecked")
     public AbstractTask( String extension, Class<? extends AbstractSetupBuilder> setupType ) {
         this.extension = extension;
         this.rootSpec = (CopySpecInternal)getProject().copySpec( (Closure<CopySpec>)null );
@@ -169,7 +172,11 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             @Override
             public WorkResult execute( CopyActionProcessingStream stream ) {
                 stream.process( action );
+                /*// if gradleVersion < 3.4
                 return new SimpleWorkResult( true );
+                */// else
+                return WorkResults.didWork( true );
+                //// endif
             }
         };
         copyActionExecuter.execute( copySpec, copyAction );
@@ -201,10 +208,9 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
     public abstract void build();
 
     /**
-     * Return the setupBuilder using the specified type 
+     * Return the setupBuilder using the specified type
      * @return setupBuilder
      */
-    @SuppressWarnings("unchecked")
     protected AbstractSetupBuilder getAbstractSetupBuilder() {
         return setupBuilder;
     }
@@ -232,7 +238,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         try {
             return setupBuilder.getSource();
         } catch ( Throwable e ) {
-            throw new IllegalArgumentException( "You have to specify input sources for your application", e ); 
+            throw new IllegalArgumentException( "You have to specify input sources for your application", e );
         }
     }
 
@@ -254,7 +260,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
     /**
      * Get the file extension.
-     * 
+     *
      * @return the extension
      */
     public String getExtension() {
@@ -263,7 +269,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
     /**
      * Set the file extension of the installer. The default is equals the task name.
-     * 
+     *
      * @param extension the file extension
      */
     public void setExtension( String extension ) {

@@ -1,3 +1,4 @@
+auto.sync=false
 build.commands=org.eclipse.jdt.core.javabuilder
 build.scans.enabled=false
 connection.gradle.distribution=GRADLE_DISTRIBUTION(VERSION(4.3.1))
