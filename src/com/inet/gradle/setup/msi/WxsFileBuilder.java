@@ -22,7 +22,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import javax.swing.JEditorPane;
 import javax.swing.text.DefaultStyledDocument;
@@ -421,20 +421,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 throw new GradleException( "No installed Java VMs found: " + java );
             }
 
-            List<File> versions = new ArrayList<File>();
-            String [] s = { "jre", "jdk" };
-            Arrays.asList( s ).forEach( prefix -> {
-                versions.addAll( getDirectories( java, prefix + jre ) );
-                if( versions.size() == 0 ) {
-                    // if the java version is like "1.8" then search also for "jre8"
-                    String jreStr = jre.toString();
-                    if( jreStr.length() > 2 && jreStr.startsWith( "1." ) ) {
-                        versions.addAll( getDirectories( java, "jre" + jreStr.substring( 2 ) ) );
-                    }
-                }
-            });
+            List<File> versions = getMatchingJREs(java, jre.toString());
 
-            if( versions.size() == 0 ) {
+            if( versions.isEmpty() ) {
                 throw new GradleException( "bundleJre version " + jre + " can not be found in: '" + java + "' Its search for an folder that starts with: jre" + jre );
             }
 
@@ -456,22 +445,23 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         addDirectory( jreDir, baseLength, javaDir );
     }
-
+    
     /**
-     * Get all directories from the directory that start with the prefix.
-     * 
-     * @param parent parent directory
-     * @param prefix the searching prefix
-     * @return list of directories
+     * Gets all matching jres in the specified folder
+     * @param parent the folder to search in
+     * @param jre the jre string to match
+     * @return returns a list of matching jre folders
      */
-    private static List<File> getDirectories( File parent, String prefix ) {
-        ArrayList<File> files = new ArrayList<File>();
-        for( File file : parent.listFiles() ) {
-            if( file.isDirectory() && file.getName().startsWith( prefix ) ) {
-                files.add( file );
-            }
+    private static List<File> getMatchingJREs(File parent, String jre) {
+    	// Always remove "1." from the version number. It is optionally included in the pattern below
+        if (jre.length() > 2 && jre.startsWith( "1." )) {
+        	jre = jre.substring(2);
         }
-        return files;
+        Pattern jreMatcher = Pattern.compile("\\Aj(re|dk)-?(1\\.)?"+Pattern.quote(jre));
+        List<File> versions = Arrays.asList(
+        	parent.listFiles(file->file.isDirectory() && jreMatcher.matcher(file.getName()).find())
+        );
+        return versions;
     }
 
     /**
