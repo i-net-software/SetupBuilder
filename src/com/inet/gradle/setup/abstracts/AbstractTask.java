@@ -162,7 +162,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             }
         }
 
-        /*// if gradleVersion < 4.2
+        /*// if gradleVersion < 3.4
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
         */// else
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem(), true );

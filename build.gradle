@@ -14,6 +14,8 @@ def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '4.5.1'  // Grad
 def buildVersion = '3a'                                                  // build version
 def baseVersion = '4.5'                                                  // Base Version to build, depends on gradle version.
 
+wrapper.gradleVersion = LIB_GRADLE_VERSION
+
 version = baseVersion
 
 // gradle version switch, depends the API level
@@ -84,8 +86,6 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     if ( System.getProperty("snapshot") ) {
         version += '-SNAPSHOT' // setting version to snapshot
     }
-
-    wrapper.gradleVersion = LIB_GRADLE_VERSION
 } else {
     println "Uploading into local '../repo'"
     version += System.getenv('DEPLOY') != null ?'':'-SNAPSHOT' // setting version to snapshot
@@ -100,10 +100,6 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     clean.doLast {
         println "Cleaning local repository folder"
         file('../repo').deleteDir()
-    }
-
-    task wrapper(type: Wrapper) {
-       gradleVersion = LIB_GRADLE_VERSION
     }
 }
 
