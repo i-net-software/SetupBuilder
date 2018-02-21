@@ -68,6 +68,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
      * Prepare the basic settings of the application
      *
      * @param application to use
+     * @param isJNLPBuild indicate that this will be a JNLP application
      * @throws Exception on errors
      */
     protected void prepareApplication( Application application, boolean isJNLPBuild ) throws Exception {

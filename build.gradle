@@ -5,6 +5,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
+
 apply from: 'javapreprocessor.gradle'
 
 group = 'de.inetsoftware'
@@ -111,6 +112,12 @@ findbugs {
     sourceSets = [sourceSets.main]
     excludeFilter file("${projectDir}/.findbugs.xml")
     ignoreFailures = true
+}
+
+javadoc {
+    // Third party libs
+    exclude "**/image4j"
+    exclude "**/icns"
 }
 
 pluginBundle {

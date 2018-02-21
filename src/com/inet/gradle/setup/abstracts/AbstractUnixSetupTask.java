@@ -1,5 +1,9 @@
 package com.inet.gradle.setup.abstracts;
 
+/**
+ * An abstract base for the Unix SetupTask
+ * @author gamma
+ */
 public abstract class AbstractUnixSetupTask extends AbstractSetupTask {
 
     public AbstractUnixSetupTask( String extension ) {
@@ -11,7 +15,7 @@ public abstract class AbstractUnixSetupTask extends AbstractSetupTask {
     /**
      * Returns the user with which the daemon should be running. If no user was specified the default root user will be
      * used.
-     * 
+     *
      * @return the user for the daemon
      */
     public String getDaemonUser() {
@@ -24,6 +28,7 @@ public abstract class AbstractUnixSetupTask extends AbstractSetupTask {
 
     /**
      * Sets the user with which the daemon should be running.
+     * @param daemonUser the user to be used for the daemon
      */
     public void setDaemonUser( String daemonUser ) {
         this.daemonUser = daemonUser;

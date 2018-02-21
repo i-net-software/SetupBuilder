@@ -10,7 +10,7 @@ import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
 
 /**
- * Create code signature for packages. Deep Signing. 
+ * Create code signature for packages. Deep Signing.
  * @author gamma
  * @param <T> concrete Task
  * @param <S> concrete SetupBuilder
@@ -52,15 +52,15 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Specific Identifier to embed in code (option -i) 
-     * @return identifier 
+     * Specific Identifier to embed in code (option -i)
+     * @return identifier
      */
     public String getIdentifier() {
         return identifier;
     }
 
     /**
-     * Specific Identifier to embed in code (option -i) 
+     * Specific Identifier to embed in code (option -i)
      * @param identifier to set
      */
     public void setIdentifier(String identifier) {
@@ -76,7 +76,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Set Key chain to use for signing. It has to be unlocked. 
+     * Set Key chain to use for signing. It has to be unlocked.
      * @param keychain key chain
      */
     public void setKeychain(String keychain) {
@@ -135,7 +135,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( getKeychainPassword() );
         command.add( keychain );
 
-        exec( command, null, null, isIgnoreError() );            
+        exec( command, null, null, isIgnoreError() );
     }
 
     /**
@@ -193,7 +193,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         command.add( path.getAbsolutePath() );
 
-        File output = new File( path.getParentFile(), "signed." + path.getName() ); 
+        File output = new File( path.getParentFile(), "signed." + path.getName() );
         command.add( output.getAbsolutePath() );
         exec( command, null, null, isIgnoreError() );
 
@@ -205,7 +205,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Should be deep signed?
-     * @return
+     * @return if deep signing is enabled
      */
     public boolean isDeepsign() {
         return deepsign;
