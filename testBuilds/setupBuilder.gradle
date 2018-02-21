@@ -55,6 +55,10 @@ setupBuilder {
     runBeforeUninstall {
         mainClass = 'com.inet.testapplication.TestLauncher'
     }
+    runAfter {
+        mainClass = 'com.inet.testapplication.TestLauncher'
+        mainJar = 'testBuilds.jar'
+    }
     service {
         displayName = "i-net TestLaunch Server"
         id = "helpdesk"
