@@ -112,6 +112,13 @@ findbugs {
     sourceSets = [sourceSets.main]
     excludeFilter file("${projectDir}/.findbugs.xml")
     ignoreFailures = true
+
+    tasks.withType(FindBugs) {
+        reports {
+            xml.enabled = false
+            html.enabled = true
+        }
+    }
 }
 
 javadoc {

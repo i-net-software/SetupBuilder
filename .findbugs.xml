@@ -2,4 +2,10 @@
   <Match>
     <Bug pattern="SE_NO_SERIALVERSIONID" />
   </Match>
+  <Match>
+      <or>
+          <Package name="~.*\.image4j"/>
+          <Package name="~.*\.icns"/>
+      </or>
+  </Match>
 </FindBugsFilter>
