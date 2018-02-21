@@ -17,22 +17,22 @@ fi
 
 # Link prefpane
 if [ -L "$PREFPANE_DESTINATION" ]; then
-	rm "$PREFPANE_DESTINATION"
+    rm "$PREFPANE_DESTINATION"
 fi
 
 ln -s "$RESOURCE_LOCATION/{{displayName}}.prefPane" "$PREFPANE_DESTINATION"
 
 # modify SERVICE_PLIST to reflect current installation
 if [ -f "/usr/libexec/PlistBuddy" ]; then
-	# Set executable
-	/usr/libexec/PlistBuddy -c "Set :Program $COMMAND" "$SERVICE_PLIST"
-	
-	# Watch for modification to trigger uninstall
+    # Set executable
+    /usr/libexec/PlistBuddy -c "Set :Program $COMMAND" "$SERVICE_PLIST"
+
+    # Watch for modification to trigger uninstall
     /usr/libexec/PlistBuddy -c "Add :WatchPaths: String $PREFPANE_DESTINATION" "$UNINSTALL_WATCH"
     /usr/libexec/PlistBuddy -c "Add :WatchPaths: String $SERVICE_APP_LOCATION" "$UNINSTALL_WATCH"
 else
-	echo "Cannot properly set up the service without the PlistBuddy tool"
-	exit 1
+    echo "Cannot properly set up the service without the PlistBuddy tool"
+    exit 1
 fi
 
 # copy default launchd file and start daemon

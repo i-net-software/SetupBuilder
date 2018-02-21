@@ -7,9 +7,9 @@ if /bin/launchctl list "{{serviceName}}" &> /dev/null; then
 fi
 
 if test -e "$DAEMON_DESTINATION"; then
-	rm "$DAEMON_DESTINATION"
+    rm "$DAEMON_DESTINATION"
 fi
 
 if test -e "$PREFPANE_DESTINATION"; then
-	rm "$PREFPANE_DESTINATION"
+    rm "$PREFPANE_DESTINATION"
 fi

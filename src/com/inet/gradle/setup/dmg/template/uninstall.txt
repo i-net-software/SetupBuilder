@@ -4,8 +4,8 @@
 
 PACKAGEID="{{serviceName}}"
 if [ -z "$PACKAGEID" ] ; then
-	echo "Package ID is not set"
-	exit 1
+    echo "Package ID is not set"
+    exit 1
 fi
 
 AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
@@ -27,7 +27,7 @@ while [[ $RESULT -eq 0 ]] && [[ $FLAG -eq 0 ]]; do
             FLAG=1
         fi
     fi
-    
+
     COUNT=$(( $COUNT+1 ))
 
 done
@@ -38,50 +38,50 @@ if [[ $FLAG -eq 1 ]]; then
     echo "########################################"
     echo "# Running uninstall for {{displayName}}"
 
-	# Find all files that should be present for our current package
-	echo "# Collecting Package Information"
-	PKGTMP="/tmp/$PACKAGEID.pkg.info"
-	pkgutil --pkg-info-plist "$PACKAGEID" > "$PKGTMP"
-	VOLUME=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :volume"`
-	LOCATION=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :install-location"`
-	TARGET_LOCATION="${VOLUME}${LOCATION}"
+    # Find all files that should be present for our current package
+    echo "# Collecting Package Information"
+    PKGTMP="/tmp/$PACKAGEID.pkg.info"
+    pkgutil --pkg-info-plist "$PACKAGEID" > "$PKGTMP"
+    VOLUME=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :volume"`
+    LOCATION=`/usr/libexec/PlistBuddy "$PKGTMP" -c "Print :install-location"`
+    TARGET_LOCATION="${VOLUME}${LOCATION}"
     TARGET_LOCATION=${TARGET_LOCATION%/}
-	
-	echo "# Before Script Section"
+
+    echo "# Before Script Section"
 
 {{script}}
 
-	echo "# After Script Section"
+    echo "# After Script Section"
 
-	if [ -d "$TARGET_LOCATION" ]; then
-	    cd "$TARGET_LOCATION" && pwd
+    if [ -d "$TARGET_LOCATION" ]; then
+        cd "$TARGET_LOCATION" && pwd
     fi
 
     pkgutil --only-files --files "$PACKAGEID" | tr '\n' '\0' | xargs -n 1 -0 rm -f
-    
+
     #Beware!
     pkgutil --only-dirs --files "$PACKAGEID" | sed '1!G;h;$!d' | tr '\n' '\0' | xargs -n 1 -0 rm -rf
     pkgutil --forget "$PACKAGEID"
 
-	echo "# Cleanup"
-	rm "$PKGTMP"
+    echo "# Cleanup"
+    rm "$PKGTMP"
 
-	if [ -f "$AGENT_DESTINATION" ]; then
-		rm "$AGENT_DESTINATION"
-	fi
+    if [ -f "$AGENT_DESTINATION" ]; then
+        rm "$AGENT_DESTINATION"
+    fi
 
     echo "# Done"
     echo "########################################"
-	# Remove watcher for this uninstall script
-	if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
-		echo "# Removed uninstall watcher"
-	    echo "########################################"
-	    /bin/launchctl unload "$AGENT_DESTINATION"
+    # Remove watcher for this uninstall script
+    if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
+        echo "# Removed uninstall watcher"
+        echo "########################################"
+        /bin/launchctl unload "$AGENT_DESTINATION"
 
-	    if [ -d "/opt/{{serviceName}}" ]; then 
-			rm -rf "/opt/{{serviceName}}"
-		fi
-	fi
+        if [ -d "/opt/{{serviceName}}" ]; then 
+            rm -rf "/opt/{{serviceName}}"
+        fi
+    fi
 fi
 
 exit 0

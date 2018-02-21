@@ -13,7 +13,7 @@ if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
 fi
 
 if [ -e "$AGENT_DESTINATION" ]; then
-	rm "$AGENT_DESTINATION"
+    rm "$AGENT_DESTINATION"
 fi
 
 {{script}}

@@ -24,7 +24,7 @@ try
 
             set icon size of theViewOptions to iconSize
             try
-            	set text size of theViewOptions to {{fontSize}}
+                set text size of theViewOptions to {{fontSize}}
             end try
 
             set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0

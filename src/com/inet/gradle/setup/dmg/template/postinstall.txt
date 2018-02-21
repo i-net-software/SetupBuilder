@@ -21,17 +21,17 @@ echo "I am Batman, or: $(whoami)"
 ################################################################################################
 ### Update the uninstall watcher
 if [ -f "/usr/libexec/PlistBuddy" ]; then
-    
+
     echo "I am Batman, or: $(whoami)"
-	# Use libexec as told by Apple to have semipermanent storage for executable for Agent 
-	/usr/bin/ditto "$SCRIPT_PATH/uninstall.sh" "/opt/{{serviceName}}/uninstall.sh"
-	chown "$(whoami)":wheel "/opt/{{serviceName}}/uninstall.sh"
-	
+    # Use libexec as told by Apple to have semipermanent storage for executable for Agent 
+    /usr/bin/ditto "$SCRIPT_PATH/uninstall.sh" "/opt/{{serviceName}}/uninstall.sh"
+    chown "$(whoami)":wheel "/opt/{{serviceName}}/uninstall.sh"
+
     /usr/libexec/PlistBuddy -c "Add :WatchPaths: String /Library/PreferencePanes" "$UNINSTALL_WATCH"
-	/usr/libexec/PlistBuddy -c "Set :Program /opt/{{serviceName}}/uninstall.sh" "$UNINSTALL_WATCH"
+    /usr/libexec/PlistBuddy -c "Set :Program /opt/{{serviceName}}/uninstall.sh" "$UNINSTALL_WATCH"
 else
-	echo "Cannot properly set up the service without the PlistBuddy tool"
-	exit 1
+    echo "Cannot properly set up the service without the PlistBuddy tool"
+    exit 1
 fi
 
 /usr/bin/ditto "$UNINSTALL_WATCH" "$AGENT_DESTINATION"

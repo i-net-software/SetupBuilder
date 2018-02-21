@@ -7,22 +7,22 @@ RUNINBACKGROUND="{{inBackground}}"
 
 # this is to be inteded with an embedded JRE and existing jars only
 if [ ! -z "$JAVAEXECUTABLE" ]; then
-	
-	# enable monitor for jobs
+
+    # enable monitor for jobs
     set -o monitor
 
-	# if the directory exists, start the run after
-	if [ -e "$RUNAFTER_WORKINGDIR" ]; then
-		if [ -z "$RUNAFTER_MAINCLASS" ]; then
-			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -jar "$RUNAFTER_MAINJAR" {{startArgument}})&
-		else
-			$(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" {{startArgument}})&
-		fi
+    # if the directory exists, start the run after
+    if [ -e "$RUNAFTER_WORKINGDIR" ]; then
+        if [ -z "$RUNAFTER_MAINCLASS" ]; then
+            $(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -jar "$RUNAFTER_MAINJAR" {{startArgument}})&
+        else
+            $(cd "$RUNAFTER_WORKINGDIR" && "$JAVAEXECUTABLE" -classpath "$RUNAFTER_MAINJAR" "$RUNAFTER_MAINCLASS" {{startArgument}})&
+        fi
         if [ ! -z "$RUNINBACKGROUND" ]; then
             # bring job back into foreground
             fg %+
         fi
-	else
-		echo "Could not find working directory at: '$RUNAFTER_WORKINGDIR'"
-	fi
+    else
+        echo "Could not find working directory at: '$RUNAFTER_WORKINGDIR'"
+    fi
 fi
