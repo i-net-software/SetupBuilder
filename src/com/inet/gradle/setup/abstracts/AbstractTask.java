@@ -46,7 +46,7 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
-/*// if gradleVersion < 3.4
+/*// if gradleVersion < 4.2
 import org.gradle.api.internal.tasks.SimpleWorkResult;
 */// else
 import org.gradle.api.tasks.WorkResults;
@@ -162,7 +162,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             }
         }
 
-        /*// if gradleVersion < 3.4
+        /*// if gradleVersion < 4.2
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
         */// else
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem(), true );
@@ -172,7 +172,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             @Override
             public WorkResult execute( CopyActionProcessingStream stream ) {
                 stream.process( action );
-                /*// if gradleVersion < 3.4
+                /*// if gradleVersion < 4.2
                 return new SimpleWorkResult( true );
                 */// else
                 return WorkResults.didWork( true );
