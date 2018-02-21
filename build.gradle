@@ -1,16 +1,17 @@
 plugins {
-  id "com.gradle.plugin-publish" version "0.9.9"
+    id "com.gradle.plugin-publish" version "0.9.9"
 }
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'findbugs'
 apply from: 'javapreprocessor.gradle'
 
 group = 'de.inetsoftware'
 
-def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '3.5'    // Gradle version for the wrapper
+def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '4.5.1'  // Gradle version for the wrapper
 def buildVersion = '3a'                                                  // build version
-def baseVersion = '3.4'                                                  // Base Version to build, depends on gradle version.
+def baseVersion = '4.5'                                                  // Base Version to build, depends on gradle version.
 
 version = baseVersion
 
@@ -21,7 +22,8 @@ def gVersion = VersionNumber.parse( gradle.gradleVersion )
 if( gVersion < VersionNumber.parse( '3.0' ) ) version = '2.0'
 if( gVersion >= VersionNumber.parse( '3.0' ) ) version = '3.0'
 if( gVersion >= VersionNumber.parse( '3.1' ) ) version = '3.1'
-if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'          // Current baseVersion for development
+if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
+if( gVersion >= VersionNumber.parse( '4.5' ) ) version = '4.5'          // Current baseVersion for development
 
 version += '.' + buildVersion
 baseVersion += '.' + buildVersion
@@ -103,23 +105,31 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     }
 }
 
-pluginBundle {
-  website = 'https://github.com/i-net-software/SetupBuilder'
-  vcsUrl = 'https://github.com/i-net-software/SetupBuilder'
-  description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
-  tags = ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ]
+findbugs {
+    toolVersion = "3.0.1"
+    // Don't worry about test classes
+    sourceSets = [sourceSets.main]
+    excludeFilter file("${projectDir}/.findbugs.xml")
+    ignoreFailures = true
+}
 
-  plugins {
-    setupBuilderPlugin {
-      id = 'de.inetsoftware.setupbuilder'
-      displayName = 'Gradle Setup Builder plugin'
+pluginBundle {
+    website = 'https://github.com/i-net-software/SetupBuilder'
+    vcsUrl = 'https://github.com/i-net-software/SetupBuilder'
+    description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
+    tags = ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ]
+
+    plugins {
+        setupBuilderPlugin {
+            id = 'de.inetsoftware.setupbuilder'
+            displayName = 'Gradle Setup Builder plugin'
+        }
+        appBunderPlugin {
+            id = 'de.inetsoftware.appbundler'
+            displayName = 'Gradle Application Bundler plugin for OSX'
+            tags = ['app']
+        }
     }
-    appBunderPlugin {
-      id = 'de.inetsoftware.appbundler'
-      displayName = 'Gradle Application Bundler plugin for OSX'
-      tags = ['app']
-    }
-  }
 }
 
 // see https://discuss.gradle.org/t/add-apikey-and-apisecret-to-pluginbundle-extension-for-plugin-publish-plugin/8636/3

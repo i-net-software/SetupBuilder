@@ -95,7 +95,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the current project.
-     * 
+     *
      * @return the project
      */
     protected Project getProject() {
@@ -113,10 +113,11 @@ public class AbstractSetupBuilder implements SetupSources {
      * All the inputs
      * @return FileTree
      */
+    @Override
     public FileTree getSource() {
         FileTree allSource = rootSpec.buildRootResolver().getAllSource();
         if ( allSource == null ) {
-            throw new IllegalArgumentException( "You have to specify input sources for your application" ); 
+            throw new IllegalArgumentException( "You have to specify input sources for your application" );
         }
         return allSource;
     }
@@ -150,7 +151,7 @@ public class AbstractSetupBuilder implements SetupSources {
     }
 
     /**
-     * Return the name of the application 
+     * Return the name of the application
      * @return name of the application
      */
     public String getApplication() {
@@ -194,7 +195,7 @@ public class AbstractSetupBuilder implements SetupSources {
     /**
      * Get the short application identifier of the setup file. If not set then the project.archivesBaseName is used.
      * Should not contain spaces if possible.
-     * 
+     *
      * @return the application identifier
      */
     public String getAppIdentifier() {
@@ -218,7 +219,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the name of the setup file without extension. If not set then baseName-version is used.
-     * 
+     *
      * @return the setup file name
      */
     public String getArchiveName() {
@@ -258,7 +259,7 @@ public class AbstractSetupBuilder implements SetupSources {
     /**
      * Set the icons for the setup. This can be one or multiple images in different size. The usage depends on the
      * platform. This can be an *.ico file, *.icns file or an list of Java readable image files like *.png or *.jpeg.
-     * 
+     *
      * @param icons the icons
      */
     public void setIcons( Object icons ) {
@@ -267,7 +268,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the bundle JRE value.
-     * 
+     *
      * @return the value
      */
     public Object getBundleJre() {
@@ -277,7 +278,7 @@ public class AbstractSetupBuilder implements SetupSources {
     /**
      * Add a Java VM into your setup. The resulting behavior depends on the platform. This can be a version or a
      * directory to a installed Java VM.
-     * 
+     *
      * @param bundleJre version or path
      * @see #setBundleJreTarget(String)
      */
@@ -287,7 +288,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the target for a bundle JRE.
-     * 
+     *
      * @return the target
      */
     public String getBundleJreTarget() {
@@ -305,7 +306,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * The target directory in the install directory for a bundled JRE. The default is "jre".
-     * 
+     *
      * @param bundleJreTarget the new value
      */
     public void setBundleJreTarget( String bundleJreTarget ) {
@@ -314,7 +315,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the main class.
-     * 
+     *
      * @return the class name
      */
     public String getMainClass() {
@@ -323,7 +324,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set the main class of the Java application.
-     * 
+     *
      * @param mainClass the class name
      */
     public void setMainClass( String mainClass ) {
@@ -332,7 +333,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the main jar file.
-     * 
+     *
      * @return the main jar
      */
     public String getMainJar() {
@@ -342,7 +343,7 @@ public class AbstractSetupBuilder implements SetupSources {
     /**
      * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in
      * the manifest.
-     * 
+     *
      * @param mainJar the main jar file
      */
     public void setMainJar( String mainJar ) {
@@ -351,7 +352,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Register a file extensions.
-     * 
+     *
      * @param closue document type
      */
     @Deprecated
@@ -360,7 +361,7 @@ public class AbstractSetupBuilder implements SetupSources {
         project.getLogger().warn( "WARNING: documentType is deprecated in setupBuilder. Move it into desktopStarter." );
         DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( this ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
-            throw new GradleException( "documentType must contains minimum one fileExtension." );
+            throw new GradleException( "documentType must contain at least one fileExtension." );
         }
         documentTypes.add( doc );
     }
@@ -376,7 +377,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * If enabled then an empty from definition is failing the build.
-     * 
+     *
      * @return true, if enabled
      */
     public boolean isFailOnEmptyFrom() {
@@ -385,7 +386,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
     /**
      * Enable the check.
-     * 
+     *
      * @param failOnEmptyFrom true, check is enabled
      */
     public void setFailOnEmptyFrom( boolean failOnEmptyFrom ) {

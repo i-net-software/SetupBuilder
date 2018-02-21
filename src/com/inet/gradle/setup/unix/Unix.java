@@ -20,8 +20,8 @@ import java.io.File;
 import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
 
 /**
- * The unix Gradle base.
- * 
+ * The unix base implementation for SetupBuilder.
+ *
  * @author Gerry Weissbach
  */
 public abstract class Unix extends AbstractUnixSetupTask {
@@ -48,6 +48,10 @@ public abstract class Unix extends AbstractUnixSetupTask {
         super( format );
     }
 
+    /**
+     * Default variables for every unix daemon
+     * @return the prefilled variables
+     */
     public String getVariablesTemplate() {
         String variables = "";
         variables += "APPLICATION_DISPLAY_NAME=\"" + getSetupBuilder().getApplication() + "\"\n";
@@ -58,7 +62,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     /**
      * Returns the section that specifies the 'Group' entry in the SPEC file. Default is Applications/Productivity
-     * 
+     *
      * @return the section
      */
     public String getSection() {
@@ -68,45 +72,80 @@ public abstract class Unix extends AbstractUnixSetupTask {
         return "Applications/Productivity";
     }
 
+    /**
+     * Set a section (like category) for the application
+     * @param section the section
+     */
     public void setSection( String section ) {
         this.section = section;
     }
 
+    /**
+     * The current architecture
+     * @return current architecture
+     */
     public String getArchitecture() {
         return architecture;
     }
 
+    /**
+     * Set the current architecture
+     * @param architecture current architecture to set
+     */
     public void setArchitecture( String architecture ) {
         this.architecture = architecture;
     }
 
+    /**
+     * The recommended package dependencies
+     * @return recommended package dependencies
+     */
     public String getRecommends() {
         return recommends;
     }
 
+    /**
+     * Sets the recommended package dependencies
+     * @param recommends package dependencies
+     */
     public void setRecommends( String recommends ) {
         this.recommends = recommends;
     }
 
+    /**
+     * The package dependencies
+     * @return package dependencies
+     */
     public String getDepends() {
         return depends;
     }
 
+    /**
+     * Sets the package dependencies
+     * @param depends package dependencies
+     */
     public void setDepends( String depends ) {
         this.depends = depends;
     }
 
+    /**
+     * Homepage of the author
+     * @return homepage of the author
+     */
     public String getHomepage() {
         return homepage;
     }
 
+    /**
+     * Sets the homepage of the author
+     * @param homepage of the author
+     */
     public void setHomepage( String homepage ) {
         this.homepage = homepage;
     }
 
     /**
      * Returns the installation root where the program directory should be located. Default is /usr/share + basename
-     * 
      * @return the installation root directory
      */
     public String getInstallationRoot() {
@@ -120,9 +159,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
     /**
      * Sets the installation root directory where the main files should be located. If the directory ends with a / it
      * will be removed.
-     * 
-     * @param installationRoot
-     *            the installation root directory
+     * @param installationRoot the installations root directory
      */
     public void setInstallationRoot( String installationRoot ) {
         this.installationRoot = installationRoot.endsWith( "/" )
@@ -131,7 +168,6 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     /**
      * Returns the a default service configuration file This will be included in the service starter
-     * 
      * @return the default service file
      */
     public File getDefaultServiceFile() {
@@ -143,8 +179,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     /**
      * Set the default service configuration file The file will be put at the "/etc/default/$service$" location
-     * 
-     * @param defaultServiceFile
+     * @param defaultServiceFile the default service file
      */
     public void setDefaultServiceFile( Object defaultServiceFile ) {
         this.defaultServiceFile = defaultServiceFile;
@@ -161,7 +196,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     /**
      * Set an additional service script that will be included into the original one.
-     * @param additionalServiceScript
+     * @param additionalServiceScript a script the will additionally be included in the service
      */
     public void setAdditionalServiceScript( String additionalServiceScript ) {
         this.additionalServiceScript = additionalServiceScript;

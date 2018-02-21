@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.process.internal.DefaultExecAction;
@@ -27,7 +28,7 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
 
 /**
  * Some basic builder functionally.
- * 
+ *
  * @author Volker Berlin
  *
  * @param <T> the task
@@ -54,7 +55,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
 
     /**
      * Call a program from the WIX installation.
-     * 
+     *
      * @param parameters the parameters
      */
     protected void exec( ArrayList<String> parameters ) {
@@ -63,7 +64,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
 
     /**
      * Execute an external process.
-     * 
+     *
      * @param parameters command line
      * @param input optional InputStream for the process
      * @param output optional OutputStream for the process
@@ -74,7 +75,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
 
     /**
      * Execute an external process.
-     * 
+     *
      * @param parameters command line
      * @param input optional InputStream for the process
      * @param output optional OutputStream for the process
@@ -98,7 +99,16 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         }
         task.getProject().getLogger().lifecycle( log.toString() );
 
+        /*// if gradleVersion < 4.5
         DefaultExecAction action = new DefaultExecAction( fileResolver );
+        */// else
+        DefaultExecAction action = new DefaultExecAction( fileResolver, new Executor() {
+            @Override
+            public void execute( Runnable command ) {
+                command.run();
+            }
+        } );
+        //// endif
         action.setCommandLine( parameters );
         action.setIgnoreExitValue( ignoreExitValue );
         action.setWorkingDir( buildDir );
