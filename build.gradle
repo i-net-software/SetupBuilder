@@ -11,7 +11,7 @@ apply from: 'javapreprocessor.gradle'
 group = 'de.inetsoftware'
 
 def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '4.5.1'  // Gradle version for the wrapper
-def buildVersion = '3b'                                                  // build version
+def buildVersion = '3c'                                                  // build version
 def baseVersion = '4.5'                                                  // Base Version to build, depends on gradle version.
 
 wrapper.gradleVersion = LIB_GRADLE_VERSION
