@@ -45,7 +45,7 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
  * Build a DMG image for OSX.
- * 
+ *
  * @author Volker Berlin
  */
 public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
@@ -56,7 +56,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create a new instance
-     * 
+     *
      * @param dmg the calling task
      * @param setup the shared settings
      * @param fileResolver the file Resolver
@@ -68,7 +68,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Build the dmg file.
-     * 
+     *
      * @throws RuntimeException if any error occur
      */
     public void build() throws RuntimeException {
@@ -78,7 +78,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
                 throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
             }
 
-            // Build all services 
+            // Build all services
             for( Service service : setup.getServices() ) {
                 new OSXApplicationBuilder( task, setup, fileResolver ).buildService( service );
                 if ( firstExecutableName == null ) {
@@ -98,7 +98,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString(); // + "/" + setup.getApplication() + ".app";
 
-            // Just in case. If it still has not been set, we do not know what the user itends. 
+            // Just in case. If it still has not been set, we do not know what the user itends.
             if ( firstExecutableName == null ) {
                 firstExecutableName = applicationName;
             }
@@ -113,7 +113,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
              * /
              */
             createBinary();
-            //*/        
+            //*/
         } catch( RuntimeException ex ) {
             ex.printStackTrace();
             throw ex;
@@ -126,7 +126,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create the binary with native tools.
-     * 
+     *
      * @throws Throwable
      */
     private void createBinary() throws Throwable {
@@ -145,7 +145,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create the service files and the pre- and post installer scripts
-     * 
+     *
      * @throws IOException in case of errors
      */
     private void createServiceFiles() throws IOException {
@@ -217,7 +217,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create a package from the specified app files
-     * 
+     *
      * @throws Throwable in case of errors
      */
     private void createPackageFromApp() throws Throwable {
@@ -253,7 +253,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Extract the application information to use for the package builder
-     * 
+     *
      * @throws IOException in case of errors
      */
     private void extractApplicationInformation() throws IOException {
@@ -291,7 +291,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Returns a subdirectory if needed because of the installation
-     * 
+     *
      * @return subdirectory or ""
      */
     private String installationSubdirectory() {
@@ -300,7 +300,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create and patch the ditribution xml file that defines the package
-     * 
+     *
      * @throws Throwable in case of error
      */
     private void createAndPatchDistributionXML() throws Throwable {
@@ -319,7 +319,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Patch the distriubiton file with custom settings
-     * 
+     *
      * @throws Throwable in case of errors
      */
     private void patchDistributionXML() throws Throwable {
@@ -385,7 +385,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Check a file for the correct setup text-resource type
-     * 
+     *
      * @param file to check
      * @return file if ok, or null
      */
@@ -414,6 +414,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "create" );
         command.add( "-srcfolder" );
         command.add( imageSourceRoot );
+        command.add( "-fs" );
+        command.add( "HFS+" );
         command.add( "-format" );
         command.add( "UDRW" );
         command.add( "-volname" );
@@ -424,7 +426,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Call hdiutil to mount temporary image
-     * 
+     *
      * @throws IOException in case of errors
      */
     private void attach() throws IOException {
@@ -454,12 +456,12 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Call SetFile to set the volume icon.
-     * 
+     *
      * @throws IOException IOException
      */
     private void setVolumeIcon() throws IOException {
 
-        // Copy Icon as file icon into attached container 
+        // Copy Icon as file icon into attached container
         File iconDestination = TempPath.getTempFile( applicationName, ".VolumeIcon.icns" );
         File icons = setup.getIconForType( buildDir, "icns" );
         if( icons == null ) {
@@ -490,7 +492,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
     /**
      * Run an apple script using the applescript.txt template
      * This will set up the layout of the DMG window
-     * 
+     *
      * @throws IOException in case of errors
      */
     private void applescript() throws IOException {
@@ -521,7 +523,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * run a Script for the Package.
-     * 
+     *
      * @throws IOException exception
      */
     private void packageApplescript() throws IOException {
