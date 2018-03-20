@@ -1,0 +1,17 @@
+
+import org.gradle.util.VersionNumber
+ext.setupBuilderVersion = { 
+
+    def baseVersion = '2.0'                                                 // Base Version to build, depends on gradle version.
+    def version = baseVersion
+
+    // gradle version switch, depends the API level
+    // println 'Gradle version: ' + gradle.gradleVersion
+    def gVersion = VersionNumber.parse( gradle.gradleVersion )
+    if( gVersion >= VersionNumber.parse( '3.0' ) ) version = '3.0'
+    if( gVersion >= VersionNumber.parse( '3.1' ) ) version = '3.1'
+    if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
+    if( gVersion >= VersionNumber.parse( '4.2' ) ) version = '4.2'
+    if( gVersion >= VersionNumber.parse( '4.5' ) ) version = '4.5'
+    return version + '.+'
+}

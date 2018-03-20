@@ -28,6 +28,15 @@ Plugin and Gradle Version
 | 3.4.x          | 3.4 - 4.3      |
 | 4.5.x          | >= 4.5         |
 
+There is a file [SetupBuilderVersion.gradle](SetupBuilderVersion.gradle) to export the required version of SetupBuilder depending on the Gradle version. It can be used to automatically obtain the correct SetupBuilder version.
+
+It can be used as followed:
+
+	apply from: "https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/SetupBuilderVersion.gradle"
+	plugins {
+		id "de.inetsoftware.setupbuilder" version setupBuilderVersion()
+	}
+
 Tasks
 ----
 The plugin add the follow tasks:
@@ -39,9 +48,11 @@ The plugin add the follow tasks:
 Sample Usage
 ----
 ### Base Sample
-    plugins {
-        id "de.inetsoftware.setupbuilder" version "1.8"
-    }
+
+	apply from: "https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/SetupBuilderVersion.gradle"
+	plugins {
+		id "de.inetsoftware.setupbuilder" version setupBuilderVersion()
+	}
     
     setupBuilder {
         vendor = 'i-net software'
