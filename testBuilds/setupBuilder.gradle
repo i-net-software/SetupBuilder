@@ -1,17 +1,12 @@
-/*
-plugins {
-    id "de.inetsoftware.setupbuilder" version "3.4.3"
-}
-/*/
 buildscript {
-    
     repositories {
         maven {
             url uri('../../repo')
         }
     }
     dependencies {
-        classpath 'de.inetsoftware:SetupBuilder:+'
+        apply from: "${buildscript.sourceFile.parentFile}/../SetupBuilderVersion.gradle"
+        classpath 'de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
     }
 }
 
@@ -22,7 +17,6 @@ repositories {
 }
 
 apply plugin: 'de.inetsoftware.setupbuilder'
-//*/
 
 apply plugin: 'java'
 

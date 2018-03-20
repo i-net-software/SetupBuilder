@@ -15,21 +15,12 @@ def buildVersion = '3c'                                                  // buil
 def baseVersion = '4.5'                                                  // Base Version to build, depends on gradle version.
 
 wrapper.gradleVersion = LIB_GRADLE_VERSION
-
-version = baseVersion
-
-// gradle version switch, depends the API level
-println 'Gradle version: ' + gradle.gradleVersion
-import org.gradle.util.VersionNumber
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
-if( gVersion < VersionNumber.parse( '3.0' ) ) version = '2.0'
-if( gVersion >= VersionNumber.parse( '3.0' ) ) version = '3.0'
-if( gVersion >= VersionNumber.parse( '3.1' ) ) version = '3.1'
-if( gVersion >= VersionNumber.parse( '3.4' ) ) version = '3.4'
-if( gVersion >= VersionNumber.parse( '4.2' ) ) version = '4.2'
-if( gVersion >= VersionNumber.parse( '4.5' ) ) version = '4.5'          // Current baseVersion for development
+println 'Gradle version: ' + gVersion
 
-version += '.' + buildVersion
+// Fetch version from script.
+apply from: "${buildscript.sourceFile.parentFile}/SetupBuilderVersion.gradle"
+version = setupBuilderVersion(buildVersion)
 baseVersion += '.' + buildVersion
 println 'SetupBuilder version: ' + version
 
