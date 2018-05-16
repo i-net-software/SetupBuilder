@@ -194,6 +194,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
      */
     // share
     private void changeDirectoryPermissionsTo755( File path ) throws IOException {
+        if ( path == null ) { return; }
         setPermissions( path, true );
         for( File file : path.listFiles() ) {
             if( file.isDirectory() ) {
@@ -210,6 +211,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
      */
     // share
     private void changeFilePermissionsTo644( File path ) throws IOException {
+        if ( path == null ) { return; }
         for( File file : path.listFiles() ) {
             if( file.isDirectory() ) {
                 changeFilePermissionsTo644( file );

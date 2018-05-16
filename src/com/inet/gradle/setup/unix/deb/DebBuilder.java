@@ -497,6 +497,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      *             on I/O failures
      */
     private void changeDirectoryPermissionsTo755( File path ) throws IOException {
+        if ( path == null ) { return; }
         DebUtils.setPermissions( path, true );
         for( File file : path.listFiles() ) {
             if( file.isDirectory() ) {
@@ -514,6 +515,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      *             on I/O failures
      */
     private void changeFilePermissionsTo644( File path ) throws IOException {
+        if ( path == null ) { return; }
         for( File file : path.listFiles() ) {
             if( file.isDirectory() ) {
                 changeFilePermissionsTo644( file );
