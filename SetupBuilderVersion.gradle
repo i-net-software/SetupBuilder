@@ -6,7 +6,7 @@ ext.setupBuilderVersion = { buildVersion = '+' ->
     def version = baseVersion
 
     // gradle version switch, depends the API level
-    // println 'Gradle version: ' + gradle.gradleVersion
+    println 'Gradle version: ' + gradle.gradleVersion
     def gVersion = VersionNumber.parse( gradle.gradleVersion )
     if( gVersion >= VersionNumber.parse( '3.0' ) ) version = '3.0'
     if( gVersion >= VersionNumber.parse( '3.1' ) ) version = '3.1'
