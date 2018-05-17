@@ -17,6 +17,7 @@ package com.inet.gradle.setup.dmg;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.gradle.api.internal.project.ProjectInternal;
@@ -31,7 +32,7 @@ import groovy.lang.Closure;
 
 /**
  * The dmg Gradle task. It build a dmg package for Mac.
- * 
+ *
  * @author Volker Berlin
  */
 public class Dmg extends AbstractUnixSetupTask {
@@ -47,6 +48,10 @@ public class Dmg extends AbstractUnixSetupTask {
     private List<LocalizedResource>        conclusionPages = new ArrayList<>();
 
     private List<PreferencesLink>          preferencesLink = new ArrayList<>();
+
+    private List<String>                   jreIncludes = Arrays.asList( "bin/java" );
+
+    private List<String>                   jreExclude = new ArrayList<>();
 
     /**
      * Create the task.
@@ -66,7 +71,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return width of Finder view
-     * 
+     *
      * @return width of Finder view
      */
     public Integer getWindowWidth() {
@@ -75,7 +80,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set width of Finder view
-     * 
+     *
      * @param windowWidth width of Finder view
      */
     public void setWindowWidth( Integer windowWidth ) {
@@ -84,7 +89,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return height of Finder view
-     * 
+     *
      * @return height of Finder view
      */
     public Integer getWindowHeight() {
@@ -93,7 +98,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set height of Finder view
-     * 
+     *
      * @param windowHeight of Finder view
      */
     public void setWindowHeight( Integer windowHeight ) {
@@ -102,7 +107,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return size of icons in Finder view
-     * 
+     *
      * @return size of icons in Finder view
      */
     public Integer getIconSize() {
@@ -111,7 +116,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set size of icons in Finder view
-     * 
+     *
      * @param iconSize of icons in Finder view
      */
     public void setIconSize( Integer iconSize ) {
@@ -120,7 +125,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return background Image for Finder View
-     * 
+     *
      * @return background Image for Finder View
      */
     public File getBackgroundImage() {
@@ -132,7 +137,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set background Image for Finder View
-     * 
+     *
      * @param backgroundFile Image for Finder View
      */
     public void setBackgroundImage( File backgroundFile ) {
@@ -141,7 +146,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return font size for Finder View
-     * 
+     *
      * @return font size for Finder View
      */
     public Integer getFontSize() {
@@ -150,7 +155,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set font size for Finder View
-     * 
+     *
      * @param fontSize size for Finder View
      */
     public void setFontSize( Integer fontSize ) {
@@ -159,7 +164,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set the needed information for signing the setup.
-     * 
+     *
      * @param closue the data for signing
      */
     public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closue ) {
@@ -169,7 +174,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Get the SignTool configuration if set
-     * 
+     *
      * @return the settings or null
      */
     public OSXCodeSign<Dmg, SetupBuilder> getCodeSign() {
@@ -179,7 +184,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Return the welcome page list
      * Allowed Format: rtf, rtfd, txt, html
-     * 
+     *
      * @return welcome page
      */
     public List<LocalizedResource> getConclusionPages() {
@@ -189,7 +194,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Set the welcome page
      * Allowed Format: rtf, rtfd, txt, html
-     * 
+     *
      * @param conclusionPage which is shown at the end
      */
     public void conclusionPage( Object conclusionPage ) {
@@ -199,7 +204,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Return the welcome page list
      * Allowed Format: rtf, rtfd, txt, html
-     * 
+     *
      * @return welcome page
      */
     public List<LocalizedResource> getWelcomePages() {
@@ -209,7 +214,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Set the welcome page
      * Allowed Format: rtf, rtfd, txt, html
-     * 
+     *
      * @param welcomePage welcome page file
      */
     public void welcomePage( Object welcomePage ) {
@@ -218,7 +223,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return the background image for the setup
-     * 
+     *
      * @return background image
      */
     public File getSetupBackgroundImage() {
@@ -230,7 +235,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set the background image for the setup
-     * 
+     *
      * @param setupBackground to set
      */
     public void setSetupBackgroundImage( Object setupBackground ) {
@@ -256,7 +261,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return the list of preferences links
-     * 
+     *
      * @return preferences links
      */
     public List<PreferencesLink> getPreferencesLinks() {
@@ -265,10 +270,42 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set a preferences link
-     * 
+     *
      * @param link the link
      */
     public void preferencesLink( Object link ) {
         preferencesLink.add( ConfigureUtil.configure( (Closure<?>)link, new PreferencesLink() ) );
+    }
+
+    /**
+     * Get a list of string - defining files - that should be included in the bundled JRE
+     * @return the jreIncludes
+     */
+    public List<String> getJreIncludes() {
+        return jreIncludes;
+    }
+
+    /**
+     * Set a list of string - defining files - that should be included in the bundled JRE
+     * @param jreIncludes the jreIncludes to set
+     */
+    public void setJreIncludes( List<String> jreIncludes ) {
+        this.jreIncludes = jreIncludes;
+    }
+
+    /**
+     * Get a list of string - defining files - that should be excluded from the bundled JRE
+     * @return the jreExclude
+     */
+    public List<String> getJreExclude() {
+        return jreExclude;
+    }
+
+    /**
+     * Set a list of string - defining files - that should be excluded from the bundled JRE
+     * @param jreExclude the jreExclude to set
+     */
+    public void setJreExclude( List<String> jreExclude ) {
+        this.jreExclude = jreExclude;
     }
 }

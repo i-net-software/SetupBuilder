@@ -35,6 +35,15 @@ import org.apache.tools.ant.types.FileSet;
 
 public class Runtime extends FileSet {
 
+    /**
+     * Constructor with the jre directory to use
+     * @param jreDir
+     */
+    public Runtime( File jreDir ) {
+        super();
+        setDir( jreDir );
+    }
+
     /* Override to provide canonical path so that runtime can be specified
      * via a version-agnostic path (relative link, e.g. `current-jre`) while
      * still preserving the original runtime directory name, e.g. `jre1.8.0_45.jre`.
@@ -49,19 +58,58 @@ public class Runtime extends FileSet {
         }
     }
 
+    /**
+     * {@inheritsDoc}
+     */
+    @Override
+    public void appendIncludes( String[] includes ) {
+        patchIncludeExcludes( includes );
+        super.appendIncludes( includes );
+    }
+
+    /**
+     * {@inheritsDoc}
+     */
+    @Override
+    public void appendExcludes( String[] excludes ) {
+        patchIncludeExcludes( excludes );
+        super.appendIncludes( excludes );
+    }
+
+    /**
+     * Patch the include and exclude directories to
+     * provide only jre relevant entries
+     * @param includExclude the list of includes or excludes to check
+     */
+    private void patchIncludeExcludes( String[] includExclude ) {
+        boolean isJDK = new File(getDir(), "jre").isDirectory();
+        if ( isJDK ) {
+            for( int i = 0; i < includExclude.length; i++ ) {
+                if ( !includExclude[i].startsWith( "jre/" ) ) {
+                    includExclude[i] = "jre/" + includExclude[i];
+                }
+            }
+        }
+    }
+
+    /**
+     * check the type of the runtime set.
+     * If it is a JDK we want to exclude certain predefined entries
+     */
     private void detectType() {
         boolean isJDK = new File(getDir(), "jre").isDirectory();
 
+        appendIncludes(new String[] {
+                        "lib/",
+                        "COPYRIGHT",
+                        "LICENSE",
+                        "README",
+                        "THIRDPARTYLICENSEREADME-JAVAFX.txt",
+                        "THIRDPARTYLICENSEREADME.txt",
+                        "Welcome.html"
+        });
+
         if (isJDK) {
-            appendIncludes(new String[] {
-                    "jre/lib/",
-                    "jreCOPYRIGHT",
-                    "jre/LICENSE",
-                    "jre/README",
-                    "jre/THIRDPARTYLICENSEREADME-JAVAFX.txt",
-                    "jre/THIRDPARTYLICENSEREADME.txt",
-                    "jre/Welcome.html"
-            });
             appendExcludes(new String[] {
                     "jre/lib/deploy/",
                     "jre/lib/deploy.jar",
@@ -70,20 +118,16 @@ public class Runtime extends FileSet {
                     "jre/lib/libnpjp2.dylib",
                     "jre/lib/plugin.jar",
                     "jre/lib/security/javaws.policy"
-                });
-        } else {
-            appendIncludes(new String[] {
-                    "lib/",
-                    "COPYRIGHT",
-                    "LICENSE",
-                    "README",
-                    "THIRDPARTYLICENSEREADME-JAVAFX.txt",
-                    "THIRDPARTYLICENSEREADME.txt",
-                    "Welcome.html"
             });
         }
     }
 
+    /**
+     * Finally copy the files of the jre
+     * @param targetDir where to copy
+     * @param project the project we're working on
+     * @throws IOException in case of errors
+     */
     void copyTo(File targetDir, Project project) throws IOException {
         detectType();
 
