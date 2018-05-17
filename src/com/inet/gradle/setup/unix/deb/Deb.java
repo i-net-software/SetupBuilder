@@ -21,22 +21,22 @@ import com.inet.gradle.setup.unix.Unix;
 
 /**
  * The deb Gradle task. It build a deb package for Debian / Ubuntu.
- * 
+ *
  * @author Stefan Heidrich
  */
 public class Deb extends Unix {
 
-    private String priority;
+    private String  priority;
 
-    private String installSize;
+    private String  installSize;
 
-    private String recommends;
+    private String  recommends;
 
-    private String checkPackage;
+    private boolean checkPackage = false;
 
-    private String maintainerEmail;
+    private String  maintainerEmail;
 
-    private String changes;
+    private String  changes;
 
     public Deb() {
         super( "deb" );
@@ -67,19 +67,21 @@ public class Deb extends Unix {
         this.installSize = installSize;
     }
 
+    @Override
     public String getRecommends() {
         return recommends;
     }
 
+    @Override
     public void setRecommends( String recommends ) {
         this.recommends = recommends;
     }
 
-    public String getCheckPackage() {
+    public boolean shouldCheckPackage() {
         return checkPackage;
     }
 
-    public void setCheckPackage( String checkPackage ) {
+    public void setCheckPackage( boolean checkPackage ) {
         this.checkPackage = checkPackage;
     }
 

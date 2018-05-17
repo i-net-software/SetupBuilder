@@ -45,7 +45,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
     /**
      * Create a new instance
-     * 
+     *
      * @param deb
      *            the calling task
      * @param setup
@@ -241,7 +241,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
     /**
      * Creates the files and the corresponding script section for the specified service.
-     * 
+     *
      * @param service
      *            the service
      * @throws IOException
@@ -272,7 +272,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         String initScriptFile = "etc/init.d/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile, true ) );
 
-        // copy a default service file if set 
+        // copy a default service file if set
         if( task.getDefaultServiceFile() != null ) {
             File serviceDestFile = new File( buildDir.getAbsolutePath(), "/etc/default/" + serviceUnixName );
             serviceDestFile.mkdirs();
@@ -290,7 +290,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
     /**
      * Creates the files and the corresponding scripts for the specified desktop starter.
-     * 
+     *
      * @param starter
      *            the desktop starter
      * @throws IOException
@@ -316,7 +316,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             if( index > -1 ) {
                 iconName = iconName.substring( index + 1 );
             }
-            // icons must be png files and should named like that 
+            // icons must be png files and should named like that
             if( !iconName.endsWith( ".png" ) ) {
                 index = iconName.lastIndexOf( '.' );
                 if( index > -1 ) {
@@ -366,7 +366,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 if( cwd.isEmpty() || cwd.equals( "." )) {
                     fw.write( "Path=" + task.getInstallationRoot() + "\n" );
                 } else {
-                    fw.write( "Path=" + cwd + "\n" );    
+                    fw.write( "Path=" + cwd + "\n" );
                 }
             }
             fw.write( "Terminal=false\n" );
@@ -393,14 +393,14 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                     if( starter.getMimeTypes() != null ) {
                         fw.write( "    <mime-type type=\"" + starter.getMimeTypes() + "\">\n" );
                     } else {
-                        fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );                        
+                        fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );
                     }
 
                     fw.write( "        <comment>" + setup.getApplication() + "</comment>\n" );
                     fw.write( "        <glob-deleteall/>\n" );
                     fw.write( "        <glob pattern=\"*." + extension + "\"/>\n" );
                     fw.write( "    </mime-type>\n" );
-                    fw.write( "</mime-info>\n" );                    
+                    fw.write( "</mime-info>\n" );
                 }
 
                 controlBuilder.addTailScriptFragment( Script.POSTINST, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
@@ -431,7 +431,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
     /**
      * Creates a file in the build path structure.
-     * 
+     *
      * @param path
      *            the path relative to the root of the build path
      * @param executable
@@ -456,7 +456,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      * property is set to true
      */
     private void checkDebianPackage() {
-        if( task.getCheckPackage() == null || task.getCheckPackage().equalsIgnoreCase( "true" ) ) {
+        if( task.shouldCheckPackage() ) {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
 //            command.add( "-d" );
@@ -490,7 +490,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
     /**
      * Changes the permissions of all directories recursively inside the specified path to 755.
-     * 
+     *
      * @param path
      *            the path
      * @throws IOException
@@ -508,7 +508,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
     /**
      * Changes the permissions of all files recursively inside the specified path to 644.
-     * 
+     *
      * @param path
      *            the path
      * @throws IOException
