@@ -37,7 +37,7 @@ public class Runtime extends FileSet {
 
     /**
      * Constructor with the jre directory to use
-     * @param jreDir
+     * @param jreDir the directory of the JRE to set
      */
     public Runtime( File jreDir ) {
         super();
@@ -59,7 +59,7 @@ public class Runtime extends FileSet {
     }
 
     /**
-     * {@inheritsDoc}
+     * {@inheritDoc}
      */
     @Override
     public void appendIncludes( String[] includes ) {
@@ -68,7 +68,7 @@ public class Runtime extends FileSet {
     }
 
     /**
-     * {@inheritsDoc}
+     * {@inheritDoc}
      */
     @Override
     public void appendExcludes( String[] excludes ) {
