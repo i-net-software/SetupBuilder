@@ -43,7 +43,7 @@ import com.inet.gradle.setup.Template;
  * <dt>prerm</dt>
  * <dd>contains scripts and commands that are executed before the files are removed</dd>
  * </dl>
- * 
+ *
  * @author Stefan Heidrich
  */
 class DebControlFileBuilder {
@@ -68,7 +68,7 @@ class DebControlFileBuilder {
 
     /**
      * the constructor setting the fields
-     * 
+     *
      * @param deb the task for the debian package
      * @param setup the generic task for all setups
      * @param buildDir the directory to build the package in
@@ -81,7 +81,7 @@ class DebControlFileBuilder {
 
     /**
      * Create the configuration files for the Debian package based on the settings in the task.
-     * 
+     *
      * @throws Exception
      */
     void build() throws Exception {
@@ -93,7 +93,7 @@ class DebControlFileBuilder {
 
     /**
      * Creates the 'control' file for the Debian package
-     * 
+     *
      * @throws IOException if something could not be written to the file
      */
     private void createControlFile() throws IOException {
@@ -146,7 +146,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the description to the file. The description is mandatory. If no description is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -170,7 +170,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the maintainer to the file. The maintainer is mandatory. If no maintainer is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -185,7 +185,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the dependencies to the file. If no dependencies are specified, the java dependencies will be used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -198,7 +198,7 @@ class DebControlFileBuilder {
 
     /**
      * Writes the pre-dependencies to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -212,7 +212,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the recommends to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -226,7 +226,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the installation size to the file. If no size is specified it will count the size of all files it has to install and round it to full megabytes.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -254,7 +254,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the architecture to the file. If no architecture is specified then 'all' will be used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -264,7 +264,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the priority to the file. If no priority are specified then 'optional' will be used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -278,7 +278,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the section to the file. If no section is specified then 'java' will be used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -292,7 +292,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the version to the file. The version is mandatory. If no version is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -307,7 +307,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the package to the file. The package is mandatory. If no package is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -322,7 +322,7 @@ class DebControlFileBuilder {
 
     /**
      * Write the homepage to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -335,7 +335,7 @@ class DebControlFileBuilder {
 
     /**
      * Adds a config file
-     * 
+     *
      * @param file the config file
      */
     public void addConfFile( String file ) {
@@ -344,7 +344,7 @@ class DebControlFileBuilder {
 
     /**
      * Creates the <tt>conffiles</tt> file with a listing of all created configuration files.
-     * 
+     *
      * @throws IOException on I/O failures
      */
     private void createConfFilesFile() throws IOException {
@@ -368,7 +368,7 @@ class DebControlFileBuilder {
 
     /**
      * Adds a fragment to the specified install script at the tail section.
-     * 
+     *
      * @param script the install script
      * @param scriptFragment the fragment to add
      */
@@ -385,7 +385,7 @@ class DebControlFileBuilder {
 
     /**
      * Adds a fragment to the specified install script at the head section.
-     * 
+     *
      * @param script the install script
      * @param scriptFragment the fragment to add
      */
@@ -401,9 +401,9 @@ class DebControlFileBuilder {
     }
 
     /**
-     * Creates the {post|pre}{inst|rm} install script files. Only scripts are generated when
+     * Creates the {post|pre}{inst|rm} install script files. Scripts are generated only when
      * they are required.
-     * 
+     *
      * @throws IOException on I/O failures
      */
     private void createScripts() throws IOException {
