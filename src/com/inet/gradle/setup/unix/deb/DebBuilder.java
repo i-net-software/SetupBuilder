@@ -459,7 +459,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         if( task.shouldCheckPackage() ) {
             ArrayList<String> command = new ArrayList<>();
             command.add( "lintian" );
-//            command.add( "-d" );
+            command.add( task.getLintianOptions() );
             command.add( task.getSetupFile().getPath() );
             exec( command );
         }

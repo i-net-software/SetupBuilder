@@ -34,6 +34,8 @@ public class Deb extends Unix {
 
     private boolean checkPackage = false;
 
+    private String  lintianOptions = "";
+
     private String  maintainerEmail;
 
     private String  changes;
@@ -83,6 +85,24 @@ public class Deb extends Unix {
 
     public void setCheckPackage( boolean checkPackage ) {
         this.checkPackage = checkPackage;
+    }
+
+    /**
+     * Return the options used for the 'lintian' process.
+     * They will only have impact when checkPackages is enabled.
+     * @return the lintianOptions
+     */
+    public String getLintianOptions() {
+        return lintianOptions;
+    }
+
+    /**
+     * Set the options used for the 'lintian' process.
+     * They will only have impact when checkPackages is enabled.
+     * @param lintianOptions the lintianOptions to set
+     */
+    public void setLintianOptions( String lintianOptions ) {
+        this.lintianOptions = lintianOptions;
     }
 
     public String getMaintainerEmail() {
