@@ -34,7 +34,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
     /**
      * Create a single Lauch4j launcher.
-     * 
+     *
      * @param launch the launch description
      * @param task the task
      * @param setup the SetupBuilder
@@ -98,7 +98,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
         // Program will be set during installation.
         setPlistProperty( servicePLIST, ":Description", service.getDescription() );
-        setPlistProperty( servicePLIST, ":Version", getSetupBuilder().getVersion() );
+        setPlistProperty( servicePLIST, ":Version", task.getVersion() );
         setPlistProperty( servicePLIST, ":KeepAlive", String.valueOf( service.isKeepAlive() ) );
         setPlistProperty( servicePLIST, ":RunAtBoot", String.valueOf( service.isStartOnBoot() ) );
         setPlistProperty( servicePLIST, ":RunAtLoad", "true" );
@@ -132,7 +132,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
     /**
      * Download and unpack the preferences pane setup files
-     * 
+     *
      * @param internalName to unpack it now
      * @return file to prefpane sources
      * @throws IOException if an error occurs

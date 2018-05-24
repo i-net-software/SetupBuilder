@@ -80,7 +80,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         appBundler.setName( appName );
         appBundler.setDisplayName( appName );
 
-        String version = setup.getVersion();
+        String version = task.getVersion();
         appBundler.setVersion( version );
         int idx = version.indexOf( '.' );
         if( idx >= 0 ) {
@@ -121,6 +121,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
             appBundler.setJarLauncherName( mainJar );
         }
 
+        appBundler.setIgnorePSN( true ); // Ignore this argument.
         appBundler.setCopyright( setup.getCopyright() );
         appBundler.setIcon( getApplicationIcon() );
         Architecture x86_64 = new Architecture();

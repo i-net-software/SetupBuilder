@@ -35,7 +35,7 @@ import com.inet.gradle.setup.abstracts.LocalizedResource;
  * <br>
  * This file contains settings for the package like dependencies, architecture, description and
  * scripts and commands that are executed before, during and after the installation.
- * 
+ *
  * @author Stefan Heidrich
  */
 class RpmControlFileBuilder {
@@ -58,7 +58,7 @@ class RpmControlFileBuilder {
 
     /**
      * the constructor setting the fields
-     * 
+     *
      * @param rpm the task for the redhat package
      * @param setup the generic task for all setups
      * @param buildDir the directory to build the package in
@@ -71,7 +71,7 @@ class RpmControlFileBuilder {
 
     /**
      * Create the configuration files for the RedHat package based on the settings in the task.
-     * 
+     *
      * @throws Exception
      */
     void build() throws Exception {
@@ -81,7 +81,7 @@ class RpmControlFileBuilder {
 
     /**
      * Creates the SPEC file for the package
-     * 
+     *
      * @throws IOException if something could not be written to the file
      */
     private void createControlFile() throws IOException {
@@ -158,7 +158,7 @@ class RpmControlFileBuilder {
     /**
      * Insert some defines for backward compatibility with old rpm versions.
      * This could be enabled and disabled with the backwardCompatibility entry of the RPM task.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -173,7 +173,7 @@ class RpmControlFileBuilder {
 
     /**
      * Get executed before the package has been removed
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -226,7 +226,7 @@ class RpmControlFileBuilder {
 
     /**
      * This script is executed before the package has been installed.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -254,7 +254,7 @@ class RpmControlFileBuilder {
 
     /**
      * This script is executed after the package has been installed.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -285,7 +285,7 @@ class RpmControlFileBuilder {
 
     /**
      * This script is executed after the package has been removed.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -310,7 +310,7 @@ class RpmControlFileBuilder {
     /**
      * Specifies the files that should be installed. The files will be installed under the installationRoot in the system.
      * If files need to be installed somewhere else these files need to be copied via the post step.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -341,7 +341,7 @@ class RpmControlFileBuilder {
     /**
      * This is used to clean up the build directory tree. Normally RPM does this for you.
      * During the clean step the created package will be copied to the distribution directory.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -352,8 +352,8 @@ class RpmControlFileBuilder {
             release = "1";
         }
 
-        controlWriter.write( "cp ../SRPMS/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + ".src.rpm '" + setup.getDestinationDir().getAbsolutePath() + "'" + NEWLINE );
-        controlWriter.write( "mv -f ../RPMS/" + rpm.getArchitecture() + "/" + setup.getAppIdentifier() + "-" + setup.getVersion() + "-" + release + "." + rpm.getArchitecture() + ".rpm '" + rpm.getSetupFile() + "'" + NEWLINE );
+        controlWriter.write( "cp ../SRPMS/" + setup.getAppIdentifier() + "-" + rpm.getVersion() + "-" + release + ".src.rpm '" + setup.getDestinationDir().getAbsolutePath() + "'" + NEWLINE );
+        controlWriter.write( "mv -f ../RPMS/" + rpm.getArchitecture() + "/" + setup.getAppIdentifier() + "-" + rpm.getVersion() + "-" + release + "." + rpm.getArchitecture() + ".rpm '" + rpm.getSetupFile() + "'" + NEWLINE );
 
         //Set some variables to begin with
         controlWriter.write( rpm.getVariablesTemplate() + NEWLINE );
@@ -368,7 +368,7 @@ class RpmControlFileBuilder {
      * Contains the necessary steps to install the build software
      * The files in the BUILD directory needs to be copied into the BUILDROOT directory so that the install step
      * finds the files.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -376,7 +376,7 @@ class RpmControlFileBuilder {
         controlWriter.write( NEWLINE + "%install" + NEWLINE );
         controlWriter.write( "cp -R . '%{buildroot}'" + NEWLINE );
         //        if(setup.getServices() != null && setup.getServices().size() > 0) {
-        //            controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);    
+        //            controlWriter.write("cp -R etc %{buildroot}" + NEWLINE);
         //        }
 
         //Set some variables to begin with
@@ -390,7 +390,7 @@ class RpmControlFileBuilder {
 
     /**
      * This will be executed during the building of the package
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -408,7 +408,7 @@ class RpmControlFileBuilder {
 
     /**
      * This is the first script RPM executes during a build.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -426,7 +426,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the prefix to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -439,7 +439,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the packager to the file. The packager is the same as the vendor.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -454,7 +454,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the homepage url to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -467,7 +467,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the BuildRoot entry to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -477,7 +477,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the license to the file. If no license is specified 'Restricted' is used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -491,7 +491,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the release to the file. If no release is specified '1' is used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -507,7 +507,7 @@ class RpmControlFileBuilder {
     /**
      * Write the description to the file. The description is created from the long description entries.
      * The description for language specified with the defaultDescriptionLanguage property will be used as default description
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -535,7 +535,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the vendor to the file. The vendor is mandatory. If no vendor is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -550,7 +550,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the dependencies to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -570,7 +570,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the architecture to the file. If no architecture is specified then 'noarch' will be used.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -580,7 +580,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the section to the file.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -593,12 +593,12 @@ class RpmControlFileBuilder {
 
     /**
      * Write the version to the file. The version is mandatory. If no version is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
     private void putVersion( OutputStreamWriter controlWriter ) throws IOException {
-        String version = setup.getVersion();
+        String version = rpm.getVersion();
         if( version == null || version.length() == 0 ) {
             throw new RuntimeException( "No version declared in the setup configuration." );
         } else {
@@ -608,7 +608,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the summary to the file. The summary is mandatory. If no summary is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -623,7 +623,7 @@ class RpmControlFileBuilder {
 
     /**
      * Write the package to the file. The package is mandatory. If no package is declared a runtime exception will be thrown.
-     * 
+     *
      * @param controlWriter the writer for the file
      * @throws IOException if the was an error while writing to the file
      */
@@ -638,7 +638,7 @@ class RpmControlFileBuilder {
 
     /**
      * Adds a config file
-     * 
+     *
      * @param file the config file
      */
     public void addConfFile( String file ) {
@@ -648,7 +648,7 @@ class RpmControlFileBuilder {
     /**
      * Adds a fragment to the install script at the specified section.
      * These sections are the pre, post, preun and the postun sections.
-     * 
+     *
      * @param script the install script section
      * @param scriptFragment the fragment to add
      */

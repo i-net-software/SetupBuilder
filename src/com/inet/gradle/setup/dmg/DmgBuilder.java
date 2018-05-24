@@ -276,7 +276,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "--identifier" );
         command.add( setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() );
         command.add( "--version" );
-        command.add( setup.getVersion() );
+        command.add( task.getVersion() );
         command.add( "--scripts" );
         command.add( TempPath.get( "scripts" ).toString() );
         command.add( "--install-location" );

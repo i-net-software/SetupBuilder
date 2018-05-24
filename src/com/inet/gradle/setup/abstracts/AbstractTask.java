@@ -67,7 +67,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
     private AbstractSetupBuilder setupBuilder;
 
-    private String extension, classifier;
+    private String extension, classifier, version;
 
     /**
      * Constructor with indication to artifact result
@@ -304,5 +304,25 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             return desc;
         }
         return setupBuilder.getDescription();
+    }
+
+    /**
+     * Get the version of the task. If not set the version of the setup is returned
+     * @return the version
+     */
+    public String getVersion() {
+        if ( version != null ) {
+            return version;
+        }
+
+        return setupBuilder.getVersion();
+    }
+
+    /**
+     * Set the version of the task
+     * @param version the version to set
+     */
+    public void setVersion( String version ) {
+        this.version = version;
     }
 }

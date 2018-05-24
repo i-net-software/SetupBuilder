@@ -21,12 +21,11 @@ import java.io.IOException;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
  * Create a XML configuration file for lauch4j.
- * 
+ *
  * @author Volker
  */
 class Launch4jManifest extends XmlFileBuilder<Msi> {
@@ -35,7 +34,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
 
     /**
      * Create a instance.
-     * 
+     *
      * @param launch the launch description
      * @param task current task
      * @param setup the SetupBuilder
@@ -48,7 +47,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
 
     /**
      * Create the XML file.
-     * 
+     *
      * @throws IOException if an error occurs on reading the image files
      */
     void build() throws IOException {
@@ -57,7 +56,7 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( assembly, "manifestVersion", "1.0" );
 
         Element identity = getOrCreateChild( assembly, "assemblyIdentity" );
-        addAttributeIfNotExists( identity, "version", Launch4jConfig.normalizeVersionNumber( setup.getVersion() ) );
+        addAttributeIfNotExists( identity, "version", Launch4jConfig.normalizeVersionNumber( task.getVersion() ) );
         addAttributeIfNotExists( identity, "processorArchitecture", "X86" );
         addAttributeIfNotExists( identity, "name", launch.getDisplayName() );
         addAttributeIfNotExists( identity, "type", "win32" );

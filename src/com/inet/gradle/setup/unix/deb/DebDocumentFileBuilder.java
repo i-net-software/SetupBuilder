@@ -30,8 +30,8 @@ import com.inet.gradle.setup.SetupBuilder;
 
 /**
  * Builder for the documentation files like changelog that are required for the Debian package tool.
- * 
- * 
+ *
+ *
  * @author Stefan Heidrich
  */
 class DebDocumentFileBuilder {
@@ -46,7 +46,7 @@ class DebDocumentFileBuilder {
 
     /**
      * the constructor setting the fields
-     * 
+     *
      * @param deb the task for the debian package
      * @param setup the generic task for all setups
      * @param buildDir the directory to build the package in
@@ -59,7 +59,7 @@ class DebDocumentFileBuilder {
 
     /**
      * Create the configuration files for the Debian package based on the settings in the task.
-     * 
+     *
      * @throws Exception
      */
     void build() throws Exception {
@@ -71,7 +71,7 @@ class DebDocumentFileBuilder {
 
     /**
      * Writes the copyrights file to the specified directory. This should be /user/share/doc/package
-     * 
+     *
      * @throws FileNotFoundException if the copyright file could not be created
      * @throws IOException if the are problems writing the copyright file
      */
@@ -110,7 +110,7 @@ class DebDocumentFileBuilder {
 
     /**
      * Writes the changelog.gz file to the specified directory. This should be /user/share/doc/package
-     * 
+     *
      * @throws IOException if there are problems writing the changelog file
      */
     private void createChangelogFile() throws IOException {
@@ -129,7 +129,7 @@ class DebDocumentFileBuilder {
 
             controlWriter = new OutputStreamWriter( gzipstream, "UTF-8" );
 
-            controlWriter.write( setup.getAppIdentifier() + " (" + setup.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE );
+            controlWriter.write( setup.getAppIdentifier() + " (" + deb.getVersion() + ") unstable; urgency=low" + NEWLINE + NEWLINE );
 
             String changes = deb.getChanges();
             if( changes != null && changes.length() > 0 ) {

@@ -45,7 +45,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Create a new instance
-     * 
+     *
      * @param rpm the calling task
      * @param setup the shared settings
      * @param fileResolver the file Resolver
@@ -57,7 +57,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Build the RedHat package in different steps with the 'rpmbuild'.
-     * 
+     *
      * <dl>
      * <dt>copy files</dt>
      * <dd>copy the files specified in the gradle script to the BUILD/usr/share/archivesBaseName directory.</dd>
@@ -133,7 +133,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Creates the files and the corresponding script section for the specified service.
-     * 
+     *
      * @param service the service
      * @throws IOException on errors during creating or writing a file
      */
@@ -146,7 +146,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
         String initTemplate = "unix/init-service.sh";
         Template initScript = new Template( initTemplate  );
         initScript.setPlaceholder( "name", serviceUnixName );
-        String version = setup.getVersion();
+        String version = task.getVersion();
         initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
         initScript.setPlaceholder( "displayName", setup.getApplication() );
         initScript.setPlaceholder( "description", service.getDescription() );
@@ -171,7 +171,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                         + "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
                         + "\nfi" );
 
-        // copy a default service file if set 
+        // copy a default service file if set
         if( task.getDefaultServiceFile() != null ) {
             File serviceDestFile = createFile(  "BUILD/etc/sysconfig/" + serviceUnixName, true );
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
@@ -188,7 +188,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Changes the permissions of all directories recursively inside the specified path to 755.
-     * 
+     *
      * @param path the path
      * @throws IOException on I/O failures
      */
@@ -205,7 +205,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Changes the permissions of all files recursively inside the specified path to 644.
-     * 
+     *
      * @param path the path
      * @throws IOException on I/O failures
      */
@@ -227,7 +227,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
-     * 
+     *
      * @param file the file
      * @param executable if set to <tt>true</tt> the executable bit will be set
      * @throws IOException on errors when setting the permissions
@@ -249,7 +249,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Creates the files and the corresponding scripts for the specified desktop starter.
-     * 
+     *
      * @param starter the desktop starter
      * @throws IOException on errors during creating or writing a file
      */
@@ -275,7 +275,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             if( index > -1 ) {
                 iconName = iconName.substring( index + 1 );
             }
-            // icons must be png files and should named like that 
+            // icons must be png files and should named like that
             if( !iconName.endsWith( ".png" ) ) {
                 index = iconName.lastIndexOf( '.' );
                 if( index > -1 ) {
@@ -326,7 +326,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                 if( cwd.isEmpty() || cwd.equals( "." )) {
                     fw.write( "Path=" + task.getInstallationRoot() + "\n" );
                 } else {
-                    fw.write( "Path=" + cwd + "\n" );    
+                    fw.write( "Path=" + cwd + "\n" );
                 }
             }
             fw.write( "Terminal=false\n" );
@@ -353,14 +353,14 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
                     if( starter.getMimeTypes() != null ) {
                         fw.write( "    <mime-type type=\"" + starter.getMimeTypes() + "\">\n" );
                     } else {
-                        fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );                        
+                        fw.write( "    <mime-type type=\"" + docType.getMimetype() + "\">\n" );
                     }
 
                     fw.write( "        <comment>" + setup.getApplication() + "</comment>\n" );
                     fw.write( "        <glob-deleteall/>\n" );
                     fw.write( "        <glob pattern=\"*." + extension + "\"/>\n" );
                     fw.write( "    </mime-type>\n" );
-                    fw.write( "</mime-info>\n" );                    
+                    fw.write( "</mime-info>\n" );
                 }
                 controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
                 controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-mime uninstall \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
@@ -378,7 +378,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 //                if( starter.getMimeTypes() != null ) {
 //                    mimetypes = starter.getMimeTypes();
 //                }
-//                
+//
 //                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "if [ -z \"$SUDO_USER\" ]; then" );
 //                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "  su $LOGNAME -c \"xdg-mime default '" + unixName + ".desktop' " + mimetypes + " || true\";" );
 //                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "else" );
@@ -391,7 +391,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * Creates a file in the build path structure.
-     * 
+     *
      * @param path the path relative to the root of the build path
      * @param executable if set to <tt>true</tt> the executable bit will be set in the permission flags
      * @return the created file
@@ -411,9 +411,9 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
     /**
      * execute the command to generate the RPM package
-     * 
+     *
      * rpmbuild -ba -clean "--define=_topdir buildDir(rpm)" SPECS/basename.spec
-     * 
+     *
      */
     private void createRpmPackage() {
 
@@ -431,7 +431,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
      * A consumer interface that can throw exceptions further up the chain.
      * @author gamma
      *
-     * @param <T> first element that will be accepted 
+     * @param <T> first element that will be accepted
      * @param <P> second element that will be accepted
      */
     @FunctionalInterface

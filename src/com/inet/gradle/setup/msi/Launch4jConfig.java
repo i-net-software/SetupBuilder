@@ -96,10 +96,10 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
         getOrCreateChild( jre, "runtimeBits" ).setTextContent( task.is64Bit() ? "64" : "32" );
 
         Element versionInfo = getOrCreateChild( launch4jConfig, "versionInfo" );
-        getOrCreateChild( versionInfo, "fileVersion" ).setTextContent( normalizeVersionNumber( setup.getVersion() ) );
-        getOrCreateChild( versionInfo, "txtFileVersion" ).setTextContent( setup.getVersion() );
-        getOrCreateChild( versionInfo, "productVersion" ).setTextContent( normalizeVersionNumber( setup.getVersion() ) );
-        getOrCreateChild( versionInfo, "txtProductVersion" ).setTextContent( setup.getVersion() );
+        getOrCreateChild( versionInfo, "fileVersion" ).setTextContent( normalizeVersionNumber( task.getVersion() ) );
+        getOrCreateChild( versionInfo, "txtFileVersion" ).setTextContent( task.getVersion() );
+        getOrCreateChild( versionInfo, "productVersion" ).setTextContent( normalizeVersionNumber( task.getVersion() ) );
+        getOrCreateChild( versionInfo, "txtProductVersion" ).setTextContent( task.getVersion() );
         getOrCreateChild( versionInfo, "fileDescription" ).setTextContent( launch.getDescription() );
         getOrCreateChild( versionInfo, "productName" ).setTextContent( setup.getApplication() );
         getOrCreateChild( versionInfo, "companyName" ).setTextContent( setup.getVendor() );

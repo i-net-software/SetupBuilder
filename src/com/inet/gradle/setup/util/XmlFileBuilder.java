@@ -83,7 +83,7 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
 
     /**
      * Add a attribute if not exists.
-     * 
+     *
      * @param el the element/node in the XML
      * @param name the name of the attribute
      * @param value the value
@@ -95,7 +95,7 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
     }
 
     /**
-     * Adds Text content to a node 
+     * Adds Text content to a node
      * @param el Node
      * @param text content
      */
@@ -139,7 +139,7 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
 
     /**
      * Get or create a child element.
-     * 
+     *
      * @param parent the parent node in which we search and create
      * @param name The tag name of the element
      * @param key the name of an attribute, can't be null

@@ -53,7 +53,7 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
  * Builder for a *.wsx file. A *.wsx file is a XML that described MSI setup and is needed for the Wix tool.
- * 
+ *
  * @author Volker Berlin
  */
 class WxsFileBuilder extends XmlFileBuilder<Msi> {
@@ -97,7 +97,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Create *.wxs file based on the settings in the task.
-     * 
+     *
      * @throws ParserConfigurationException
      * @throws Exception if any error occur
      */
@@ -116,7 +116,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( product, "Language", "1033" );
         addAttributeIfNotExists( product, "Manufacturer", setup.getVendor() );
         addAttributeIfNotExists( product, "Name", setup.getApplication() );
-        addAttributeIfNotExists( product, "Version", setup.getVersion() );
+        addAttributeIfNotExists( product, "Version", task.getVersion() );
         addAttributeIfNotExists( product, "UpgradeCode", getGuid( "UpgradeCode" ) );
 
         // Package node
@@ -134,7 +134,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( packge, "InstallScope", task.getInstallScope().name() );
 
         // MajorUpgrade
-        if( task.getMultiInstanceCount() <= 1 ) { 
+        if( task.getMultiInstanceCount() <= 1 ) {
             Element update = getOrCreateChild( product, "MajorUpgrade" );
             addAttributeIfNotExists( update, "AllowDowngrades", "yes" );
         }
@@ -271,7 +271,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Get or create a directory node.
-     * 
+     *
      * @param segments the segments of the path in the target. The last segment contains the file name.
      * @return the directory node
      */
@@ -281,7 +281,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Get or create a directory node.
-     * 
+     *
      * @param segments the segments of the path in the target. The last segment contains the file name.
      * @param length the used length from the segments
      * @return the directory node
@@ -298,7 +298,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Get or Create a component node
-     * 
+     *
      * @param dir the parent directory node.
      * @param compID the ID of the component
      * @return the component node
@@ -315,7 +315,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a file to the setup
-     * 
+     *
      * @param file the file to add.
      * @param segments the segments of the path in the target. The last segment contains the file name.
      */
@@ -345,7 +345,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a file.
-     * 
+     *
      * @param component the parent component node
      * @param file the source file
      * @param pathID an ID of the parent path
@@ -357,7 +357,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a file.
-     * 
+     *
      * @param component the parent component node
      * @param file the source file
      * @param pathID an ID of the parent path
@@ -379,7 +379,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add all files in a directory.
-     * 
+     *
      * @param dir the source directory
      * @param baseLength the base length of the directory. This length will be cut from the absolute path.
      * @param target the target directory
@@ -445,7 +445,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         addDirectory( jreDir, baseLength, javaDir );
     }
-    
+
     /**
      * Gets all matching jres in the specified folder
      * @param parent the folder to search in
@@ -466,7 +466,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add the GUI to the Setup.
-     * 
+     *
      * @throws Exception if any exception occur
      */
     private void addGUI() throws Exception {
@@ -508,7 +508,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add an icon in Add/Remove Programs
-     * 
+     *
      * @param appDirRef
      * @throws IOException if an error occur on reading the image files
      */
@@ -526,7 +526,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a license file to the setup. If the license file is not an RTF file then it convert it to RTF.
-     * 
+     *
      * @param product the product node in the XML.
      * @return true, if license was added; false if license was not added.
      * @throws Exception if any exception occur
@@ -572,7 +572,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add the windows services.
-     * 
+     *
      * @throws IOException if an I/O error occurs when reading or writing
      */
     private void addServices() throws IOException {
@@ -674,7 +674,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Rename a file after it was copy.
-     * 
+     *
      * @param id the base ID for the actions
      * @param directory the directory of the file
      * @param sourceName the sourcename. This should not contain any placeholder in brackets []
@@ -683,7 +683,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     private void renameFileIfDynamic( String id, String directory, String sourceName, String targetName ) {
         int idx = targetName.indexOf( '[' );
         if( idx < 0 || targetName.indexOf( ']' ) < idx ) {
-            // not a dynamic name 
+            // not a dynamic name
             return;
         }
 
@@ -702,7 +702,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Get the parent Component for a shortcut.
-     * 
+     *
      * @param starter the shortcut description
      * @param product the node of the product
      * @return the component node
@@ -745,7 +745,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add the shortcuts if which was define.
-     * 
+     *
      * @throws IOException If any I/O exception occur on icon loading
      */
     private void addShortcuts() throws IOException {
@@ -822,7 +822,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Register file extension.
-     * 
+     *
      * @param starter desktop starter
      * @param cmd the command line to execute
      * @throws IOException if any IOException occur
@@ -866,7 +866,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Get the ID of the working directory.
-     * 
+     *
      * @param starter the shortcut definition
      * @return the id
      */
@@ -883,7 +883,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a runner without command line window.
-     * 
+     *
      * @param run the runner
      * @param id the id that should be used
      * @param Return the Return attribute, can be null (default "check"), possible values: "asyncNoWait", "asyncWait", "check" or "ignore"
@@ -915,7 +915,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
         } else {
             addAttributeIfNotExists( action, "Directory", getWoringDirID( run ) );
-            addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd.target + "\" " + cmd.arguments ); // full quoted path + arguments 
+            addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd.target + "\" " + cmd.arguments ); // full quoted path + arguments
             return;
         }
         Element target = getOrCreateChildByKeyValue( product, "SetProperty", "Action", id + "_target" );
@@ -965,7 +965,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a CustomAction to one of the sequences.
-     * 
+     *
      * @param id the ID of the action
      * @param execute true, InstallExecuteSequence; false, InstallUISequence
      * @param sequenceAction the name of an existing action in sequence after which it should be added.
@@ -1009,7 +1009,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add files to delete.
-     * 
+     *
      * @param pattern the pattern to delete
      * @return the component
      */
@@ -1026,7 +1026,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a registry key.
-     * 
+     *
      * @param component parent component
      * @param root The root of the key like HKLM, HKCU, HKMU
      * @param id the id for the key
@@ -1043,7 +1043,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a registry value.
-     * 
+     *
      * @param regkey the parent registry key
      * @param name the value name, null use the default value of a key
      * @param type the type
@@ -1059,7 +1059,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Split a path in segments.
-     * 
+     *
      * @param path the path to split
      * @return the segments of the path
      */
@@ -1069,7 +1069,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Create a valid id for a directory from path segments.
-     * 
+     *
      * @param segments the segments of the path in the target. The last segment contains the file name.
      * @param length the length of the segments that should be used for the id
      * @return a valid id
@@ -1093,7 +1093,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Create a valid id from string for the wxs file.
-     * 
+     *
      * @param str possible id but with possible invalid characters
      * @return a valid id
      */
@@ -1158,7 +1158,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Create a reproducible GUID
-     * 
+     *
      * @param id a parameter as random input
      * @return the GUID
      */
@@ -1168,7 +1168,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add the settings for multiple instances
-     * 
+     *
      * @throws IOException If an I/O error occur on loading resources
      */
     private void addMultiInstanceTransforms() throws IOException {
@@ -1238,7 +1238,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add pre and post scripts if any set.
-     * 
+     *
      * @throws IOException can not occur
      */
     private void addPreAndPostScripts() throws IOException {
@@ -1251,7 +1251,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add pre and post scripts if any set.
-     * 
+     *
      * @param actionId the unique ID
      * @param scripts the scripts content
      * @param execute true, InstallExecuteSequence; false, InstallUISequence
@@ -1272,7 +1272,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add pre and post scripts if any set.
-     * 
+     *
      * @param actionId the unique ID
      * @param script the script content
      * @param execute true, InstallExecuteSequence; false, InstallUISequence
@@ -1306,7 +1306,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Detect the script language.
-     * 
+     *
      * @param script current script
      * @return "vbscript" or "jsscript"
      * @throws IOException can not occur

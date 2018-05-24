@@ -151,7 +151,7 @@ class DebControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
-        String description = setup.getDescription();
+        String description = deb.getDescription();
 
         String secondLine = "";
         File longDescription = setup.getLongDescription( setup.getDefaultResourceLanguage() );
@@ -297,7 +297,7 @@ class DebControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putVersion( OutputStreamWriter controlWriter ) throws IOException {
-        String version = setup.getVersion();
+        String version = deb.getVersion();
         if( version == null || version.length() == 0 ) {
             throw new RuntimeException( "No version declared in the setup configuration." );
         } else {
