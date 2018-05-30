@@ -49,9 +49,25 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private List<PreferencesLink>          preferencesLink = new ArrayList<>();
 
-    private List<String>                   jreIncludes = Arrays.asList( "bin/java" );
+    private List<String>                   jreIncludes = Arrays.asList( new String[] {
+        "lib/",
+        "COPYRIGHT",
+        "LICENSE",
+        "README",
+        "THIRDPARTYLICENSEREADME-JAVAFX.txt",
+        "THIRDPARTYLICENSEREADME.txt",
+        "Welcome.html"
+    });
 
-    private List<String>                   jreExclude = new ArrayList<>();
+    private List<String>                   jreExcludes = Arrays.asList( new String[] {
+        "lib/deploy/",
+        "lib/deploy.jar",
+        "lib/javaws.jar",
+        "lib/libdeploy.dylib",
+        "lib/libnpjp2.dylib",
+        "lib/plugin.jar",
+        "lib/security/javaws.policy"
+    });
 
     /**
      * Create the task.
@@ -297,15 +313,15 @@ public class Dmg extends AbstractUnixSetupTask {
      * Get a list of string - defining files - that should be excluded from the bundled JRE
      * @return the jreExclude
      */
-    public List<String> getJreExclude() {
-        return jreExclude;
+    public List<String> getJreExcludes() {
+        return jreExcludes;
     }
 
     /**
      * Set a list of string - defining files - that should be excluded from the bundled JRE
      * @param jreExclude the jreExclude to set
      */
-    public void setJreExclude( List<String> jreExclude ) {
-        this.jreExclude = jreExclude;
+    public void setJreExcludes( List<String> jreExclude ) {
+        this.jreExcludes = jreExclude;
     }
 }

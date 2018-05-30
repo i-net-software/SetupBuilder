@@ -191,7 +191,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         Runtime runtime = new Runtime( jreDir );
         if ( task instanceof Dmg ) {
             List<String> include = ((Dmg)task).getJreIncludes();
-            List<String> exclude = ((Dmg)task).getJreExclude();
+            List<String> exclude = ((Dmg)task).getJreExcludes();
 
             runtime.appendIncludes( include.toArray( new String[include.size()] ) );
             runtime.appendExcludes( exclude.toArray( new String[exclude.size()] ) );

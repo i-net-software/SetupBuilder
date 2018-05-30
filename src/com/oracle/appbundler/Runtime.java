@@ -93,43 +93,12 @@ public class Runtime extends FileSet {
     }
 
     /**
-     * check the type of the runtime set.
-     * If it is a JDK we want to exclude certain predefined entries
-     */
-    private void detectType() {
-        boolean isJDK = new File(getDir(), "jre").isDirectory();
-
-        appendIncludes(new String[] {
-                        "lib/",
-                        "COPYRIGHT",
-                        "LICENSE",
-                        "README",
-                        "THIRDPARTYLICENSEREADME-JAVAFX.txt",
-                        "THIRDPARTYLICENSEREADME.txt",
-                        "Welcome.html"
-        });
-
-        if (isJDK) {
-            appendExcludes(new String[] {
-                    "jre/lib/deploy/",
-                    "jre/lib/deploy.jar",
-                    "jre/lib/javaws.jar",
-                    "jre/lib/libdeploy.dylib",
-                    "jre/lib/libnpjp2.dylib",
-                    "jre/lib/plugin.jar",
-                    "jre/lib/security/javaws.policy"
-            });
-        }
-    }
-
-    /**
      * Finally copy the files of the jre
      * @param targetDir where to copy
      * @param project the project we're working on
      * @throws IOException in case of errors
      */
     void copyTo(File targetDir, Project project) throws IOException {
-        detectType();
 
         File runtimeHomeDirectory = getDir();
         File runtimeContentsDirectory = runtimeHomeDirectory.getParentFile();
