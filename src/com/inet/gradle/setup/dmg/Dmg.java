@@ -50,6 +50,7 @@ public class Dmg extends AbstractUnixSetupTask {
     private List<PreferencesLink>          preferencesLink = new ArrayList<>();
 
     private List<String>                   jreIncludes = Arrays.asList( new String[] {
+        "bin/java",
         "lib/",
         "COPYRIGHT",
         "LICENSE",
