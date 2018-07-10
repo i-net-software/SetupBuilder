@@ -65,9 +65,9 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
     private final CopySpecInternal rootSpec;
 
-    private AbstractSetupBuilder setupBuilder;
+    private AbstractSetupBuilder   setupBuilder;
 
-    private String extension, classifier, version;
+    private String                 extension, classifier, version;
 
     /**
      * Constructor with indication to artifact result

@@ -28,6 +28,7 @@ import groovy.lang.Closure;
  * Definition of an executable which can be started on the desktop (e.g. an entry in the start menu on Windows)
  */
 public class DesktopStarter extends Application {
+
     private String             mimeTypes, categories;
 
     private Location           location;
@@ -36,7 +37,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Create a new DesktopStarter
-     * 
+     *
      * @param setup current SetupBuilder
      */
     public DesktopStarter( AbstractSetupBuilder setup ) {
@@ -46,7 +47,7 @@ public class DesktopStarter extends Application {
     /**
      * Sets the mime type is application is associated with. Multiple mime types are separated
      * by semicolons.
-     * 
+     *
      * @param mimeTypes the mime type
      */
     public void setMimeTypes( String mimeTypes ) {
@@ -55,7 +56,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Returns the mime types separated by semicolon.
-     * 
+     *
      * @return the mime types or <tt>null</tt> if not set
      */
     public String getMimeTypes() {
@@ -65,7 +66,7 @@ public class DesktopStarter extends Application {
     /**
      * Sets the categories as defined by Freedesktop. Multiple categories are separated
      * by semicolons.
-     * 
+     *
      * @see <a href="http://standards.freedesktop.org/menu-spec/latest/apa.html">http://standards.freedesktop.org/menu-spec/latest/apa.html</a>
      * @param categories the categories
      */
@@ -75,7 +76,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Returns the categories separated by semicolon.
-     * 
+     *
      * @return the categories or <tt>null</tt> if not set
      */
     public String getCategories() {
@@ -84,7 +85,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Get the location of this desktop/shortcut entry.
-     * 
+     *
      * @return the location
      */
     public Location getLocation() {
@@ -96,7 +97,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Set the location of this desktop/shortcut entry.
-     * 
+     *
      * @param location new location
      */
     public void setLocation( Location location ) {
@@ -112,7 +113,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Register a file extensions.
-     * 
+     *
      * @param closue document type
      */
     public void documentType( Closure<?> closue ) {
@@ -125,7 +126,7 @@ public class DesktopStarter extends Application {
 
     /**
      * Return the registered file extensions or the ones defined by the main setup
-     * 
+     *
      * @return list of document types.
      */
     public List<DocumentType> getDocumentType() {

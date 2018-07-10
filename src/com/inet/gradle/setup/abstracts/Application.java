@@ -23,7 +23,7 @@ import com.inet.gradle.setup.image.ImageFactory;
 
 /**
  * Generic application wrapper
- * 
+ *
  * @author gamma
  */
 public class Application {
@@ -35,7 +35,7 @@ public class Application {
 
     /**
      * Create a new DesktopStarter
-     * 
+     *
      * @param setup current SetupBuilder
      */
     public Application( AbstractSetupBuilder setup ) {
@@ -44,7 +44,7 @@ public class Application {
 
     /**
      * get the displayName of the application.
-     * 
+     *
      * @return the display name
      */
     public String getDisplayName() {
@@ -56,7 +56,7 @@ public class Application {
 
     /**
      * Set the displayName of the application.
-     * 
+     *
      * @param displayName the name to set
      */
     public void setDisplayName( String displayName ) {
@@ -65,7 +65,7 @@ public class Application {
 
     /**
      * Returns the description
-     * 
+     *
      * @return the description
      */
     public String getDescription() {
@@ -77,7 +77,7 @@ public class Application {
 
     /**
      * Sets the description.
-     * 
+     *
      * @param description the description to set
      */
     public void setDescription( String description ) {
@@ -86,7 +86,7 @@ public class Application {
 
     /**
      * Get an executable
-     * 
+     *
      * @return the executable
      */
     public String getExecutable() {
@@ -94,8 +94,8 @@ public class Application {
     }
 
     /**
-     * Set the executable file. If this is a relative pfad then it is relative to the install directory.
-     * 
+     * Set the executable file. If this is a relative path then it is relative to the install directory.
+     *
      * @param executable Set the executable file.
      */
     public void setExecutable( String executable ) {
@@ -104,7 +104,7 @@ public class Application {
 
     /**
      * Get the main jar file.
-     * 
+     *
      * @return the main jar
      */
     public String getMainJar() {
@@ -116,7 +116,7 @@ public class Application {
 
     /**
      * Set the jar which contains the main class. This jar must contains all references to all other needed jar files in the manifest.
-     * 
+     *
      * @param mainJar the main jar file
      */
     public void setMainJar( String mainJar ) {
@@ -125,7 +125,7 @@ public class Application {
 
     /**
      * Get the main class.
-     * 
+     *
      * @return the class name
      */
     public String getMainClass() {
@@ -137,7 +137,7 @@ public class Application {
 
     /**
      * Set the main class of the Java application.
-     * 
+     *
      * @param mainClass the class name
      */
     public void setMainClass( String mainClass ) {
@@ -146,7 +146,7 @@ public class Application {
 
     /**
      * Get the icons for this desktop/shortcut entry.
-     * 
+     *
      * @return the icons
      */
     public Object getIcons() {
@@ -158,7 +158,7 @@ public class Application {
 
     /**
      * Retrieve a specific icon from the icons set for the setup
-     * 
+     *
      * @param buildDir directory in which to put the icon
      * @param type of the icon to retrieve
      * @return the icon file
@@ -171,7 +171,7 @@ public class Application {
     /**
      * Set the icons for desktop/shortcut entry. This can be one or multiple images in different size. The usage depends on the
      * platform. This can be an *.ico file, *.icns file or an list of Java readable image files like *.png or *.jpeg.
-     * 
+     *
      * @param icons the icons
      */
     public void setIcons( Object icons ) {
@@ -180,7 +180,7 @@ public class Application {
 
     /**
      * Get the working directory of this desktop/shortcut entry.
-     * 
+     *
      * @return the working directory
      */
     public String getWorkDir() {
@@ -189,7 +189,7 @@ public class Application {
 
     /**
      * Set the working directory. If not set then the installation directory is used.
-     * 
+     *
      * @param workDir the work directory.
      */
     public void setWorkDir( String workDir ) {
@@ -198,7 +198,7 @@ public class Application {
 
     /**
      * Returns the command-line arguments for starting.
-     * 
+     *
      * @return the command-line arguments for starting
      */
     public String getStartArguments() {
@@ -210,7 +210,7 @@ public class Application {
 
     /**
      * Sets the command-line arguments for starting .
-     * 
+     *
      * @param startArguments the command-line arguments for starting
      */
     public void setStartArguments( String startArguments ) {

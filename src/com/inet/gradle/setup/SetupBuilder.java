@@ -33,7 +33,7 @@ import groovy.lang.Closure;
 
 /**
  * The Gradle extension for all setup tasks.
- * 
+ *
  * @author Volker Berlin
  */
 public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
@@ -56,7 +56,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Create a new instance.
-     * 
+     *
      * @param project current project
      */
     public SetupBuilder( Project project ) {
@@ -65,7 +65,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Return the license files
-     * 
+     *
      * @return licenseFiles list of license files
      */
     public List<LocalizedResource> getLicenseFiles() {
@@ -74,7 +74,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Return the license file for a specific locale
-     * 
+     *
      * @param locale for which to get the file
      * @return license file
      */
@@ -84,7 +84,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set the license file
-     * 
+     *
      * @param license license file or closure
      */
     public void setLicenseFile( Object license ) {
@@ -94,7 +94,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Add a license file
-     * 
+     *
      * @param license license file or closure
      */
     public void licenseFile( Object license ) {
@@ -103,7 +103,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * A command that run after the installer.
-     * 
+     *
      * @return the command or null
      */
     public DesktopStarter getRunAfter() {
@@ -112,7 +112,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run after the installer.
-     * 
+     *
      * @param runAfter the command
      */
     public void setRunAfter( String runAfter ) {
@@ -122,16 +122,16 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run after the installer.
-     * 
-     * @param closue the command
+     *
+     * @param closure the command
      */
-    public void runAfter( Closure<?> closue ) {
-        runAfter = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
+    public void runAfter( Closure<?> closure ) {
+        runAfter = ConfigureUtil.configure( closure, new DesktopStarter( this ) );
     }
 
     /**
      * A command that run before the uninstaller.
-     * 
+     *
      * @return the command or null
      */
     public DesktopStarter getRunBeforeUninstall() {
@@ -140,7 +140,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run before the uninstaller.
-     * 
+     *
      * @param runAfter the command
      */
     public void setRunBeforeUninstall( String runAfter ) {
@@ -150,7 +150,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set a command that run run before the uninstaller.
-     * 
+     *
      * @param closue the command
      */
     public void runBeforeUninstall( Closure<DesktopStarter> closue ) {
@@ -159,7 +159,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Register a service.
-     * 
+     *
      * @param closue the closure of the service definition
      */
     public void service( Closure<Service> closue ) {
@@ -169,7 +169,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Returns the registered services.
-     * 
+     *
      * @return the registered services
      */
     public List<Service> getServices() {
@@ -178,7 +178,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Register a desktop starter.
-     * 
+     *
      * @param closue the closure of the desktop starter's definition
      */
     public void desktopStarter( Closure<?> closue ) {
@@ -188,7 +188,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Returns the registered desktop starters.
-     * 
+     *
      * @return the registered desktop starters, never null, can be empty.
      */
     public List<DesktopStarter> getDesktopStarters() {
@@ -197,7 +197,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the list pattern for files that should be deleted.
-     * 
+     *
      * @return the list
      */
     public List<String> getDeleteFiles() {
@@ -206,7 +206,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Add a file pattern to delete files before install and after uninstall.
-     * 
+     *
      * @param pattern the patter. Can contains * and ? characters
      */
     public void deleteFiles( String pattern ) {
@@ -218,7 +218,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Get the list of folders to delete.
-     * 
+     *
      * @return the list
      */
     public List<String> getDeleteFolders() {
@@ -227,7 +227,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Add a folder to delete before install and after uninstall. It delete the folder with all sub directories.
-     * 
+     *
      * @param folder the folder
      */
     public void deleteFolder( String folder ) {
@@ -250,7 +250,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Return the description files
-     * 
+     *
      * @return licenseFiles list of license files
      */
     public List<LocalizedResource> getLongDescriptions() {
@@ -259,7 +259,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Return the description file for a specific locale
-     * 
+     *
      * @param locale for which to get the file
      * @return license file
      */
@@ -269,7 +269,7 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
 
     /**
      * Set the description file
-     * 
+     *
      * @param description file or closure
      */
     public void longDescription( Object description ) {
