@@ -15,14 +15,14 @@
  */
 package com.inet.gradle.setup.msi;
 
-import groovy.lang.Closure;
-
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -33,12 +33,14 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
-import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.util.Logging;
 import com.inet.gradle.setup.util.ResourceUtils;
+
+import groovy.lang.Closure;
 
 /**
  * Build a MSI setup for Windows.
- * 
+ *
  * @author Volker Berlin
  */
 class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
@@ -47,7 +49,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Create a new instance
-     * 
+     *
      * @param msi the calling task
      * @param setup the shared settings
      * @param fileResolver the file Resolver
@@ -75,11 +77,12 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
 
             List<MsiLanguages> languages = task.getLanguages();
-            File mui = light( languages.get( 0 ) );
+
+            File mui = light( languages.get( 0 ), getLanguageResources(languages.get( 0 )) );
             HashMap<MsiLanguages, File> translations = new HashMap<>();
             for( int i = 1; i < languages.size(); i++ ) {
                 MsiLanguages language = languages.get( i );
-                File file = light( language );
+                File file = light( language, getLanguageResources(languages.get( i )) );
                 patchLangID( file, language );
                 File mst = msitran( mui, file, language );
                 translations.put( language, mst );
@@ -111,8 +114,33 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
     }
 
     /**
+     * Get a list of matching files for the resource location
+     * @param msiLanguages
+     * @return String list of files.
+     */
+    private String[] getLanguageResources(MsiLanguages msiLanguages) {
+        File languageResourcesLocation;
+        try {
+            languageResourcesLocation = task.getLanguageResourceLocation();
+        } catch( Exception e ) {
+            e.printStackTrace();
+            return null;
+        }
+
+        // Return list of matching files
+        return Arrays.asList( languageResourcesLocation.list( new FilenameFilter() {
+
+            @Override
+            public boolean accept( File dir, String name ) {
+                Logging.sysout( "Found a language Resource file: " + dir + File.separator + name );
+                return name.endsWith( msiLanguages.getCulture() + ".wxl" );
+            }
+        } ) ).stream().map( path -> new File(languageResourcesLocation, path).getAbsolutePath() ).toArray( String[]::new );
+    }
+
+    /**
      * Create the lauch4j starter if there was set some and add it to the sources.
-     * 
+     *
      * @throws Exception if any error occur
      */
     private void buildLauch4j() throws Exception {
@@ -135,7 +163,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Call a program from the WIX installation.
-     * 
+     *
      * @param tool the program name
      * @param parameters the parameters
      */
@@ -163,11 +191,11 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Call the light.exe tool.
-     * 
+     *
      * @param language the target language
      * @return the generated msi file
      */
-    private File light( MsiLanguages language ) {
+    private File light( MsiLanguages language, String... locations ) {
         File out = new File( buildDir, setup.getArchiveName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
@@ -180,6 +208,18 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         parameters.add( out.getAbsolutePath() );
         parameters.add( "-spdb" );
         parameters.add( "-cultures:" + language.getCulture() + ";neutral" );
+
+        // There has to be at least one localization, the default fallback
+        if ( locations != null ) {
+            locations = getLanguageResources( MsiLanguages.en_us );
+        }
+
+        // Add locations
+        for( String location : locations ) {
+            parameters.add( "-loc" );
+            parameters.add( location );
+        }
+
         parameters.add( "*.wixobj" );
         callWixTool( "light.exe", parameters );
         return out;
@@ -187,7 +227,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Change the language ID of a *.msi file.
-     * 
+     *
      * @param file a msi file
      * @param language the target language
      */
@@ -204,7 +244,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Set all languages IDs for which translations was added.
-     * 
+     *
      * @param mui the multilingual user interface (MUI) installer file
      * @param langIDs a comma separated list of languages IDs
      */
@@ -221,7 +261,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Call the msitran.exe tool and create a transform file (*.mst).
-     * 
+     *
      * @param mui the multilingual user interface (MUI) installer file
      * @param file the current msi file
      * @param language current language
@@ -260,7 +300,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Sign a file if the needed information are set.
-     * 
+     *
      * @param file file to sign
      * @throws IOException If any I/O error occur on loading of the sign tool
      */
@@ -326,7 +366,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Get the name of the wxs file
-     * 
+     *
      * @return the xml file
      */
     private File getWxsFile() {
@@ -335,7 +375,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Get the calling path (include name) of a WIX tool
-     * 
+     *
      * @param tool the name of the tool file
      * @return the path
      */

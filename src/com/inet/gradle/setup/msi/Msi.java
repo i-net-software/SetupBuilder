@@ -15,8 +15,6 @@
  */
 package com.inet.gradle.setup.msi;
 
-import groovy.lang.Closure;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,34 +29,43 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
-import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.util.ResourceUtils;
+import com.inet.gradle.setup.util.TempPath;
+
+import groovy.lang.Closure;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.
- * 
+ *
  * @author Volker Berlin
  */
 public class Msi extends AbstractSetupTask {
 
-    private String   arch;
+    private String         arch;
 
-    private boolean  only32bit;
+    private boolean        only32bit;
 
-    private Object   bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript;
+    private Object         bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript, languageResourceLocation;
 
-    private List<String> languages;
+    private List<String>   languages;
 
-    private SignTool signTool;
+    private SignTool       signTool;
 
-    private double minOS;
+    private double         minOS;
 
-    private List<Launch4j> launch4j = new ArrayList<>();
+    private List<Launch4j> launch4j           = new ArrayList<>();
 
-    private int multiInstanceCount = 1;
+    private int            multiInstanceCount = 1;
 
-    private InstallScope installScope;
+    private InstallScope   installScope;
 
-    private List<String> preGUI = new ArrayList<String>();
+    private List<String>   preGUI             = new ArrayList<String>();
+
+    // Will generate a checkbox.
+    private boolean        runAfterIsOptional = false;
+
+    // Default language Resource Locations. From the Jar file.
+    private File           _languageResourceLocations;
 
     /**
      * Create a new instance.
@@ -86,7 +93,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * If this installer should run only on windows 32 bit versions.
-     * 
+     *
      * @return true, if only 32 bit
      */
     boolean isOnly32Bit() {
@@ -112,7 +119,7 @@ public class Msi extends AbstractSetupTask {
      * <li>ia64
      * <li>x86-only - does not run on a 64 bit system
      * </ul>
-     * 
+     *
      * @param arch the architecture
      */
     public void setArch( String arch ) {
@@ -127,7 +134,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * if the setup is a 64 bit setup.
-     * 
+     *
      * @return true, if 64 bit.
      */
     boolean is64Bit() {
@@ -153,7 +160,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Set a file with a banner BMP. The typical size is 493 x 58
-     * 
+     *
      * @param bannerBmp the file
      */
     public void setBannerBmp( Object bannerBmp ) {
@@ -162,7 +169,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the banner BMP.
-     * 
+     *
      * @return the BMP
      */
     public File getDialogBmp() {
@@ -174,7 +181,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Set a file with the dialog BMP. The typical size is 493 x 312
-     * 
+     *
      * @param dialogBmp the file
      */
     public void setDialogBmp( Object dialogBmp ) {
@@ -183,7 +190,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Set the needed information for signing the setup.
-     * 
+     *
      * @param closue the data for signing
      */
     public void signTool( Closure<SignTool> closue ) {
@@ -192,7 +199,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the SignTool configuration if set
-     * 
+     *
      * @return the settings or null
      */
     public SignTool getSignTool() {
@@ -201,7 +208,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get a URL to a *.wxs file for the WIX Toolset
-     * 
+     *
      * @return the template
      * @throws MalformedURLException if any error occur
      */
@@ -215,7 +222,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set an optional *.wxs file as template for building the final file with the settings of the gradle task. This
      * template give you the option to set things that are not available via the gradle task.
-     * 
+     *
      * @param wxsTemplate the file location
      */
     public void setWxsTemplate( Object wxsTemplate ) {
@@ -240,7 +247,7 @@ public class Msi extends AbstractSetupTask {
                 value = MsiLanguages.valueOf( key );
             } catch( IllegalArgumentException ex ) {
                 // The completely name was not found.
-                // now we check if this is only a language without a country 
+                // now we check if this is only a language without a country
                 for( MsiLanguages msiLanguage : MsiLanguages.values() ) {
                     if( msiLanguage.toString().startsWith( key ) ) {
                         value = msiLanguage;
@@ -282,7 +289,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the minimum OS version.
-     * 
+     *
      * @return the version
      */
     public double getMinOS() {
@@ -308,7 +315,7 @@ public class Msi extends AbstractSetupTask {
      * <li> 5.1 - Windows XP
      * <li> 5.0 - Windows 2000
      * </ul>
-     * 
+     *
      * @param minVersion the version
      */
     public void setMinOS( double minVersion ) {
@@ -317,7 +324,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Register a lauch4j configuration.
-     * 
+     *
      * @param closue the closure of the launch4j definition
      */
     public void launch4j( Closure<Launch4j> closue ) {
@@ -327,7 +334,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Returns the registered services.
-     * 
+     *
      * @return the registered services
      */
     public List<Launch4j> getLaunch4js() {
@@ -336,7 +343,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the count of possible multiple instances.
-     * 
+     *
      * @return instance count
      */
     public int getMultiInstanceCount() {
@@ -346,7 +353,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set the count of possible multiple instances. The default is 1. A value lesser or equals 1 result in a single
      * instance setup.
-     * 
+     *
      * @param instanceCount the current instance count
      */
     public void setMultiInstanceCount( int instanceCount ) {
@@ -355,7 +362,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the URL to a vbscript that set the instance name.
-     * 
+     *
      * @return the URL
      * @throws MalformedURLException if any error occur
      */
@@ -368,7 +375,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Set a vbscript that can change the product name, instance id and other things on a multi instance installation.
-     * 
+     *
      * @param multiInstanceScript the script
      */
     public void setMultiInstanceScript( Object multiInstanceScript ) {
@@ -384,7 +391,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Get the install scope. Never null.
-     * 
+     *
      * @return the scope
      */
     public InstallScope getInstallScope() {
@@ -397,7 +404,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set the install scope. Possible values are perUser and perMachine. If not set then it is perMachine.
      * A perUser installer has no elevated rights and can not installed to program files.
-     * 
+     *
      * @param installScope the new scope
      */
     public void setInstallScope( InstallScope installScope ) {
@@ -406,7 +413,7 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Returns the preGUI scripts.
-     * 
+     *
      * @return the scripts
      */
     public List<String> getPreGUI() {
@@ -416,7 +423,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set a vbscript or jscript that should be executed before the GUI is displayed. This can be used for setting
      * a default install directory. This action has no elevated rights.
-     * 
+     *
      * @param script list or single script
      */
     @SuppressWarnings( "unchecked" )
@@ -428,7 +435,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Add a vbscript or jscript that should be executed before the GUI is displayed. This can be used for setting
      * a default install directory. This action has no elevated rights.
-     * 
+     *
      * @param script the content for the entry
      */
     public void preGUI( Object script ) {
@@ -439,5 +446,44 @@ public class Msi extends AbstractSetupTask {
         } else {
             preGUI.add( script.toString() );
         }
+    }
+
+    /**
+     * Returns if the runAfter is optional
+     * @return the runAfterIsOptional
+     */
+    public boolean isRunAfterOptional() {
+        return runAfterIsOptional;
+    }
+
+    /**
+     * Set that the runAfter is optional
+     * @param runAfterIsOptional the runAfterIsOptional to set
+     */
+    public void setRunAfterIsOptional( boolean runAfterIsOptional ) {
+        this.runAfterIsOptional = runAfterIsOptional;
+    }
+
+    /**
+     * Set an optional path for the location of language resources
+     * @param languageResourceLocation the location.
+     */
+    public void setLanguageResourceLocation( Object languageResourceLocation ) {
+        this.languageResourceLocation = languageResourceLocation;
+    }
+
+    /**
+     * return the file for optional language resource locations
+     * @return the location
+     * @throws Exception in case of errors
+     */
+    public File getLanguageResourceLocation() throws Exception {
+        if( languageResourceLocation != null ) {
+            return getProject().file( languageResourceLocation );
+        } else if ( _languageResourceLocations == null ) {
+            _languageResourceLocations = ResourceUtils.extractDirectory( "com/inet/gradle/setup/msi/i18n/", TempPath.get( "i18n" ).toFile() );
+        }
+
+        return _languageResourceLocations;
     }
 }
