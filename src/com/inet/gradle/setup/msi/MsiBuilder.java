@@ -77,12 +77,13 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
 
             List<MsiLanguages> languages = task.getLanguages();
+            String[] languageResources = getLanguageResources();
 
-            File mui = light( languages.get( 0 ) );
+            File mui = light( languages.get( 0 ), languageResources );
             HashMap<MsiLanguages, File> translations = new HashMap<>();
             for( int i = 1; i < languages.size(); i++ ) {
                 MsiLanguages language = languages.get( i );
-                File file = light( language );
+                File file = light( language, languageResources );
                 patchLangID( file, language );
                 File mst = msitran( mui, file, language );
                 translations.put( language, mst );
@@ -91,7 +92,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             // Now create a msi with all files
             new WxsFileBuilder( task, setup, wxsFile, buildDir, template, true ).build();
             candle();
-            mui = light( languages.get( 0 ) );
+            mui = light( languages.get( 0 ), languageResources );
 
             // Add the translations to the msi with all files
             StringBuilder langIDs = new StringBuilder( languages.get( 0 ).getLangID() );
@@ -118,7 +119,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      * @param msiLanguages
      * @return String list of files.
      */
-    private String[] getLanguageResources(MsiLanguages msiLanguages) {
+    private String[] getLanguageResources() {
         File languageResourcesLocation;
         try {
             languageResourcesLocation = task.getLanguageResourceLocation();
@@ -132,7 +133,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
             @Override
             public boolean accept( File dir, String name ) {
-                boolean accept = name.endsWith( msiLanguages.getCulture() + ".wxl" );
+                boolean accept = name.endsWith( ".wxl" );
                 Logging.sysout( "Found a language Resource file: '" + dir + File.separator + name + "' will use: " + accept );
                 return accept;
             }
@@ -194,9 +195,10 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      * Call the light.exe tool.
      *
      * @param language the target language
+     * @param languageResources the language resource files
      * @return the generated msi file
      */
-    private File light( MsiLanguages language ) {
+    private File light( MsiLanguages language, String[] languageResources  ) {
         File out = new File( buildDir, setup.getArchiveName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
@@ -210,17 +212,12 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         parameters.add( "-spdb" );
         parameters.add( "-cultures:" + language.getCulture() + ";neutral" );
 
-        String[] locations = getLanguageResources( language );
-        // There has to be at least one localization, the default fallback
-        if ( locations == null || locations.length == 0 ) {
-            Logging.sysout( "No localizations given, will use default!" );
-            locations = getLanguageResources( MsiLanguages.en_us );
-        }
-
         // Add locations
-        for( String location : locations ) {
-            parameters.add( "-loc" );
-            parameters.add( location );
+        if ( languageResources != null ) {
+            for( String location : languageResources ) {
+                parameters.add( "-loc" );
+                parameters.add( location );
+            }
         }
 
         parameters.add( "*.wixobj" );
