@@ -765,7 +765,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
             }
 
-            addAttributeIfNotExists( shortcut, "WorkingDirectory", getWoringDirID( starter ) );
+            addAttributeIfNotExists( shortcut, "WorkingDirectory", getWorkingDirID( starter ) );
 
             // find the optional id for an icon
             String target = starter.getExecutable();
@@ -870,7 +870,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param starter the shortcut definition
      * @return the id
      */
-    private String getWoringDirID( DesktopStarter starter ) {
+    private String getWorkingDirID( DesktopStarter starter ) {
         String workDir = starter.getWorkDir();
         if( workDir != null && !workDir.isEmpty() ) {
             String[] segments = segments( workDir );
@@ -914,7 +914,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 command = "\"[SystemFolder]cmd.exe\" /C \"cd /D \"[INSTALLDIR]" + cmd.workDir + "\" & " + cmd.relativFull + '\"';
             }
         } else {
-            addAttributeIfNotExists( action, "Directory", getWoringDirID( run ) );
+            addAttributeIfNotExists( action, "Directory", getWorkingDirID( run ) );
             addAttributeIfNotExists( action, "ExeCommand", '\"' + cmd.target + "\" " + cmd.arguments ); // full quoted path + arguments
             return;
         }
@@ -951,16 +951,47 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( runAfter == null ) {
             return;
         }
-        String id = "runAfter";
-        addRun( runAfter, id, "asyncNoWait", "immediate" );
 
+        String id = "runAfter";
         Element ui = getOrCreateChild( product, "UI" );
         Element exitDialog = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "ExitDialog" );
         addAttributeIfNotExists( exitDialog, "Control", "Finish" );
         addAttributeIfNotExists( exitDialog, "Event", "DoAction" );
         addAttributeIfNotExists( exitDialog, "Value", id );
-        // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
-        exitDialog.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+
+        if ( !task.getOptionalExitDialogTextKey().isEmpty() ) {
+            Element optional = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT" );
+            addAttributeIfNotExists( optional, "Property", "WIXUI_EXITDIALOGOPTIONALTEXT" );
+            addAttributeIfNotExists( optional, "Value", "!(loc."+ task.getOptionalExitDialogTextKey() +")" );
+
+            Element sequence = getOrCreateChild( product, "InstallUISequence" );
+            Element action = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT");
+            addAttributeIfNotExists( action, "After", "FindRelatedProducts");
+            action.setTextContent( "NOT Installed" );
+        }
+
+        if ( task.isRunAfterOptional() ) {
+            // http://wixtoolset.org/documentation/manual/v3/howtos/ui_and_localization/run_program_after_install.html
+            exitDialog.setTextContent( "WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed" );
+
+            Element optionalEnabled = getOrCreateChildByKeyValue( product, "Property", "Id", "WIXUI_EXITDIALOGOPTIONALCHECKBOX" );
+            addAttributeIfNotExists( optionalEnabled, "Value", "1" );
+
+            Element optional = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "CA_Set_WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" );
+            addAttributeIfNotExists( optional, "Property", "WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" );
+            addAttributeIfNotExists( optional, "Value", "!(loc.OptionalRunAfterText)" );
+
+            Element sequence = getOrCreateChild( product, "InstallUISequence" );
+            Element action = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "CA_Set_WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT");
+            addAttributeIfNotExists( action, "After", "FindRelatedProducts");
+            action.setTextContent( "NOT Installed" );
+
+        } else {
+            // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
+            exitDialog.setTextContent( "NOT Installed OR REINSTALL OR UPGRADINGPRODUCTCODE" );
+        }
+
+        addRun( runAfter, id, "asyncNoWait", "immediate" );
     }
 
     /**

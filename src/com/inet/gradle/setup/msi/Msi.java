@@ -67,6 +67,9 @@ public class Msi extends AbstractSetupTask {
     // Default language Resource Locations. From the Jar file.
     private File           _languageResourceLocations;
 
+    // Optional key to display text on the exit dialog
+    private String         optionalExitDialogTextKey;
+
     /**
      * Create a new instance.
      */
@@ -485,5 +488,27 @@ public class Msi extends AbstractSetupTask {
         }
 
         return _languageResourceLocations;
+    }
+
+    /**
+     * Return an optional localization key to set additional text on the exit dialog
+     * This requires the runAfter to be set as well or there will be no exit dialog.
+     * The localization can contain the [ProductName] key
+     *
+     * @param optionalExitDialogTextKey the key to an optional exit dialog text.
+     */
+    public void setOptionalExitDialogTextKey(String optionalExitDialogTextKey) {
+        this.optionalExitDialogTextKey = optionalExitDialogTextKey;
+    }
+
+    /**
+     * Return an optional localization key to set additional text on the exit dialog
+     * This requires the runAfter to be set as well or there will be no exit dialog.
+     * The localization can contain the [ProductName] key
+     *
+     * @return the key to an optional exit dialog text.
+     */
+    public String getOptionalExitDialogTextKey() {
+        return optionalExitDialogTextKey != null ? optionalExitDialogTextKey : "";
     }
 }
