@@ -1,4 +1,4 @@
-package com.inet.gradle.setup.dmg;
+package com.inet.gradle.setup.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,14 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
-
-import com.inet.gradle.setup.util.Logging;
 
 /**
  * Automatically create and tear down a temporary directory
  * Also create additional directories when needed.
- * 
+ *
  * @author gamma
  *
  */
@@ -27,7 +24,7 @@ public class TempPath {
      */
     static {
         try {
-            tmp = Files.createTempDirectory( "SetupBuilder", new FileAttribute[0] );
+            tmp = Files.createTempDirectory( "SetupBuilder" );
         } catch( IOException e1 ) {
             System.err.println( "Could not create temporary directory." );
             e1.printStackTrace();
@@ -49,7 +46,7 @@ public class TempPath {
 
     /**
      * Return the temporary root folder as string
-     * 
+     *
      * @return the temporary root folder as string
      */
     public static String get() {
@@ -58,25 +55,30 @@ public class TempPath {
 
     /**
      * Return the path to the temporary directory with the extension name
-     * 
+     *
      * @param directory below the tmp root
      * @return the Path, create directory if not yet there
      * @throws IOException in case of fire.
      */
     public static Path get( String directory ) throws IOException {
 
-        Path destination = new File( tmp.toFile(), directory ).toPath();
-        if( Files.notExists( destination ) ) {
-            Files.createDirectories( destination, new FileAttribute[0] );
-            Logging.sysout( "Created temporary directory: " + tmp );
+        File destination = new File( tmp.toFile(), directory );
+        if( !destination.exists() ) {
+            if ( destination.mkdirs() ) {
+                Logging.sysout( "Created temporary directory: " + destination );
+            } else {
+                Logging.sysout( "Could not create temporary directory: " + destination );
+            }
+        } else {
+            Logging.sysout( "Directory did exist: " + destination );
         }
 
-        return destination;
+        return destination.toPath();
     }
 
     /**
      * Return a new file from the directory
-     * 
+     *
      * @param directory below the tmp root
      * @param file name of the file
      * @return a new File object for the directory and file
@@ -88,7 +90,7 @@ public class TempPath {
 
     /**
      * Return a new file
-     * 
+     *
      * @param file name of the file
      * @return a new File object for the directory and file
      */
@@ -98,7 +100,7 @@ public class TempPath {
 
     /**
      * Return a new temp file as string
-     * 
+     *
      * @param file name of the file
      * @return a new File object for the directory and file
      */
@@ -108,7 +110,7 @@ public class TempPath {
 
     /**
      * Return a new file from the directory
-     * 
+     *
      * @param directory below the tmp root
      * @param file name of the file
      * @return a new File object for the directory and file
@@ -120,7 +122,7 @@ public class TempPath {
 
     /**
      * Clear up all the content from below the tmp directory.
-     * 
+     *
      * @throws Exception in case of fire.
      */
     private static void clearTemporaryFolder() throws Exception {

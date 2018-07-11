@@ -41,6 +41,7 @@ import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.Logging;
+import com.inet.gradle.setup.util.TempPath;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
