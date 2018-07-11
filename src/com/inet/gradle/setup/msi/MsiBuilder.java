@@ -78,11 +78,11 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
             List<MsiLanguages> languages = task.getLanguages();
 
-            File mui = light( languages.get( 0 ), getLanguageResources(languages.get( 0 )) );
+            File mui = light( languages.get( 0 ) );
             HashMap<MsiLanguages, File> translations = new HashMap<>();
             for( int i = 1; i < languages.size(); i++ ) {
                 MsiLanguages language = languages.get( i );
-                File file = light( language, getLanguageResources(languages.get( i )) );
+                File file = light( language );
                 patchLangID( file, language );
                 File mst = msitran( mui, file, language );
                 translations.put( language, mst );
@@ -132,8 +132,9 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
             @Override
             public boolean accept( File dir, String name ) {
-                Logging.sysout( "Found a language Resource file: " + dir + File.separator + name );
-                return name.endsWith( msiLanguages.getCulture() + ".wxl" );
+                boolean accept = name.endsWith( msiLanguages.getCulture() + ".wxl" );
+                Logging.sysout( "Found a language Resource file: '" + dir + File.separator + name + "' will use: " + accept );
+                return accept;
             }
         } ) ).stream().map( path -> new File(languageResourcesLocation, path).getAbsolutePath() ).toArray( String[]::new );
     }
@@ -195,7 +196,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      * @param language the target language
      * @return the generated msi file
      */
-    private File light( MsiLanguages language, String... locations ) {
+    private File light( MsiLanguages language ) {
         File out = new File( buildDir, setup.getArchiveName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
@@ -209,8 +210,10 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         parameters.add( "-spdb" );
         parameters.add( "-cultures:" + language.getCulture() + ";neutral" );
 
+        String[] locations = getLanguageResources( language );
         // There has to be at least one localization, the default fallback
-        if ( locations != null ) {
+        if ( locations == null || locations.length == 0 ) {
+            Logging.sysout( "No localizations given, will use default!" );
             locations = getLanguageResources( MsiLanguages.en_us );
         }
 
