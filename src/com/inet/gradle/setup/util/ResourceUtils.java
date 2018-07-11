@@ -18,6 +18,8 @@ package com.inet.gradle.setup.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +28,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Enumeration;
 import java.util.function.Function;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -36,7 +40,7 @@ public class ResourceUtils {
 
     /**
      * Extract a resource file and save it as file.
-     * 
+     *
      * @param clazz the class name
      * @param name the relative resource file
      * @param dir the directory
@@ -54,7 +58,7 @@ public class ResourceUtils {
 
     /**
      * Unzip it
-     * 
+     *
      * @param file input zip file
      * @param folder zip file output folder
      */
@@ -77,7 +81,7 @@ public class ResourceUtils {
         try (ZipFile zipFile = new ZipFile( file )) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while( entries.hasMoreElements() ) {
-                ZipEntry zipEntry = (ZipEntry)entries.nextElement();
+                ZipEntry zipEntry = entries.nextElement();
 
                 String fileName = zipEntry.getName();
                 if( !zipEntry.isDirectory() ) {
@@ -107,7 +111,7 @@ public class ResourceUtils {
 
     /**
      * Deletes directory denoted by given path with its content.
-     * 
+     *
      * @param directoryPath directory path.
      * @throws IOException if an I/O error occurs, like something cannot be deleted.
      */
@@ -129,5 +133,62 @@ public class ResourceUtils {
                 }
             }
         } );
+    }
+
+    /**
+     * Extract a resource directory with unknown entries. Will only extract flat structure without subdirectories
+     * @param path the class location
+     * @param destination the output directory
+     * @return the output directory
+     * @throws Exception in case of errors
+     */
+    public static File extractDirectory( String path, File destination ) throws Exception {
+
+        path = path.replaceAll( "\\.", "/" ); // Class path to file path
+        if ( !path.endsWith( "/" ) ) {
+            path += "/"; // has to be a directory
+        }
+
+        URL dirURL = ResourceUtils.class.getClassLoader().getResource( path );
+
+        if (dirURL != null && dirURL.getProtocol().equals("file")) {
+            // A file path already
+            Logging.sysout( "Input is already an existing file: " + dirURL );
+            return new File(dirURL.toURI());
+        }
+
+        if (dirURL.getProtocol().equals("jar")) {
+            // a JAR path
+            String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+
+            JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
+            Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+
+            Logging.sysout( "Checking Jar for files: " + jarPath );
+            Logging.sysout( "Path to look for: " + path );
+            while(entries.hasMoreElements()) {
+                JarEntry nextElement = entries.nextElement();
+                String name = nextElement.getName();
+
+                Logging.sysout( "Checking: " + name );
+                if (name.startsWith(path)) { //filter according to the path
+                    String entry = name.substring(path.length());
+                    int checkSubdir = entry.indexOf("/");
+                    if (checkSubdir >= 0 || entry.isEmpty()) {
+                        // if it is a subdirectory, we don't want it
+                        continue;
+                    }
+
+                    try (InputStream input = jar.getInputStream( nextElement ) ) {
+                        File output = new File(destination, entry);
+                        Files.copy( input, output.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                    }
+                }
+            }
+            jar.close();
+            return destination;
+        }
+
+        throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
     }
 }
