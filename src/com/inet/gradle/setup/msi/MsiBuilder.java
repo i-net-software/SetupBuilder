@@ -16,13 +16,11 @@
 package com.inet.gradle.setup.msi;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -33,7 +31,6 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
-import com.inet.gradle.setup.util.Logging;
 import com.inet.gradle.setup.util.ResourceUtils;
 
 import groovy.lang.Closure;
@@ -120,24 +117,18 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      * @return String list of files.
      */
     private String[] getLanguageResources() {
-        File languageResourcesLocation;
-        try {
-            languageResourcesLocation = task.getLanguageResourceLocation();
-        } catch( Exception e ) {
-            e.printStackTrace();
-            return null;
+
+        List<MsiLocalizedResource> i18n = task.getI18n();
+        List<String> i18nFiles = new ArrayList<>();
+
+        for( MsiLocalizedResource msiLocalizedResource : i18n ) {
+            File result = msiLocalizedResource.getResource();
+            if ( result != null ) {
+                i18nFiles.add( result.getAbsolutePath() );
+            }
         }
 
-        // Return list of matching files
-        return Arrays.asList( languageResourcesLocation.list( new FilenameFilter() {
-
-            @Override
-            public boolean accept( File dir, String name ) {
-                boolean accept = name.endsWith( ".wxl" );
-                Logging.sysout( "Found a language Resource file: '" + dir + File.separator + name + "' will use: " + accept );
-                return accept;
-            }
-        } ) ).stream().map( path -> new File(languageResourcesLocation, path).getAbsolutePath() ).toArray( String[]::new );
+        return i18nFiles.toArray( new String[i18nFiles.size()] );
     }
 
     /**

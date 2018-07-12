@@ -1,4 +1,0 @@
-<?xml version='1.0'?>
-<WixLocalization xmlns="http://schemas.microsoft.com/wix/2006/localization" Codepage="utf-8" Culture="de-de">
-    <String Id="OptionalRunAfterText">[ProductName] ausführen</String>
-</WixLocalization>

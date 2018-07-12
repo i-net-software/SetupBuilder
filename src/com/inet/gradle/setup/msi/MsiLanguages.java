@@ -17,7 +17,7 @@ package com.inet.gradle.setup.msi;
 
 /**
  * A mapping between Windows cultures and languages IDs
- * 
+ *
  * @author Volker Berlin
  */
 enum MsiLanguages {
@@ -88,10 +88,32 @@ enum MsiLanguages {
     }
 
     /**
-     * The numeric language ID. 
+     * The numeric language ID.
      * @return the id
      */
     String getLangID() {
         return Integer.toString( langID );
+    }
+
+    public static MsiLanguages getMsiLanguage( String input ) {
+
+        String key = input.replace( '-', '_' ).toLowerCase();
+        MsiLanguages value = null;
+        try {
+            value = MsiLanguages.valueOf( key );
+        } catch( IllegalArgumentException ex ) {
+            // The complete name was not found.
+            // now we check if this is only a language without a country
+            for( MsiLanguages msiLanguage : MsiLanguages.values() ) {
+                if( msiLanguage.toString().startsWith( key ) ) {
+                    value = msiLanguage;
+                    break;
+                }
+            }
+            if( value == null ) {
+                throw ex; // not supported language
+            }
+        }
+        return value;
     }
 }

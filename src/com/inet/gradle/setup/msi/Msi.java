@@ -16,6 +16,7 @@
 package com.inet.gradle.setup.msi;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,40 +42,50 @@ import groovy.lang.Closure;
  */
 public class Msi extends AbstractSetupTask {
 
-    private String         arch;
+    private String                     arch;
 
-    private boolean        only32bit;
+    private boolean                    only32bit;
 
-    private Object         bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript, languageResourceLocation;
+    private Object                     bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript, languageResourceLocation;
 
-    private List<String>   languages;
+    private List<String>               languages;
 
-    private SignTool       signTool;
+    private SignTool                   signTool;
 
-    private double         minOS;
+    private double                     minOS;
 
-    private List<Launch4j> launch4j           = new ArrayList<>();
+    private List<Launch4j>             launch4j           = new ArrayList<>();
 
-    private int            multiInstanceCount = 1;
+    private int                        multiInstanceCount = 1;
 
-    private InstallScope   installScope;
+    private InstallScope               installScope;
 
-    private List<String>   preGUI             = new ArrayList<String>();
+    private List<String>               preGUI             = new ArrayList<String>();
 
     // Will generate a checkbox.
-    private boolean        runAfterIsOptional = false;
+    private boolean                    runAfterIsOptional = false;
 
-    // Default language Resource Locations. From the Jar file.
-    private File           _languageResourceLocations;
+    private List<MsiLocalizedResource> i18n               = new ArrayList<>();
 
-    // Optional key to display text on the exit dialog
-    private String         optionalExitDialogTextKey;
 
     /**
      * Create a new instance.
+     * @throws IOException if the default resources are missing
      */
-    public Msi() {
+    public Msi() throws IOException {
         super( "msi" );
+
+        MsiLocalizedResource resource = new MsiLocalizedResource( getSetupBuilder() );
+        resource.setLocale( "en" );
+        resource.setOverridable( true );
+        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-en.properties", TempPath.get( "i18n" ).toFile() ) );
+        i18n.add( resource );
+
+        resource = new MsiLocalizedResource( getSetupBuilder() );
+        resource.setLocale( "de" );
+        resource.setOverridable( true );
+        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-de.properties", TempPath.get( "i18n" ).toFile() ) );
+        i18n.add( resource );
     }
 
     /**
@@ -244,24 +255,7 @@ public class Msi extends AbstractSetupTask {
         }
 
         for( String lang : languages ) {
-            String key = lang.replace( '-', '_' ).toLowerCase();
-            MsiLanguages value = null;
-            try {
-                value = MsiLanguages.valueOf( key );
-            } catch( IllegalArgumentException ex ) {
-                // The completely name was not found.
-                // now we check if this is only a language without a country
-                for( MsiLanguages msiLanguage : MsiLanguages.values() ) {
-                    if( msiLanguage.toString().startsWith( key ) ) {
-                        value = msiLanguage;
-                        break;
-                    }
-                }
-                if( value == null ) {
-                    throw ex; // not supported language
-                }
-            }
-            result.add( value );
+            result.add( MsiLanguages.getMsiLanguage( lang ) );
         }
 
         if( result.isEmpty() ) {
@@ -468,47 +462,20 @@ public class Msi extends AbstractSetupTask {
     }
 
     /**
-     * Set an optional path for the location of language resources
-     * @param languageResourceLocation the location.
+     * add a localized resource to the project.
+     * The files have to bi in the property file format and will be converted to wixLocalization files
+     *
+     * @param localization the localization object
      */
-    public void setLanguageResourceLocation( Object languageResourceLocation ) {
-        this.languageResourceLocation = languageResourceLocation;
+    public void i18n( Object localization ) {
+        MsiLocalizedResource.addLocalizedResource( getSetupBuilder(), i18n, localization );
     }
 
     /**
      * return the file for optional language resource locations
-     * @return the location
-     * @throws Exception in case of errors
+     * @return the localized resources
      */
-    public File getLanguageResourceLocation() throws Exception {
-        if( languageResourceLocation != null ) {
-            return getProject().file( languageResourceLocation );
-        } else if ( _languageResourceLocations == null ) {
-            _languageResourceLocations = ResourceUtils.extractDirectory( "com/inet/gradle/setup/msi/i18n/", TempPath.get( "i18n" ).toFile() );
-        }
-
-        return _languageResourceLocations;
-    }
-
-    /**
-     * Return an optional localization key to set additional text on the exit dialog
-     * This requires the runAfter to be set as well or there will be no exit dialog.
-     * The localization can contain the [ProductName] key
-     *
-     * @param optionalExitDialogTextKey the key to an optional exit dialog text.
-     */
-    public void setOptionalExitDialogTextKey(String optionalExitDialogTextKey) {
-        this.optionalExitDialogTextKey = optionalExitDialogTextKey;
-    }
-
-    /**
-     * Return an optional localization key to set additional text on the exit dialog
-     * This requires the runAfter to be set as well or there will be no exit dialog.
-     * The localization can contain the [ProductName] key
-     *
-     * @return the key to an optional exit dialog text.
-     */
-    public String getOptionalExitDialogTextKey() {
-        return optionalExitDialogTextKey != null ? optionalExitDialogTextKey : "";
+    public List<MsiLocalizedResource> getI18n() {
+        return i18n;
     }
 }

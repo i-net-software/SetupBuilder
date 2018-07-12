@@ -959,17 +959,17 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addAttributeIfNotExists( exitDialog, "Event", "DoAction" );
         addAttributeIfNotExists( exitDialog, "Value", id );
 
-        if ( !task.getOptionalExitDialogTextKey().isEmpty() ) {
-            Element optional = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT" );
-            addAttributeIfNotExists( optional, "Property", "WIXUI_EXITDIALOGOPTIONALTEXT" );
-            addAttributeIfNotExists( optional, "Value", "!(loc."+ task.getOptionalExitDialogTextKey() +")" );
+        // Add optional exit text. Can be empty (I hope)
+        Element optionalExitText = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT" );
+        addAttributeIfNotExists( optionalExitText, "Property", "WIXUI_EXITDIALOGOPTIONALTEXT" );
+        addAttributeIfNotExists( optionalExitText, "Value", "!(loc.OptionalExitText)" );
 
-            Element sequence = getOrCreateChild( product, "InstallUISequence" );
-            Element action = getOrCreateChildByKeyValue( sequence, "Custom", "Action", "CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT");
-            addAttributeIfNotExists( action, "After", "FindRelatedProducts");
-            action.setTextContent( "NOT Installed" );
-        }
+        Element optionalExitTextSequence = getOrCreateChild( product, "InstallUISequence" );
+        Element optionalExitTextAction = getOrCreateChildByKeyValue( optionalExitTextSequence, "Custom", "Action", "CA_Set_WIXUI_EXITDIALOGOPTIONALTEXT");
+        addAttributeIfNotExists( optionalExitTextAction, "After", "FindRelatedProducts");
+        optionalExitTextAction.setTextContent( "NOT Installed" );
 
+        // Check if the runAfter is optional
         if ( task.isRunAfterOptional() ) {
             // http://wixtoolset.org/documentation/manual/v3/howtos/ui_and_localization/run_program_after_install.html
             exitDialog.setTextContent( "WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed" );

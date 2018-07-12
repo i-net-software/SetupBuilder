@@ -98,7 +98,7 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the project
      */
-    protected Project getProject() {
+    public Project getProject() {
         return project;
     }
 
