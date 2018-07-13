@@ -126,6 +126,16 @@ public class TempPath {
      * @throws Exception in case of fire.
      */
     private static void clearTemporaryFolder() throws Exception {
+        clearTemporaryFolder( tmp );
+    }
+
+    /**
+     * Clear up all the content from below the given directory.
+     * @param tmp the temporary file
+     *
+     * @throws Exception in case of fire.
+     */
+    public static void clearTemporaryFolder( Path tmp ) throws Exception {
         // Remove temporary folder and content.
         Files.walkFileTree( tmp, new SimpleFileVisitor<Path>() {
             @Override

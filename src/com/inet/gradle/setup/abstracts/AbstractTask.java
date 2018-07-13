@@ -54,6 +54,8 @@ import org.gradle.api.tasks.WorkResults;
 import org.gradle.internal.nativeplatform.filesystem.FileSystem;
 import org.gradle.internal.reflect.Instantiator;
 
+import com.inet.gradle.setup.util.TempPath;
+
 import groovy.lang.Closure;
 
 /**
@@ -82,6 +84,12 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         ProjectInternal project = (ProjectInternal)getProject();
         setupBuilder = project.getExtensions().getByType( setupType );
         setGroup( "build" ); // for displaying in buildship
+
+        try {
+            TempPath.clearTemporaryFolder( getTemporaryDir().toPath() );
+        } catch( Exception e ) {
+            // Ignore
+        }
     }
 
     /**
