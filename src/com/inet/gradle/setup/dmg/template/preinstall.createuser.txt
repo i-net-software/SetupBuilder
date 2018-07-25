@@ -14,35 +14,42 @@ fi
 
 # find the next UID and GID that is below 500, so that we can create the service user
 # if the user or group already exists, it will use this existing ID and still do the rest. We might have changes to commit.
-NEXTUID=$(ID=`dscl . -read "/Users/${DEAMON_USER}" UniqueID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
-NEXTGID=$(ID=`dscl . -read "/Groups/${DEAMON_USER}" PrimaryGroupID 2> /dev/null | awk '{print $2}'` && [ ! -z "$ID" ] && echo "$ID" || dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+OLDUID=$(dscl . -read "/Users/${DEAMON_USER}" UniqueID 2> /dev/null | awk '{print $2}')
+OLDGID=$(dscl . -read "/Groups/${DEAMON_USER}" PrimaryGroupID 2> /dev/null | awk '{print $2}')
 
+NEXTUID=$([ ! -z "$OLDUID" ] && echo "$OLDUID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+NEXTGID=$([ ! -z "$OLDGID" ] && echo "$OLDGID" || dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+
+echo "I am Batman, or: $(whoami)"
 echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${DEAMON_USER}'"
 
 #########################################################################################################
-dscl . -create "/Users/${DEAMON_USER}" UniqueID "${NEXTUID}"
-dscl . -create "/Users/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
-dscl . -create "/Users/${DEAMON_USER}" NFSHomeDirectory "${HOME_DIRECTORY}"
+# Create Group
+[ -z "$OLDUID" ] && dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}" || echo "Group already existed"
+# Unusable password for standard user group
+dscl . -create "/Groups/${DEAMON_USER}" Password \*                                     || echo "Password for group can not be set"
+#########################################################################################################
+
+#########################################################################################################
+# Create User
+[ -z "$OLDUID" ] && dscl . -create "/Users/${DEAMON_USER}" UniqueID "${NEXTUID}"        || echo "User already existed"
+[ -z "$OLDUID" ] && dscl . -create "/Users/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"  || echo "User already existed, not setting PrimaryGroupID"
+dscl . -create "/Users/${DEAMON_USER}" NFSHomeDirectory "${HOME_DIRECTORY}"             || echo "NFSHomeDirectory can not be set"
 
 # Can't login as standard user
-dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false
-dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"
+dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false                         || echo "UserShell can not be set"
+dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"  || echo "RealName can not be set"
 
 # Revoke Rights
-dscl . -delete "/Users/${DEAMON_USER}" PasswordPolicyOptions
-dscl . -delete "/Users/${DEAMON_USER}" AuthenticationAuthority
+dscl . -delete "/Users/${DEAMON_USER}" PasswordPolicyOptions                            || echo "PasswordPolicyOptions can not be removed"
+dscl . -delete "/Users/${DEAMON_USER}" AuthenticationAuthority                          || echo "AuthenticationAuthority can not be removed"
 
 # Unusable password for standard users
-dscl . -create "/Users/${DEAMON_USER}" Password \*
+dscl . -create "/Users/${DEAMON_USER}" Password \*                                      || echo "Password can not be set"
 # dscl . -read "/Users/${DEAMON_USER}"
-#########################################################################################################
 
-#########################################################################################################
-dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}"
-dseditgroup -o edit -a "${DEAMON_USER}" -t user staff
-# Unusable password for standard users
-dscl . -create "/Groups/${DEAMON_USER}" Password \*
-# dscl . -read "/Groups/${DEAMON_USER}"
+# Add user to group user and staff, but check first! Mojave removed the user group
+dseditgroup -o edit -a "${DEAMON_USER}" -t "$(dscl . -read "/Groups/user" RecordName 2> /dev/null | awk '{print $2}')" "$(dscl . -read "/Groups/staff" RecordName 2> /dev/null | awk '{print $2}')" || echo "Default groups could not be added to user"
 #########################################################################################################
 
 # make home directory
