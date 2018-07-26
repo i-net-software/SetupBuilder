@@ -34,6 +34,7 @@ import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.util.Logging;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
+import com.oracle.appbundler.Argument;
 import com.oracle.appbundler.BundleDocument;
 import com.oracle.appbundler.Runtime;
 
@@ -156,6 +157,20 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
             bundle.setIcon( getApplicationIcon().toString() );
             appBundler.addConfiguredBundleDocument( bundle );
         }
+    }
+
+    /**
+     * Adds a scheme to the application. That is: a protocol that will trigger this app
+     * @param scheme
+     */
+    protected void addScheme( String scheme ) {
+        if ( scheme == null || scheme.isEmpty() ) {
+            return;
+        }
+
+        Argument schemeArgument = new Argument();
+        schemeArgument.setValue( scheme );
+        appBundler.addConfiguredScheme( schemeArgument  );
     }
 
     /**

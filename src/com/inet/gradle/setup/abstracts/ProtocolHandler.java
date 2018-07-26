@@ -1,12 +1,10 @@
-package com.inet.gradle.setup.msi;
+package com.inet.gradle.setup.abstracts;
 
 import java.util.List;
 
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
-import com.inet.gradle.setup.abstracts.Application;
 
 import groovy.lang.Closure;
 
@@ -59,10 +57,8 @@ public class ProtocolHandler extends Application {
 
         ProtocolHandler res = new ProtocolHandler( parent );
         if( scheme instanceof Closure<?> ) {
-            System.out.println( "Closure Path" );
             res = ConfigureUtil.configure( (Closure<?>)scheme, res );
         } else {
-            System.out.println( "Setter Path" );
             res.setScheme( (String)scheme );
         }
 

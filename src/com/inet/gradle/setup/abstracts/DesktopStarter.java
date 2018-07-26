@@ -27,7 +27,7 @@ import groovy.lang.Closure;
 /**
  * Definition of an executable which can be started on the desktop (e.g. an entry in the start menu on Windows)
  */
-public class DesktopStarter extends Application {
+public class DesktopStarter extends ProtocolHandler {
 
     private String             mimeTypes, categories;
 

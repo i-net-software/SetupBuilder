@@ -30,6 +30,7 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
+import com.inet.gradle.setup.abstracts.ProtocolHandler;
 import com.inet.gradle.setup.util.ResourceUtils;
 import com.inet.gradle.setup.util.TempPath;
 
@@ -46,7 +47,7 @@ public class Msi extends AbstractSetupTask {
 
     private boolean                    only32bit;
 
-    private Object                     bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript, languageResourceLocation;
+    private Object                     bannerBmp, dialogBmp, wxsTemplate, multiInstanceScript;
 
     private List<String>               languages;
 
@@ -425,7 +426,6 @@ public class Msi extends AbstractSetupTask {
      *
      * @param script list or single script
      */
-    @SuppressWarnings( "unchecked" )
     public void setPreGUI( Object script ) {
         preGUI.clear();
         preGUI( script );
@@ -437,6 +437,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @param script the content for the entry
      */
+    @SuppressWarnings( { "unchecked", "rawtypes" } )
     public void preGUI( Object script ) {
         if( script == null ) {
             // nothing

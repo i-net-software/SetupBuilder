@@ -66,6 +66,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
         prepareApplication( application, false );
         setDocumentTypes( application.getDocumentType() );
+        addScheme( application.getScheme() );
         finishApplication();
         copyBundleFiles( application );
 

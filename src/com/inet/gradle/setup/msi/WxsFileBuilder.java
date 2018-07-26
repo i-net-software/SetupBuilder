@@ -47,6 +47,7 @@ import org.w3c.dom.Element;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
+import com.inet.gradle.setup.abstracts.ProtocolHandler;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.ResourceUtils;
 import com.inet.gradle.setup.util.XmlFileBuilder;
@@ -180,11 +181,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addIcon();
         addServices();
         addShortcuts();
+        addProtocolHandler();
         addRunBeforeUninstall();
         addRunAfter();
         addDeleteFiles();
         addPreAndPostScripts();
-        addSchemeDefinition();
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
@@ -196,29 +197,37 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
     }
 
     /**
-     * Add the scheme definition using registry entries
+     * Add the scheme for globally defined protocol handler
      */
-    private void addSchemeDefinition() {
+    private void addProtocolHandler() {
+        for( ProtocolHandler handler: task.getProtocolHandler() ) {
+            registerSchemeDefinition( handler );
+        }
+    }
 
-        List<ProtocolHandler> protocolHandler = task.getProtocolHandler();
-        if ( protocolHandler.isEmpty() ) { return; }
+    /**
+     * Add the scheme definitions for an application
+     */
+    private void registerSchemeDefinition( ProtocolHandler handler ) {
+
+        if ( handler.getScheme() == null || handler.getScheme().isEmpty() ) {
+            return;
+        }
 
         Element registryEntries = getComponent( installDir, "protocol_handler_RegistryEntries" );
-        for( ProtocolHandler handler : protocolHandler ) {
 
-            Element registryKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler" ), handler.getScheme() );
-            // registryKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
+        Element registryKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler" ), handler.getScheme() );
+        // registryKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
 
-            addRegistryValue( registryKey, null, "string", handler.getDisplayName() );
-            addRegistryValue( registryKey, "URL Protocol", "string", "" );
+        addRegistryValue( registryKey, null, "string", handler.getDisplayName() );
+        addRegistryValue( registryKey, "URL Protocol", "string", "" );
 
-            Element registrySubKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler_shell" ), handler.getScheme() + "\\shell\\open\\command" );
-            // registrySubKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
+        Element registrySubKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler_shell" ), handler.getScheme() + "\\shell\\open\\command" );
+        // registrySubKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
 
-            handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
-            CommandLine cmd = new CommandLine( handler, javaDir );
-            addRegistryValue( registrySubKey, null, "string", cmd.full );
-        }
+        handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
+        CommandLine cmd = new CommandLine( handler, javaDir );
+        addRegistryValue( registrySubKey, null, "string", cmd.full );
     }
 
     /**
@@ -844,6 +853,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             renameFileIfDynamic( id, linkLocation, name + ".lnk", starter.getDisplayName() + ".lnk" );
 
             registerFileExtension( starter, cmd );
+            registerSchemeDefinition( starter );
         }
     }
 
