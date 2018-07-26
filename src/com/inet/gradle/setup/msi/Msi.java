@@ -67,6 +67,8 @@ public class Msi extends AbstractSetupTask {
 
     private List<MsiLocalizedResource> i18n               = new ArrayList<>();
 
+    private List<ProtocolHandler>      protocolHandler    = new ArrayList<>();
+
 
     /**
      * Create a new instance.
@@ -477,5 +479,21 @@ public class Msi extends AbstractSetupTask {
      */
     public List<MsiLocalizedResource> getI18n() {
         return i18n;
+    }
+
+    /**
+     * Return the list of protocol handler
+     * @return the list of protocol handler
+     */
+    public List<ProtocolHandler> getProtocolHandler() {
+        return protocolHandler;
+    }
+
+    /**
+     * Adds a protocol handler to the application
+     * @param handler the closure of the handler
+     */
+    public void protocolHandler( Object handler ) {
+        ProtocolHandler.addProtocolHandler( getSetupBuilder(), protocolHandler, handler );
     }
 }

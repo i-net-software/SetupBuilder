@@ -184,6 +184,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addRunAfter();
         addDeleteFiles();
         addPreAndPostScripts();
+        addSchemeDefinition();
 
         //Feature
         Element feature = getOrCreateChildById( product, "Feature", "MainApplication" );
@@ -192,6 +193,32 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
 
         save();
+    }
+
+    /**
+     * Add the scheme definition using registry entries
+     */
+    private void addSchemeDefinition() {
+
+        List<ProtocolHandler> protocolHandler = task.getProtocolHandler();
+        if ( protocolHandler.isEmpty() ) { return; }
+
+        Element registryEntries = getComponent( installDir, "protocol_handler_RegistryEntries" );
+        for( ProtocolHandler handler : protocolHandler ) {
+
+            Element registryKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler" ), handler.getScheme() );
+            // registryKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
+
+            addRegistryValue( registryKey, null, "string", handler.getDisplayName() );
+            addRegistryValue( registryKey, "URL Protocol", "string", "" );
+
+            Element registrySubKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler_shell" ), handler.getScheme() + "\\shell\\open\\command" );
+            // registrySubKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
+
+            handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
+            CommandLine cmd = new CommandLine( handler, javaDir );
+            addRegistryValue( registrySubKey, null, "string", cmd.full );
+        }
     }
 
     /**
@@ -473,7 +500,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element wixUiInstalldir = getOrCreateChildById( product, "Property", "WIXUI_INSTALLDIR" );
         addAttributeIfNotExists( wixUiInstalldir, "Value", "INSTALLDIR" );
         getOrCreateChildById( product, "UIRef", "WixUI_ErrorProgressText" ); // https://stackoverflow.com/questions/44844248/wix-progressdlg-not-showing-status-info-properly
-        Element uiRef = getOrCreateChildById( product, "UIRef", "WixUI_InstallDir" );
+        getOrCreateChildById( product, "UIRef", "WixUI_InstallDir" );
 
         boolean isLicense = addLicense( product );
         if( !isLicense ) {

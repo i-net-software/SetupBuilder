@@ -15,7 +15,7 @@
  */
 package com.inet.gradle.setup.msi;
 
-import com.inet.gradle.setup.abstracts.DesktopStarter;
+import com.inet.gradle.setup.abstracts.Application;
 
 /**
  * Get the parts of a windows command line.
@@ -30,11 +30,11 @@ class CommandLine {
     final String workDir;
 
     /**
-     * Generate the parts of the command line. 
+     * Generate the parts of the command line.
      * @param starter a command description
      * @param javaDir path to java if embedded
      */
-    CommandLine( DesktopStarter starter, String javaDir ) {
+    CommandLine( Application starter, String javaDir ) {
         String target = starter.getExecutable();
         String arguments = starter.getStartArguments();
         String dir;
