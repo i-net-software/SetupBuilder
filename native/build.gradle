@@ -1,3 +1,5 @@
+apply plugin: 'java'
+
 task getXCrun(type: Exec) {
     commandLine "xcrun"
     args "--show-sdk-path"
@@ -9,7 +11,7 @@ task compileNativeStarter(type: Exec) {
 
     dependsOn getXCrun
 
-    def outputFile = new File( "../src/com/oracle/appbundler", "JavaAppLauncher" )
+    def outputFile = new File( "${buildDir}", "JavaAppLauncher" )
     doFirst {
         def javahome = System.getProperty( "java.home" )
         println javahome += "/..";
@@ -40,6 +42,10 @@ task compileNativeStarter(type: Exec) {
 
     doLast {
         outputFile.setExecutable( true, false)
+        copy {
+            from( outputFile )
+            into('../src/com/oracle/appbundler')
+        }
     }
 
     workingDir "."
@@ -48,4 +54,4 @@ task compileNativeStarter(type: Exec) {
     commandLine "/usr/bin/gcc"
 }
 
-defaultTasks = ["compileNativeStarter"]
+defaultTasks = ["compileNativeStarter", "clean"]

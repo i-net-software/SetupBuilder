@@ -192,15 +192,7 @@ int launch(char *commandName, int progargc, char *progargv[]) {
     // It is highly recommended that the resulting .app container is being signed with a certificate from Apple - otherwise you will not need this mechanism.
     // Moved up here to check if we want to launch a JNLP. If so: make sure the version is below 9
     
-    /*
-     NSString *jnlplauncher = [infoDictionary objectForKey:@JVM_RUN_JNLP];
-     /*/
-    NSString *jnlplauncher = [NSString stringWithFormat:@"%s", progargv[0]];
-    // Ordering does not matter here. REmove the first entry by moving the last one into place
-    progargv[0] = progargv[progargc-1];
-    progargc--;
-    //*/
-    
+    NSString *jnlplauncher = [infoDictionary objectForKey:@JVM_RUN_JNLP];
     if ( jnlplauncher != nil ) {
         int required = 8;
         if ( jvmRequired != nil ) {
