@@ -1,5 +1,7 @@
 package com.inet.gradle.setup.abstracts;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.gradle.util.ConfigureUtil;
@@ -16,7 +18,7 @@ import groovy.lang.Closure;
  */
 public class ProtocolHandler extends Application {
 
-    private String scheme;
+    private List<String> scheme = new ArrayList<>();
 
     /**
      * Construct the protocol handler
@@ -27,24 +29,55 @@ public class ProtocolHandler extends Application {
     }
 
     /**
-     * Return the scheme
-     * @return the scheme
+     * Return the list of scheme
+     * @return the list of scheme
      */
-    public String getScheme() {
+    public List<String> getSchemes() {
         return scheme;
     }
 
     /**
-     * Set the scheme
+     * Set the scheme. Can be a string or list
      * @param scheme the scheme to set
      */
-    public void setScheme( String scheme ) {
-        if ( !scheme.matches( "^[a-zA-Z]+$" ) ) {
-            throw new IllegalArgumentException( "The scheme only allows the letters 'a-z'. Was: " + scheme );
+    @SuppressWarnings( "unchecked" )
+    public void setScheme( Object scheme ) {
+        if ( ! ( scheme instanceof List<?> ) ) {
+            this.scheme = Arrays.asList( (String)scheme );
+        } else {
+            this.scheme = (List<String>)scheme;
         }
-        this.scheme = scheme;
+
+        checkSchemesAreValid();
     }
 
+    /**
+     * Add one or a list of schemes
+     * @param scheme the scheme(s) to add
+     */
+    @SuppressWarnings( "unchecked" )
+    public void scheme( Object scheme ) {
+        if ( ! ( scheme instanceof List<?> ) ) {
+            if ( !((String)scheme).matches( "^[a-zA-Z]+$" ) ) {
+                throw new IllegalArgumentException( "The scheme only allows the letters 'a-z'. Was: " + scheme );
+            }
+            this.scheme.add( (String)scheme );
+        } else {
+            this.scheme.addAll( (List<String>)scheme );
+        }
+
+        checkSchemesAreValid();
+    }
+
+    /**
+     * Check validity of schemes
+     */
+    private void checkSchemesAreValid() {
+        if ( this.scheme.stream().filter( e -> !e.matches( "^[a-zA-Z]+$" ) ).findFirst().isPresent() ) {
+            this.scheme = new ArrayList<>(); // reset
+            throw new IllegalArgumentException( "The scheme only allows the letters 'a-z'. Was: " + this.scheme );
+        }
+    }
 
     /**
      * Add a protocol handler
@@ -59,7 +92,7 @@ public class ProtocolHandler extends Application {
         if( scheme instanceof Closure<?> ) {
             res = ConfigureUtil.configure( (Closure<?>)scheme, res );
         } else {
-            res.setScheme( (String)scheme );
+            res.setScheme( scheme );
         }
 
         holder.add( res );

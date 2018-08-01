@@ -210,24 +210,21 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private void registerSchemeDefinition( ProtocolHandler handler ) {
 
-        if ( handler.getScheme() == null || handler.getScheme().isEmpty() ) {
-            return;
+        for( String scheme: handler.getSchemes() ) {
+
+            Element registryEntries = getComponent( installDir, id( scheme ) + "protocol_handler_RegistryEntries" );
+
+            Element registryKey = addRegistryKey( registryEntries, "HKCR", id( scheme + "_protocol_handler" ), scheme );
+
+            addRegistryValue( registryKey, null, "string", handler.getDisplayName() );
+            addRegistryValue( registryKey, "URL Protocol", "string", "" );
+
+            Element registrySubKey = addRegistryKey( registryEntries, "HKCR", id( scheme + "_protocol_handler_shell" ), scheme + "\\shell\\open\\command" );
+
+            handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
+            CommandLine cmd = new CommandLine( handler, javaDir );
+            addRegistryValue( registrySubKey, null, "string", cmd.full );
         }
-
-        Element registryEntries = getComponent( installDir, "protocol_handler_RegistryEntries" );
-
-        Element registryKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler" ), handler.getScheme() );
-        // registryKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
-
-        addRegistryValue( registryKey, null, "string", handler.getDisplayName() );
-        addRegistryValue( registryKey, "URL Protocol", "string", "" );
-
-        Element registrySubKey = addRegistryKey( registryEntries, "HKCR", id( handler.getScheme() + "_protocol_handler_shell" ), handler.getScheme() + "\\shell\\open\\command" );
-        // registrySubKey.setAttribute( "Action", "createAndRemoveOnUninstall" );
-
-        handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
-        CommandLine cmd = new CommandLine( handler, javaDir );
-        addRegistryValue( registrySubKey, null, "string", cmd.full );
     }
 
     /**
