@@ -498,7 +498,7 @@ public class AppBundlerTask extends Task {
 
     private void copyRuntime(File plugInsDirectory) throws IOException {
         if (runtime != null) {
-            runtime.copyTo(plugInsDirectory);
+            runtime.copyTo(plugInsDirectory, getProject());
         }
     }
 
