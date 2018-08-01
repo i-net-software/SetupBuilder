@@ -1,0 +1,51 @@
+task getXCrun(type: Exec) {
+    commandLine "xcrun"
+    args "--show-sdk-path"
+    standardOutput = new ByteArrayOutputStream()
+    ext.run = { return standardOutput.toString().trim() }
+}
+
+task compileNativeStarter(type: Exec) {
+
+    dependsOn getXCrun
+
+    def outputFile = new File( "../src/com/oracle/appbundler", "JavaAppLauncher" )
+    doFirst {
+        def javahome = System.getProperty( "java.home" )
+        println javahome += "/..";
+
+        args "-v"
+        args "-arch"
+        args "x86_64"
+        args "-arch"
+        args "i386"
+        args "-I"
+        args "${javahome}/include"
+        args "-I"
+        args "${javahome}/include/darwin"
+        args "-DLIBJLI_DYLIB=\"${javahome}/jre/lib/jli/libjli.dylib\""
+        args "-framework"
+        args "Cocoa"
+        args "-F"
+        args "${javahome}/../.."
+        args "-isysroot"
+        args "${getXCrun.run()}"
+        args "-mmacosx-version-min=10.7"
+        args "-fobjc-exceptions"
+        args "-std=c99"
+        args "-o"
+        args outputFile
+        args "main.m"
+    }
+
+    doLast {
+        outputFile.setExecutable( true, false)
+    }
+
+    workingDir "."
+    outputs.file( outputFile )
+
+    commandLine "/usr/bin/gcc"
+}
+
+defaultTasks = ["compileNativeStarter"]
