@@ -193,6 +193,15 @@ int launch(char *commandName, int progargc, char *progargv[]) {
     // Moved up here to check if we want to launch a JNLP. If so: make sure the version is below 9
     
     NSString *jnlplauncher = [infoDictionary objectForKey:@JVM_RUN_JNLP];
+    if ( jnlplauncher == nil && progargc > 0 ) {
+        // Check if the first parameter was a jnlp file ...
+        NSString *firstArgument = [NSString stringWithFormat:@"%s", progargv[0]];
+        if ( [firstArgument.pathExtension isEqualToString:@"jnlp"] ) {
+            jnlplauncher = firstArgument;
+            progargv[0] = progargv[progargc-1];
+            progargc--;
+        }
+    }
     if ( jnlplauncher != nil ) {
         int required = 8;
         if ( jvmRequired != nil ) {
