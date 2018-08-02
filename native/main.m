@@ -386,6 +386,7 @@ int launch(char *commandName, int progargc, char *progargv[]) {
         [options addObject:@"-Xverify:remote"];
         [options addObject:@"-Djnlpx.remove=true"];
         [options addObject:@"-DtrustProxy=true"];
+        [options addObject:@"-Dapple.awt.UIElement=true"]; // This is extra to hide the programm
         
         [options addObject:[NSString stringWithFormat:@"-Djava.security.policy=file:%@/lib/security/javaws.policy", runtimePath]];
         [options addObject:[NSString stringWithFormat:@"-Xbootclasspath/a:%@/lib/javaws.jar:%@/lib/deploy.jar:%@/lib/plugin.jar", runtimePath, runtimePath, runtimePath]];
