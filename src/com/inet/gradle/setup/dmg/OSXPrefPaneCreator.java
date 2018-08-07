@@ -56,7 +56,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         File prefPaneBinary = new File( prefPaneSource, "build/sym/Release/" + internalName + ".prefPane" );
 
         if( !prefPaneBinary.exists() ) {
-            throw new GradleException( "Launch4j failed. " );
+            throw new GradleException( "Failed to create the Preferences Pane." );
         }
 
         // Where will the Result be put
@@ -70,12 +70,14 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         Path iconPath = getApplicationIcon().toPath();
 
         Files.copy( iconPath, new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/Resources/applet.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        Files.move( new File( prefPaneContents, "MacOS/" + internalName ).toPath(), new File( prefPaneContents, "MacOS/" + displayName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+
+        //        Files.move( new File( prefPaneContents, "MacOS/" + internalName ).toPath(), new File( prefPaneContents, "MacOS/" + displayName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/MacOS/applet" ).toPath(), new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/MacOS/" + internalName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), new File( prefPaneContents, "Resources/" + displayName + ".app" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Logging.sysout( "Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
         // Make executable
-        setApplicationFilePermissions( new File( prefPaneContents, "Resources/" + displayName + ".app/Contents/MacOS/applet" ) );
+        setApplicationFilePermissions( new File( prefPaneContents, "Resources/" + displayName + ".app/Contents/MacOS/" + internalName ) );
 
         // Rename prefPane
         Files.move( prefPaneBinary.toPath(), prefPaneLocation.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
@@ -87,10 +89,13 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         File prefPanePLIST = new File( prefPaneLocation, "Contents/Info.plist" );
         setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier()) + ".prefPane" );
         setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
-        setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
-        setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
+        setPlistProperty( prefPanePLIST, ":CFBundleExecutable", internalName );
+        setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName ); // Will be used for the sudo app name
 
-        setPlistProperty( prefPanePLIST, ":CFBundleExecutable", displayName );
+        File sudoPLIST = new File( prefPaneLocation, "Contents/Resources/" + displayName + ".app/Contents/Info.plist" );
+        setPlistProperty( sudoPLIST, ":CFBundleIdentifier", (getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier()) + ".prefPane.helper" );
+        setPlistProperty( sudoPLIST, ":CFBundleName", displayName + " Helper" );
+        setPlistProperty( sudoPLIST, ":CFBundleExecutable", internalName );
 
         File servicePLIST = new File( prefPaneLocation, "Contents/Resources/service.plist" );
         setPlistProperty( servicePLIST, ":Name", displayName );
@@ -128,6 +133,13 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         }
 
         ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
+/*
+        // Sign these packages already.
+        if( task.getCodeSign() != null ) {
+            task.getCodeSign().signApplication( new File( prefPaneLocation, "Contents/Resources/" + displayName + ".app" ) );
+            task.getCodeSign().signApplication( prefPaneLocation.getAbsoluteFile() );
+        }
+*/
     }
 
     /**
