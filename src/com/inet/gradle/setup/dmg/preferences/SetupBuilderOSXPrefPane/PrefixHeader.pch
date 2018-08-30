@@ -1,0 +1,13 @@
+//
+//  PrefixHeader.pch
+//  SetupBuilderOSXPrefPane
+//
+//  Created by Gerry Weißbach on 03/02/2016.
+//  Copyright © 2016 i-net software. All rights reserved.
+//
+
+#ifdef DEBUG
+    #define DLog(...) NSLog(@"%s %@", __PRETTY_FUNCTION__, [NSString stringWithFormat:__VA_ARGS__])
+#else
+    #define DLog(...) do { } while (0)
+#endif

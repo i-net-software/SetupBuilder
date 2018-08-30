@@ -1,0 +1,436 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		300AAE101B60D9A800953A78 /* OnOffSwitchControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AAE0C1B60D9A800953A78 /* OnOffSwitchControl.h */; };
+		300AAE111B60D9A800953A78 /* OnOffSwitchControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE0D1B60D9A800953A78 /* OnOffSwitchControl.m */; };
+		300AAE121B60D9A800953A78 /* OnOffSwitchControlCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AAE0E1B60D9A800953A78 /* OnOffSwitchControlCell.h */; };
+		300AAE131B60D9A800953A78 /* OnOffSwitchControlCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE0F1B60D9A800953A78 /* OnOffSwitchControlCell.m */; };
+		300AAE161B60DF1B00953A78 /* ProductIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 300AAE151B60DF1B00953A78 /* ProductIcon.icns */; };
+		300AAE321B60E4C700953A78 /* Process.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AAE2C1B60E4C700953A78 /* Process.h */; };
+		300AAE331B60E4C700953A78 /* Process.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE2D1B60E4C700953A78 /* Process.m */; };
+		300AAE341B60E4C700953A78 /* Service.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AAE2E1B60E4C700953A78 /* Service.h */; };
+		300AAE351B60E4C700953A78 /* Service.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE2F1B60E4C700953A78 /* Service.m */; };
+		300AAE361B60E4C700953A78 /* ServiceController.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AAE301B60E4C700953A78 /* ServiceController.h */; };
+		300AAE371B60E4C700953A78 /* ServiceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE311B60E4C700953A78 /* ServiceController.m */; };
+		303114CE1B6120950017C421 /* service.plist in Resources */ = {isa = PBXBuildFile; fileRef = 303114CD1B6120950017C421 /* service.plist */; };
+		303EB2E81B6902DD003C5B98 /* SetupBuilderOSXPrefPane.app in Resources */ = {isa = PBXBuildFile; fileRef = 303EB2E71B6902DD003C5B98 /* SetupBuilderOSXPrefPane.app */; };
+		3066D9D61B60D49400729DB7 /* SetupBuilderOSXPrefPane.h in Headers */ = {isa = PBXBuildFile; fileRef = 3066D9D51B60D49400729DB7 /* SetupBuilderOSXPrefPane.h */; };
+		3066D9D81B60D49400729DB7 /* SetupBuilderOSXPrefPane.m in Sources */ = {isa = PBXBuildFile; fileRef = 3066D9D71B60D49400729DB7 /* SetupBuilderOSXPrefPane.m */; };
+		3066D9DD1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3066D9DB1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib */; };
+		30957F4E1B626BC900D8528D /* gray.png in Resources */ = {isa = PBXBuildFile; fileRef = 30957F4A1B626BC900D8528D /* gray.png */; };
+		30957F4F1B626BC900D8528D /* green.png in Resources */ = {isa = PBXBuildFile; fileRef = 30957F4B1B626BC900D8528D /* green.png */; };
+		30957F501B626BC900D8528D /* red.png in Resources */ = {isa = PBXBuildFile; fileRef = 30957F4C1B626BC900D8528D /* red.png */; };
+		30957F511B626BC900D8528D /* yellow.png in Resources */ = {isa = PBXBuildFile; fileRef = 30957F4D1B626BC900D8528D /* yellow.png */; };
+		30C2C9D81C61DC9600EA672C /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 30C2C9D71C61DC9600EA672C /* PrefixHeader.pch */; };
+		30C477F11C4FB61E006FC2AA /* Strings.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30C477F31C4FB61E006FC2AA /* Strings.strings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		300AAE0C1B60D9A800953A78 /* OnOffSwitchControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnOffSwitchControl.h; sourceTree = "<group>"; };
+		300AAE0D1B60D9A800953A78 /* OnOffSwitchControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OnOffSwitchControl.m; sourceTree = "<group>"; };
+		300AAE0E1B60D9A800953A78 /* OnOffSwitchControlCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OnOffSwitchControlCell.h; sourceTree = "<group>"; };
+		300AAE0F1B60D9A800953A78 /* OnOffSwitchControlCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OnOffSwitchControlCell.m; sourceTree = "<group>"; };
+		300AAE151B60DF1B00953A78 /* ProductIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = ProductIcon.icns; sourceTree = "<group>"; };
+		300AAE2C1B60E4C700953A78 /* Process.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Process.h; sourceTree = "<group>"; };
+		300AAE2D1B60E4C700953A78 /* Process.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Process.m; sourceTree = "<group>"; };
+		300AAE2E1B60E4C700953A78 /* Service.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Service.h; sourceTree = "<group>"; };
+		300AAE2F1B60E4C700953A78 /* Service.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Service.m; sourceTree = "<group>"; };
+		300AAE301B60E4C700953A78 /* ServiceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceController.h; sourceTree = "<group>"; };
+		300AAE311B60E4C700953A78 /* ServiceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceController.m; sourceTree = "<group>"; };
+		303114CD1B6120950017C421 /* service.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = service.plist; sourceTree = "<group>"; };
+		303EB2E71B6902DD003C5B98 /* SetupBuilderOSXPrefPane.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; path = SetupBuilderOSXPrefPane.app; sourceTree = "<group>"; };
+		3066D9D01B60D49400729DB7 /* SetupBuilderOSXPrefPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SetupBuilderOSXPrefPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
+		3066D9D41B60D49400729DB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3066D9D51B60D49400729DB7 /* SetupBuilderOSXPrefPane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SetupBuilderOSXPrefPane.h; sourceTree = "<group>"; };
+		3066D9D71B60D49400729DB7 /* SetupBuilderOSXPrefPane.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SetupBuilderOSXPrefPane.m; sourceTree = "<group>"; };
+		3066D9DC1B60D49400729DB7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/SetupBuilderOSXPrefPane.xib; sourceTree = "<group>"; };
+		30957F4A1B626BC900D8528D /* gray.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gray.png; sourceTree = "<group>"; };
+		30957F4B1B626BC900D8528D /* green.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = green.png; sourceTree = "<group>"; };
+		30957F4C1B626BC900D8528D /* red.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = red.png; sourceTree = "<group>"; };
+		30957F4D1B626BC900D8528D /* yellow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = yellow.png; sourceTree = "<group>"; };
+		30C2C9D71C61DC9600EA672C /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		30C477F21C4FB61E006FC2AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Strings.strings; sourceTree = "<group>"; };
+		30C477F91C4FB69F006FC2AA /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Strings.strings; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3066D9CC1B60D49400729DB7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		300AAE0A1B60D9A800953A78 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				303EB2E71B6902DD003C5B98 /* SetupBuilderOSXPrefPane.app */,
+				300AAE0B1B60D9A800953A78 /* OnOffSwitchControl */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		300AAE0B1B60D9A800953A78 /* OnOffSwitchControl */ = {
+			isa = PBXGroup;
+			children = (
+				300AAE0C1B60D9A800953A78 /* OnOffSwitchControl.h */,
+				300AAE0D1B60D9A800953A78 /* OnOffSwitchControl.m */,
+				300AAE0E1B60D9A800953A78 /* OnOffSwitchControlCell.h */,
+				300AAE0F1B60D9A800953A78 /* OnOffSwitchControlCell.m */,
+			);
+			path = OnOffSwitchControl;
+			sourceTree = "<group>";
+		};
+		300AAE141B60DF1B00953A78 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				30957F491B626BC900D8528D /* status */,
+				303114CD1B6120950017C421 /* service.plist */,
+				300AAE151B60DF1B00953A78 /* ProductIcon.icns */,
+				30C477F31C4FB61E006FC2AA /* Strings.strings */,
+			);
+			path = Resources;
+			sourceTree = SOURCE_ROOT;
+		};
+		300AAE2B1B60E4C700953A78 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				300AAE2C1B60E4C700953A78 /* Process.h */,
+				300AAE2D1B60E4C700953A78 /* Process.m */,
+				300AAE2E1B60E4C700953A78 /* Service.h */,
+				300AAE2F1B60E4C700953A78 /* Service.m */,
+				300AAE301B60E4C700953A78 /* ServiceController.h */,
+				300AAE311B60E4C700953A78 /* ServiceController.m */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		3066D9C61B60D49400729DB7 = {
+			isa = PBXGroup;
+			children = (
+				3066D9D21B60D49400729DB7 /* SetupBuilderOSXPrefPane */,
+				3066D9D11B60D49400729DB7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3066D9D11B60D49400729DB7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3066D9D01B60D49400729DB7 /* SetupBuilderOSXPrefPane.prefPane */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3066D9D21B60D49400729DB7 /* SetupBuilderOSXPrefPane */ = {
+			isa = PBXGroup;
+			children = (
+				30C2C9D71C61DC9600EA672C /* PrefixHeader.pch */,
+				300AAE2B1B60E4C700953A78 /* Service */,
+				300AAE141B60DF1B00953A78 /* Resources */,
+				300AAE0A1B60D9A800953A78 /* lib */,
+				3066D9D51B60D49400729DB7 /* SetupBuilderOSXPrefPane.h */,
+				3066D9D71B60D49400729DB7 /* SetupBuilderOSXPrefPane.m */,
+				3066D9DB1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib */,
+				3066D9D31B60D49400729DB7 /* Supporting Files */,
+			);
+			path = SetupBuilderOSXPrefPane;
+			sourceTree = "<group>";
+		};
+		3066D9D31B60D49400729DB7 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				3066D9D41B60D49400729DB7 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		30957F491B626BC900D8528D /* status */ = {
+			isa = PBXGroup;
+			children = (
+				30957F4A1B626BC900D8528D /* gray.png */,
+				30957F4B1B626BC900D8528D /* green.png */,
+				30957F4C1B626BC900D8528D /* red.png */,
+				30957F4D1B626BC900D8528D /* yellow.png */,
+			);
+			path = status;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		3066D9CD1B60D49400729DB7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				300AAE341B60E4C700953A78 /* Service.h in Headers */,
+				300AAE121B60D9A800953A78 /* OnOffSwitchControlCell.h in Headers */,
+				300AAE361B60E4C700953A78 /* ServiceController.h in Headers */,
+				3066D9D61B60D49400729DB7 /* SetupBuilderOSXPrefPane.h in Headers */,
+				300AAE321B60E4C700953A78 /* Process.h in Headers */,
+				30C2C9D81C61DC9600EA672C /* PrefixHeader.pch in Headers */,
+				300AAE101B60D9A800953A78 /* OnOffSwitchControl.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		3066D9CF1B60D49400729DB7 /* SetupBuilderOSXPrefPane */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3066D9E01B60D49400729DB7 /* Build configuration list for PBXNativeTarget "SetupBuilderOSXPrefPane" */;
+			buildPhases = (
+				3066D9CB1B60D49400729DB7 /* Sources */,
+				3066D9CC1B60D49400729DB7 /* Frameworks */,
+				3066D9CD1B60D49400729DB7 /* Headers */,
+				3066D9CE1B60D49400729DB7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SetupBuilderOSXPrefPane;
+			productName = SetupBuilderOSXPrefPane;
+			productReference = 3066D9D01B60D49400729DB7 /* SetupBuilderOSXPrefPane.prefPane */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3066D9C71B60D49400729DB7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0820;
+				ORGANIZATIONNAME = "i-net software";
+				TargetAttributes = {
+					3066D9CF1B60D49400729DB7 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+				};
+			};
+			buildConfigurationList = 3066D9CA1B60D49400729DB7 /* Build configuration list for PBXProject "SetupBuilderOSXPrefPane" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				de,
+			);
+			mainGroup = 3066D9C61B60D49400729DB7;
+			productRefGroup = 3066D9D11B60D49400729DB7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3066D9CF1B60D49400729DB7 /* SetupBuilderOSXPrefPane */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3066D9CE1B60D49400729DB7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				30957F4F1B626BC900D8528D /* green.png in Resources */,
+				3066D9DD1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib in Resources */,
+				30C477F11C4FB61E006FC2AA /* Strings.strings in Resources */,
+				30957F511B626BC900D8528D /* yellow.png in Resources */,
+				30957F4E1B626BC900D8528D /* gray.png in Resources */,
+				30957F501B626BC900D8528D /* red.png in Resources */,
+				303114CE1B6120950017C421 /* service.plist in Resources */,
+				300AAE161B60DF1B00953A78 /* ProductIcon.icns in Resources */,
+				303EB2E81B6902DD003C5B98 /* SetupBuilderOSXPrefPane.app in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3066D9CB1B60D49400729DB7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				300AAE351B60E4C700953A78 /* Service.m in Sources */,
+				300AAE111B60D9A800953A78 /* OnOffSwitchControl.m in Sources */,
+				300AAE131B60D9A800953A78 /* OnOffSwitchControlCell.m in Sources */,
+				3066D9D81B60D49400729DB7 /* SetupBuilderOSXPrefPane.m in Sources */,
+				300AAE331B60E4C700953A78 /* Process.m in Sources */,
+				300AAE371B60E4C700953A78 /* ServiceController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		3066D9DB1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3066D9DC1B60D49400729DB7 /* Base */,
+			);
+			name = SetupBuilderOSXPrefPane.xib;
+			sourceTree = "<group>";
+		};
+		30C477F31C4FB61E006FC2AA /* Strings.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				30C477F21C4FB61E006FC2AA /* en */,
+				30C477F91C4FB69F006FC2AA /* de */,
+			);
+			name = Strings.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3066D9DE1B60D49400729DB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		3066D9DF1B60D49400729DB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		3066D9E11B60D49400729DB7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = NO;
+				DSTROOT = /tmp/prefPane;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = SetupBuilderOSXPrefPane/PrefixHeader.pch;
+				INFOPLIST_FILE = SetupBuilderOSXPrefPane/Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.inet.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = prefPane;
+			};
+			name = Debug;
+		};
+		3066D9E21B60D49400729DB7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = NO;
+				DSTROOT = /tmp/prefPane;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = SetupBuilderOSXPrefPane/PrefixHeader.pch;
+				INFOPLIST_FILE = SetupBuilderOSXPrefPane/Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/PreferencePanes";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.inet.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = prefPane;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3066D9CA1B60D49400729DB7 /* Build configuration list for PBXProject "SetupBuilderOSXPrefPane" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3066D9DE1B60D49400729DB7 /* Debug */,
+				3066D9DF1B60D49400729DB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3066D9E01B60D49400729DB7 /* Build configuration list for PBXNativeTarget "SetupBuilderOSXPrefPane" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3066D9E11B60D49400729DB7 /* Debug */,
+				3066D9E21B60D49400729DB7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3066D9C71B60D49400729DB7 /* Project object */;
+}

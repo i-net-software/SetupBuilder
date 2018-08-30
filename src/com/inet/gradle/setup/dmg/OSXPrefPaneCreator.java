@@ -1,7 +1,8 @@
 package com.inet.gradle.setup.dmg;
 
 import java.io.File;
-import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
      * @param launch the launch description
      * @param task the task
      * @param setup the SetupBuilder
-     * @return the file to the created exe.
+     * @return the file to the created pref pane.
      * @throws Exception if any error occur
      */
     void create( Service service ) throws Exception {
@@ -147,10 +148,10 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
      *
      * @param internalName to unpack it now
      * @return file to prefpane sources
-     * @throws IOException if an error occurs
+     * @throws Exception in case of errors.
      */
     @SuppressWarnings( "serial" )
-    private File unpackAndPatchPrefPaneSource( String internalName ) throws IOException {
+    private File unpackAndPatchPrefPaneSource( String internalName ) throws Exception {
 
         // Create Config and load Dependencies.
         String configName = "prefPaneSource";
@@ -160,26 +161,27 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
             config.setVisible( false );
             config.setTransitive( false );
             DependencyHandler dependencies = project.getDependencies();
-            dependencies.add( configName, "de.inetsoftware:SetupBuilderOSXPrefPane:+:sources" );
+            dependencies.add( configName, "org.openbakery.xcode-plugin:0.15.2" );
         }
 
         // Prepare output directory
         File outputDir = new File( buildDir, configName );
         outputDir.mkdirs();
 
-        // Unzip the content
-        for( File file : config.getFiles() ) {
-            ResourceUtils.unZipIt( file, outputDir, ( entryName ) -> {
-                return entryName.replaceAll( "SetupBuilderOSXPrefPane", internalName );
-            }, ( inputStream ) -> {
+        URL dirURL = OSXPrefPaneCreator.class.getClassLoader().getResource( "com/inet/gradle/setup/dmg/preferences/build.gradle" );
+        String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
+        File jar = new File(URLDecoder.decode(jarPath, "UTF-8"));
 
-                return new ReplacingInputStream( inputStream, new HashMap<byte[], byte[]>() {
-                    {
-                        put( "SetupBuilderOSXPrefPane".getBytes(), internalName.getBytes() );
-                    }
-                } );
+        // Unzip the content
+        ResourceUtils.unZipIt( jar, outputDir, "com/inet/gradle/setup/dmg/preferences", ( entryName ) -> {
+            return entryName.replaceAll( "SetupBuilderOSXPrefPane", internalName );
+        }, ( inputStream ) -> {
+            return new ReplacingInputStream( inputStream, new HashMap<byte[], byte[]>() {
+                {
+                    put( "SetupBuilderOSXPrefPane".getBytes(), internalName.getBytes() );
+                }
             } );
-        }
+        } );
         return outputDir;
     }
 }

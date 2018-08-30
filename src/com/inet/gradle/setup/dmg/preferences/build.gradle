@@ -1,0 +1,82 @@
+plugins {
+    id "com.gradle.plugin-publish" version "0.9.1"
+    id "org.openbakery.xcode-plugin" version "0.15.2"
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+group = 'de.inetsoftware'
+version = '1.9'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile gradleApi()
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs = ['.']
+            exclude 'build'
+        }
+    }
+}
+
+if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
+    apply from: '../BuildScripts/base.gradle' // for internal build system
+    println "Uploading into internal Repository 'fileserver'"
+    
+    preparePublish.dependsOn 'sourcesJar'
+    if ( System.getProperty("snapshot") ) {
+        version += '-SNAPSHOT' // setting version to snapshot
+    }
+    
+} else {
+    println "Uploading into local '../repo'"
+    version += '-SNAPSHOT' // setting version to snapshot
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: uri('../repo'))
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    uploadArchives.dependsOn sourcesJar
+    from sourceSets.main.resources
+    classifier "sources"
+
+    doLast {
+        configurations.archives.artifacts.removeAll{ it.classifier != "sources" } // only leave gthe sources
+    }
+}
+/*
+publishing {
+    publications {
+        myPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            pom.withXml {
+                asNode().appendNode('description', 'Preference Pane sources')
+            }
+        }
+    }
+}*/
+
+compileJava.enabled = false
+classes.enabled = false
+jar.enabled = false
+
+xcodebuild {
+  scheme = 'SetupBuilderOSXPrefPane'
+  target = 'SetupBuilderOSXPrefPane'
+  configuration = 'Release'
+  type = 'OSX'
+}

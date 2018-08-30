@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Description</key>
+	<string>application.description</string>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Label</key>
+	<string>application.label</string>
+	<key>Name</key>
+	<string>application name</string>
+	<key>Program</key>
+	<string>application.app</string>
+	<key>RunAsRoot</key>
+	<true/>
+	<key>RunAtBoot</key>
+	<true/>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>Version</key>
+	<string>1.0.0</string>
+	<key>starter</key>
+	<array>
+		<dict>
+			<key>title</key>
+			<string>Test Link</string>
+			<key>action</key>
+			<string>echo &quot;Hello World&quot;</string>
+		</dict>
+		<dict>
+			<key>asroot</key>
+			<true/>
+			<key>title</key>
+			<string>Test Link - keeps open</string>
+			<key>action</key>
+			<string>/usr/bin/osascript -e &quot;display dialog \\&quot;Hello World\\&quot;&quot;</string>
+		</dict>
+	</array>
+</dict>
+</plist>

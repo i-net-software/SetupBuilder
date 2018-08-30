@@ -1,0 +1,13 @@
+/* 
+  Strings.strings
+  SetupBuilderOSXPrefPane
+
+  Created by Gerry Weißbach on 20/01/2016.
+  Copyright © 2016 i-net software. All rights reserved.
+*/
+"informativeUninstall" = "Hiermit wird '%@' und das damit verbundene Systemsteuerungsprogramm entfernt.";
+"willUninstall" = "Möchten Sie '%@' wirklich entfernen?";
+"Yes" = "Ja";
+"Cancel" = "Abbrechen";
+"Uninstall" = "Deinstallation";
+"runAsRoot" = " (als '%@' ausführen)";

@@ -71,6 +71,10 @@ public class ResourceUtils {
     }
 
     public static void unZipIt( File file, File folder, Function<String, String> nameClosure, Function<InputStream, InputStream> streamClosure ) {
+        unZipIt( file, folder, "", nameClosure, null );
+    }
+
+    public static void unZipIt( File file, File folder, String startsWith, Function<String, String> nameClosure, Function<InputStream, InputStream> streamClosure ) {
 
         // create output directory is not exists
         if( !folder.exists() ) {
@@ -85,6 +89,11 @@ public class ResourceUtils {
 
                 String fileName = zipEntry.getName();
                 if( !zipEntry.isDirectory() ) {
+                    if ( fileName.startsWith( startsWith ) ) {
+                        fileName = fileName.substring( startsWith.length() );
+                    } else {
+                        continue;
+                    }
 
                     if( nameClosure != null ) {
                         fileName = nameClosure.apply( fileName );
@@ -174,8 +183,15 @@ public class ResourceUtils {
                 if (name.startsWith(path)) { //filter according to the path
                     String entry = name.substring(path.length());
                     int checkSubdir = entry.indexOf("/");
-                    if (checkSubdir >= 0 || entry.isEmpty()) {
+                    if (checkSubdir >= 0 ) {
                         // if it is a subdirectory, we don't want it
+                        File nDest = new File( destination, entry.substring( 0, checkSubdir ) );
+                        if ( !nDest.exists() ) {
+                            nDest.mkdirs();
+                        }
+                        extractDirectory( name, nDest );
+                        continue;
+                    } else if ( entry.isEmpty() ) {
                         continue;
                     }
 

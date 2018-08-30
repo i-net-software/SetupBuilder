@@ -160,8 +160,8 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
     }
 
     /**
-     * Adds a scheme to the application. That is: a protocol that will trigger this app
-     * @param scheme
+     * Adds a scheme to the application. That is: a protocol that will trigger this application
+     * @param scheme a scheme to add
      */
     protected void addScheme( String scheme ) {
         if ( scheme == null || scheme.isEmpty() ) {

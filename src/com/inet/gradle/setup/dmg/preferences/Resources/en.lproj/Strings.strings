@@ -1,0 +1,13 @@
+/* 
+  Strings.strings
+  SetupBuilderOSXPrefPane
+
+  Created by Gerry Weißbach on 20/01/2016.
+  Copyright © 2016 i-net software. All rights reserved.
+*/
+"informativeUninstall" = "This will remove '%@' and the preference pane it is connected to.";
+"willUninstall" = "Do you really want to remove '%@'?";
+"Yes" = "Yes";
+"Cancel" = "Cancel";
+"Uninstall" = "Uninstall";
+"runAsRoot" = " (runs as '%@')";
