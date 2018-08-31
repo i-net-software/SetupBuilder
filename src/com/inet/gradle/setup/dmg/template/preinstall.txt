@@ -9,10 +9,12 @@ TARGET_LOCATION=${2%/}
 # Remove watcher before anything can start
 AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
 if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
+    echo "Unloading previous service uninstall script"
     /bin/launchctl unload "$AGENT_DESTINATION"
 fi
 
 if [ -e "$AGENT_DESTINATION" ]; then
+    echo "Removing previous service uninstall script"
     rm "$AGENT_DESTINATION"
 fi
 

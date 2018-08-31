@@ -1,26 +1,17 @@
 
 DAEMON_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.plist"
-UNINSTALL_AGENT_DESTINATION="/Library/LaunchDaemons/{{serviceName}}.uninstall.plist"
-
 PREFPANE_DESTINATION="/Library/PreferencePanes/{{displayName}}.prefPane"
-UNINSTALL_DESTINATION="/opt/{{serviceName}}/uninstall.sh"
-
-if /bin/launchctl list "{{serviceName}}.uninstall" &> /dev/null; then
-    /bin/launchctl unload "$UNINSTALL_AGENT_DESTINATION"
-fi
-
 if /bin/launchctl list "{{serviceName}}" &> /dev/null; then
+    echo "Unloading previous service"
     /bin/launchctl unload "$DAEMON_DESTINATION"
 fi
 
 if test -e "$DAEMON_DESTINATION"; then
+    echo "Removing previous service file"
     rm "$DAEMON_DESTINATION"
 fi
 
 if test -e "$PREFPANE_DESTINATION"; then
+    echo "Removing previous preferences link"
     rm "$PREFPANE_DESTINATION"
-fi
-
-if test -e "$UNINSTALL_DESTINATION"; then
-    rm "$UNINSTALL_DESTINATION"
 fi
