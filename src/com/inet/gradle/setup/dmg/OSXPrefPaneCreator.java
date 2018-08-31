@@ -92,7 +92,8 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", prefPaneIdentifier + ".prefPane" );
         setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
         setPlistProperty( prefPanePLIST, ":CFBundleExecutable", internalName );
-        setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName + " Helper" ); // Will be used for the sudo app name
+        setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName );
+        addPlistProperty( prefPanePLIST, ":NSPrefPaneHelperApplication", "String", displayName + " Helper" ); // Will be used for the sudo app name
         addPlistProperty( prefPanePLIST, ":NSAppleEventsUsageDescription", "String", "Helper application to provide priviledged access to " + displayName );
 
         File sudoPLIST = new File( prefPaneHelper, "Contents/Info.plist" );

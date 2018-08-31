@@ -23,7 +23,7 @@ NSTask *task = nil;
     if ( sudoName == nil ) {
         NSString *plistPath = [NSString stringWithFormat:@"%@/Contents/Info.plist", [[NSBundle bundleForClass:[self class]] bundlePath]];
         NSDictionary *plist = [[NSDictionary alloc] initWithContentsOfFile:plistPath];
-        sudoName = [plist objectForKey:@"NSPrefPaneIconLabel"];
+        sudoName = [plist objectForKey:@"NSPrefPaneHelperApplication"];
     }
     
     return sudoName;
