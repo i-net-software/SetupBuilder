@@ -259,6 +259,7 @@ NSTimer *timer;
             NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[self class]] bundlePath] lastPathComponent]];
             if ( [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
                 [p executeSudo:[NSString stringWithFormat:@"rm \"%@\"", prefPane]];
+                [Process killSudoHelper];
                 *stop = YES;
             }
         }];
