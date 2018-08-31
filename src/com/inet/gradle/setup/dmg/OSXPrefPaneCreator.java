@@ -66,37 +66,40 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         // Rename to app-name to the final prefpane name in the service
         File prefPaneLocation = new File( resourcesOutput, displayName + ".prefPane" );
 
+        // Rename prefPane
+        Files.move( prefPaneBinary.toPath(), prefPaneLocation.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+
         // rename helper Tool in binary of the pref pane
-        File prefPaneContents = new File( prefPaneBinary, "Contents" );
+        File prefPaneContents = new File( prefPaneLocation, "Contents" );
         Path iconPath = getApplicationIcon().toPath();
 
         Files.copy( iconPath, new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/Resources/applet.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        File prefPaneHelper = new File( prefPaneContents, "Resources/" + displayName + " Helper.app" );
 
         //        Files.move( new File( prefPaneContents, "MacOS/" + internalName ).toPath(), new File( prefPaneContents, "MacOS/" + displayName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/MacOS/applet" ).toPath(), new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/MacOS/" + internalName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), new File( prefPaneContents, "Resources/" + displayName + ".app" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), prefPaneHelper.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Logging.sysout( "Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
-        // Make executable
-        setApplicationFilePermissions( new File( prefPaneContents, "Resources/" + displayName + ".app/Contents/MacOS/" + internalName ) );
-
-        // Rename prefPane
-        Files.move( prefPaneBinary.toPath(), prefPaneLocation.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        // Make applet binary executable
+        setApplicationFilePermissions( new File( prefPaneHelper, "Contents/MacOS/applet" ) );
 
         // Copy Icon
         Files.copy( iconPath, new File( prefPaneLocation, "Contents/Resources/ProductIcon.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 
         // Patch Info.plist
         File prefPanePLIST = new File( prefPaneLocation, "Contents/Info.plist" );
-        setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", (getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier()) + ".prefPane" );
+        String prefPaneIdentifier = getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier();
+        setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", prefPaneIdentifier + ".prefPane" );
         setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
         setPlistProperty( prefPanePLIST, ":CFBundleExecutable", internalName );
-        setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName ); // Will be used for the sudo app name
+        setPlistProperty( prefPanePLIST, ":NSPrefPaneIconLabel", displayName + " Helper" ); // Will be used for the sudo app name
+        setPlistProperty( prefPanePLIST, ":NSAppleEventsUsageDescription", "Helper application to provide priviledged access to " + displayName );
 
-        File sudoPLIST = new File( prefPaneLocation, "Contents/Resources/" + displayName + ".app/Contents/Info.plist" );
-        setPlistProperty( sudoPLIST, ":CFBundleIdentifier", (getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier()) + ".prefPane.helper" );
+        File sudoPLIST = new File( prefPaneHelper, "Contents/Info.plist" );
+        setPlistProperty( sudoPLIST, ":CFBundleIdentifier", prefPaneIdentifier + ".prefPane.helper" );
         setPlistProperty( sudoPLIST, ":CFBundleName", displayName + " Helper" );
-        setPlistProperty( sudoPLIST, ":CFBundleExecutable", internalName );
+        setPlistProperty( sudoPLIST, ":CFBundleExecutable", "applet" );
+        setPlistProperty( sudoPLIST, ":NSAppleEventsUsageDescription", "Helper application to provide priviledged access to " + displayName );
 
         File servicePLIST = new File( prefPaneLocation, "Contents/Resources/service.plist" );
         setPlistProperty( servicePLIST, ":Name", displayName );
@@ -133,7 +136,8 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
             addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "bool", preferencesLink.isRunAsRoot() ? "YES" : "NO" );
         }
 
-        ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
+        // Keep temporary output directory
+        // ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
 /*
         // Sign these packages already.
         if( task.getCodeSign() != null ) {
