@@ -85,7 +85,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
 
-            controlBuilder.addScriptFragment( Script.PREINSTHEAD, "# check for java. the service woll need it and other parts probably too"
+            controlBuilder.addScriptFragment( Script.PREINSTHEAD, "# check for java. the service will need it and other parts probably too"
                             + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
                             + "\n\n"
                             );
@@ -177,13 +177,13 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
 
-        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " || true" );
+        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " && systemctl enable " + serviceUnixName + " ) || true" );
         if ( task.shouldStartDefaultService() ) {
             controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
         }
 
         controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
-        controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --del " + serviceUnixName + " || true" );
+        controlBuilder.addScriptFragment( Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );
     }
 
     /**
