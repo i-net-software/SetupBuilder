@@ -754,19 +754,27 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             case ApplicationMenu:
                 refDirID = "ApplicationProgramsFolder";
                 Element menuFolders = getOrCreateChildById( targetDir, "Directory", "ProgramMenuFolder" );
-                Element appProgrammsFolder = getOrCreateChildById( menuFolders, "Directory", "ApplicationProgramsFolder" );
+                Element appProgrammsFolder = getOrCreateChildById( menuFolders, "Directory", refDirID );
                 addAttributeIfNotExists( appProgrammsFolder, "Name", setup.getApplication() );
                 removeOnUninstall = true;
                 break;
             case InstallDir:
                 refDirID = "INSTALLDIR";
                 break;
+            case DesktopDir:
+                refDirID = "DesktopFolder";
+                Element desktopMenuFolders = getOrCreateChildById( targetDir, "Directory", "ProgramMenuFolder" );
+                Element desktopProgrammsFolder = getOrCreateChildById( desktopMenuFolders, "Directory", refDirID );
+                addAttributeIfNotExists( desktopProgrammsFolder, "Name", "Desktop" );
+                removeOnUninstall = true;
+                break;
         }
         Element dirRef = getOrCreateChildById( product, "DirectoryRef", refDirID );
 
         Element component = getComponent( dirRef, "shortcuts_" + refDirID );
         if( removeOnUninstall ) {
-            Element removeFolder = getOrCreateChildById( component, "RemoveFolder", "ApplicationProgramsFolder" );
+            Element removeFolder = getOrCreateChildById( component, "RemoveFolder", "Remove" + refDirID );
+            addAttributeIfNotExists( removeFolder, "Directory", refDirID );
             addAttributeIfNotExists( removeFolder, "On", "uninstall" );
         }
         Element reg = addRegistryKey( component, "HKCU", "shortcuts_reg_" + refDirID, "Software\\" + setup.getVendor() + "\\" + setup.getApplication() );
@@ -842,6 +850,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     break;
                 case InstallDir:
                     linkLocation = "[INSTALLDIR]";
+                    break;
+                case DesktopDir:
+                    linkLocation = "[ApplicationDesktopShortcut]";
                     break;
             }
             if( starter.getWorkDir() != null ) {

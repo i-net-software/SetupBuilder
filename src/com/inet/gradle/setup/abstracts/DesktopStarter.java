@@ -108,7 +108,7 @@ public class DesktopStarter extends ProtocolHandler {
      * Possible locations for desktop/shortcut entries.
      */
     public static enum Location {
-        StartMenu, ApplicationMenu, InstallDir;
+        StartMenu, ApplicationMenu, InstallDir, DesktopDir;
     }
 
     /**
