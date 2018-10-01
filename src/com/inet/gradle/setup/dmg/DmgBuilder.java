@@ -319,7 +319,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
     }
 
     /**
-     * Patch the distriubiton file with custom settings
+     * Patch the distribution file with custom settings
      *
      * @throws Throwable in case of errors
      */
@@ -484,9 +484,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             Files.copy( task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             BufferedImage image = ImageIO.read( backgroundDestination );
 
-            // Override the values to use the acutal image size
-            task.setWindowWidth( image.getWidth() );
-            task.setWindowHeight( image.getHeight() );
+            // Override the values to use the actual image size
+            task.setWindowWidth( image.getWidth() + task.getWindowWidthCorrection() );
+            task.setWindowHeight( image.getHeight() + task.getWindowHeightCorrection() );
         }
     }
 

@@ -39,7 +39,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private Object                         backgroundImage, setupBackground, setupIcon;
 
-    private Integer                        windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14;
+    private Integer                        windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
 
     private OSXCodeSign<Dmg, SetupBuilder> codeSign;
 
@@ -105,6 +105,28 @@ public class Dmg extends AbstractUnixSetupTask {
     }
 
     /**
+     * Return correction width of Finder view
+     * This may be needed if there is a background-image
+     * set which does not take the borders of the window into account
+     *
+     * @return width correction of Finder view
+     */
+    public Integer getWindowWidthCorrection() {
+        return windowWidthCorrection;
+    }
+
+    /**
+     * Set correction width of Finder view
+     * This may be needed if there is a background-image
+     * set which does not take the borders of the window into account
+     *
+     * @param windowWidthCorrection width of Finder view
+     */
+    public void setWindowWidthCorrection( Integer windowWidthCorrection ) {
+        this.windowWidthCorrection = windowWidthCorrection;
+    }
+
+    /**
      * Return height of Finder view
      *
      * @return height of Finder view
@@ -120,6 +142,28 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public void setWindowHeight( Integer windowHeight ) {
         this.windowHeight = windowHeight;
+    }
+
+    /**
+     * Return correction height of Finder view
+     * This may be needed if there is a background-image
+     * set which does not take the borders of the window into account
+     *
+     * @return width correction of Finder view
+     */
+    public Integer getWindowHeightCorrection() {
+        return windowHeightCorrection;
+    }
+
+    /**
+     * Set correction height of Finder view
+     * This may be needed if there is a background-image
+     * set which does not take the borders of the window into account
+     *
+     * @param windowHeightCorrection height of Finder view
+     */
+    public void setWindowHeightCorrection( Integer windowHeightCorrection ) {
+        this.windowHeightCorrection = windowHeightCorrection;
     }
 
     /**
