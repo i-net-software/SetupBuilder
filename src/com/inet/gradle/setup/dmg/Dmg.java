@@ -226,11 +226,11 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Set the needed information for signing the setup.
      *
-     * @param closue the data for signing
+     * @param closure the data for signing
      */
-    public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closue ) {
+    public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closure ) {
         ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<Dmg, SetupBuilder>( this, project.getFileResolver() ) );
+        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<Dmg, SetupBuilder>( this, project.getFileResolver() ) );
     }
 
     /**
