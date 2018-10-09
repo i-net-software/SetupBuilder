@@ -43,6 +43,10 @@ try
             end try
 
             try
+                set background color of theViewOptions to {{backgroundColor}}
+            end try
+
+            try
                 set background picture of theViewOptions to file ".resources:background{{backgroundExt}}"
             end try
 

@@ -15,6 +15,7 @@
  */
 package com.inet.gradle.setup.dmg;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,8 @@ public class Dmg extends AbstractUnixSetupTask {
     private Object                         backgroundImage, setupBackground, setupIcon;
 
     private Integer                        windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
+
+    private Color                          backgroundColor;
 
     private OSXCodeSign<Dmg, SetupBuilder> codeSign;
 
@@ -368,5 +371,24 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public void setJreExcludes( List<String> jreExclude ) {
         this.jreExcludes = jreExclude;
+    }
+
+    /**
+     * Returns the converted background color as apple script string
+     * @return the backgroundColor as apple script color string
+     */
+    public String getBackgroundColor() {
+        return "{" +
+               String.join( ", ", Arrays.asList( String.valueOf(backgroundColor.getRed()*257),
+                                                 String.valueOf(backgroundColor.getGreen()*257),
+                                                 String.valueOf(backgroundColor.getBlue()*257 )) ) +
+                "}";
+    }
+
+    /**
+     * @param backgroundColor the backgroundColor to set
+     */
+    public void setBackgroundColor( Color backgroundColor ) {
+        this.backgroundColor = backgroundColor;
     }
 }

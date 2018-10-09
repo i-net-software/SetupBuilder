@@ -508,6 +508,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         // Only works with the first executable in the list
         applescript.setPlaceholder( "executable", firstExecutableName );
 
+        applescript.setPlaceholder( "backgroundColor", task.getBackgroundColor() );
         applescript.setPlaceholder( "windowWidth", task.getWindowWidth().toString() );
         applescript.setPlaceholder( "windowHeight", task.getWindowHeight().toString() );
         applescript.setPlaceholder( "iconSize", task.getIconSize().toString() );
