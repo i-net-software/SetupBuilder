@@ -87,12 +87,12 @@ public class Dmg extends AbstractUnixSetupTask {
     }
 
     /**
-     * Return width of Finder view
+     * Return width of Finder view INCLUDING the correction settings
      *
      * @return width of Finder view
      */
     public Integer getWindowWidth() {
-        return windowWidth;
+        return windowWidth + windowWidthCorrection;
     }
 
     /**
@@ -127,12 +127,12 @@ public class Dmg extends AbstractUnixSetupTask {
     }
 
     /**
-     * Return height of Finder view
+     * Return height of Finder view INCLUDING the correction settings
      *
      * @return height of Finder view
      */
     public Integer getWindowHeight() {
-        return windowHeight;
+        return windowHeight + windowHeightCorrection;
     }
 
     /**

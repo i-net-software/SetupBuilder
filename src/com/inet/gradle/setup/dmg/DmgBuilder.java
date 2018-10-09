@@ -484,9 +484,13 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             Files.copy( task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             BufferedImage image = ImageIO.read( backgroundDestination );
 
-            // Override the values to use the actual image size
-            task.setWindowWidth( image.getWidth() + task.getWindowWidthCorrection() );
-            task.setWindowHeight( image.getHeight() + task.getWindowHeightCorrection() );
+            // The image may be a non-standard one which we do not have Java access to.
+            // Still it may work later on. e.g. tiffs are not directly supported in Java 8 and older
+            if ( image != null ) {
+                // Override the values to use the actual image size
+                task.setWindowWidth( image.getWidth() );
+                task.setWindowHeight( image.getHeight() );
+            }
         }
     }
 
