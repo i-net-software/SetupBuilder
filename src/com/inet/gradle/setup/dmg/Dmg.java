@@ -378,6 +378,11 @@ public class Dmg extends AbstractUnixSetupTask {
      * @return the backgroundColor as apple script color string
      */
     public String getBackgroundColor() {
+        if ( backgroundColor == null ) {
+            // Fallback
+            backgroundColor = new Color(255, 255, 255);
+        }
+
         return "{" +
                String.join( ", ", Arrays.asList( String.valueOf(backgroundColor.getRed()*257),
                                                  String.valueOf(backgroundColor.getGreen()*257),
