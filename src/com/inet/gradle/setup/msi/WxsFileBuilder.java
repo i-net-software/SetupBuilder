@@ -510,7 +510,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
         boolean isLicense = addLicense( product );
         if( !isLicense ) {
-            // skip license dialog because we does no hat a license text
+            // skip license dialog because we do no have a license text
             Element ui = getOrCreateChild( product, "UI" );
             Element child = getOrCreateChildByKeyValue( ui, "Publish", "Dialog", "WelcomeDlg" );
             child.setAttribute( "Control", "Next" );
