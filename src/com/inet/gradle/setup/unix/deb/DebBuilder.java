@@ -28,20 +28,18 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
 import com.inet.gradle.setup.util.Logging;
 
-public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
+public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
 
     private DebControlFileBuilder  controlBuilder;
 
     private DebDocumentFileBuilder documentBuilder;
-
-    private SetupBuilder           setup;
 
     /**
      * Create a new instance
@@ -54,8 +52,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      *            the file Resolver
      */
     public DebBuilder( Deb deb, SetupBuilder setup, FileResolver fileResolver ) {
-        super( deb, fileResolver );
-        this.setup = setup;
+        super( deb, setup, fileResolver );
     }
 
     /**
@@ -65,6 +62,8 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         try {
             File filesPath = new File( buildDir, task.getInstallationRoot() );
             task.copyTo( filesPath );
+            addBundleJre( filesPath );
+
             changeFilePermissionsTo644( filesPath );
 
             // create the package config files in the DEBIAN subfolder
@@ -528,5 +527,4 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             }
         }
     }
-
 }

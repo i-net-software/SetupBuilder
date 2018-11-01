@@ -29,19 +29,17 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
 import com.inet.gradle.setup.util.Logging;
 
-public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
+public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
     private RpmControlFileBuilder controlBuilder;
-
-    private SetupBuilder          setup;
 
     /**
      * Create a new instance
@@ -51,8 +49,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
      * @param fileResolver the file Resolver
      */
     public RpmBuilder( Rpm rpm, SetupBuilder setup, FileResolver fileResolver ) {
-        super( rpm, fileResolver );
-        this.setup = setup;
+        super( rpm, setup, fileResolver );
     }
 
     /**

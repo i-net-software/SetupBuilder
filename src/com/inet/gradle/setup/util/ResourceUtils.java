@@ -207,4 +207,28 @@ public class ResourceUtils {
 
         throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
     }
+
+    /**
+     * Recursively copy files from source to destination
+     * @param source the source
+     * @param destination the destination
+     * @throws IOException an Exception
+     */
+    public static void copy(File source, File destination) throws IOException {
+        Path sourcePath = source.toPath();
+        Path destinationPath = destination.toPath();
+
+        destination.getParentFile().mkdirs();
+
+        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+
+        if (Files.isDirectory(sourcePath)) {
+            String[] files = source.list();
+
+            for (int i = 0; i < files.length; i++) {
+                String file = files[i];
+                copy(new File(source, file), new File(destination, file));
+            }
+        }
+    }
 }
