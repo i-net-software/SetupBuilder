@@ -124,18 +124,9 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
             return;
         }
 
-        String keychain = getKeychain() != null ? getKeychain() : System.getenv("HOME") + "/Library/Keychains/login.keychain";
-
         // unlock keychain
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "security" );
-        command.add( "-v" );
-        command.add( "unlock-keychain" );
-        command.add( "-p" );
-        command.add( getKeychainPassword() );
-        command.add( keychain );
-
-        exec( command, null, null, isIgnoreError() );
+        String keychain = getKeychain() != null ? getKeychain() : System.getenv("HOME") + "/Library/Keychains/login.keychain";
+        exec( isIgnoreError(), "security", "-v", "unlock-keychain", "-p", getKeychainPassword(), keychain);
     }
 
     /**
