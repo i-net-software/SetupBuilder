@@ -80,7 +80,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
      * Returns the response and ignores the exit value.
      *
      * @param parameters command line
-     * @returns the output
+     * @return the output
      */
     protected String exec( String... parameters ) {
         return exec(true, parameters);
@@ -90,8 +90,9 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
      * Execute an external process.
      * Returns the response.
      *
+     * @param ignoreExitValue if the exit value should be ignored
      * @param parameters command line
-     * @returns the output
+     * @return the output
      */
     protected String exec( boolean ignoreExitValue, String... parameters ) {
         ArrayList<String> command = new ArrayList<>();
