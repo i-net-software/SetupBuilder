@@ -78,6 +78,8 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             }
             File filesPath = new File( buildDir.getAbsolutePath() + "/BUILD" + task.getInstallationRoot() );
             task.copyTo( filesPath );
+            addBundleJre( filesPath );
+
             changeFilePermissionsTo644( filesPath );
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
