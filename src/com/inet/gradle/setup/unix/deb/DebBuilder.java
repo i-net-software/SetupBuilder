@@ -340,7 +340,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                     iconFile = new File( iconDir, unixName + ".png" );
                 }
                 scaledFile.renameTo( iconFile );
-                DebUtils.setPermissions( iconFile, false );
+                setPermissions( iconFile, false );
             }
         }
         try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
@@ -448,7 +448,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         }
         file.createNewFile();
 
-        DebUtils.setPermissions( file, executable );
+        setPermissions( file, executable );
         return file;
     }
 
@@ -486,47 +486,6 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                 e1.printStackTrace();
             }
             throw e;
-        }
-    }
-
-    /**
-     * Changes the permissions of all directories recursively inside the specified path to 755.
-     *
-     * @param path
-     *            the path
-     * @throws IOException
-     *             on I/O failures
-     */
-    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
-        if ( path == null ) { return; }
-        DebUtils.setPermissions( path, true );
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeDirectoryPermissionsTo755( file );
-            }
-        }
-    }
-
-    /**
-     * Changes the permissions of all files recursively inside the specified path to 644.
-     *
-     * @param path
-     *            the path
-     * @throws IOException
-     *             on I/O failures
-     */
-    private void changeFilePermissionsTo644( File path ) throws IOException {
-        if ( path == null ) { return; }
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeFilePermissionsTo644( file );
-            } else {
-                if( file.getName().endsWith( ".sh" ) ) {
-                    DebUtils.setPermissions( file, true );
-                } else {
-                    DebUtils.setPermissions( file, false );
-                }
-            }
         }
     }
 }

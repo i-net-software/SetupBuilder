@@ -19,10 +19,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.gradle.api.internal.file.FileResolver;
@@ -186,67 +183,6 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
         controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
         controlBuilder.addScriptFragment( Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );
-    }
-
-    /**
-     * Changes the permissions of all directories recursively inside the specified path to 755.
-     *
-     * @param path the path
-     * @throws IOException on I/O failures
-     */
-    // share
-    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
-        if ( path == null ) { return; }
-        setPermissions( path, true );
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeDirectoryPermissionsTo755( file );
-            }
-        }
-    }
-
-    /**
-     * Changes the permissions of all files recursively inside the specified path to 644.
-     *
-     * @param path the path
-     * @throws IOException on I/O failures
-     */
-    // share
-    private void changeFilePermissionsTo644( File path ) throws IOException {
-        if ( path == null ) { return; }
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeFilePermissionsTo644( file );
-            } else {
-                if( file.getName().endsWith( ".sh" ) ) {
-                    setPermissions( file, true );
-                } else {
-                    setPermissions( file, false );
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
-     *
-     * @param file the file
-     * @param executable if set to <tt>true</tt> the executable bit will be set
-     * @throws IOException on errors when setting the permissions
-     */
-    // share
-    static void setPermissions( File file, boolean executable ) throws IOException {
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        perms.add( PosixFilePermission.OWNER_READ );
-        perms.add( PosixFilePermission.OWNER_WRITE );
-        perms.add( PosixFilePermission.GROUP_READ );
-        perms.add( PosixFilePermission.OTHERS_READ );
-        if( executable ) {
-            perms.add( PosixFilePermission.OWNER_EXECUTE );
-            perms.add( PosixFilePermission.GROUP_EXECUTE );
-            perms.add( PosixFilePermission.OTHERS_EXECUTE );
-        }
-        Files.setPosixFilePermissions( file.toPath(), perms );
     }
 
     /**

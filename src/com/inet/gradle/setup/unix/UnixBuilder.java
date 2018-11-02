@@ -2,6 +2,11 @@ package com.inet.gradle.setup.unix;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.FileResolver;
@@ -88,5 +93,74 @@ public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder
         ResourceUtils.copy( jreDir, jreTarget );
         javaMainExecutable = String.join( "/", task.getInstallationRoot(), setup.getBundleJreTarget(), javaCommandSuffix ).replaceAll( "\\/+", "\\/" );
         task.getProject().getLogger().lifecycle( "\tUpdated the Java Executable Path to: '" + javaMainExecutable + "'" );
+    }
+
+
+    /**
+     * Changes the permissions of all directories recursively inside the specified path to 755.
+     *
+     * @param path
+     *            the path
+     * @throws IOException
+     *             on I/O failures
+     */
+    protected void changeDirectoryPermissionsTo755( File path ) throws IOException {
+        if ( path == null ) { return; }
+        setPermissions( path, true );
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeDirectoryPermissionsTo755( file );
+            }
+        }
+    }
+
+    /**
+     * Changes the permissions of all files recursively inside the specified path to 644.
+     *
+     * @param path
+     *            the path
+     * @throws IOException
+     *             on I/O failures
+     */
+    protected void changeFilePermissionsTo644( File path ) throws IOException {
+        if ( path == null ) { return; }
+        for( File file : path.listFiles() ) {
+            if( file.isDirectory() ) {
+                changeFilePermissionsTo644( file );
+            } else {
+                if( file.getName().endsWith( ".sh" ) ) {
+                    setPermissions( file, true );
+                } else {
+                    setPermissions( file, false );
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
+     *
+     * @param file the file
+     * @param executable if set to <tt>true</tt> the executable bit will be set
+     * @throws IOException on errors when setting the permissions
+     */
+    // share
+    public static void setPermissions( File file, boolean executable ) throws IOException {
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        if( executable ) {
+            perms.add( PosixFilePermission.OWNER_EXECUTE );
+            perms.add( PosixFilePermission.GROUP_EXECUTE );
+            perms.add( PosixFilePermission.OTHERS_EXECUTE );
+        }
+        try {
+            Files.setPosixFilePermissions( file.toPath(), perms );
+        } catch ( NoSuchFileException e ) {
+            // This might happen when a link was asked ... do not bother.
+        }
     }
 }

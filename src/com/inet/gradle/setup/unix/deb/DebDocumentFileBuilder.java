@@ -105,7 +105,7 @@ class DebDocumentFileBuilder {
         controlWriter.flush();
         controlWriter.close();
 
-        DebUtils.setPermissions( copyright, false );
+        DebBuilder.setPermissions( copyright, false );
     }
 
     /**
@@ -142,7 +142,7 @@ class DebDocumentFileBuilder {
 
             controlWriter.flush();
 
-            DebUtils.setPermissions( changelog, false );
+            DebBuilder.setPermissions( changelog, false );
 
         } finally {
             if( controlWriter != null ) {
