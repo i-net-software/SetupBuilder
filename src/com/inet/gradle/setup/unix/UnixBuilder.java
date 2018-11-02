@@ -86,7 +86,7 @@ public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder
 
         task.getProject().getLogger().lifecycle( "\tJRE is set and will be copied from: '" + jreDir.getAbsolutePath() + "' to' " + jreTarget.getAbsolutePath() + "'" );
         ResourceUtils.copy( jreDir, jreTarget );
-        javaMainExecutable = String.join( "/", task.getInstallationRoot(), setup.getBundleJreTarget(), javaCommandSuffix );
+        javaMainExecutable = String.join( "/", task.getInstallationRoot(), setup.getBundleJreTarget(), javaCommandSuffix ).replaceAll( "\\/+", "\\/" );
         task.getProject().getLogger().lifecycle( "\tUpdated the Java Executable Path to: '" + javaMainExecutable + "'" );
     }
 }
