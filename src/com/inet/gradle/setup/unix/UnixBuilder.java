@@ -61,7 +61,7 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
                 throw new GradleException( "bundleJre version '" + jre + "' does not match the found JavaVersion: '" + javaVersion +"'" );
             }
 
-            jreDir = new File( javaCommand.substring( 0, javaCommandSuffix.length() ) );
+            jreDir = new File( javaCommand.substring( 0, javaCommand.length() - javaCommandSuffix.length() ) );
             if( !jreDir.isDirectory() ) {
                 throw new GradleException( "bundleJre version '" + jre + "' can not be found in: " + jreDir + "'" );
             }
