@@ -62,12 +62,13 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         try {
             File filesPath = new File( buildDir, task.getInstallationRoot() );
             task.copyTo( filesPath );
+
+            // Add a bundled java vm if required. Will update the variable to indicate the java-main program
             addBundleJre( filesPath );
 
             changeFilePermissionsTo644( filesPath );
 
             // create the package config files in the DEBIAN subfolder
-
             controlBuilder = new DebControlFileBuilder( super.task, setup, new File( buildDir, "DEBIAN" ) );
 
             addScriptsToControlFiles();
@@ -109,7 +110,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                 if( executable != null ) {
                     controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )\n" );
                 } else if( mainClass != null ) {
-                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
+                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
                 }
             }
 
@@ -131,9 +132,9 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                     }
                 } else if( mainClass != null ) {
                     if( task.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
                     } else {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
                     }
                 }
                 controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
@@ -163,7 +164,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
     private void addScriptsToControlFiles() {
 
         controlBuilder.addHeadScriptFragment( Script.PREINST, "# check for java. the service woll need it and other parts probably too"
-                        + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
+                        + "[ ! -x '" + javaMainExecutable + "' ] && echo \"The program 'java' does not exist but will be needed. (Looked up at '" + javaMainExecutable + "')\" && exit 1 || :"
                         + "\n\n"
                         );
 
@@ -266,6 +267,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        initScript.setPlaceholder( "daemonExec", javaMainExecutable );
         initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
         String initScriptFile = "etc/init.d/" + serviceUnixName;
@@ -303,7 +305,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "\"" + javaMainExecutable + "\" -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };

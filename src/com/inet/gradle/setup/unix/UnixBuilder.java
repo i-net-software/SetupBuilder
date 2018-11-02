@@ -9,12 +9,15 @@ import org.gradle.api.internal.file.FileResolver;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
-import com.inet.gradle.setup.abstracts.AbstractTask;
 import com.inet.gradle.setup.util.ResourceUtils;
 
-public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T, S> {
+public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder> extends AbstractBuilder<T, S> {
 
-    protected SetupBuilder           setup;
+    protected SetupBuilder setup;
+
+    private String         javaCommandSuffix  = "/bin/java";
+
+    protected String       javaMainExecutable = "/usr" + javaCommandSuffix; // Default Java Location
 
     /**
      * Create a new instance
@@ -46,7 +49,6 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
             jreDir = null;
         }
 
-        String javaCommandSuffix = "/bin/java";
         if ( jreDir == null || !jreDir.isDirectory() )
         {
             // This is a version number, need to look on our own.
@@ -84,5 +86,6 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
 
         task.getProject().getLogger().lifecycle( "\tJRE is set and will be copied from: '" + jreDir.getAbsolutePath() + "' to' " + jreTarget.getAbsolutePath() + "'" );
         ResourceUtils.copy( jreDir, jreTarget );
+        javaMainExecutable = String.join( "/", task.getInstallationRoot(), setup.getBundleJreTarget(), javaCommandSuffix );
     }
 }

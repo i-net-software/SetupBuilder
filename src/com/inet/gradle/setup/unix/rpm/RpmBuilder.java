@@ -78,14 +78,16 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             }
             File filesPath = new File( buildDir.getAbsolutePath() + "/BUILD" + task.getInstallationRoot() );
             task.copyTo( filesPath );
+
+            // Add a bundled java vm if required. Will update the variable to indicate the java-main program
             addBundleJre( filesPath );
 
             changeFilePermissionsTo644( filesPath );
 
-            controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
+            controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ), javaMainExecutable );
 
             controlBuilder.addScriptFragment( Script.PREINSTHEAD, "# check for java. the service will need it and other parts probably too"
-                            + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
+                            + "[ ! -x '" + javaMainExecutable + "' ] && echo \"The program 'java' does not exist but will be needed. (Looked up at '" + javaMainExecutable + "')\" && exit 1 || :"
                             + "\n\n"
                             );
 
@@ -157,6 +159,7 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        initScript.setPlaceholder( "daemonExec", javaMainExecutable );
         initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
@@ -261,7 +264,7 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "\"" + javaMainExecutable + "\" -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
 
