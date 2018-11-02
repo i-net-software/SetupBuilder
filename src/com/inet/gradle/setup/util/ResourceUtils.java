@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
@@ -220,7 +221,7 @@ public class ResourceUtils {
 
         destination.getParentFile().mkdirs();
 
-        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS);
 
         if (Files.isDirectory(sourcePath)) {
             String[] files = source.list();
