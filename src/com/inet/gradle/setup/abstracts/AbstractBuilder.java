@@ -113,7 +113,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
     @SuppressWarnings( "resource" )
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, boolean ignoreExitValue ) {
         // print command line to the log
-        StringBuilder log = new StringBuilder( "\t" );
+        StringBuilder log = new StringBuilder( "\tCommand: " );
         for( String para : parameters ) {
 
             if ( para == null ) {

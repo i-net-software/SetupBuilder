@@ -19,12 +19,9 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
     /**
      * Create a new instance
      *
-     * @param deb
-     *            the calling task
-     * @param setup
-     *            the shared settings
-     * @param fileResolver
-     *            the file Resolver
+     * @param task the calling task
+     * @param setup the shared settings
+     * @param fileResolver the file Resolver
      */
     protected UnixBuilder( T task, SetupBuilder setup, FileResolver fileResolver ) {
         super( task, fileResolver );
@@ -39,6 +36,7 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
     protected void addBundleJre( File filesPath ) throws IOException {
         Object jre = setup.getBundleJre();
         if( jre == null ) {
+            task.getProject().getLogger().lifecycle( "\tNo JRE for bundling set." );
             return;
         }
         File jreDir;
@@ -53,26 +51,26 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
         {
             // This is a version number, need to look on our own.
             // check version of current java
-            String javaCommand = exec( "readlink", "-e", "$(which java)" );
+            String javaCommand = exec( "sh", "-c", "readlink -e $(which java)" ); // readlink requires an "sh"
             if ( javaCommand.length() == 0 || !javaCommand.endsWith( javaCommandSuffix ) ) { // Forward slashes should be good. This is Linux!
-                throw new GradleException( "Java was not found" );
+                throw new GradleException( "Java was not found: '" + javaCommand +"'" );
             }
 
-            String javaVersion = exec( javaCommand, "--version", "2>&1", "|", "awk", "-F", "'\"'", "'/version/ {print $2}'" );
+            String javaVersion = exec( "sh", "-c", javaCommand + " -version 2>&1 | awk -F '\"' '/version/ {print $2}'" );
             if( javaVersion.length() == 0 || !javaVersion.startsWith( jre.toString() ) ) {
-                throw new GradleException( "bundleJre version " + jre + " does not match the found JavaVersion: " + javaVersion );
+                throw new GradleException( "bundleJre version '" + jre + "' does not match the found JavaVersion: '" + javaVersion +"'" );
             }
 
             jreDir = new File( javaCommand.substring( 0, javaCommandSuffix.length() ) );
             if( !jreDir.isDirectory() ) {
-                throw new GradleException( "bundleJre version " + jre + " can not be found in: " + jreDir );
+                throw new GradleException( "bundleJre version '" + jre + "' can not be found in: " + jreDir + "'" );
             }
         } else {
             // Check if the folder contains a java - command
             File javaCommand = new File( jreDir, javaCommandSuffix);
-            String javaVersion = exec( javaCommand.getAbsolutePath(), "--version", "2>&1", "|", "awk", "-F", "'\"'", "'/version/ {print $2}'" );
+            String javaVersion = exec( "sh", "-c", javaCommand.getAbsolutePath() + " -version 2>&1 | awk -F '\"' '/version/ {print $2}'" );
             if( javaVersion.length() == 0 ) {
-                throw new GradleException( "Java - Command '" + javaCommandSuffix + "' not found in " + jreDir );
+                throw new GradleException( "Java - Command '" + javaCommandSuffix + "' not found in '" + jreDir + "'" );
             }
         }
 
@@ -83,6 +81,8 @@ public abstract class UnixBuilder<T extends AbstractTask, S extends AbstractSetu
         }
 
         File jreTarget = new File( filesPath, setup.getBundleJreTarget() ); // jre or something. This is the final destination
+
+        task.getProject().getLogger().lifecycle( "\tJRE is set and will be copied from: '" + jreDir.getAbsolutePath() + "' to' " + jreTarget.getAbsolutePath() + "'" );
         ResourceUtils.copy( jreDir, jreTarget );
     }
 }
