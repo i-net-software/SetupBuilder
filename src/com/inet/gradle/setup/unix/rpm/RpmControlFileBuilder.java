@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.annotation.Nonnull;
+
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
@@ -56,17 +58,21 @@ class RpmControlFileBuilder {
 
     Map<Script, StringBuilder> scriptMap = new HashMap<>();
 
+    private String javaMainExecutable;
+
     /**
      * the constructor setting the fields
      *
      * @param rpm the task for the redhat package
      * @param setup the generic task for all setups
      * @param buildDir the directory to build the package in
+     * @param javaMainExecutable the Java main Executable
      */
-    RpmControlFileBuilder( Rpm rpm, SetupBuilder setup, File buildDir ) {
+    RpmControlFileBuilder( Rpm rpm, SetupBuilder setup, File buildDir, @Nonnull String javaMainExecutable ) {
         this.rpm = rpm;
         this.setup = setup;
         this.buildDir = buildDir;
+        this.javaMainExecutable = javaMainExecutable;
     }
 
     /**
@@ -214,9 +220,9 @@ class RpmControlFileBuilder {
 
             } else if( mainClass != null ) {
                 if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && java -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
+                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
                 } else {
-                    controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && java -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
+                    controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
                 }
             }
             controlWriter.write( NEWLINE );
@@ -275,7 +281,7 @@ class RpmControlFileBuilder {
             if( executable != null ) {
                 controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )" + NEWLINE );
             } else if( mainClass != null ) {
-                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && java -cp \"" + runAfterStarter.getMainJar() + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + " )" + NEWLINE );
+                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + runAfterStarter.getMainJar() + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + " )" + NEWLINE );
             }
         }
 

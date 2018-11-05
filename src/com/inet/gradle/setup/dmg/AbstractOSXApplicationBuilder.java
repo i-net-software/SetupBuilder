@@ -280,12 +280,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
         // Set Property in plist file
         // /usr/libexec/PlistBuddy -c "Add PreferenceSpecifiers:19:Titles:0 $buildDate" "$BUNDLE/Root.plist"
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/libexec/PlistBuddy" );
-        command.add( "-c" );
-        command.add( "Delete " + property );
-        command.add( plist.getAbsolutePath() );
-        exec( command, null, null, true );
+        exec( "/usr/libexec/PlistBuddy", "-c", "Delete " + property, plist.getAbsolutePath() );
     }
 
     /**

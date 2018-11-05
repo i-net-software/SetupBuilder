@@ -22,6 +22,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
@@ -206,5 +207,29 @@ public class ResourceUtils {
         }
 
         throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
+    }
+
+    /**
+     * Recursively copy files from source to destination
+     * @param source the source
+     * @param destination the destination
+     * @throws IOException an Exception
+     */
+    public static void copy(File source, File destination) throws IOException {
+        Path sourcePath = source.toPath();
+        Path destinationPath = destination.toPath();
+
+        destination.getParentFile().mkdirs();
+
+        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.COPY_ATTRIBUTES);
+
+        if (Files.isDirectory(sourcePath)) {
+            String[] files = source.list();
+
+            for (int i = 0; i < files.length; i++) {
+                String file = files[i];
+                copy(new File(source, file), new File(destination, file));
+            }
+        }
     }
 }

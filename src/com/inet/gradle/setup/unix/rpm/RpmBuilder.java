@@ -19,29 +19,24 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
 import com.inet.gradle.setup.util.Logging;
 
-public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
+public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
     private RpmControlFileBuilder controlBuilder;
-
-    private SetupBuilder          setup;
 
     /**
      * Create a new instance
@@ -51,8 +46,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
      * @param fileResolver the file Resolver
      */
     public RpmBuilder( Rpm rpm, SetupBuilder setup, FileResolver fileResolver ) {
-        super( rpm, fileResolver );
-        this.setup = setup;
+        super( rpm, setup, fileResolver );
     }
 
     /**
@@ -83,10 +77,13 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             task.copyTo( filesPath );
             changeFilePermissionsTo644( filesPath );
 
-            controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ) );
+            // Add a bundled java vm if required. Will update the variable to indicate the java-main program
+            addBundleJre( filesPath );
+
+            controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ), javaMainExecutable );
 
             controlBuilder.addScriptFragment( Script.PREINSTHEAD, "# check for java. the service will need it and other parts probably too"
-                            + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
+                            + "[ ! -x '" + javaMainExecutable + "' ] && echo \"The program 'java' does not exist but will be needed. (Looked up at '" + javaMainExecutable + "')\" && exit 1 || :"
                             + "\n\n"
                             );
 
@@ -158,6 +155,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        initScript.setPlaceholder( "daemonExec", javaMainExecutable );
         initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
         String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
@@ -187,67 +185,6 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
     }
 
     /**
-     * Changes the permissions of all directories recursively inside the specified path to 755.
-     *
-     * @param path the path
-     * @throws IOException on I/O failures
-     */
-    // share
-    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
-        if ( path == null ) { return; }
-        setPermissions( path, true );
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeDirectoryPermissionsTo755( file );
-            }
-        }
-    }
-
-    /**
-     * Changes the permissions of all files recursively inside the specified path to 644.
-     *
-     * @param path the path
-     * @throws IOException on I/O failures
-     */
-    // share
-    private void changeFilePermissionsTo644( File path ) throws IOException {
-        if ( path == null ) { return; }
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeFilePermissionsTo644( file );
-            } else {
-                if( file.getName().endsWith( ".sh" ) ) {
-                    setPermissions( file, true );
-                } else {
-                    setPermissions( file, false );
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
-     *
-     * @param file the file
-     * @param executable if set to <tt>true</tt> the executable bit will be set
-     * @throws IOException on errors when setting the permissions
-     */
-    // share
-    static void setPermissions( File file, boolean executable ) throws IOException {
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        perms.add( PosixFilePermission.OWNER_READ );
-        perms.add( PosixFilePermission.OWNER_WRITE );
-        perms.add( PosixFilePermission.GROUP_READ );
-        perms.add( PosixFilePermission.OTHERS_READ );
-        if( executable ) {
-            perms.add( PosixFilePermission.OWNER_EXECUTE );
-            perms.add( PosixFilePermission.GROUP_EXECUTE );
-            perms.add( PosixFilePermission.OTHERS_EXECUTE );
-        }
-        Files.setPosixFilePermissions( file.toPath(), perms );
-    }
-
-    /**
      * Creates the files and the corresponding scripts for the specified desktop starter.
      *
      * @param starter the desktop starter
@@ -262,7 +199,7 @@ public class RpmBuilder extends AbstractBuilder<Rpm, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "\"" + javaMainExecutable + "\" -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
 

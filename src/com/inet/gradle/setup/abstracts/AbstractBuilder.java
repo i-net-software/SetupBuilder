@@ -15,10 +15,12 @@
  */
 package com.inet.gradle.setup.abstracts;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 import org.gradle.api.internal.file.FileResolver;
@@ -75,6 +77,33 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
 
     /**
      * Execute an external process.
+     * Returns the response and ignores the exit value.
+     *
+     * @param parameters command line
+     * @return the output
+     */
+    protected String exec( String... parameters ) {
+        return exec(true, parameters);
+    }
+
+    /**
+     * Execute an external process.
+     * Returns the response.
+     *
+     * @param ignoreExitValue if the exit value should be ignored
+     * @param parameters command line
+     * @return the output
+     */
+    protected String exec( boolean ignoreExitValue, String... parameters ) {
+        ArrayList<String> command = new ArrayList<>();
+        command.addAll( Arrays.asList( parameters ) );
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exec( command, null, baos, ignoreExitValue );
+        return baos.toString().trim();
+    }
+
+    /**
+     * Execute an external process.
      *
      * @param parameters command line
      * @param input optional InputStream for the process
@@ -84,7 +113,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
     @SuppressWarnings( "resource" )
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, boolean ignoreExitValue ) {
         // print command line to the log
-        StringBuilder log = new StringBuilder( "\t" );
+        StringBuilder log = new StringBuilder( "\tCommand: " );
         for( String para : parameters ) {
 
             if ( para == null ) {

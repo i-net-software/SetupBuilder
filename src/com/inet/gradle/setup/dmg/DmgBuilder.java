@@ -470,12 +470,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         }
         Files.copy( icons.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
 
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "SetFile" );
-        command.add( "-a" );
-        command.add( "C" );
-        command.add( iconDestination.getParent() );
-        exec( command, null, null, true );
+        exec( "SetFile", "-a", "C", iconDestination.getParent() );
 
         if( task.getBackgroundImage() != null ) {
             String name = task.getBackgroundImage().getName();

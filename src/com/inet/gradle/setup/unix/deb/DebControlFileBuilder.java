@@ -218,7 +218,7 @@ class DebControlFileBuilder {
      */
     private void putRecommends( OutputStreamWriter controlWriter ) throws IOException {
         String recommends = deb.getRecommends();
-        if( recommends == null || recommends.length() == 0 ) {
+        if( ( recommends == null || recommends.length() == 0 ) && setup.getBundleJre() != null ) {
             recommends = "openjdk-8-jre | openjdk-8-jdk | default-jre | default-jdk, libgtk2-perl";
         }
         controlWriter.write( "Recommends: " + recommends + NEWLINE );

@@ -28,20 +28,18 @@ import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
-import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
 import com.inet.gradle.setup.util.Logging;
 
-public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
+public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
 
     private DebControlFileBuilder  controlBuilder;
 
     private DebDocumentFileBuilder documentBuilder;
-
-    private SetupBuilder           setup;
 
     /**
      * Create a new instance
@@ -54,8 +52,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
      *            the file Resolver
      */
     public DebBuilder( Deb deb, SetupBuilder setup, FileResolver fileResolver ) {
-        super( deb, fileResolver );
-        this.setup = setup;
+        super( deb, setup, fileResolver );
     }
 
     /**
@@ -65,10 +62,13 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         try {
             File filesPath = new File( buildDir, task.getInstallationRoot() );
             task.copyTo( filesPath );
+
             changeFilePermissionsTo644( filesPath );
 
-            // create the package config files in the DEBIAN subfolder
+            // Add a bundled java vm if required. Will update the variable to indicate the java-main program
+            addBundleJre( filesPath );
 
+            // create the package config files in the DEBIAN subfolder
             controlBuilder = new DebControlFileBuilder( super.task, setup, new File( buildDir, "DEBIAN" ) );
 
             addScriptsToControlFiles();
@@ -110,7 +110,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                 if( executable != null ) {
                     controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )\n" );
                 } else if( mainClass != null ) {
-                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
+                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
                 }
             }
 
@@ -132,9 +132,9 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                     }
                 } else if( mainClass != null ) {
                     if( task.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
                     } else {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && java -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
                     }
                 }
                 controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
@@ -164,7 +164,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
     private void addScriptsToControlFiles() {
 
         controlBuilder.addHeadScriptFragment( Script.PREINST, "# check for java. the service woll need it and other parts probably too"
-                        + "[ ! -x '/usr/bin/java' ] && echo \"The program 'java' does not exist but will be needed.\" && exit 1 || :"
+                        + "[ ! -x '" + javaMainExecutable + "' ] && echo \"The program 'java' does not exist but will be needed. (Looked up at '" + javaMainExecutable + "')\" && exit 1 || :"
                         + "\n\n"
                         );
 
@@ -267,6 +267,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        initScript.setPlaceholder( "daemonExec", javaMainExecutable );
         initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
         String initScriptFile = "etc/init.d/" + serviceUnixName;
@@ -304,7 +305,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "java -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "\"" + javaMainExecutable + "\" -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };
@@ -339,7 +340,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
                     iconFile = new File( iconDir, unixName + ".png" );
                 }
                 scaledFile.renameTo( iconFile );
-                DebUtils.setPermissions( iconFile, false );
+                setPermissions( iconFile, false );
             }
         }
         try (FileWriter fw = new FileWriter( createFile( "usr/share/applications/" + unixName + ".desktop", false ) )) {
@@ -447,7 +448,7 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
         }
         file.createNewFile();
 
-        DebUtils.setPermissions( file, executable );
+        setPermissions( file, executable );
         return file;
     }
 
@@ -487,46 +488,4 @@ public class DebBuilder extends AbstractBuilder<Deb, SetupBuilder> {
             throw e;
         }
     }
-
-    /**
-     * Changes the permissions of all directories recursively inside the specified path to 755.
-     *
-     * @param path
-     *            the path
-     * @throws IOException
-     *             on I/O failures
-     */
-    private void changeDirectoryPermissionsTo755( File path ) throws IOException {
-        if ( path == null ) { return; }
-        DebUtils.setPermissions( path, true );
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeDirectoryPermissionsTo755( file );
-            }
-        }
-    }
-
-    /**
-     * Changes the permissions of all files recursively inside the specified path to 644.
-     *
-     * @param path
-     *            the path
-     * @throws IOException
-     *             on I/O failures
-     */
-    private void changeFilePermissionsTo644( File path ) throws IOException {
-        if ( path == null ) { return; }
-        for( File file : path.listFiles() ) {
-            if( file.isDirectory() ) {
-                changeFilePermissionsTo644( file );
-            } else {
-                if( file.getName().endsWith( ".sh" ) ) {
-                    DebUtils.setPermissions( file, true );
-                } else {
-                    DebUtils.setPermissions( file, false );
-                }
-            }
-        }
-    }
-
 }
