@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.gradle.api.GradleException;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -42,57 +45,71 @@ public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder
      * @throws IOException an exception
      */
     protected void addBundleJre( File filesPath ) throws IOException {
-        Object jre = setup.getBundleJre();
-        if( jre == null ) {
+        File jreDir = task.getBundleJre();
+        if( jreDir == null ) {
             task.getProject().getLogger().lifecycle( "\tNo JRE for bundling set." );
             return;
         }
-        File jreDir;
-        try {
-            jreDir = task.getProject().file( jre );
-        } catch( Exception e ) {
-            jreDir = null;
-        }
-
-        if ( jreDir == null || !jreDir.isDirectory() )
-        {
-            // This is a version number, need to look on our own.
-            // check version of current java
-            String javaCommand = exec( "sh", "-c", "readlink -e $(which java)" ); // readlink requires an "sh"
-            if ( javaCommand.length() == 0 || !javaCommand.endsWith( javaCommandSuffix ) ) { // Forward slashes should be good. This is Linux!
-                throw new GradleException( "Java was not found: '" + javaCommand +"'" );
-            }
-
-            String javaVersion = exec( "sh", "-c", javaCommand + " -version 2>&1 | awk -F '\"' '/version/ {print $2}'" );
-            if( javaVersion.length() == 0 || !javaVersion.startsWith( jre.toString() ) ) {
-                throw new GradleException( "bundleJre version '" + jre + "' does not match the found JavaVersion: '" + javaVersion +"'" );
-            }
-
-            jreDir = new File( javaCommand.substring( 0, javaCommand.length() - javaCommandSuffix.length() ) );
-            if( !jreDir.isDirectory() ) {
-                throw new GradleException( "bundleJre version '" + jre + "' can not be found in: " + jreDir + "'" );
-            }
-        } else {
-            // Check if the folder contains a java - command
-            File javaCommand = new File( jreDir, javaCommandSuffix);
-            String javaVersion = exec( "sh", "-c", javaCommand.getAbsolutePath() + " -version 2>&1 | awk -F '\"' '/version/ {print $2}'" );
-            if( javaVersion.length() == 0 ) {
-                throw new GradleException( "Java - Command '" + javaCommandSuffix + "' not found in '" + jreDir + "'" );
-            }
-        }
 
         // Check if this is the JRE or JDK - usually the jdk has a jre folder
-        File jdkCheck = new File( jreDir, "jre" );
-        if ( jdkCheck.isDirectory() ) {
-            jreDir = jdkCheck;
-        }
-
         File jreTarget = new File( filesPath, setup.getBundleJreTarget() ); // jre or something. This is the final destination
 
-        task.getProject().getLogger().lifecycle( "\tJRE is set and will be copied from: '" + jreDir.getAbsolutePath() + "' to' " + jreTarget.getAbsolutePath() + "'" );
-        ResourceUtils.copy( jreDir, jreTarget );
+        if ( jreDir.isDirectory() ) {
+
+            File jdkCheck = new File( jreDir, "jre" );
+            if ( jdkCheck.isDirectory() ) {
+                jreDir = jdkCheck;
+            }
+
+            checkForBinJava( jreDir);
+            task.getProject().getLogger().lifecycle( "\tJRE is set and will be copied from: '" + jreDir.getAbsolutePath() + "' to' " + jreTarget.getAbsolutePath() + "'" );
+            ResourceUtils.copy( jreDir, jreTarget );
+        } else if ( jreDir.isFile() ) {
+            // Check for Archive ... usually a tgz/tar.gz
+            FileTree tree = null;
+            if ( jreDir.getName().endsWith( ".zip" ) ) {
+                tree = setup.getProject().zipTree( jreDir );
+            } else if ( jreDir.getName().endsWith( ".tar.gz" ) || jreDir.getName().endsWith( ".tgz" ) ) {
+                tree = setup.getProject().tarTree( jreDir );
+            } else {
+                throw new GradleException( "Unsupported content set as Java Runtime, please use .zip, .tar.gz or .tgz - or a Directory '" + jreDir + "'" );
+            }
+
+            // Copy over the data from the tree
+            FileTree finalTree = tree;
+            setup.getProject().copy( spec -> {
+                spec.from( finalTree );
+                spec.into( jreTarget );
+            } );
+
+            // Check if there is exactly one directory ... usually the VMs are packed in such a folder
+            File[] files = jreTarget.listFiles();
+            if (files != null && files.length == 1 ) { // only one directory! Move it up!
+                Path tempFile = Files.createTempDirectory( "SetupBuilder." );
+                Files.move( files[0].toPath(), tempFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING );
+                Files.move( tempFile, jreTarget.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING );
+            }
+            checkForBinJava( jreTarget );
+
+        } else {
+            throw new GradleException( "Unsupported content set as Java Runtime '" + jreDir + "'" );
+        }
+
         javaMainExecutable = String.join( "/", task.getInstallationRoot(), setup.getBundleJreTarget(), javaCommandSuffix ).replaceAll( "\\/+", "\\/" );
         task.getProject().getLogger().lifecycle( "\tUpdated the Java Executable Path to: '" + javaMainExecutable + "'" );
+    }
+
+    /**
+     *
+     * @param jreDir
+     */
+    private void checkForBinJava( File jreDir ) {
+        File javaCommand = new File( jreDir, javaCommandSuffix);
+        String javaVersion = exec( "sh", "-c", javaCommand.getAbsolutePath() + " -version 2>&1 | awk -F '\"' '/version/ {print $2}'" );
+        if( javaVersion.length() == 0 ) {
+            throw new GradleException( "Java - Command '" + javaCommandSuffix + "' not found in '" + jreDir + "'" );
+        }
+
     }
 
 

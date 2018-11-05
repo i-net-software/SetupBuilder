@@ -44,6 +44,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     private String additionalServiceScript;
 
+    private Object bundleJre;
+
     public Unix( String format ) {
         super( format );
     }
@@ -216,5 +218,40 @@ public abstract class Unix extends AbstractUnixSetupTask {
      */
     public void setStartDefaultService( boolean startDefaultService ) {
         this.startDefaultService = startDefaultService;
+    }
+
+    /**
+     * Get the bundle JRE directory.
+     *
+     * @return the value
+     */
+    public File getBundleJre() {
+
+        Object jre = bundleJre;
+        if ( jre == null ) {
+            jre = getSetupBuilder().getBundleJre();
+        }
+        if ( jre == null ) {
+            return null; // Expected if nothing was set, nothing will be included.
+        }
+
+        File jreDir = null;
+        try {
+            jreDir = getProject().file( jre );
+        } catch( Exception e ) {
+            // Will keep going though!
+            getProject().getLogger().error( "bundleJre version '" + jre + "' can not be resolved to a Java Runtime Directory which is required for embedding!" );
+        }
+        return jreDir;
+    }
+
+    /**
+     * Add a Java VM into your setup. This has to be a
+     * directory to an installed Java VM.
+     *
+     * @param bundleJre path
+     */
+    public void setBundleJre( Object bundleJre ) {
+        this.bundleJre = bundleJre;
     }
 }

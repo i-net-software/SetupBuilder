@@ -77,7 +77,7 @@ public class ResourceUtils {
 
     public static void unZipIt( File file, File folder, String startsWith, Function<String, String> nameClosure, Function<InputStream, InputStream> streamClosure ) {
 
-        // create output directory is not exists
+        // create output directory if not exists
         if( !folder.exists() ) {
             folder.mkdir();
         }
@@ -208,7 +208,6 @@ public class ResourceUtils {
 
         throw new UnsupportedOperationException("Cannot list files for URL "+dirURL);
     }
-
     /**
      * Recursively copy files from source to destination
      * @param source the source
@@ -223,7 +222,7 @@ public class ResourceUtils {
 
         Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING, LinkOption.NOFOLLOW_LINKS, StandardCopyOption.COPY_ATTRIBUTES);
 
-        if (Files.isDirectory(sourcePath)) {
+        if (Files.isDirectory(sourcePath) && !Files.isSymbolicLink(sourcePath) ) {
             String[] files = source.list();
 
             for (int i = 0; i < files.length; i++) {
