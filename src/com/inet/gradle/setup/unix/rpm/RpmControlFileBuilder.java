@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import javax.annotation.Nonnull;
-
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
@@ -68,7 +66,7 @@ class RpmControlFileBuilder {
      * @param buildDir the directory to build the package in
      * @param javaMainExecutable the Java main Executable
      */
-    RpmControlFileBuilder( Rpm rpm, SetupBuilder setup, File buildDir, @Nonnull String javaMainExecutable ) {
+    RpmControlFileBuilder( Rpm rpm, SetupBuilder setup, File buildDir, String javaMainExecutable ) {
         this.rpm = rpm;
         this.setup = setup;
         this.buildDir = buildDir;
