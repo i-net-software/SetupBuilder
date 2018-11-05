@@ -63,10 +63,10 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             File filesPath = new File( buildDir, task.getInstallationRoot() );
             task.copyTo( filesPath );
 
+            changeFilePermissionsTo644( filesPath );
+
             // Add a bundled java vm if required. Will update the variable to indicate the java-main program
             addBundleJre( filesPath );
-
-            changeFilePermissionsTo644( filesPath );
 
             // create the package config files in the DEBIAN subfolder
             controlBuilder = new DebControlFileBuilder( super.task, setup, new File( buildDir, "DEBIAN" ) );
