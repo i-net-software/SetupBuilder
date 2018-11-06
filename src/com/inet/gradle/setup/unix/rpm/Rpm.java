@@ -23,7 +23,7 @@ import com.inet.gradle.setup.unix.Unix;
 
 /**
  * The rpm Gradle task. It build a rpm package for Linux.
- * 
+ *
  * @author Volker Berlin
  */
 public class Rpm extends Unix {
@@ -36,6 +36,8 @@ public class Rpm extends Unix {
 
     private boolean           backwardCompatible = true;
 
+    private ArrayList<String> specHeader         = new ArrayList<String>();
+
     private ArrayList<String> prep               = new ArrayList<String>();
 
     private ArrayList<String> build              = new ArrayList<String>();
@@ -43,6 +45,7 @@ public class Rpm extends Unix {
     private ArrayList<String> install            = new ArrayList<String>();
 
     private ArrayList<String> clean              = new ArrayList<String>();
+
 
     /**
      * the default constructor
@@ -62,7 +65,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the summary that should be used in the 'Summary' entry in the SPEC file.
-     * 
+     *
      * @return the summary specified in the gradle script
      */
     public String getSummary() {
@@ -74,7 +77,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the 'Summary' entry in the SPEC file.
-     * 
+     *
      * @param summary
      *            the value for the entry
      */
@@ -84,7 +87,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the release that should be used in the 'Release' entry in the SPEC file.
-     * 
+     *
      * @return the release specified in the gradle script
      */
     public String getRelease() {
@@ -93,7 +96,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the 'Release' entry in the SPEC file.
-     * 
+     *
      * @param release
      *            the value for the entry
      */
@@ -103,7 +106,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the license that should be used in the 'License' entry in the SPEC file.
-     * 
+     *
      * @return the license specified in the gradle script
      */
     public String getLicense() {
@@ -112,7 +115,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the 'License' entry in the SPEC file.
-     * 
+     *
      * @param license
      *            the value for the entry
      */
@@ -122,7 +125,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the backward compatibility for old rpm versions
-     * 
+     *
      * @return the backward compatibility for old rpm versions
      */
     public boolean isBackwardCompatible() {
@@ -131,7 +134,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the backward compatibility for old rpm versions
-     * 
+     *
      * @param backwardCompatibility
      *            the backward compatibility for old rpm versions
      */
@@ -140,8 +143,27 @@ public class Rpm extends Unix {
     }
 
     /**
+     * Returns the specHeader which are header lines that should be put additionally
+     *
+     * @return the prep specified in the gradle script
+     */
+    public ArrayList<String> getSpecHeader() {
+        return specHeader;
+    }
+
+    /**
+     * Adds an entry to the additional SPEC file header
+     *
+     * @param specHeader
+     *            the value for the entry
+     */
+    public void setSpecHeader( String specHeader ) {
+        this.specHeader.add( specHeader );
+    }
+
+    /**
      * Returns the prep that should be used in the '%prep' entry in the SPEC file.
-     * 
+     *
      * @return the prep specified in the gradle script
      */
     public ArrayList<String> getPrep() {
@@ -150,7 +172,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the '%prep' entry in the SPEC file.
-     * 
+     *
      * @param prep
      *            the value for the entry
      */
@@ -160,7 +182,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the clean that should be used in the '%clean' entry in the SPEC file.
-     * 
+     *
      * @return the clean specified in the gradle script
      */
     public ArrayList<String> getClean() {
@@ -169,7 +191,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the '%clean' entry in the SPEC file.
-     * 
+     *
      * @param clean
      *            the value for the entry
      */
@@ -179,7 +201,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the install that should be used in the '%install' entry in the SPEC file.
-     * 
+     *
      * @return the install specified in the gradle script
      */
     public ArrayList<String> getInstall() {
@@ -188,7 +210,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the '%install' entry in the SPEC file.
-     * 
+     *
      * @param install
      *            the value for the entry
      */
@@ -198,7 +220,7 @@ public class Rpm extends Unix {
 
     /**
      * Returns the build that should be used in the '%build' entry in the SPEC file.
-     * 
+     *
      * @return the build specified in the gradle script
      */
     public ArrayList<String> getBuild() {
@@ -207,7 +229,7 @@ public class Rpm extends Unix {
 
     /**
      * Sets the value for the '%build' entry in the SPEC file.
-     * 
+     *
      * @param build
      *            the value for the entry
      */

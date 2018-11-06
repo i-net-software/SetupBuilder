@@ -117,6 +117,8 @@ class RpmControlFileBuilder {
             putDepends( controlWriter );
             putArchitecture( controlWriter );
 
+            putAdditionalHeaderInformation( controlWriter );
+
             putBackwardCompatibility( controlWriter );
 
             putDescription( controlWriter );
@@ -580,6 +582,21 @@ class RpmControlFileBuilder {
      */
     private void putArchitecture( OutputStreamWriter controlWriter ) throws IOException {
         controlWriter.write( "BuildArchitectures: " + rpm.getArchitecture() + NEWLINE );
+    }
+
+    /**
+     * Write additional header information
+     *
+     * @param controlWriter the writer for the file
+     */
+    private void putAdditionalHeaderInformation( OutputStreamWriter controlWriter ) {
+        rpm.getSpecHeader().forEach( header -> {
+            try {
+                controlWriter.write( header + NEWLINE );
+            } catch( IOException e ) {
+                setup.getProject().getLogger().error( e.getLocalizedMessage() );
+            }
+        } );
     }
 
     /**
