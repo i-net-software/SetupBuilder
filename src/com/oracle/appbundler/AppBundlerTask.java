@@ -57,6 +57,8 @@ import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.resources.FileResource;
 
+import com.inet.gradle.setup.util.ResourceUtils;
+
 /**
  * App bundler Ant task.
  */
@@ -931,20 +933,6 @@ public class AppBundlerTask extends Task {
     }
 
     static void copy(File source, File destination) throws IOException {
-        Path sourcePath = source.toPath();
-        Path destinationPath = destination.toPath();
-
-        destination.getParentFile().mkdirs();
-
-        Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-
-        if (Files.isDirectory(sourcePath)) {
-            String[] files = source.list();
-
-            for (int i = 0; i < files.length; i++) {
-                String file = files[i];
-                copy(new File(source, file), new File(destination, file));
-            }
-        }
+        ResourceUtils.copy( source, destination );
     }
 }
