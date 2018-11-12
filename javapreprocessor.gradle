@@ -10,6 +10,7 @@
 import java.util.StringTokenizer;
 import java.util.regex.*;
 
+
 /**
  * Java Preprocessor.
  * The JPP allows replacement of variables at compile time and conditional compilation.
@@ -75,26 +76,26 @@ class JPPTask extends DefaultTask {
             String op = st.nextToken();
             String lit = st.nextToken();
             String varContent = props.get(var);
-//            println "compare: "+var+"("+varContent+")"+op+lit;
+            // println "compare: "+var+"("+varContent+")"+op+lit;
+
+            def vd = parseDouble(varContent);
+            def ld = parseDouble(lit);
+            if ( var.toLowerCase().indexOf('version') > 0 ) {
+                vd = VersionNumber.parse(varContent)
+                ld = VersionNumber.parse(lit)
+            }
+
             if (op.equals("=") || op.equals("==")) {
                 return lit.equals(varContent);
             } else if (op.equals("!=")) {
                 return !lit.equals(varContent);
             } else if (op.equals(">")) {
-                double vd = parseDouble(varContent);
-                double ld = parseDouble(lit);
                 return vd>ld;
             } else if (op.equals("<")) {
-                double vd = parseDouble(varContent);
-                double ld = parseDouble(lit);
                 return vd<ld;
             } else if (op.equals(">=")) {
-                double vd = parseDouble(varContent);
-                double ld = parseDouble(lit);
                 return vd>=ld;
             } else if (op.equals("<=")) {
-                double vd = parseDouble(varContent);
-                double ld = parseDouble(lit);
                 return vd<=ld;
             } else {
                 throw new UnsupportedOperationException(op);

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.initialization.DefaultBuildCancellationToken;
 import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.util.IndentationOutputStream;
@@ -130,13 +131,20 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
 
         /*// if gradleVersion < 4.5
         DefaultExecAction action = new DefaultExecAction( fileResolver );
-        */// else
+        //// elif gradleVersion < 4.8
         DefaultExecAction action = new DefaultExecAction( fileResolver, new Executor() {
             @Override
             public void execute( Runnable command ) {
                 command.run();
             }
         } );
+        */// else
+        DefaultExecAction action = new DefaultExecAction( fileResolver, new Executor() {
+            @Override
+            public void execute( Runnable command ) {
+                command.run();
+            }
+        }, new DefaultBuildCancellationToken());
         //// endif
         action.setCommandLine( parameters );
         action.setIgnoreExitValue( ignoreExitValue );
