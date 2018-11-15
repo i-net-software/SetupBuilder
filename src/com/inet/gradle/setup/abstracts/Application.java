@@ -18,6 +18,7 @@ package com.inet.gradle.setup.abstracts;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.inet.gradle.setup.image.ImageFactory;
 
@@ -30,6 +31,8 @@ public class Application {
     protected final AbstractSetupBuilder setup;
 
     private String                       displayName, mainJar, mainClass, executable, description, workDir, startArguments;
+
+    private ArrayList<String>            javaVMArguments = new ArrayList<String>();
 
     private Object                       icons;
 
@@ -215,5 +218,23 @@ public class Application {
      */
     public void setStartArguments( String startArguments ) {
         this.startArguments = startArguments;
+    }
+
+    /**
+     * Returns the Java VM Arguments for starting java
+     *
+     * @return the Java VM Arguments for starting java
+     */
+    public ArrayList<String> getJavaVMArguments() {
+        return javaVMArguments;
+    }
+
+    /**
+     * Sets the Java VM Arguments for starting java
+     *
+     * @param vmArguments the Java VM Arguments for starting java
+     */
+    public void setJavaVMArguments( ArrayList<String> vmArguments ) {
+        this.javaVMArguments = vmArguments;
     }
 }

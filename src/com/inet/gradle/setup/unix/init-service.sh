@@ -23,6 +23,7 @@ PIDFILE=/var/run/$APPNAME.pid
 SCRIPTNAME=${0##*/}
 WORKINGDIR="{{workdir}}"
 STARTARGUMENTS="{{startArguments}}"
+JAVAVMARGUMENTS="{{javaVMArguments}}"
 
 if [ -e /lib/lsb/init-functions ]; then
     . /lib/lsb/init-functions
@@ -263,13 +264,13 @@ start() {
         if [ ! -z "${BACKGROUND}" ]; then
             BACKGROUND="-b"
         fi
-        start-stop-daemon  --chuid "$DAEMON_USER" ${BACKGROUND} --chdir "$WORKINGDIR" --make-pidfile --start --pidfile "$PIDFILE" --exec $DAEMON_EXEC -- ${STARTARGUMENTS} -cp "${MAINARCHIVE}" ${MAINCLASS}
+        start-stop-daemon  --chuid "$DAEMON_USER" ${BACKGROUND} --chdir "$WORKINGDIR" --make-pidfile --start --pidfile "$PIDFILE" --exec $DAEMON_EXEC -- ${JAVAVMARGUMENTS} -cp "${MAINARCHIVE}" ${MAINCLASS} ${STARTARGUMENTS}
     elif checkfunc "start_daemon"; then
-        start_daemon -u "$DAEMON_USER" /bin/bash -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${STARTARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} > \"/tmp/${APPNAME}-${DAEMON_USER}.out\" ${BACKGROUND}"
+        start_daemon -u "$DAEMON_USER" /bin/bash -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${JAVAVMARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/${APPNAME}-${DAEMON_USER}.out\" ${BACKGROUND}"
     elif checkfunc "daemon"; then
-        daemon -u "$DAEMON_USER" "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${STARTARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} > \"/tmp/${APPNAME}-${DAEMON_USER}.out\" ${BACKGROUND}"
+        daemon -u "$DAEMON_USER" "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${JAVAVMARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/${APPNAME}-${DAEMON_USER}.out\" ${BACKGROUND}"
     else
-        su - --shell=/bin/bash $DAEMON_USER -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${STARTARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} > \"/tmp/${APPNAME}-${DAEMON_USER}.out\" ${BACKGROUND}"
+        su - --shell=/bin/bash $DAEMON_USER -c "cd \"${WORKINGDIR}\" ; $DAEMON_EXEC ${JAVAVMARGUMENTS} -cp \"${MAINARCHIVE}\" ${MAINCLASS} ${STARTARGUMENTS} > \"/tmp/${APPNAME}-${DAEMON_USER}.out\" ${BACKGROUND}"
     fi
 
     # return if this was not a background process

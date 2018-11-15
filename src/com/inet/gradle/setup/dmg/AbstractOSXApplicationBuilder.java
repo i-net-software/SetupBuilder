@@ -120,6 +120,12 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
                 throw new ConfigurationException( "A main jar file is required for the application. You have to configure at least the following:\n\n\tsetupBuilder {\n\t\t[..]\n\t\tmainJar = '/path/to/yourMain.jar'\n\t}\n\n" );
             }
             appBundler.setJarLauncherName( mainJar );
+
+            application.getJavaVMArguments().forEach( arg -> {
+                Argument argument = new Argument();
+                argument.setValue( arg );
+                appBundler.addConfiguredArgument( argument );
+            });
         }
 
         appBundler.setIgnorePSN( true ); // Ignore this argument.

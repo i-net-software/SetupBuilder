@@ -31,7 +31,6 @@ import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.UnixBuilder;
-import com.inet.gradle.setup.unix.rpm.RpmControlFileBuilder.Script;
 import com.inet.gradle.setup.util.Logging;
 
 public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
@@ -82,14 +81,14 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
             controlBuilder = new RpmControlFileBuilder( super.task, setup, new File( buildDir, "SPECS" ), javaMainExecutable );
 
-            controlBuilder.addScriptFragment( Script.PREINSTHEAD, "# check for java. the service will need it and other parts probably too"
+            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "# check for java. the service will need it and other parts probably too"
                             + "[ ! -x '" + javaMainExecutable + "' ] && echo \"The program 'java' does not exist but will be needed. (Looked up at '" + javaMainExecutable + "')\" && exit 1 || :"
                             + "\n\n"
                             );
 
             String daemonuser = task.getDaemonUser();
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-                controlBuilder.addScriptFragment( Script.POSTINSTHEAD, "useradd -r -m -U " + daemonuser + " 2> /dev/null || true\n"
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTHEAD, "useradd -r -m -U " + daemonuser + " 2> /dev/null || true\n"
                                 + "[ \"$(id " + daemonuser + " 2> /dev/null 1>&2; echo $?)\" == \"0\" ]"
                                 + " && chown -R " + daemonuser + ":" + daemonuser + " '" + task.getInstallationRoot() + "'"
                                 + " && chmod -R g+w '" + task.getInstallationRoot() + "' || true \n\n" );
@@ -104,8 +103,8 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             }
 
             if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-                controlBuilder.addScriptFragment( Script.POSTRMTAIL, "userdel -r " + daemonuser + " 2> /dev/null || true \n" );
-                controlBuilder.addScriptFragment( Script.POSTRMTAIL, "groupdel " + daemonuser + " 2> /dev/null || true \n" );
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTRMTAIL, "userdel -r " + daemonuser + " 2> /dev/null || true \n" );
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTRMTAIL, "groupdel " + daemonuser + " 2> /dev/null || true \n" );
             }
 
             // copy the license files
@@ -152,6 +151,7 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
         initScript.setPlaceholder( "workdir", workingDir );
         initScript.setPlaceholder( "mainJar", mainJarPath );
         initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+        initScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
@@ -162,9 +162,9 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
         initScript.writeTo( createFile( initScriptFile , true ) );
         controlBuilder.addConfFile( initScriptFile );
 
-        controlBuilder.addScriptFragment( Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
 
-        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
                         + "echo replace path\n"
                         + "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
                         + "\nfi" );
@@ -175,13 +175,13 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
 
-        controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " && systemctl enable " + serviceUnixName + " ) || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " && systemctl enable " + serviceUnixName + " ) || true" );
         if ( task.shouldStartDefaultService() ) {
-            controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
+            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
         }
 
-        controlBuilder.addScriptFragment( Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
-        controlBuilder.addScriptFragment( Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );
     }
 
     /**
@@ -199,7 +199,7 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "\"" + javaMainExecutable + "\" -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "\"" + javaMainExecutable + "\" " + String.join( " ", starter.getJavaVMArguments()) + " -cp \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
 
@@ -299,15 +299,15 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
                     fw.write( "    </mime-type>\n" );
                     fw.write( "</mime-info>\n" );
                 }
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
-                controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-mime uninstall \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "xdg-mime install \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "xdg-mime uninstall \"" + task.getInstallationRoot() + "/" + simpleVendor + "-" + extension + ".xml\" || true" );
 
                 String iconame = unixName;
                 if( starter.getIcons() != null ) {
                     iconame = iconName;
                 }
-                controlBuilder.addScriptFragment( Script.POSTINSTTAIL, "xdg-icon-resource install --context mimetypes --novendor --size 48 /usr/share/icons/hicolor/48x48/apps/" + iconame + ".png " + iconame + " || true" );
-                controlBuilder.addScriptFragment( Script.PRERMHEAD, "xdg-icon-resource uninstall --context mimetypes --size 48 " + iconame + " || true" );
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "xdg-icon-resource install --context mimetypes --novendor --size 48 /usr/share/icons/hicolor/48x48/apps/" + iconame + ".png " + iconame + " || true" );
+                controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "xdg-icon-resource uninstall --context mimetypes --size 48 " + iconame + " || true" );
 
                 // we don't want to overwrite the default application and it seems that doing it per hand is the proper way under unix.
                 // so we don't do it here.

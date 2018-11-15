@@ -110,7 +110,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                 if( executable != null ) {
                     controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )\n" );
                 } else if( mainClass != null ) {
-                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
+                    controlBuilder.addTailScriptFragment( Script.POSTINST, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" " + String.join( " ", runAfterStarter.getJavaVMArguments()) + " -cp \"" + mainJarPath + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + ")\n" );
                 }
             }
 
@@ -132,9 +132,9 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                     }
                 } else if( mainClass != null ) {
                     if( task.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "( cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" " + String.join( " ", runBeforeUninstall.getJavaVMArguments()) + " -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + ")" );
                     } else {
-                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
+                        controlBuilder.addTailScriptFragment( Script.PRERM, "(su " + task.getDaemonUser() + " -c 'cd \"" + workingDir + "\" && \"" + javaMainExecutable + "\" " + String.join( " ", runBeforeUninstall.getJavaVMArguments()) + " -cp \"" + mainJarPath + "\" " + mainClass + " " + runBeforeUninstall.getStartArguments() + "' )" );
                     }
                 }
                 controlBuilder.addTailScriptFragment( Script.PRERM, "    ;;\nesac" );
@@ -264,6 +264,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         initScript.setPlaceholder( "workdir", workingDir );
         initScript.setPlaceholder( "mainJar", mainJarPath );
         initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+        initScript.setPlaceholder( "javaVMArguments", (String.join( " ", service.getJavaVMArguments())).trim() );
 
         initScript.setPlaceholder( "mainClass", service.getMainClass() );
         initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
@@ -305,7 +306,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
-                fw.write( "\"" + javaMainExecutable + "\" -cp  \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
+                fw.write( "\"" + javaMainExecutable + "\" " + String.join( " ", starter.getJavaVMArguments()) + " -cp \"" + task.getInstallationRoot() + "/" + starter.getMainJar() + "\" " + starter.getMainClass() + " " + starter.getStartArguments() + " \"$@\"" );
             }
         }
         int[] iconSizes = { 16, 32, 48, 64, 128 };

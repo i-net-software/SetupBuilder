@@ -220,9 +220,9 @@ class RpmControlFileBuilder {
 
             } else if( mainClass != null ) {
                 if( rpm.getDaemonUser().equalsIgnoreCase( "root" ) ) {
-                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
+                    controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && \"" + javaMainExecutable + "\" " + String.join( " ", starter.getJavaVMArguments()) + " -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + " )" + NEWLINE );
                 } else {
-                    controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
+                    controlWriter.write( "(su " + rpm.getDaemonUser() + " -c 'cd \"${RPM_INSTALL_PREFIX}/" + workingDir + "\" && \"" + javaMainExecutable + "\" " + String.join( " ", starter.getJavaVMArguments()) + " -cp \"" + starter.getMainJar() + "\" " + mainClass + " " + starter.getStartArguments() + "' )" + NEWLINE );
                 }
             }
             controlWriter.write( NEWLINE );
@@ -281,7 +281,7 @@ class RpmControlFileBuilder {
             if( executable != null ) {
                 controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && " + executable + " " + runAfterStarter.getStartArguments() + " & )" + NEWLINE );
             } else if( mainClass != null ) {
-                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && \"" + javaMainExecutable + "\" -cp \"" + runAfterStarter.getMainJar() + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + " )" + NEWLINE );
+                controlWriter.write( "( cd \"${RPM_INSTALL_PREFIX}" + workingDir + "\" && \"" + javaMainExecutable + "\" " + String.join( " ", runAfterStarter.getJavaVMArguments()) + " -cp \"" + runAfterStarter.getMainJar() + "\" " + mainClass + " " + runAfterStarter.getStartArguments() + " )" + NEWLINE );
             }
         }
 
