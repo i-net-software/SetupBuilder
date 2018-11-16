@@ -31,6 +31,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.JEditorPane;
 import javax.swing.text.DefaultStyledDocument;
@@ -667,10 +668,13 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
                 addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
             }
+            addMultiStringRegistryValue( regkey, "Options", service.getJavaVMArguments() );
+
             regkey = addRegistryKey( component, "HKLM", id + "_RegStart", baseKey + name + "\\Parameters\\Start" );
             addRegistryValue( regkey, "Class", "string", service.getMainClass() );
             addRegistryValue( regkey, "Mode", "string", "jvm" );
             addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" + subdir );
+            addMultiStringRegistryValue( regkey, "Params", Arrays.asList( service.getStartArguments().split( " " ) ).stream().filter( e -> e.length() > 0  ).collect( Collectors.toList() ) );
             regkey = addRegistryKey( component, "HKLM", id + "_RegLog", baseKey + name + "\\Parameters\\Log" );
             addRegistryValue( regkey, "Path", "string", "[INSTALLDIR]" + subdir );
             addRegistryValue( regkey, "Prefix", "string", "service" );
@@ -1133,6 +1137,26 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         return regValue;
     }
 
+    /**
+     * Add a registry value.
+     *
+     * @param regkey the parent registry key
+     * @param name the entry name, null use the default value of a key
+     * @param values the list of values
+     * @return the value node
+     */
+    private Element addMultiStringRegistryValue( Element regkey, String name, List<String> values ) {
+
+        if ( values.isEmpty() ) return null;
+        Element regValue = getOrCreateChildByKeyValue( regkey, "RegistryValue", "Name", name );
+        addAttributeIfNotExists( regValue, "Type", "multiString" );
+
+        for( String value : values ) {
+            getOrCreateChild( regValue, "MultiStringValue", value, true );
+        }
+
+        return regValue;
+    }
     /**
      * Split a path in segments.
      *
