@@ -20,12 +20,11 @@ import java.io.File;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
  * Create a XML configuration file for lauch4j.
- * 
+ *
  * @author Volker
  */
 class Launch4jConfig extends XmlFileBuilder<Msi> {
@@ -33,8 +32,8 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
     private Launch4j launch;
 
     /**
-     * Create a instance.
-     * 
+     * Create an instance.
+     *
      * @param launch the launch description
      * @param task current task
      * @param setup the SetupBuilder
@@ -47,7 +46,7 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
 
     /**
      * Create the XML file.
-     * 
+     *
      * @return the created file
      * @throws Exception if an error occurs on reading the image files
      */
@@ -83,7 +82,7 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
         if( bundleJRE != null ) {
             String jreTarget = setup.getBundleJreTarget();
             String workDir = launch.getWorkDir();
-            if( workDir != null && !workDir.isEmpty() ) {
+            if( workDir != null && !workDir.isEmpty() && !workDir.equals( "." ) ) { // This might lead to problems
                 int count = workDir.split( "[/\\\\]" ).length;
                 for( int i = 0; i < count; i++ ) {
                     jreTarget = "..\\" + jreTarget;
@@ -94,6 +93,11 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
             getOrCreateChild( jre, "minVersion" ).setTextContent( System.getProperty( "java.version" ) );
         }
         getOrCreateChild( jre, "runtimeBits" ).setTextContent( task.is64Bit() ? "64" : "32" );
+
+        // Add all JVM Arguments
+        for( String argument : launch.getJavaVMArguments() ) {
+            getOrCreateChild( jre, "opt", argument, true );
+        }
 
         Element versionInfo = getOrCreateChild( launch4jConfig, "versionInfo" );
         getOrCreateChild( versionInfo, "fileVersion" ).setTextContent( normalizeVersionNumber( task.getVersion() ) );
@@ -122,7 +126,7 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
 
     /**
      * Normalize the number in the format x.x.x.x
-     * 
+     *
      * @param version current version
      * @return normalize version
      */
