@@ -37,6 +37,7 @@ class CommandLine {
     CommandLine( Application starter, String javaDir ) {
         String target = starter.getExecutable();
         String arguments = starter.getStartArguments();
+        String vmArguments = String.join( " ", starter.getJavaVMArguments() ).trim();
         String dir;
         String workDir = starter.getWorkDir();
         if( workDir == null ) {
@@ -54,7 +55,7 @@ class CommandLine {
                 target = "javaw.exe";
             }
             dir = "";
-            arguments = "-cp \"[INSTALLDIR]" + workDir + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
+            arguments = vmArguments + " -cp \"[INSTALLDIR]" + workDir + starter.getMainJar() + "\" " + starter.getMainClass() + " " + arguments;
         } else {
             if( !target.startsWith( "[" ) ) {
                 dir = "[INSTALLDIR]";
