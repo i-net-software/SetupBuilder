@@ -204,6 +204,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         for( ProtocolHandler handler: task.getProtocolHandler() ) {
             registerSchemeDefinition( handler );
         }
+        for( ProtocolHandler handler: task.getLaunch4js() ) {
+            registerSchemeDefinition( handler );
+        }
     }
 
     /**
