@@ -24,7 +24,7 @@ import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
 /**
- * Create a XML configuration file for lauch4j.
+ * Create an XML configuration file for lauch4j.
  *
  * @author Volker
  */

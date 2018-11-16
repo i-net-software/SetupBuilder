@@ -29,12 +29,11 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.util.ResourceUtils;
 
 /**
  * Create the Lauch4j programs if there any configured.
- * 
+ *
  * @author Volker
  */
 public class Launch4jCreator {
@@ -43,7 +42,7 @@ public class Launch4jCreator {
 
     /**
      * Create a single Lauch4j launcher.
-     * 
+     *
      * @param launch the launch description
      * @param task the task
      * @param setup the SetupBuilder
@@ -67,7 +66,7 @@ public class Launch4jCreator {
 
     /**
      * Download the lauch4j and create a classloader
-     * 
+     *
      * @param project current project
      * @param buildDir current temp directory
      * @return the ClassLoader for lauch4j
@@ -119,7 +118,7 @@ public class Launch4jCreator {
 
     /**
      * Close the ClassLoader
-     * 
+     *
      * @throws IOException if any error occur
      */
     void close() throws IOException {
