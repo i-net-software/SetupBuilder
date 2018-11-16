@@ -115,8 +115,35 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
                 return (Element)child;
             }
         }
+        return createChild( parent, name, append );
+    }
+
+    /**
+     * Returns or creates a child node with a text node entry only
+     * @param parent the parent node to attach to
+     * @param name the name of the node
+     * @param textNodeValue the textnode value of the node
+     * @param append if it should be appended or set in first position
+     * @return the new element
+     */
+    public Element getOrCreateChild( Node parent, String name, String textNodeValue, boolean append ) {
+        Node first = parent.getFirstChild();
+        for( Node child = first; child != null; child = child.getNextSibling() ) {
+            if( name.equals( child.getNodeName() ) &&
+                child.getFirstChild().getNodeType() == Element.TEXT_NODE &&
+                textNodeValue.equals( child.getFirstChild().getTextContent() ) ) {
+                return (Element)child;
+            }
+        }
+        Element child = createChild( parent, name, append );
+        addNodeText( child, textNodeValue );
+        return child;
+    }
+
+    public Element createChild( Node parent, String name, boolean append ) {
         Document doc = parent instanceof Document ? (Document)parent : parent.getOwnerDocument();
         Element child = doc.createElement( name );
+        Node first = parent.getFirstChild();
         if( append || first == null ) {
             parent.appendChild( child );
         } else {
