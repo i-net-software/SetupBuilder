@@ -42,7 +42,6 @@ public class MsiLocalizedResource {
     public MsiLocalizedResource( SetupBuilder setup, File temporaryDirectory ) {
         this.setup = setup;
         this.temporaryDirectory = temporaryDirectory;
-
     }
 
     /**
@@ -62,7 +61,7 @@ public class MsiLocalizedResource {
         }
 
         try {
-            File wxlFile = new File( temporaryDirectory, "i18n" + File.pathSeparator + input.getName() + "." + UUID.randomUUID().toString() + ".wxl" );
+            File wxlFile = new File( temporaryDirectory, "i18n-" + input.getName() + "." + UUID.randomUUID().toString() + ".wxl" );
             if( wxlFile.exists() ) {
                 return wxlFile;
             }

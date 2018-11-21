@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
@@ -72,22 +73,9 @@ public class Msi extends AbstractSetupTask {
 
     /**
      * Create a new instance.
-     * @throws IOException if the default resources are missing
      */
-    public Msi() throws IOException {
+    public Msi() {
         super( "msi" );
-
-        MsiLocalizedResource resource = new MsiLocalizedResource( getSetupBuilder(), getTemporaryDir() );
-        resource.setLocale( "en" );
-        resource.setOverridable( true );
-        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-en.properties", new File( getTemporaryDir(), "i18n" ) ) ) ;
-        i18n.add( resource );
-
-        resource = new MsiLocalizedResource( getSetupBuilder(), getTemporaryDir() );
-        resource.setLocale( "de" );
-        resource.setOverridable( true );
-        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-de.properties", new File( getTemporaryDir(), "i18n" ) ) );
-        i18n.add( resource );
     }
 
     /**
@@ -95,6 +83,24 @@ public class Msi extends AbstractSetupTask {
      */
     @Override
     public void build() {
+
+        try {
+            // Extract default language Resources
+            MsiLocalizedResource resource = new MsiLocalizedResource( getSetupBuilder(), getTemporaryDir() );
+            resource.setLocale( "en" );
+            resource.setOverridable( true );
+            resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-en.properties", getTemporaryDir() ) ) ;
+            i18n.add( resource );
+
+            resource = new MsiLocalizedResource( getSetupBuilder(), getTemporaryDir() );
+            resource.setLocale( "de" );
+            resource.setOverridable( true );
+            resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-de.properties", getTemporaryDir() ) );
+            i18n.add( resource );
+        } catch( IOException e ) {
+            throw new GradleException( "Could not extract required ressources.", e );
+        }
+
         ProjectInternal project = (ProjectInternal)getProject();
         new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
