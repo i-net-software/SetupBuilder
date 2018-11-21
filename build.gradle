@@ -6,7 +6,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
 
-apply from: 'javapreprocessor.gradle'
+apply from: "${buildscript.sourceFile.parentFile}/scripts/javapreprocessor.gradle"
 
 group = 'de.inetsoftware'
 
@@ -19,7 +19,7 @@ def gVersion = VersionNumber.parse( gradle.gradleVersion )
 println 'Gradle version: ' + gVersion
 
 // Fetch version from script.
-apply from: "${buildscript.sourceFile.parentFile}/SetupBuilderVersion.gradle"
+apply from: "${buildscript.sourceFile.parentFile}/scripts/SetupBuilderVersion.gradle"
 version = setupBuilderVersion(buildVersion)
 baseVersion += '.' + buildVersion
 println 'SetupBuilder version: ' + version
