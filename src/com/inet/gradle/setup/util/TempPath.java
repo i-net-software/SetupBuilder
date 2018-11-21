@@ -17,17 +17,16 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public class TempPath {
 
-    private static Path tmp;
+    private Path tmp;
 
     /**
-     * Create the temp directory at startup
+     * Create a TempPath in a defined directory
+     * @param root the root path of the temporary directory. Should be used with the tasks temp dir.
      */
-    static {
-        try {
-            tmp = Files.createTempDirectory( "SetupBuilder" );
-        } catch( IOException e1 ) {
-            System.err.println( "Could not create temporary directory." );
-            e1.printStackTrace();
+    public TempPath( Path root ) {
+        tmp = root;
+        if ( !tmp.toFile().exists() ) {
+            tmp.toFile().mkdirs();
         }
 
         // Add a shutdown hook to kill the sub process faster
@@ -45,11 +44,19 @@ public class TempPath {
     }
 
     /**
+     * Create a TempPath in a temporary Directory
+     * @throws IOException in case of errors while creating the temporary directory
+     */
+    public TempPath() throws IOException {
+        this( Files.createTempDirectory( "SetupBuilder" ) );
+    }
+
+    /**
      * Return the temporary root folder as string
      *
      * @return the temporary root folder as string
      */
-    public static String get() {
+    public String get() {
         return tmp.toString();
     }
 
@@ -60,7 +67,7 @@ public class TempPath {
      * @return the Path, create directory if not yet there
      * @throws IOException in case of fire.
      */
-    public static Path get( String directory ) throws IOException {
+    public Path get( String directory ) throws IOException {
 
         File destination = new File( tmp.toFile(), directory );
         if( !destination.exists() ) {
@@ -84,7 +91,7 @@ public class TempPath {
      * @return a new File object for the directory and file
      * @throws IOException in case of fire.
      */
-    public static File getTempFile( String directory, String file ) throws IOException {
+    public File getTempFile( String directory, String file ) throws IOException {
         return new File( get( directory ).toFile(), file );
     }
 
@@ -94,7 +101,7 @@ public class TempPath {
      * @param file name of the file
      * @return a new File object for the directory and file
      */
-    public static File getTempFile( String file ) {
+    public File getTempFile( String file ) {
         return new File( get(), file );
     }
 
@@ -104,7 +111,7 @@ public class TempPath {
      * @param file name of the file
      * @return a new File object for the directory and file
      */
-    public static String getTempString( String file ) {
+    public String getTempString( String file ) {
         return getTempFile( file ).toString();
     }
 
@@ -116,7 +123,7 @@ public class TempPath {
      * @return a new File object for the directory and file
      * @throws IOException in case of fire.
      */
-    public static String getTempString( String directory, String file ) throws IOException {
+    public String getTempString( String directory, String file ) throws IOException {
         return new File( get( directory ).toFile(), file ).toString();
     }
 
@@ -125,7 +132,7 @@ public class TempPath {
      *
      * @throws Exception in case of fire.
      */
-    private static void clearTemporaryFolder() throws Exception {
+    private void clearTemporaryFolder() throws Exception {
         clearTemporaryFolder( tmp );
     }
 
@@ -152,6 +159,5 @@ public class TempPath {
         } );
 
         Logging.sysout( "Removed the temporary content at: " + tmp.toString() );
-        tmp = null;
     }
 }

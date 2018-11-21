@@ -55,6 +55,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     private SetupBuilder setup;
 
+    private TempPath    tempPath;
+
     /**
      * Create a new instance
      *
@@ -73,6 +75,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      * @throws RuntimeException if any error occur
      */
     public void build() throws RuntimeException {
+
+        tempPath = new TempPath( new File( setup.getProject().getBuildDir(), "tmp/SetupBuilder" ).toPath() );
 
         try {
             if( setup.getServices().isEmpty() && setup.getDesktopStarters().isEmpty() ) {
@@ -210,10 +214,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         }
 
         uninstall.addScript( new OSXScriptBuilder( task.getPostrm() ) );
-        uninstall.writeTo( TempPath.getTempFile( "scripts", "uninstall.sh" ) );
-        watchUninstall.writeTo( TempPath.getTempFile( "scripts", "watchuninstall.plist" ) );
-        preinstall.writeTo( TempPath.getTempFile( "scripts", "preinstall" ) );
-        postinstall.writeTo( TempPath.getTempFile( "scripts", "postinstall" ) );
+        uninstall.writeTo( tempPath.getTempFile( "scripts", "uninstall.sh" ) );
+        watchUninstall.writeTo( tempPath.getTempFile( "scripts", "watchuninstall.plist" ) );
+        preinstall.writeTo( tempPath.getTempFile( "scripts", "preinstall" ) );
+        postinstall.writeTo( tempPath.getTempFile( "scripts", "postinstall" ) );
     }
 
     /**
@@ -227,18 +231,18 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         extractApplicationInformation();
         createAndPatchDistributionXML();
 
-        imageSourceRoot = TempPath.get( "distribution" ).toString();
+        imageSourceRoot = tempPath.get( "distribution" ).toString();
         File resultingPackage = new File( imageSourceRoot, applicationName + ".pkg" );
 
         // Build Product for packaging
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/productbuild" );
         command.add( "--distribution" );
-        command.add( TempPath.getTempString( "distribution.xml" ) );
+        command.add( tempPath.getTempString( "distribution.xml" ) );
         command.add( "--package-path" );
-        command.add( TempPath.get( "packages" ).toString() );
+        command.add( tempPath.get( "packages" ).toString() );
         command.add( "--resources" );
-        command.add( TempPath.get( "resources" ).toString() );
+        command.add( tempPath.get( "resources" ).toString() );
 
         // Sign the final package
         command.add( resultingPackage.getAbsolutePath() );
@@ -264,7 +268,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "--analyze" );
         command.add( "--root" );
         command.add( buildDir.toString() );
-        command.add( TempPath.getTempString( applicationIdentifier + ".plist" ) );
+        command.add( tempPath.getTempString( applicationIdentifier + ".plist" ) );
         exec( command );
 
         // set identifier, create package
@@ -273,21 +277,21 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "--root" );
         command.add( buildDir.toString() );
         command.add( "--component-plist" );
-        command.add( TempPath.getTempString( applicationIdentifier + ".plist" ) );
+        command.add( tempPath.getTempString( applicationIdentifier + ".plist" ) );
         command.add( "--identifier" );
         command.add( setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() );
         command.add( "--version" );
         command.add( task.getVersion() );
         command.add( "--scripts" );
-        command.add( TempPath.get( "scripts" ).toString() );
+        command.add( tempPath.get( "scripts" ).toString() );
         command.add( "--install-location" );
 
         // Application as default directory except there are more application parts to install.
         command.add( "/Applications/" + installationSubdirectory() );
-        command.add( TempPath.getTempString( "packages", applicationName + ".pkg" ) );
+        command.add( tempPath.getTempString( "packages", applicationName + ".pkg" ) );
         exec( command );
 
-        Files.copy( TempPath.getTempFile( "packages", applicationName + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( tempPath.getTempFile( "packages", applicationName + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
@@ -311,8 +315,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( TempPath.getTempFile( "packages", applicationName + ".pkg" ).toString() );
-        command.add( TempPath.getTempFile( "distribution.xml" ).toString() );
+        command.add( tempPath.getTempFile( "packages", applicationName + ".pkg" ).toString() );
+        command.add( tempPath.getTempFile( "distribution.xml" ).toString() );
         exec( command );
 
         patchDistributionXML();
@@ -325,7 +329,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      */
     private void patchDistributionXML() throws Throwable {
 
-        File xml = TempPath.getTempFile( "distribution.xml" );
+        File xml = tempPath.getTempFile( "distribution.xml" );
         URL url = xml.toURI().toURL();
         @SuppressWarnings( "rawtypes" )
         XmlFileBuilder xmlFile = new XmlFileBuilder<Dmg>( task, setup, xml, buildDir, url );
@@ -342,7 +346,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         // Product node
         File backgroundImage = task.getSetupBackgroundImage();
         if( backgroundImage != null ) {
-            Files.copy( backgroundImage.toPath(), TempPath.getTempFile( "resources", backgroundImage.getName() ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            Files.copy( backgroundImage.toPath(), tempPath.getTempFile( "resources", backgroundImage.getName() ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             Element background = xmlFile.getOrCreateChild( distribution, "background", false );
             xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
             xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
@@ -354,7 +358,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         for( LocalizedResource localizedResource : welcomePages ) {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
             if( welcomePage != null ) {
-                Files.copy( welcomePage.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "Welcome" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+                Files.copy( welcomePage.toPath(), tempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "Welcome" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
                 Element license = xmlFile.getOrCreateChild( distribution, "welcome", false );
                 xmlFile.addAttributeIfNotExists( license, "file", "Welcome" );
             }
@@ -365,7 +369,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         for( LocalizedResource localizedResource : licenseFiles ) {
             File licenseFile = checkSetupTextFile( localizedResource.getResource() );
             if( licenseFile != null ) {
-                Files.copy( licenseFile.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "License" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+                Files.copy( licenseFile.toPath(), tempPath.getTempFile( "resources/" + localizedResource.getLanguage() + ".lproj", "License" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
                 Element license = xmlFile.getOrCreateChild( distribution, "license", false );
                 xmlFile.addAttributeIfNotExists( license, "file", "License" );
             }
@@ -376,7 +380,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         for( LocalizedResource localizedResource : conclusionPages ) {
             File welcomePage = checkSetupTextFile( localizedResource.getResource() );
             if( welcomePage != null ) {
-                Files.copy( welcomePage.toPath(), TempPath.getTempFile( "resources/" + localizedResource.getLocale().getLanguage() + ".lproj", "Conclusion" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+                Files.copy( welcomePage.toPath(), tempPath.getTempFile( "resources/" + localizedResource.getLocale().getLanguage() + ".lproj", "Conclusion" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
                 Element license = xmlFile.getOrCreateChild( distribution, "conclusion", false );
                 xmlFile.addAttributeIfNotExists( license, "file", "Conclusion" );
             }
@@ -439,7 +443,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "-noautoopen" );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
         command.add( "-mountroot" );
-        command.add( TempPath.get() );
+        command.add( tempPath.get() );
 
         exec( command );
     }
@@ -451,7 +455,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "detach" );
-        command.add( TempPath.get() + "/" + applicationName );
+        command.add( tempPath.get() + "/" + applicationName );
         exec( command );
     }
 
@@ -463,7 +467,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
     private void setVolumeIcon() throws IOException {
 
         // Copy Icon as file icon into attached container
-        File iconDestination = TempPath.getTempFile( applicationName, ".VolumeIcon.icns" );
+        File iconDestination = tempPath.getTempFile( applicationName, ".VolumeIcon.icns" );
         File icons = setup.getIconForType( buildDir, "icns" );
         if( icons == null ) {
             throw new IllegalArgumentException( "You have to specify a valid icon file" );
@@ -474,7 +478,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         if( task.getBackgroundImage() != null ) {
             String name = task.getBackgroundImage().getName();
-            File backgroundDestination = TempPath.getTempFile( applicationName, "/.resources/background" + name.substring( name.lastIndexOf( '.' ) ) );
+            File backgroundDestination = tempPath.getTempFile( applicationName, "/.resources/background" + name.substring( name.lastIndexOf( '.' ) ) );
             Files.createDirectories( backgroundDestination.getParentFile().toPath(), new FileAttribute[0] );
             Files.copy( task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             BufferedImage image = ImageIO.read( backgroundDestination );
