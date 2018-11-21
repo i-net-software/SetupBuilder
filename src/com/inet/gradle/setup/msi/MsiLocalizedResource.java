@@ -12,7 +12,6 @@ import java.util.UUID;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.SetupBuilder;
-import com.inet.gradle.setup.util.TempPath;
 
 import groovy.lang.Closure;
 
@@ -32,13 +31,17 @@ public class MsiLocalizedResource {
 
     private boolean      overridable;
 
+    private File         temporaryDirectory;
+
     /**
      * Stub Object for localized resources
      *
      * @param setup the setup
+     * @param temporaryDirectory the temporary directory of the task to store resources
      */
-    public MsiLocalizedResource( SetupBuilder setup ) {
+    public MsiLocalizedResource( SetupBuilder setup, File temporaryDirectory ) {
         this.setup = setup;
+        this.temporaryDirectory = temporaryDirectory;
 
     }
 
@@ -59,11 +62,12 @@ public class MsiLocalizedResource {
         }
 
         try {
-            File wxlFile = TempPath.getTempFile( "i18n", input.getName() + "." + UUID.randomUUID().toString() + ".wxl" );
+            File wxlFile = new File( temporaryDirectory, "i18n" + File.pathSeparator + input.getName() + "." + UUID.randomUUID().toString() + ".wxl" );
             if( wxlFile.exists() ) {
                 return wxlFile;
             }
 
+            wxlFile.getParentFile().mkdirs();
             Properties props = new Properties();
             props.load( Files.newInputStream( input.toPath() ) );
 
@@ -159,12 +163,13 @@ public class MsiLocalizedResource {
      * Set the license file
      *
      * @param parent the setup builder
+     * @param temporaryDirectory the temporary directory to put the resource is
      * @param holder the list to add the entry to
      * @param resource file file or closure
      */
-    public static void addLocalizedResource( SetupBuilder parent, List<MsiLocalizedResource> holder, Object resource ) {
+    public static void addLocalizedResource( SetupBuilder parent, File temporaryDirectory, List<MsiLocalizedResource> holder, Object resource ) {
 
-        MsiLocalizedResource res = new MsiLocalizedResource( parent );
+        MsiLocalizedResource res = new MsiLocalizedResource( parent, temporaryDirectory );
         if( resource instanceof Closure<?> ) {
             res = ConfigureUtil.configure( (Closure<?>)resource, res );
         } else {

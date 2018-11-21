@@ -32,7 +32,6 @@ import org.gradle.util.ConfigureUtil;
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
 import com.inet.gradle.setup.abstracts.ProtocolHandler;
 import com.inet.gradle.setup.util.ResourceUtils;
-import com.inet.gradle.setup.util.TempPath;
 
 import groovy.lang.Closure;
 
@@ -78,16 +77,16 @@ public class Msi extends AbstractSetupTask {
     public Msi() throws IOException {
         super( "msi" );
 
-        MsiLocalizedResource resource = new MsiLocalizedResource( getSetupBuilder() );
+        MsiLocalizedResource resource = new MsiLocalizedResource( getSetupBuilder(), getTemporaryDir() );
         resource.setLocale( "en" );
         resource.setOverridable( true );
-        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-en.properties", TempPath.get( "i18n" ).toFile() ) );
+        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-en.properties", new File( getTemporaryDir(), "i18n" ) ) ) ;
         i18n.add( resource );
 
-        resource = new MsiLocalizedResource( getSetupBuilder() );
+        resource = new MsiLocalizedResource( getSetupBuilder(), getTemporaryDir() );
         resource.setLocale( "de" );
         resource.setOverridable( true );
-        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-de.properties", TempPath.get( "i18n" ).toFile() ) );
+        resource.setResource( ResourceUtils.extract( getClass(), "i18n/language-de.properties", new File( getTemporaryDir(), "i18n" ) ) );
         i18n.add( resource );
     }
 
@@ -471,7 +470,7 @@ public class Msi extends AbstractSetupTask {
      * @param localization the localization object
      */
     public void i18n( Object localization ) {
-        MsiLocalizedResource.addLocalizedResource( getSetupBuilder(), i18n, localization );
+        MsiLocalizedResource.addLocalizedResource( getSetupBuilder(), getTemporaryDir(), i18n, localization );
     }
 
     /**
