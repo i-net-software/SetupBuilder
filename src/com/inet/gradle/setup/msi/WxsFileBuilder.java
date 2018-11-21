@@ -906,7 +906,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     addRegistryValue( reg, "FriendlyAppName", "string", setup.getApplication() );
                     String targetFile = cmd.relativTarget;
                     if( targetFile.startsWith( "[INSTALLDIR]" ) ) {
-                        targetFile = targetFile.substring( "[INSTALLDIR]".length() ); // für id we need to cut the [INSTALLDIR]. For java command there is ever a directory
+                        targetFile = targetFile.substring( "[INSTALLDIR]".length() ); // for the id we need to cut the [INSTALLDIR]. For java command there is ever a directory
                     }
                     String[] segments = segments( targetFile );
                     addAttributeIfNotExists( verb, "TargetFile", id( segments, segments.length ) );
