@@ -5,7 +5,7 @@ buildscript {
         }
     }
     dependencies {
-        apply from: "${buildscript.sourceFile.parentFile}/../SetupBuilderVersion.gradle"
+        apply from: "${buildscript.sourceFile.parentFile.parentFile}/scripts/SetupBuilderVersion.gradle"
         classpath 'de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
     }
 }
