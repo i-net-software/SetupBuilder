@@ -641,7 +641,7 @@ public class AppBundlerTask extends Task {
 
             // Write runtime
             if (runtime != null) {
-                writeProperty(xout, "JVMRuntime", runtime.getDir().getParentFile().getParentFile().getName());
+                writeProperty(xout, "JVMRuntime", runtime.normalizeJVMName(  runtime.getDir().getParentFile().getParentFile() ) );
             }
 
             if(jvmRequired != null) {

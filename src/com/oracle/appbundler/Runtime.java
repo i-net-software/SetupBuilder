@@ -105,7 +105,7 @@ public class Runtime extends FileSet {
         File runtimeDirectory = runtimeContentsDirectory.getParentFile();
 
         // Create root plug-in directory
-        File pluginDirectory = new File(targetDir, runtimeDirectory.getName());
+        File pluginDirectory = new File(targetDir, normalizeJVMName( runtimeDirectory ) );
         pluginDirectory.mkdir();
 
         // Create Contents directory
@@ -132,5 +132,15 @@ public class Runtime extends FileSet {
             File destination = new File(pluginHomeDirectory, includedFile);
             AppBundlerTask.copy(source, destination);
         }
+    }
+
+    /**
+     * Returns a normalized version of the JVM name, meaning: it has to have a '.' to be recognized as bundle
+     * Or the signature will not work!
+     * @param jvm the JVM File
+     * @return the normalized name
+     */
+    public String normalizeJVMName( File jvm ) {
+        return jvm.getName().contains( "." ) ? jvm.getName() : jvm.getName() + ".jre";
     }
 }
