@@ -76,9 +76,12 @@ class Launch4jManifest extends XmlFileBuilder<Msi> {
         Element trustInfo = getOrCreateChild( assembly, "trustInfo" );
         trustInfo.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "urn:schemas-microsoft-com:asm.v2" );
 
-        Element security = getOrCreateChild( trustInfo, "security" );
-        Element requestedPrivileges = getOrCreateChild( security, "requestedPrivileges" );
-        Element requestedExecutionLevel = getOrCreateChildByKeyValue( requestedPrivileges, "requestedExecutionLevel", "level", launch.getRequestedExecutionLevel() );
-        addAttributeIfNotExists( requestedExecutionLevel, "uiAccess", "false" );
+        String level = launch.getRequestedExecutionLevel();
+        if ( level != null && !level.isEmpty() ) {
+            Element security = getOrCreateChild( trustInfo, "security" );
+            Element requestedPrivileges = getOrCreateChild( security, "requestedPrivileges" );
+            Element requestedExecutionLevel = getOrCreateChildByKeyValue( requestedPrivileges, "requestedExecutionLevel", "level", level );
+            addAttributeIfNotExists( requestedExecutionLevel, "uiAccess", "false" );
+        }
     }
 }
