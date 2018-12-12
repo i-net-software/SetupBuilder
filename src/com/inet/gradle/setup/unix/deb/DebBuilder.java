@@ -15,14 +15,13 @@
  */
 package com.inet.gradle.setup.unix.deb;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.gradle.api.internal.file.FileResolver;
 
@@ -30,6 +29,7 @@ import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
@@ -81,8 +81,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                 setupStarter( starter );
             }
 
-            // TODO: internationalize
-            if( setup.getLicenseFile( "en" ) != null ) {
+            if( setup.getLicenseFiles().size() > 0 ) {
                 setupEula();
             }
 
@@ -205,22 +204,28 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         String templateLicenseName = setup.getAppIdentifier() + "/license";
         String templateAcceptName = setup.getAppIdentifier() + "/accept-license";
         String templateErrorName = setup.getAppIdentifier() + "/error-license";
-        try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) );
-                        // TODO: internationalize
-                        BufferedReader fr = new BufferedReader( new FileReader( setup.getLicenseFile( "en" ) ) )) {
+        try (FileWriter fw = new FileWriter( createFile( "DEBIAN/templates", false ) ) ) {
+
             fw.write( "Template: " + templateLicenseName + "\n" );
             fw.write( "Type: note\n" );
-            fw.write( "Description: License agreement\n" );
-            while( fr.ready() ) {
-                String line = fr.readLine().trim();
-                if( line.isEmpty() ) {
-                    fw.write( " .\n" );
-                } else {
-                    fw.write( ' ' );
-                    fw.write( line );
-                    fw.write( '\n' );
+
+            for( LocalizedResource localizedResource : setup.getLicenseFiles() ) {
+
+                StringBuffer content = new StringBuffer();
+
+                String lang = localizedResource.getLanguage().equalsIgnoreCase( setup.getDefaultResourceLanguage() ) ? "" : "-" + localizedResource.getLanguage();
+                content.append( "Description" + lang + ": License agreement\n" );
+
+                try (Scanner scanner = new Scanner( localizedResource.getResource(), "UTF8" )) {
+                    while ( scanner.hasNextLine() ) {
+                        String line = scanner.nextLine();
+                        content.append( " " + ( line.isEmpty() ? '.' : line) + "\n" );
+                    }
+                } finally {
+                    fw.write( content.toString() );
                 }
             }
+
             fw.write( '\n' );
             fw.write( "Template: " + templateAcceptName + "\n" );
             fw.write( "Type: boolean\n" );
@@ -236,7 +241,26 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
 
         controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"remove\" ] || [ \"$1\" = \"purge\" ]  ; then\n" + "  db_purge\n" + "fi" );
 
-        controlBuilder.addHeadScriptFragment( Script.PREINST, "if [ \"$1\" = \"install\" ] ; then\n" + "  db_get " + templateAcceptName + "\n" + "  if [ \"$RET\" = \"true\" ]; then\n" + "    echo \"License already accepted\"\n" + "  else\n" + "    db_input high " + templateLicenseName + " || true\n" + "    db_go\n" + "    db_input high " + templateAcceptName + " || true\n" + "    db_go\n" + "    db_get " + templateAcceptName + "\n" + "    if [ \"$RET\" != \"true\" ]; then\n" + "        echo \"License was not accepted by the user\"\n" + "        db_input high " + templateErrorName + " || true\n" + "        db_go\n" + "        db_purge\n" + "        exit 1\n" + "    fi\n" + "  fi\n" + "fi" );
+        controlBuilder.addHeadScriptFragment( Script.PREINST,
+                        "if [ \"$1\" = \"install\" ] ; then\n" +
+                        "  db_get " + templateAcceptName + "\n" +
+                        "  if [ \"$RET\" = \"true\" ]; then\n" +
+                        "    echo \"License already accepted\"\n" +
+                        "  else\n" +
+                        "    db_input high " + templateLicenseName + " || true\n" +
+//                        "    db_go\n" +
+                        "    db_input high " + templateAcceptName + " || true\n" +
+                        "    db_go\n" +
+                        "    db_get " + templateAcceptName + "\n" +
+                        "    if [ \"$RET\" != \"true\" ]; then\n" +
+                        "        echo \"License was not accepted by the user\"\n" +
+                        "        db_input high " + templateErrorName + " || true\n" +
+                        "        db_go\n" +
+                        "        db_purge\n" +
+                        "        exit 1\n" +
+                        "    fi\n" +
+                        "  fi\n" +
+                        "fi" );
     }
 
     /**

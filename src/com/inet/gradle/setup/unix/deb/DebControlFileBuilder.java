@@ -26,12 +26,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
 
 /**
  * Builder for the control, postinst and prerm files, that are required for the Debian package tool.
@@ -151,21 +153,25 @@ class DebControlFileBuilder {
      * @throws IOException if the was an error while writing to the file
      */
     private void putDescription( OutputStreamWriter controlWriter ) throws IOException {
-        String description = deb.getDescription();
 
-        String secondLine = "";
-        File longDescription = setup.getLongDescription( setup.getDefaultResourceLanguage() );
-        if( longDescription != null ) {
-            try (Scanner scanner = new Scanner( longDescription, "UTF8" )) {
-                secondLine = scanner.useDelimiter( "\\A" ).next();
+        List<LocalizedResource> longDescriptions = setup.getLongDescriptions();
+        if ( longDescriptions.size() > 0 ) {
+            for( LocalizedResource localizedResource : setup.getLongDescriptions() ) {
+                String lang = localizedResource.getLanguage().equalsIgnoreCase( setup.getDefaultResourceLanguage() ) ? "" : "-" + localizedResource.getLanguage();
+                StringBuffer content = new StringBuffer( "Description" + lang + ": " + deb.getDescription() + NEWLINE );
+                try (Scanner scanner = new Scanner( localizedResource.getResource(), "UTF8" )) {
+                    while ( scanner.hasNextLine() ) {
+                        String line = scanner.nextLine();
+                        content.append( " " + ( line.isEmpty() ? '.' : line) + NEWLINE );
+                    }
+                } finally {
+                    controlWriter.write( content.toString() );
+                }
             }
-
-            if( secondLine.trim().length() > 0 ) {
-                secondLine = NEWLINE + " " + secondLine;
-            }
+        } else {
+            // Write single line of short description.
+            controlWriter.write( "Description: " + deb.getDescription() + NEWLINE );
         }
-
-        controlWriter.write( "Description: " + description + secondLine + NEWLINE );
     }
 
     /**

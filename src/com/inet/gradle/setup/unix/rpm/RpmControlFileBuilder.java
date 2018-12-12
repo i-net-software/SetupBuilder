@@ -525,13 +525,16 @@ class RpmControlFileBuilder {
             for( LocalizedResource desc : descriptions ) {
 
                 String lang = desc.getLanguage();
-                String content = NEWLINE + "%description";
-                content += (lang.equalsIgnoreCase( setup.getDefaultResourceLanguage() ) ? "" + NEWLINE : " -l " + lang + NEWLINE);
+                StringBuffer content = new StringBuffer( NEWLINE + "%description" );
+                content.append( (lang.equalsIgnoreCase( setup.getDefaultResourceLanguage() ) ? "" + NEWLINE : " -l " + lang + NEWLINE) );
 
                 try (Scanner scanner = new Scanner( desc.getResource(), "UTF8" )) {
-                    content += scanner.useDelimiter( "\\A" ).next();
+                    while ( scanner.hasNextLine() ) {
+                        String line = scanner.nextLine();
+                        content.append( " " + ( line.isEmpty() ? '|' : line) + NEWLINE );
+                    }
                 } finally {
-                    controlWriter.write( content + NEWLINE );
+                    controlWriter.write( content.toString() + NEWLINE );
                 }
             }
         } else {

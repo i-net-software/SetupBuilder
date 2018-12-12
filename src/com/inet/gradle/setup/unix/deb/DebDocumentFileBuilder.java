@@ -18,15 +18,15 @@ package com.inet.gradle.setup.unix.deb;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.zip.GZIPOutputStream;
 
 import com.inet.gradle.setup.SetupBuilder;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
 
 /**
  * Builder for the documentation files like changelog that are required for the Debian package tool.
@@ -87,21 +87,30 @@ class DebDocumentFileBuilder {
 
         controlWriter = new OutputStreamWriter( fileoutput, "UTF-8" );
 
-        controlWriter.write( "File: *" + NEWLINE );
-        controlWriter.write( "Copyright: 2011-" + Calendar.getInstance().get( Calendar.YEAR ) + " i-net software" + NEWLINE );
-        controlWriter.write( "License: commercial" + NEWLINE );
-        // TODO: internationalize
-        File license = setup.getLicenseFile( "en" );
-        if( license != null ) {
-            FileReader reader = new FileReader( license );
-            int c = reader.read();
-            while( c != -1 ) {
-                controlWriter.write( c );
-                c = reader.read();
-            }
+        controlWriter.write( "Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/" + NEWLINE );
+        controlWriter.write( "Upstream-Name: " + setup.getArchiveName() + NEWLINE );
+        controlWriter.write( "Source: " + deb.getHomepage() + NEWLINE );
 
-            reader.close();
+        for( LocalizedResource localizedResource : setup.getLicenseFiles() ) {
+
+            StringBuffer content = new StringBuffer();
+            content.append( NEWLINE );
+            content.append( "File: *" + NEWLINE );
+            content.append( "Copyright: " + setup.getCopyright() + NEWLINE );
+
+            String lang = localizedResource.getLanguage().equalsIgnoreCase( setup.getDefaultResourceLanguage() ) ? "" : " and " + localizedResource.getLanguage();
+            content.append( "License: commercial" + lang + NEWLINE );
+
+            try (Scanner scanner = new Scanner( localizedResource.getResource(), "UTF8" )) {
+                while ( scanner.hasNextLine() ) {
+                    String line = scanner.nextLine();
+                    content.append( " " + ( line.isEmpty() ? '.' : line) + NEWLINE );
+                }
+            } finally {
+                controlWriter.write( content + NEWLINE );
+            }
         }
+
         controlWriter.flush();
         controlWriter.close();
 
