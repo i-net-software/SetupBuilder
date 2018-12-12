@@ -114,7 +114,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         processFiles( new CopyActionProcessingStreamAction() {
             @Override
             public void processFile( FileCopyDetailsInternal details ) {
-//                details.copyTo( details.getRelativePath().getFile( target ) ); // didn't work with mounted smb devises under Unix
+//                details.copyTo( details.getRelativePath().getFile( target ) ); // didn't work with mounted smb devices under Unix
                 if( !details.isDirectory() ) {
                     try {
                         File f = details.getRelativePath().getFile( target );
