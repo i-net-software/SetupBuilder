@@ -21,8 +21,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -587,7 +590,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             try( FileInputStream fis = new FileInputStream( localizedResource.getResource() ) ) {
                 byte[] bytes = new byte[5];
                 fis.read( bytes );
-                isRtf = "{\rtf".equals( new String( bytes ) );
+                isRtf = "{\\rtf".equals( new String( bytes ) );
             }
             if( !isRtf ) {
                 // Convert a txt file in a rtf file
@@ -596,8 +599,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 p.setContentType( "text/rtf" );
                 DefaultStyledDocument doc = (DefaultStyledDocument)p.getDocument();
 
-                try( FileInputStream fis = new FileInputStream( localizedResource.getResource() ) ) {
-                    kit.read( fis, doc, 0 );
+                try( Reader reader = new InputStreamReader( new FileInputStream( localizedResource.getResource() ), StandardCharsets.UTF_8) ) {
+                    kit.read( reader, doc, 0 );
                 }
 
                 SimpleAttributeSet attrs = new SimpleAttributeSet();
