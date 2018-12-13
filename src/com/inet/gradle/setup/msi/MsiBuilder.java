@@ -61,12 +61,13 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      */
     void build() {
         try {
-            buildLauch4j();
 
             File wxsFile = getWxsFile();
             URL template = task.getWxsTemplate();
             new WxsFileBuilder( task, setup, wxsFile, buildDir, template, false ).build();
             template = wxsFile.toURI().toURL();
+
+            buildLauch4j();
             candle();
 
             ResourceUtils.extract( getClass(), "sdk/MsiTran.exe", buildDir );
@@ -189,7 +190,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      * @param languageResources the language resource files
      * @return the generated msi file
      */
-    private File light( MsiLanguages language, String[] languageResources  ) {
+    private File light( MsiLanguages language, String[] languageResources ) {
         File out = new File( buildDir, setup.getArchiveName() + '_' + language.getCulture() + ".msi" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
@@ -209,6 +210,12 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
                 parameters.add( "-loc" );
                 parameters.add( location );
             }
+        }
+
+        // Set a localized EULA file
+        File localizedRtfFile = MsiLocalizedResource.localizedRtfFile( task.getTemporaryDir(), language );
+        if ( localizedRtfFile.exists() ) {
+            parameters.add( "-dWixUILicenseRtf=\"" + localizedRtfFile.getAbsolutePath() + "\"" );
         }
 
         parameters.add( "*.wixobj" );

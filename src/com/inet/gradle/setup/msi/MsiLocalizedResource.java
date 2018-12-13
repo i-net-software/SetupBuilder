@@ -145,7 +145,7 @@ public class MsiLocalizedResource {
      *
      * @param list from which to receive the resource
      * @param locale for which to get the file
-     * @return license file
+     * @return localized file
      */
     public static File getLocalizedResourceFile( List<MsiLocalizedResource> list, String locale ) {
 
@@ -159,7 +159,7 @@ public class MsiLocalizedResource {
     }
 
     /**
-     * Set the license file
+     * Set a localized file
      *
      * @param parent the setup builder
      * @param temporaryDirectory the temporary directory to put the resource is
@@ -177,5 +177,16 @@ public class MsiLocalizedResource {
         }
 
         holder.add( res );
+    }
+
+
+    /**
+     * Returns the file for a localized license
+     * @param temporaryDirectory the directory
+     * @param lang the language
+     * @return the localized license file
+     */
+    public static File localizedRtfFile( File temporaryDirectory, MsiLanguages lang ) {
+        return new File( temporaryDirectory, "i18n/" + "license-" + lang.getCulture().replaceAll( "[^a-zA-Z0-9]", "_" ) + ".rtf" );
     }
 }

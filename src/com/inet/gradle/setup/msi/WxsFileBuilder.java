@@ -20,8 +20,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +51,7 @@ import org.w3c.dom.Element;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.DocumentType;
+import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.ProtocolHandler;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.ResourceUtils;
@@ -569,41 +573,52 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @throws Exception if any exception occur
      */
     private boolean addLicense( Element product ) throws Exception {
-        // TODO: Internationalize
-        File license = setup.getLicenseFile( "en" );
-        if( license == null ) {
+
+        if ( setup.getLicenseFiles().size() == 0 ) {
             return false;
         }
-        boolean isRtf;
-        try( FileInputStream fis = new FileInputStream( license ) ) {
-            byte[] bytes = new byte[5];
-            fis.read( bytes );
-            isRtf = "{\rtf".equals( new String( bytes ) );
-        }
-        if( !isRtf ) {
-            // Convert a txt file in a rtf file
-            JEditorPane p = new JEditorPane();
-            EditorKit kit = p.getEditorKitForContentType( "text/plain" );
-            p.setContentType( "text/rtf" );
-            DefaultStyledDocument doc = (DefaultStyledDocument)p.getDocument();
 
-            try( FileInputStream fis = new FileInputStream( license ) ) {
-                kit.read( fis, doc, 0 );
+        for( LocalizedResource localizedResource : setup.getLicenseFiles() ) {
+
+            String lang = localizedResource.getLanguage();
+            File rtfOutputName = MsiLocalizedResource.localizedRtfFile( task.getTemporaryDir(), MsiLanguages.getMsiLanguage( lang ) );
+
+            boolean isRtf;
+            try( FileInputStream fis = new FileInputStream( localizedResource.getResource() ) ) {
+                byte[] bytes = new byte[5];
+                fis.read( bytes );
+                isRtf = "{\rtf".equals( new String( bytes ) );
             }
-            SimpleAttributeSet attrs = new SimpleAttributeSet();
-            StyleConstants.setFontSize( attrs, 9 );
-            StyleConstants.setFontFamily( attrs, "Courier New" );
-            doc.setCharacterAttributes( 0, doc.getLength(), attrs, false );
+            if( !isRtf ) {
+                // Convert a txt file in a rtf file
+                JEditorPane p = new JEditorPane();
+                EditorKit kit = p.getEditorKitForContentType( "text/plain; charset=utf-8" );
+                p.setContentType( "text/rtf" );
+                DefaultStyledDocument doc = (DefaultStyledDocument)p.getDocument();
 
-            kit = p.getEditorKitForContentType( "text/rtf" );
-            license = new File( buildDir, "license.rtf" );
-            try( FileOutputStream output = new FileOutputStream( license ) ) {
-                kit.write( output, doc, 0, doc.getLength() );
+                try( FileInputStream fis = new FileInputStream( localizedResource.getResource() ) ) {
+                    kit.read( fis, doc, 0 );
+                }
+
+                SimpleAttributeSet attrs = new SimpleAttributeSet();
+                StyleConstants.setFontSize( attrs, 9 );
+                StyleConstants.setFontFamily( attrs, "Courier New" );
+                doc.setCharacterAttributes( 0, doc.getLength(), attrs, false );
+
+                kit = p.getEditorKitForContentType( "text/rtf" );
+                try( FileOutputStream output = new FileOutputStream( rtfOutputName ) ) {
+                    kit.write( output, doc, 0, doc.getLength() );
+                }
+            } else {
+                try( InputStream input = new FileInputStream( localizedResource.getResource() ) ) {
+                    Files.copy( input, rtfOutputName.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                }
             }
         }
 
         Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUILicenseRtf" );
-        addAttributeIfNotExists( licenseNode, "Value", license.getAbsolutePath() );
+        addAttributeIfNotExists( licenseNode, "Value", setup.getLicenseFile( setup.getDefaultResourceLanguage() ).getAbsolutePath() );
+        addAttributeIfNotExists( licenseNode, "Overridable", "yes" );
         return true;
     }
 
