@@ -72,7 +72,7 @@ enum MsiLanguages {
 
     /**
      * Create a instance of the enum.
-     * @param langID the numeric lanaguage ID.
+     * @param langID the numeric language ID.
      */
     private MsiLanguages( int langID ) {
         this.culture = name().replace( '_', '-' );
