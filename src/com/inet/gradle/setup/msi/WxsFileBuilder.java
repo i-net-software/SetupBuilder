@@ -581,6 +581,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             return false;
         }
 
+        File res = null;
         for( LocalizedResource localizedResource : setup.getLicenseFiles() ) {
 
             String lang = localizedResource.getLanguage();
@@ -617,10 +618,22 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     Files.copy( input, rtfOutputName.toPath(), StandardCopyOption.REPLACE_EXISTING );
                 }
             }
+
+            if ( res == null ) {
+                // If there is no other ()e.g. Default
+                res = rtfOutputName;
+            }
         }
 
+        File defaultLicenseResource = MsiLocalizedResource.localizedRtfFile( task.getTemporaryDir(), MsiLanguages.getMsiLanguage( setup.getDefaultResourceLanguage() ) );
+        if ( defaultLicenseResource == null ) {
+            // We checked that there is at least one language so there has to be another one if not the default.
+            defaultLicenseResource = res;
+        }
+
+        // Write node with default language file
         Element licenseNode = getOrCreateChildById( product, "WixVariable", "WixUILicenseRtf" );
-        addAttributeIfNotExists( licenseNode, "Value", setup.getLicenseFile( setup.getDefaultResourceLanguage() ).getAbsolutePath() );
+        addAttributeIfNotExists( licenseNode, "Value", defaultLicenseResource.getAbsolutePath() );
         addAttributeIfNotExists( licenseNode, "Overridable", "yes" );
         return true;
     }
