@@ -27,7 +27,7 @@ echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${D
 # Create Group
 [ -z "$OLDUID" ] && dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}" || echo "Group already existed"
 # Unusable password for standard user group
-dscl . -create "/Groups/${DEAMON_USER}" Password \*                                     || echo "Password for group can not be set"
+[ -z "$OLDUID" ] && dscl . -create "/Groups/${DEAMON_USER}" Password \*                 || echo "Password for group not set"
 #########################################################################################################
 
 #########################################################################################################
@@ -53,4 +53,5 @@ dseditgroup -o edit -a "${DEAMON_USER}" -t "$(dscl . -read "/Groups/user" Record
 #########################################################################################################
 
 # make home directory
-mkdir -p "${HOME_DIRECTORY}/Library/Preferences" && chown -R "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}" || true
+[ -z "$OLDUID" ] && mkdir -p "${HOME_DIRECTORY}/Library/Preferences"                    || echo "HomeDirectory and preferences should already exist" 
+[ -z "$OLDUID" ] && chown -R "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}"        || echo "Directory permissions have been set before"
