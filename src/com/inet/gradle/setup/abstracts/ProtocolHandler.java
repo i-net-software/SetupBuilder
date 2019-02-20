@@ -4,12 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.gradle.util.ConfigureUtil;
-
-import com.inet.gradle.setup.SetupBuilder;
-
-import groovy.lang.Closure;
-
 /**
  * Custom Protocol handler. Will result in the registration of `scheme`
  * as a handler with the application as a starter.
@@ -77,24 +71,5 @@ public class ProtocolHandler extends Application {
             this.scheme = new ArrayList<>(); // reset
             throw new IllegalArgumentException( "The scheme only allows the letters 'a-z'. Was: " + this.scheme );
         }
-    }
-
-    /**
-     * Add a protocol handler
-     *
-     * @param parent the setup builder
-     * @param holder the list to add the entry to
-     * @param scheme file file or closure
-     */
-    public static void addProtocolHandler( SetupBuilder parent, List<ProtocolHandler> holder, Object scheme ) {
-
-        ProtocolHandler res = new ProtocolHandler( parent );
-        if( scheme instanceof Closure<?> ) {
-            res = ConfigureUtil.configure( (Closure<?>)scheme, res );
-        } else {
-            res.setScheme( scheme );
-        }
-
-        holder.add( res );
     }
 }
