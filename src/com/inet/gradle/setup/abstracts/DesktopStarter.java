@@ -130,9 +130,6 @@ public class DesktopStarter extends ProtocolHandler {
      * @return list of document types.
      */
     public List<DocumentType> getDocumentType() {
-        if( documentTypes.isEmpty() ) {
-            return setup.getDocumentType();
-        }
         return documentTypes;
     }
 }

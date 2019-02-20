@@ -18,16 +18,12 @@ package com.inet.gradle.setup.abstracts;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
-import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.Logging;
@@ -65,9 +61,6 @@ public class AbstractSetupBuilder implements SetupSources {
     private String                 mainClass;
 
     private String                 mainJar;
-
-    @Deprecated
-    private List<DocumentType>     documentTypes   = new ArrayList<>();
 
     private boolean                failOnEmptyFrom = true;
 
@@ -348,31 +341,6 @@ public class AbstractSetupBuilder implements SetupSources {
      */
     public void setMainJar( String mainJar ) {
         this.mainJar = mainJar;
-    }
-
-    /**
-     * Register a file extensions.
-     *
-     * @param closue document type
-     */
-    @Deprecated
-    public void documentType( Closure<?> closue ) {
-        System.err.println("WARNING: documentType is deprecated in setupBuilder. Move it into a desktopStarter.");
-        project.getLogger().warn( "WARNING: documentType is deprecated in setupBuilder. Move it into desktopStarter." );
-        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( this ) );
-        if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
-            throw new GradleException( "documentType must contain at least one fileExtension." );
-        }
-        documentTypes.add( doc );
-    }
-
-    /**
-     * Get the list of document types.
-     * @return the list
-     */
-    @Deprecated
-    public List<DocumentType> getDocumentType() {
-        return documentTypes;
     }
 
     /**
