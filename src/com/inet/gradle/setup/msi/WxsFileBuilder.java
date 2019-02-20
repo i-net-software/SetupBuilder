@@ -188,8 +188,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         addGUI();
         addIcon();
         addServices();
-        addShortcuts();
-        addProtocolHandler();
+        addShortcutsAndRegisterProtocols();
         addRunBeforeUninstall();
         addRunAfter();
         addDeleteFiles();
@@ -202,18 +201,6 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
 
         save();
-    }
-
-    /**
-     * Add the scheme for globally defined protocol handler
-     */
-    private void addProtocolHandler() {
-        for( ProtocolHandler handler: task.getProtocolHandler() ) {
-            registerSchemeDefinition( handler );
-        }
-        for( ProtocolHandler handler: task.getLaunch4js() ) {
-            registerSchemeDefinition( handler );
-        }
     }
 
     /**
@@ -367,11 +354,15 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element parent = getDirectory( segments );
 
         String pathID = id( segments, segments.length - 1 );
-        String compID = id( pathID + "_Comp");
+        String compID = id( ( pathID.length() > 0 ? pathID : "root" ) + "_Comp");
+
         Element component = getComponent( parent, compID );
 
         String name = segments[segments.length - 1];
         String id = addFile( component, file, pathID, name );
+
+        // Debug Output of files that will be added
+        task.getProject().getLogger().debug( "adding file: '" +file.toString() + "' '" + name + "' '" + id + "' '" + pathID + "' '" + compID + "' '" + String.join( "%", segments ) + "'" );
 
         // save the jvm.dll position
         if( name.equals( "jvm.dll" ) ) {
@@ -410,7 +401,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      *            added to improve the performance.
      */
     private String addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
-        String id = id( pathID + '_' + name );
+        String id = id( (pathID.length() > 0 ? pathID + '_' : "") + name );
         if( isAddFiles ) {
             Element fileEl = getOrCreateChildById( component, "File", id );
             addAttributeIfNotExists( fileEl, "Source", file.getAbsolutePath() );
@@ -827,80 +818,89 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      *
      * @throws IOException If any I/O exception occur on icon loading
      */
-    private void addShortcuts() throws IOException {
-        List<DesktopStarter> starters = setup.getDesktopStarters();
-        if( starters.isEmpty() ) {
-            return;
+    private void addShortcutsAndRegisterProtocols() throws IOException {
+        for( DesktopStarter starter : setup.getDesktopStarters() ) {
+            addShortcutsImpl( starter );
+        }
+        for( DesktopStarter starter : task.getLaunch4js() ) {
+            addShortcutsImpl( starter );
+        }
+    }
+
+    private void addShortcutsImpl( DesktopStarter starter ) throws IOException {
+        Element component = getShortcutComponent( starter, product );
+
+        String idSource = starter.getExecutable();
+        if ( idSource == null || idSource.isEmpty() ) {
+            idSource = starter.getLocation() + "_" + starter.getDisplayName();
         }
 
-        for( DesktopStarter starter : starters ) {
-            Element component = getShortcutComponent( starter, product );
-            String id = id( starter.getLocation() + "_" + starter.getDisplayName() );
-            Element shortcut = getOrCreateChildById( component, "Shortcut", id );
-            String name = starter.getDisplayName().replace( '[', '_' ).replace( ']', '_' );
-            addAttributeIfNotExists( shortcut, "Name", name );
+        String id = id( idSource );
 
-            if( !starter.getDescription().isEmpty() ) {
-                addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
-            }
+        Element shortcut = getOrCreateChildById( component, "Shortcut", id );
+        String name = starter.getDisplayName().replace( '[', '_' ).replace( ']', '_' );
+        addAttributeIfNotExists( shortcut, "Name", name );
 
-            addAttributeIfNotExists( shortcut, "WorkingDirectory", getWorkingDirID( starter ) );
+        if( !starter.getDescription().isEmpty() ) {
+            addAttributeIfNotExists( shortcut, "Description", starter.getDescription() );
+        }
 
-            // find the optional id for an icon
-            String target = starter.getExecutable();
-            String iconID;
-            if( starter.getIcons() != null ) {
-                if( starter.getIcons().equals( setup.getIcons() ) ) {
-                    iconID = ICON_ID;
-                } else {
-                    File iconFile = starter.getIconForType( buildDir, "ico" );
-                    iconID = id( starter.getDisplayName() + ".ico" );
-                    Element icon = getOrCreateChildById( product, "Icon", iconID );
-                    addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
-                }
+        addAttributeIfNotExists( shortcut, "WorkingDirectory", getWorkingDirID( starter ) );
+
+        // find the optional id for an icon
+        String target = starter.getExecutable();
+        String iconID;
+        if( starter.getIcons() != null ) {
+            if( starter.getIcons().equals( setup.getIcons() ) ) {
+                iconID = ICON_ID;
             } else {
-                iconID = null;
+                File iconFile = starter.getIconForType( buildDir, "ico" );
+                iconID = id( starter.getDisplayName() + ".ico" );
+                Element icon = getOrCreateChildById( product, "Icon", iconID );
+                addAttributeIfNotExists( icon, "SourceFile", iconFile.getAbsolutePath() );
             }
-            if( target == null || target.isEmpty() ) {
-                // if target is empty then it must be a Java application
-                if( iconID == null ) {
-                    iconID = ICON_ID;
-                }
-            }
-
-            CommandLine cmd = new CommandLine( starter, javaDir );
-            addAttributeIfNotExists( shortcut, "Target", cmd.target );
-            if( !cmd.arguments.isEmpty() ) {
-                addAttributeIfNotExists( shortcut, "Arguments", cmd.arguments );
-            }
-            if( iconID != null ) {
-                addAttributeIfNotExists( shortcut, "Icon", iconID );
-            }
-
-            String linkLocation;
-            switch( starter.getLocation() ) {
-                default:
-                case StartMenu:
-                    linkLocation = "[ProgramMenuFolder]";
-                    break;
-                case ApplicationMenu:
-                    linkLocation = "[ApplicationProgramsFolder]";
-                    break;
-                case InstallDir:
-                    linkLocation = "[INSTALLDIR]";
-                    break;
-                case DesktopDir:
-                    linkLocation = "[ApplicationDesktopShortcut]";
-                    break;
-            }
-            if( starter.getWorkDir() != null ) {
-                linkLocation += starter.getWorkDir();
-            }
-            renameFileIfDynamic( id, linkLocation, name + ".lnk", starter.getDisplayName() + ".lnk" );
-
-            registerFileExtension( starter, cmd );
-            registerSchemeDefinition( starter );
+        } else {
+            iconID = null;
         }
+        if( target == null || target.isEmpty() ) {
+            // if target is empty then it must be a Java application
+            if( iconID == null ) {
+                iconID = ICON_ID;
+            }
+        }
+
+        CommandLine cmd = new CommandLine( starter, javaDir );
+        addAttributeIfNotExists( shortcut, "Target", cmd.target );
+        if( !cmd.arguments.isEmpty() ) {
+            addAttributeIfNotExists( shortcut, "Arguments", cmd.arguments );
+        }
+        if( iconID != null ) {
+            addAttributeIfNotExists( shortcut, "Icon", iconID );
+        }
+
+        String linkLocation;
+        switch( starter.getLocation() ) {
+            default:
+            case StartMenu:
+                linkLocation = "[ProgramMenuFolder]";
+                break;
+            case ApplicationMenu:
+                linkLocation = "[ApplicationProgramsFolder]";
+                break;
+            case InstallDir:
+                linkLocation = "[INSTALLDIR]";
+                break;
+            case DesktopDir:
+                linkLocation = "[ApplicationDesktopShortcut]";
+                break;
+        }
+        if( starter.getWorkDir() != null ) {
+            linkLocation += starter.getWorkDir();
+        }
+        renameFileIfDynamic( id, linkLocation, name + ".lnk", starter.getDisplayName() + ".lnk" );
+
+        registerFileExtension( starter, cmd );
+        registerSchemeDefinition( starter );
     }
 
     /**
@@ -918,7 +918,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                         fileExtension = fileExtension.substring( 1 );
                     }
                     String pID = id( setup.getAppIdentifier() + "." + fileExtension );
-                    Element component = getComponent( installDir, "_file_extension" );
+                    Element component = getComponent( installDir, pID + "_file_extension" );
                     getOrCreateChild( component, "CreateFolder" );
                     Element progID = getOrCreateChildById( component, "ProgId", pID );
                     if( !docType.getName().isEmpty() ) {
@@ -1198,6 +1198,11 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @return the segments of the path
      */
     String[] segments( String path ) {
+        path = path.trim();
+        // prevent empty first segment
+        if ( path.length() > 1 && path.charAt( 0 ) == '/' || path.charAt( 0 ) == '\\' ) {
+            path = path.substring( 1 );
+        }
         return path.split( "[/\\\\]" );
     }
 
