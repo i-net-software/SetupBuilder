@@ -25,9 +25,9 @@ echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${D
 
 #########################################################################################################
 # Create Group
-[ -z "$OLDUID" ] && dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}" || echo "Group already existed"
+[ -z "$OLDGID" ] && dscl . -create "/Groups/${DEAMON_USER}" PrimaryGroupID "${NEXTGID}" || echo "Group already existed"
 # Unusable password for standard user group
-[ -z "$OLDUID" ] && dscl . -create "/Groups/${DEAMON_USER}" Password \*                 || echo "Password for group not set"
+[ -z "$OLDGID" ] && dscl . -create "/Groups/${DEAMON_USER}" Password \*                 || echo "Password for group not set"
 #########################################################################################################
 
 #########################################################################################################
