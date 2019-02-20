@@ -9,7 +9,7 @@ public class Launch4j extends DesktopStarter {
 
     /**
      * Create a new DesktopStarter
-     * 
+     *
      * @param setup current SetupBuilder
      */
     public Launch4j( AbstractSetupBuilder setup ) {
@@ -18,8 +18,8 @@ public class Launch4j extends DesktopStarter {
 
     /**
      * Sets the requested execution level for launch4j
-     * 
-     * @param requestedExecutionLevel the requested execution level 
+     *
+     * @param requestedExecutionLevel the requested execution level
      */
     public void setRequestedExecutionLevel( String requestedExecutionLevel ) {
         this.requestedExecutionLevel = requestedExecutionLevel;
@@ -27,7 +27,7 @@ public class Launch4j extends DesktopStarter {
 
     /**
      * Returns the requested execution level
-     * 
+     *
      * @return the requested execution level, <tt>"requireAdministrator"</tt> by default or <tt>null</tt> if unset
      */
     public String getRequestedExecutionLevel() {
