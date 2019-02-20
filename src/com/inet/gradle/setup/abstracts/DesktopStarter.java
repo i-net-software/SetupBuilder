@@ -119,7 +119,7 @@ public class DesktopStarter extends ProtocolHandler {
     public void documentType( Closure<?> closue ) {
         DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( setup ) );
         if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
-            throw new GradleException( "documentType must contains minimum one fileExtension." );
+            throw new GradleException( "The documentType has to contain at least one file extension." );
         }
         documentTypes.add( doc );
     }
