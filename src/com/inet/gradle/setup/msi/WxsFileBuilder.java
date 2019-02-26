@@ -219,9 +219,17 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             Element registrySubKey = addRegistryKey( registryEntries, "HKCR", id( scheme + "_protocol_handler_shell" ), scheme + "\\shell\\open\\command" );
 
-            handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
+            // multiplied the actual command
+            // handler.setStartArguments( handler.getStartArguments() + " \"%1\"" );
             CommandLine cmd = new CommandLine( handler, javaDir );
-            addRegistryValue( registrySubKey, null, "string", cmd.full );
+
+            // add the file parameter if not in the command already
+            String fullCommand = cmd.full;
+            if ( !fullCommand.contains( "%1" ) ) {
+                fullCommand += " \"%1\"";
+            }
+
+            addRegistryValue( registrySubKey, null, "string", fullCommand );
         }
     }
 
@@ -941,7 +949,14 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     }
                     String[] segments = segments( targetFile );
                     addAttributeIfNotExists( verb, "TargetFile", id( segments, segments.length ) );
-                    addAttributeIfNotExists( verb, "Argument", cmd.arguments + "\"%1\"" );
+
+                    // add the file parameter if not in the command already
+                    String arguments = cmd.arguments;
+                    if ( !arguments.contains( "%1" ) ) {
+                        arguments += " \"%1\"";
+                    }
+
+                    addAttributeIfNotExists( verb, "Argument", arguments );
                 }
             }
         }
