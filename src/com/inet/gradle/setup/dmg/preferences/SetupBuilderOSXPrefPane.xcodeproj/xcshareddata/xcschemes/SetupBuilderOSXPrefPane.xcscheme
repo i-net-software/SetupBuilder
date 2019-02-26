@@ -49,7 +49,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "rm -R &quot;$USER_LIBRARY_DIR/PreferencePanes/$FULL_PRODUCT_NAME&quot;&#10;ln -s &quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME&quot; &quot;$USER_LIBRARY_DIR/PreferencePanes/&quot;">
+               scriptText = "mkdir -p &quot;$USER_LIBRARY_DIR/PreferencePanes&quot;&#10;rm -R &quot;$USER_LIBRARY_DIR/PreferencePanes/$FULL_PRODUCT_NAME&quot;&#10;ln -s &quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME&quot; &quot;$USER_LIBRARY_DIR/PreferencePanes/&quot;&#10;">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
@@ -67,7 +67,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Run Script"
-               scriptText = "rm -R &quot;$USER_LIBRARY_DIR/PreferencePanes/$FULL_PRODUCT_NAME&quot;">
+               scriptText = "rm -R &quot;$USER_LIBRARY_DIR/PreferencePanes/$FULL_PRODUCT_NAME&quot;&#10;">
             </ActionContent>
          </ExecutionAction>
       </PostActions>
