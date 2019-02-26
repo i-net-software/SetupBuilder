@@ -43,6 +43,10 @@ NSTimer *timer;
     }];
     
     NSString *asRootString = localized(@"runAsRoot");
+    
+    NSString *osxMode = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
+    NSColor *color = [@"dark" isEqualToString:osxMode.lowercaseString] ? [NSColor whiteColor] : [NSColor blueColor];
+
     for ( NSDictionary *starter in [service starter] ) {
         
         NSString *action = [starter valueForKey:@"action"];
@@ -57,7 +61,6 @@ NSTimer *timer;
         NSButton *button = [[NSButton alloc] init];
         button.title = title;
 
-        NSColor *color = [NSColor blueColor];
         NSMutableAttributedString *colorTitle = [[NSMutableAttributedString alloc] initWithAttributedString:[button attributedTitle]];
 //        DLog(@"title: %@", colorTitle);
 
