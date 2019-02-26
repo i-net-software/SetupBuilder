@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2015 i-net software. All rights reserved.</string>
+	<string>Copyright © 2019 i-net software. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>SetupBuilderOSXPrefPane</string>
 	<key>NSPrefPaneIconFile</key>
