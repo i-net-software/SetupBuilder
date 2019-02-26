@@ -62,7 +62,7 @@
                         </textFieldCell>
                     </textField>
                     <button translatesAutoresizingMaskIntoConstraints="NO" id="0pt-T0-CY2" customClass="OnOffSwitchControl">
-                        <rect key="frame" x="40" y="20" width="88" height="35"/>
+                        <rect key="frame" x="30" y="20" width="108" height="35"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="35" id="lJe-9M-abk"/>
                         </constraints>
@@ -83,7 +83,7 @@
                         </textFieldCell>
                     </textField>
                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qAn-z6-xUT">
-                        <rect key="frame" x="168" y="20" width="417" height="114"/>
+                        <rect key="frame" x="168" y="29" width="417" height="105"/>
                     </stackView>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QDQ-qs-DvU">
                         <rect key="frame" x="593" y="28" width="55" height="19"/>
@@ -97,11 +97,10 @@
                     </button>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="qAn-z6-xUT" secondAttribute="bottom" constant="20" symbolic="YES" id="14T-5S-C6f"/>
                     <constraint firstItem="XQW-yi-ng8" firstAttribute="leading" secondItem="YSO-gs-n7c" secondAttribute="trailing" constant="20" id="2au-9i-Q3G"/>
                     <constraint firstItem="0gj-zc-lV2" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="20" symbolic="YES" id="3zs-rv-UiW"/>
                     <constraint firstItem="XQW-yi-ng8" firstAttribute="centerY" secondItem="YSO-gs-n7c" secondAttribute="centerY" id="4XP-sJ-V5W"/>
-                    <constraint firstItem="0pt-T0-CY2" firstAttribute="trailing" secondItem="0gj-zc-lV2" secondAttribute="trailing" constant="-20" id="Bvh-tY-xLO"/>
+                    <constraint firstItem="0pt-T0-CY2" firstAttribute="trailing" secondItem="0gj-zc-lV2" secondAttribute="trailing" constant="-10" id="Bvh-tY-xLO"/>
                     <constraint firstAttribute="trailing" secondItem="XQW-yi-ng8" secondAttribute="trailing" constant="20" symbolic="YES" id="CdZ-zh-ga9"/>
                     <constraint firstItem="0gj-zc-lV2" firstAttribute="leading" secondItem="se5-gp-TjO" secondAttribute="leading" constant="20" symbolic="YES" id="GBG-tc-nAO"/>
                     <constraint firstItem="nGA-0N-RDv" firstAttribute="centerX" secondItem="0gj-zc-lV2" secondAttribute="centerX" id="JJn-AH-Ybf"/>
@@ -110,10 +109,11 @@
                     <constraint firstAttribute="trailing" secondItem="fSf-Qm-wLU" secondAttribute="trailing" constant="20" id="RFD-q6-K1W"/>
                     <constraint firstItem="QDQ-qs-DvU" firstAttribute="centerY" secondItem="0pt-T0-CY2" secondAttribute="centerY" id="RTv-ZN-48q"/>
                     <constraint firstItem="qAn-z6-xUT" firstAttribute="leading" secondItem="YSO-gs-n7c" secondAttribute="leading" id="Sbv-ZM-tQP"/>
-                    <constraint firstItem="0pt-T0-CY2" firstAttribute="leading" secondItem="0gj-zc-lV2" secondAttribute="leading" constant="20" id="Shy-Ew-GWu"/>
+                    <constraint firstItem="0pt-T0-CY2" firstAttribute="leading" secondItem="0gj-zc-lV2" secondAttribute="leading" constant="10" id="Shy-Ew-GWu"/>
                     <constraint firstItem="nGA-0N-RDv" firstAttribute="top" secondItem="0gj-zc-lV2" secondAttribute="bottom" constant="8" symbolic="YES" id="VF0-bZ-rxX"/>
                     <constraint firstItem="0pt-T0-CY2" firstAttribute="top" secondItem="nGA-0N-RDv" secondAttribute="bottom" constant="8" symbolic="YES" id="aI4-Hx-2Fa"/>
                     <constraint firstItem="YSO-gs-n7c" firstAttribute="leading" secondItem="0gj-zc-lV2" secondAttribute="trailing" constant="20" id="aee-GW-a6H"/>
+                    <constraint firstItem="QDQ-qs-DvU" firstAttribute="bottom" secondItem="qAn-z6-xUT" secondAttribute="bottom" id="aqp-dn-IS7"/>
                     <constraint firstAttribute="bottom" secondItem="0pt-T0-CY2" secondAttribute="bottom" constant="20" symbolic="YES" id="bK2-S0-52Y"/>
                     <constraint firstItem="YSO-gs-n7c" firstAttribute="top" secondItem="se5-gp-TjO" secondAttribute="top" constant="20" id="cQp-zt-lb8"/>
                     <constraint firstItem="fSf-Qm-wLU" firstAttribute="leading" secondItem="0gj-zc-lV2" secondAttribute="trailing" constant="22" id="uNK-u7-Fv0"/>
