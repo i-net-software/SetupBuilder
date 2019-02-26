@@ -43,9 +43,6 @@ NSTimer *timer;
     }];
     
     NSString *asRootString = localized(@"runAsRoot");
-    
-    NSString *osxMode = [[NSUserDefaults standardUserDefaults] stringForKey:@"AppleInterfaceStyle"];
-    NSColor *color = [@"dark" isEqualToString:osxMode.lowercaseString] ? [NSColor whiteColor] : [NSColor blueColor];
 
     for ( NSDictionary *starter in [service starter] ) {
         
@@ -65,8 +62,8 @@ NSTimer *timer;
 //        DLog(@"title: %@", colorTitle);
 
         NSRange titleRange = NSMakeRange(0, [colorTitle length]);
-        [colorTitle addAttribute:NSForegroundColorAttributeName value:color range:titleRange];
-        [colorTitle addAttribute:NSUnderlineColorAttributeName value:color range:titleRange];
+        [colorTitle addAttribute:NSForegroundColorAttributeName value:[NSColor linkColor] range:titleRange];
+        [colorTitle addAttribute:NSUnderlineColorAttributeName value:[NSColor linkColor] range:titleRange];
         [colorTitle addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:titleRange];
 /*
         if ( asRoot ) {
