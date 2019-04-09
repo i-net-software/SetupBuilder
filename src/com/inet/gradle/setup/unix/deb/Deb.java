@@ -97,7 +97,7 @@ public class Deb extends Unix {
     }
 
     /**
-     * Set the options used for the 'lintian' process.
+     * Set the options used for the 'linting' process.
      * They will only have impact when checkPackages is enabled.
      * @param lintianOptions the lintianOptions to set
      */
