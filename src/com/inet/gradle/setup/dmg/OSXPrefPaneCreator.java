@@ -137,8 +137,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
             addPlistProperty( servicePLIST, ":starter:" + i + ":asroot", "bool", preferencesLink.isRunAsRoot() ? "YES" : "NO" );
         }
 
-        // Keep temporary output directory
-        // ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
+        ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
 /*
         // Sign these packages already.
         if( task.getCodeSign() != null ) {
