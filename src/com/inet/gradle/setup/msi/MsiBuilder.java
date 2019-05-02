@@ -380,6 +380,9 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
     private static String getToolPath( String tool ) {
         // first check the environ variable WIX
         String wix = System.getenv( "WIX" );
+        if( wix == null ) {
+            wix = System.getProperty( "WIX" ); // try the system property because a property can be set easer from a gradle script
+        }
         if( wix != null ) {
             File file = new File( wix );
             file = new File( file, "bin\\" + tool );
