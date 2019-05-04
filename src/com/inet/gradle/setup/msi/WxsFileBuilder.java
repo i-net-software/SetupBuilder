@@ -409,7 +409,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      *            added to improve the performance.
      */
     private String addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
-        String id = id( (pathID.length() > 0 ? pathID + '_' : "") + name );
+        String id = id( (pathID.length() > 0 ? pathID + '\\' : "") + name );
         if( isAddFiles ) {
             Element fileEl = getOrCreateChildById( component, "File", id );
             addAttributeIfNotExists( fileEl, "Source", file.getAbsolutePath() );
