@@ -2,6 +2,7 @@ package com.inet.gradle.setup.msi;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -68,7 +69,9 @@ public class MsiLocalizedResource {
 
             wxlFile.getParentFile().mkdirs();
             Properties props = new Properties();
-            props.load( Files.newInputStream( input.toPath() ) );
+            try ( InputStream stream = Files.newInputStream( input.toPath() ) ) {
+                props.load( stream );
+            }
 
             StringBuilder builder = new StringBuilder();
             builder.append( "<?xml version='1.0'?>\n" );
