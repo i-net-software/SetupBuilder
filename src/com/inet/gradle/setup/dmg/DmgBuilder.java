@@ -51,11 +51,11 @@ import com.inet.gradle.setup.util.XmlFileBuilder;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
-    private String       applicationName, applicationIdentifier, imageSourceRoot, firstExecutableName;
+    private String       imageSourceRoot, firstExecutableName;
 
     private SetupBuilder setup;
 
-    private TempPath    tempPath;
+    private TempPath     tempPath;
 
     /**
      * Create a new instance
@@ -99,13 +99,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
                 }
             }
 
-            applicationIdentifier = setup.getAppIdentifier();
-            applicationName = setup.getApplication();
             imageSourceRoot = buildDir.toString(); // + "/" + setup.getApplication() + ".app";
 
             // Just in case. If it still has not been set, we do not know what the user itends.
             if ( firstExecutableName == null ) {
-                firstExecutableName = applicationName;
+                firstExecutableName = setup.getApplication();
             }
 
             if( !setup.getServices().isEmpty() ) {
@@ -232,7 +230,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         createAndPatchDistributionXML();
 
         imageSourceRoot = tempPath.get( "distribution" ).toString();
-        File resultingPackage = new File( imageSourceRoot, applicationName + ".pkg" );
+        File resultingPackage = new File( imageSourceRoot, setup.getApplication() + ".pkg" );
 
         // Build Product for packaging
         ArrayList<String> command = new ArrayList<>();
@@ -253,7 +251,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         }
 
         packageApplescript();
-        Files.copy( resultingPackage.toPath(), new File( setup.getDestinationDir(), "/" + applicationName + ".pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( resultingPackage.toPath(), new File( setup.getDestinationDir(), "/" + setup.getApplication() + ".pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
@@ -268,7 +266,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "--analyze" );
         command.add( "--root" );
         command.add( buildDir.toString() );
-        command.add( tempPath.getTempString( applicationIdentifier + ".plist" ) );
+        command.add( tempPath.getTempString( setup.getAppIdentifier() + ".plist" ) );
         exec( command );
 
         // set identifier, create package
@@ -277,7 +275,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "--root" );
         command.add( buildDir.toString() );
         command.add( "--component-plist" );
-        command.add( tempPath.getTempString( applicationIdentifier + ".plist" ) );
+        command.add( tempPath.getTempString( setup.getAppIdentifier() + ".plist" ) );
         command.add( "--identifier" );
         command.add( setup.getMainClass() != null ? setup.getMainClass() : setup.getAppIdentifier() );
         command.add( "--version" );
@@ -288,16 +286,16 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         // Application as default directory except there are more application parts to install.
         command.add( "/Applications/" + installationSubdirectory() );
-        command.add( tempPath.getTempString( "packages", applicationName + ".pkg" ) );
+        command.add( tempPath.getTempString( "packages", setup.getApplication() + ".pkg" ) );
         exec( command );
 
-        Files.copy( tempPath.getTempFile( "packages", applicationName + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + applicationIdentifier + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        Files.copy( tempPath.getTempFile( "packages", setup.getApplication() + ".pkg" ).toPath(), new File( setup.getDestinationDir(), "/" + setup.getAppIdentifier() + ".pkgbuild.pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
     }
 
     /**
-     * Returns a subdirectory if needed because of the installation
+     * Returns a sub directory if needed because of the installation
      *
-     * @return subdirectory or ""
+     * @return sub directory or ""
      */
     private String installationSubdirectory() {
         return (setup.getServices().size() + setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "");
@@ -315,7 +313,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
         command.add( "--package" );
-        command.add( tempPath.getTempFile( "packages", applicationName + ".pkg" ).toString() );
+        command.add( tempPath.getTempFile( "packages", setup.getApplication() + ".pkg" ).toString() );
         command.add( tempPath.getTempFile( "distribution.xml" ).toString() );
         exec( command );
 
@@ -341,7 +339,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         // The title of the installer
         Element title = xmlFile.getOrCreateChild( distribution, "title" );
-        xmlFile.addNodeText( title, applicationName );
+        xmlFile.addNodeText( title, setup.getApplication() );
 
         // Product node
         File backgroundImage = task.getSetupBackgroundImage();
@@ -424,7 +422,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "-format" );
         command.add( "UDRW" );
         command.add( "-volname" );
-        command.add( applicationName );
+        command.add( setup.getApplication() );
         command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
         exec( command );
     }
@@ -455,7 +453,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "detach" );
-        command.add( tempPath.get() + "/" + applicationName );
+        command.add( tempPath.get() + "/" + setup.getApplication() );
         exec( command );
     }
 
@@ -467,7 +465,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
     private void setVolumeIcon() throws IOException {
 
         // Copy Icon as file icon into attached container
-        File iconDestination = tempPath.getTempFile( applicationName, ".VolumeIcon.icns" );
+        File iconDestination = tempPath.getTempFile( setup.getApplication(), ".VolumeIcon.icns" );
         File icons = setup.getIconForType( buildDir, "icns" );
         if( icons == null ) {
             throw new IllegalArgumentException( "You have to specify a valid icon file" );
@@ -478,7 +476,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         if( task.getBackgroundImage() != null ) {
             String name = task.getBackgroundImage().getName();
-            File backgroundDestination = tempPath.getTempFile( applicationName, "/.resources/background" + name.substring( name.lastIndexOf( '.' ) ) );
+            File backgroundDestination = tempPath.getTempFile( setup.getApplication(), "/.resources/background" + name.substring( name.lastIndexOf( '.' ) ) );
             Files.createDirectories( backgroundDestination.getParentFile().toPath(), new FileAttribute[0] );
             Files.copy( task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             BufferedImage image = ImageIO.read( backgroundDestination );
@@ -535,7 +533,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         Template applescript = new Template( "dmg/template/package.applescript.txt" );
         applescript.setPlaceholder( "icon", ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns" ).getAbsolutePath() );
-        applescript.setPlaceholder( "package", new File( imageSourceRoot, applicationName + ".pkg" ).getAbsolutePath() );
+        applescript.setPlaceholder( "package", new File( imageSourceRoot, setup.getApplication() + ".pkg" ).getAbsolutePath() );
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );

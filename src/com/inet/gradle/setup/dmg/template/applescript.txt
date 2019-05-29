@@ -51,8 +51,12 @@ try
             end try
 
             update without registering applications
+
             close
+
             open
+
+            close
         end tell
     end tell
 end try
