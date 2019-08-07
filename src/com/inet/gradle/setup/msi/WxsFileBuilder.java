@@ -1132,7 +1132,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             run.setExecutable( "rmdir" );
             run.setStartArguments( "/S /Q \"[INSTALLDIR]" + folder + '\"' );
             addRun( run, id, "ignore", null );
-            addCustomActionToSequence( id, true, "RemoveFolders", true, null );
+            // http://stackoverflow.com/questions/320921/how-to-add-a-wix-custom-action-that-happens-only-on-uninstall-via-msi
+            addCustomActionToSequence( id, true, "RemoveFolders", true, "REMOVE=\"ALL\" OR REINSTALL=\"ALL\" OR UPGRADINGPRODUCTCODE" ); // prevent executing in /quiet mode on rerun the same installer
         }
     }
 
