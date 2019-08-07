@@ -1,6 +1,6 @@
 language: groovy
 jdk:
-  - oraclejdk8
+  - openjdk8
 env:
   matrix:
    - LIB_GRADLE_VERSION=2.14.1 DEPLOY=true
