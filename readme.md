@@ -39,11 +39,14 @@ It can be used as followed:
 
 Tasks
 ----
-The plugin add the follow tasks:
+
+The plugin adds the following tasks:
 * msi
 * deb
 * rpm
 * dmg
+
+For more information check the [wiki](https://github.com/i-net-software/SetupBuilder/wiki).
 
 Sample Usage
 ----
