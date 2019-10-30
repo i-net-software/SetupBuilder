@@ -46,6 +46,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.inet.gradle.setup.util.Strings;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
@@ -666,6 +667,16 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                 subdir = "";
             }
 
+            String logPath = Strings.defaultString( service.getLogPath(), "[INSTALLDIR]" + subdir );
+            String logPrefix = Strings.defaultString( service.getLogPrefix(), "service" );
+            String logLevel = service.getLogLevel();
+            String pidFile = service.getPidFile();
+            String stdOutput = service.getStdOutput();
+            String stdError = service.getStdError();
+            String libraryPath = service.getLibraryPath();
+            String javaHome = service.getJavaHome();
+            String jvm = service.getJvm();
+
             // add the service file
             String[] segments = segments( exe );
             Element directory = getDirectory( segments );
@@ -691,15 +702,27 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "yes" );
             addAttributeIfNotExists( regkey, "ForceCreateOnInstall", "yes" );
 
-            // Java parameter of the service
+            // Procrun parameter of the service
             String baseKey =
                             task.is64Bit() ? "SOFTWARE\\Wow6432Node\\Apache Software Foundation\\ProcRun 2.0\\"
                                             : "SOFTWARE\\Apache Software Foundation\\ProcRun 2.0\\";
+            regkey = addRegistryKey( component, "HKLM", id + "_RegProcrunParameters", baseKey + name + "\\Parameters" );
+            addRegistryValue( regkey, "LibraryPath", "string", libraryPath );
+
             regkey = addRegistryKey( component, "HKLM", id + "_RegJava", baseKey + name + "\\Parameters\\Java" );
             addRegistryValue( regkey, "Classpath", "string", service.getMainJar() );
+            if( setup.getBundleJre() != null && (jvm != null || javaHome != null) ) {
+                throw new IllegalStateException( "Combining bundleJre with jvm/javaHome is not allowed" );
+            }
             if( setup.getBundleJre() != null ) {
                 addRegistryValue( regkey, "JavaHome", "string", "[INSTALLDIR]" + setup.getBundleJreTarget() );
                 addRegistryValue( regkey, "Jvm", "string", "[INSTALLDIR]" + jvmDll );
+            }
+            if( javaHome != null ) {
+                addRegistryValue( regkey, "JavaHome", "string", javaHome );
+            }
+            if( jvm != null ) {
+                addRegistryValue( regkey, "Jvm", "string", jvm );
             }
             addMultiStringRegistryValue( regkey, "Options", service.getJavaVMArguments() );
 
@@ -709,11 +732,24 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" + subdir );
             addMultiStringRegistryValue( regkey, "Params", Arrays.asList( service.getStartArguments().split( " " ) ).stream().filter( e -> e.length() > 0  ).collect( Collectors.toList() ) );
             regkey = addRegistryKey( component, "HKLM", id + "_RegLog", baseKey + name + "\\Parameters\\Log" );
-            addRegistryValue( regkey, "Path", "string", "[INSTALLDIR]" + subdir );
-            addRegistryValue( regkey, "Prefix", "string", "service" );
+            addRegistryValue( regkey, "Path", "string", logPath );
+            addRegistryValue( regkey, "Prefix", "string", logPrefix );
+            if( logLevel != null ) {
+                addRegistryValue( regkey, "Level", "string", logLevel );
+            }
+            if( pidFile != null ) {
+                addRegistryValue( regkey, "PidFile", "string", pidFile );
+            }
+            if( stdOutput != null ) {
+                addRegistryValue( regkey, "StdOutput", "string", stdOutput );
+            }
+            if( stdError != null ) {
+                addRegistryValue( regkey, "StdError", "string", stdError );
+            }
             regkey = addRegistryKey( component, "HKLM", id + "_RegStop", baseKey + name + "\\Parameters\\Stop" );
             addRegistryValue( regkey, "Class", "string", "java.lang.System" ); // call System.exit() on stop to support Runtime.getRuntime().addShutdownHook()
             addRegistryValue( regkey, "Mode", "string", "jvm" );
+            addRegistryValue( regkey, "WorkingPath", "string", "[INSTALLDIR]" + subdir );
 
             // start the service
             if( service.isStartOnBoot() ) {
@@ -738,7 +774,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             renameFileIfDynamic( id, subdir, target + ".exe", name + ".exe" );
 
             // delete log files on uninstall
-            addDeleteFiles( subdir + "service.*.log" );
+            addDeleteFiles( String.format( "%s%s.*.log", subdir, logPrefix ) );
         }
     }
 
