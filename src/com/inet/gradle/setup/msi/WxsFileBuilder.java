@@ -690,7 +690,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             if( !service.getDescription().isEmpty() ) {
                 addAttributeIfNotExists( install, "Description", service.getDescription() );
             }
-            addAttributeIfNotExists( install, "Start", service.isStartOnBoot() ? "auto" : "demand" );
+            addAttributeIfNotExists( install, "Start", service.getWinStartupMode() != null ? service.getWinStartupMode()
+                : service.isStartOnBoot() ? "auto" : "demand" );
             addAttributeIfNotExists( install, "Type", "ownProcess" );
             addAttributeIfNotExists( install, "ErrorControl", "normal" );
             addAttributeIfNotExists( install, "Arguments", " \"//RS//" + name + "\"");
