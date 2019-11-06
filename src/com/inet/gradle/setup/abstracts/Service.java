@@ -22,9 +22,10 @@ import com.inet.gradle.setup.SetupBuilder;
  * Definition of a service to be installed on the target system.
  */
 public class Service extends Application {
+
     private boolean startOnBoot = true, keepAlive = false;
 
-    private String id, wrapper, logPath, logPrefix, logLevel, pidFile, stdError, stdOutput, libraryPath, javaHome, jvm;
+    private String id, wrapper, logPath, logPrefix, logLevel, pidFile, stdError, stdOutput, libraryPath, javaHome, jvm, winStartupMode;
 
     /**
      * Create a new Service
@@ -38,6 +39,7 @@ public class Service extends Application {
     /**
      * Returns a boolean flag indicating whether the service is started when the system is booted.
      *
+     * @see #getWinStartupMode()
      * @return boolean flag indicating whether the service is started when the system is booted
      */
     public boolean isStartOnBoot() {
@@ -47,10 +49,24 @@ public class Service extends Application {
     /**
      * Sets a boolean flag indicating whether the service is started when the system is booted.
      *
+     * @see #setWinStartupMode(String)
      * @param startOnBoot boolean flag indicating whether the service is started when the system is booted
      */
     public void setStartOnBoot( boolean startOnBoot ) {
         this.startOnBoot = startOnBoot;
+    }
+
+    /**
+     * Gets the startup mode for Windows. One of "delayed", "auto", or "manual". Overrides {@link #isStartOnBoot()}
+     * if set.
+     */
+    public String getWinStartupMode() {
+        return winStartupMode;
+    }
+
+    /** Service startup mode can be either "delayed", "auto", or "manual". Overrides {@link #setStartOnBoot(boolean)} */
+    public void setWinStartupMode( String winStartupMode ) {
+        this.winStartupMode = winStartupMode;
     }
 
     /**
