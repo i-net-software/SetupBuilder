@@ -868,7 +868,9 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addShortcutsImpl( starter );
         }
         for( DesktopStarter starter : task.getLaunch4js() ) {
-            addShortcutsImpl( starter );
+            CommandLine cmd = new CommandLine( starter, javaDir );
+            registerFileExtension( starter, cmd );
+            registerSchemeDefinition( starter );
         }
     }
 
