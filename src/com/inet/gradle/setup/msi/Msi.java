@@ -324,19 +324,19 @@ public class Msi extends AbstractSetupTask {
     }
 
     /**
-     * Register a lauch4j configuration.
+     * Register a lauch4j configuration. Every configuration create an *.exe file with the given settings.
      *
      * @param closue the closure of the launch4j definition
      */
     public void launch4j( Closure<Launch4j> closue ) {
-        Launch4j service = ConfigureUtil.configure( closue, new Launch4j( getSetupBuilder() ) );
-        launch4j.add( service );
+        Launch4j launcher = ConfigureUtil.configure( closue, new Launch4j( getSetupBuilder() ) );
+        launch4j.add( launcher );
     }
 
     /**
-     * Returns the registered services.
+     * Returns the registered launcher.
      *
-     * @return the registered services
+     * @return the registered launcher
      */
     public List<Launch4j> getLaunch4js() {
         return launch4j;
