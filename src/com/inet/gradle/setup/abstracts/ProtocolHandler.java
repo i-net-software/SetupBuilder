@@ -23,7 +23,7 @@ public class ProtocolHandler extends Application {
     }
 
     /**
-     * Return the list of scheme
+     * Return the list of scheme. A scheme is a custom URL protocol like the standard scheme "http", "https" or "ftp".
      * @return the list of scheme
      */
     public List<String> getSchemes() {
@@ -31,7 +31,7 @@ public class ProtocolHandler extends Application {
     }
 
     /**
-     * Set the scheme. Can be a string or list
+     * Set the scheme. Can be a string or list. A scheme is a custom URL protocol like the standard scheme "http", "https" or "ftp".
      * @param scheme the scheme to set
      */
     @SuppressWarnings( "unchecked" )
