@@ -67,6 +67,10 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
             getOrCreateChild( classPath, "mainClass" ).setTextContent( mainClass );
             getOrCreateChild( classPath, "cp" ).setTextContent( launch.getMainJar() );
         }
+        String args = launch.getStartArguments();
+        if( !args.isEmpty() ) {
+            getOrCreateChild( launch4jConfig, "cmdLine" ).setTextContent( args );
+        }
         getOrCreateChild( launch4jConfig, "outfile" ).setTextContent( outfile.getAbsolutePath() );
         getOrCreateChild( launch4jConfig, "errTitle" ).setTextContent( launch.getDisplayName() );
         getOrCreateChild( launch4jConfig, "chdir" ).setTextContent( "." );
