@@ -360,6 +360,7 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
         command.add( "-v" );
         command.add( "--clean" );
         command.add( "--define=_topdir " + buildDir.getAbsolutePath() );
+        command.add( "--define=_build_id_links none" );
         command.add( "SPECS/" + setup.getAppIdentifier() + ".spec" );
         exec( command );
     }

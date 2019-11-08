@@ -75,19 +75,19 @@ public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder
                 throw new GradleException( "Unsupported content set as Java Runtime, please use .zip, .tar.gz or .tgz - or a Directory '" + jreDir + "'" );
             }
 
-            // Copy over the data from the tree
-            FileTree finalTree = tree;
+            
+            FileTree sourceTree = tree;
+            File javaCopy = new File(setup.getProject().getBuildDir() + "/java_copy"); 
             setup.getProject().copy( spec -> {
-                spec.from( finalTree );
-                spec.into( jreTarget );
-            } );
-
-            // Check if there is exactly one directory ... usually the VMs are packed in such a folder
-            File[] files = jreTarget.listFiles();
+                spec.from( sourceTree );
+                spec.into( javaCopy );
+            } );  
+            
+            File[] files = javaCopy.listFiles();
             if (files != null && files.length == 1 ) { // only one directory! Move it up!
-                Path tempFile = Files.createTempDirectory( "SetupBuilder." );
-                Files.move( files[0].toPath(), tempFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING );
-                Files.move( tempFile, jreTarget.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING );
+                Files.move( files[0].toPath(), jreTarget.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING );
+            } else {
+                Files.move( javaCopy.toPath(), jreTarget.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING );
             }
             checkForBinJava( jreTarget );
 
