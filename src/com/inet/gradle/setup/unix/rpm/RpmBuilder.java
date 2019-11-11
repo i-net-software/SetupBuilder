@@ -195,7 +195,7 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
         String unixName = starter.getDisplayName();
         String consoleStarterPath = "/usr/bin/" + unixName;
         try (FileWriter fw = new FileWriter( createFile( "BUILD" + consoleStarterPath, true ) )) {
-            fw.write( "#!/bin/bash\n" );
+            fw.write( "#!/bin/sh\n" );
             if( starter.getExecutable() != null ) {
                 fw.write( "\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\" " + starter.getStartArguments() + " \"$@\"" );
             } else {
