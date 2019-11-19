@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.codehaus.groovy.control.ConfigurationException;
@@ -36,6 +37,7 @@ import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.Argument;
 import com.oracle.appbundler.BundleDocument;
+import com.oracle.appbundler.Option;
 import com.oracle.appbundler.Runtime;
 
 /**
@@ -122,6 +124,17 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
             appBundler.setJarLauncherName( mainJar );
 
             application.getJavaVMArguments().forEach( arg -> {
+                Option argument = new Option();
+                argument.setValue( arg );
+                appBundler.addConfiguredOption( argument );
+            });
+
+            Arrays.asList( application.getStartArguments().split( " " ) ).forEach( arg -> {
+
+                if ( arg.isEmpty() ) {
+                    return;
+                }
+
                 Argument argument = new Argument();
                 argument.setValue( arg );
                 appBundler.addConfiguredArgument( argument );
