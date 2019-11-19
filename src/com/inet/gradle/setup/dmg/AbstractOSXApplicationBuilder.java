@@ -126,6 +126,10 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
                 argument.setValue( arg );
                 appBundler.addConfiguredArgument( argument );
             });
+
+            Argument argument = new Argument();
+            argument.setValue( application.getStartArguments() );
+            appBundler.addConfiguredArgument( argument );
         }
 
         appBundler.setIgnorePSN( true ); // Ignore this argument.
