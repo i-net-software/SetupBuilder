@@ -368,7 +368,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element component = getComponent( parent, compID );
 
         String name = segments[segments.length - 1];
-        String id = addFile( component, file, pathID, name );
+        String id = addFile( component, file, segments, isAddFiles );
 
         // Debug Output of files that will be added
         task.getProject().getLogger().debug( "adding file: '" +file.toString() + "' '" + name + "' '" + id + "' '" + pathID + "' '" + compID + "' '" + String.join( "%", segments ) + "'" );
@@ -394,23 +394,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param file the source file
      * @param pathID an ID of the parent path
      * @param name the target file name
-     */
-    private String addFile( Element component, File file, String pathID, String name ) {
-        return addFile( component, file, pathID, name, isAddFiles );
-    }
-
-    /**
-     * Add a file.
-     *
-     * @param component the parent component node
-     * @param file the source file
-     * @param pathID an ID of the parent path
-     * @param name the target file name
      * @param isAddFiles if the file should added or not. On creating the multi language translations the files will not
      *            added to improve the performance.
      */
-    private String addFile( Element component, File file, String pathID, String name, boolean isAddFiles ) {
-        String id = id( (pathID.length() > 0 ? pathID + '\\' : "") + name );
+    private String addFile( Element component, File file, String[] segments, boolean isAddFiles ) {
+        String name = segments[segments.length-1];
+        String id = id( segments, segments.length );
         if( isAddFiles ) {
             Element fileEl = getOrCreateChildById( component, "File", id );
             addAttributeIfNotExists( fileEl, "Source", file.getAbsolutePath() );
@@ -681,7 +670,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             String[] segments = segments( exe );
             Element directory = getDirectory( segments );
             Element component = getComponent( directory, id );
-            addFile( component, prunsrv, id, segments[segments.length - 1], true );
+            addFile( component, prunsrv, segments, true );
 
             // install the windows service
             Element install = getOrCreateChildById( component, "ServiceInstall", id + "_install" );
@@ -771,7 +760,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
             // Add the prunmgr.exe and change it name dynamically to the service name. Dynamically is important for multiple instances.
             String target = name.replace( '[', '_' ).replace( ']', '_' );
-            addFile( component, prunmgr, id + "GUI", target + ".exe", true );
+            addFile( component, prunmgr, segments( id + "GUI\\" + target + ".exe"), true );
             renameFileIfDynamic( id, subdir, target + ".exe", name + ".exe" );
 
             // delete log files on uninstall
@@ -1277,7 +1266,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             StringBuilder builder = new StringBuilder();
             for( int i = 0; i < length; i++ ) {
                 if( i > 0 ) {
-                    builder.append( '_' );
+                    builder.append( '\\' );
                 }
                 builder.append( segments[i] );
             }
