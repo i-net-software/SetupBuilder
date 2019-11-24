@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+    <Product >
+        <UIRef Id="customUI"/>
+        <UI>
+
+            <Publish Control="Next" Dialog="InstallDirDlg" Event="NewDialog" Order="5" Value="customDlg">1</Publish>
+
+            <Publish Control="Back" Dialog="VerifyReadyDlg" Event="NewDialog" Order="2" Value="customDlg">1</Publish>
+
+        </UI>
+    </Product>
+</Wix>
