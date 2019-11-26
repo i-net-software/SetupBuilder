@@ -15,7 +15,7 @@ def buildVersion = '7'                                                     // bu
 def baseVersion = '4.8'                                                    // Base Version to build, depends on gradle version.
 
 wrapper.gradleVersion = LIB_GRADLE_VERSION
-def gVersion = VersionNumber.parse( gradle.gradleVersion )
+def gVersion = org.gradle.util.VersionNumber.parse( gradle.gradleVersion )
 println 'Gradle version: ' + gVersion
 
 // Fetch version from script.

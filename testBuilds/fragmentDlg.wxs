@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+    <Fragment Id="4CEF7014-3916-4356-BCB2-D30113BEC9EB">
+        <UI Id="customUI">
+            <Dialog Id="customDlg" Width="370" Height="270" Title="Custom" NoMinimize="yes">
+
+                <Control Type="Text" Id="text" Width="179" Height="17" X="45" Y="176"  Text="HELLO FROM FRAGMENT DIALOG" />
+            <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="Back">
+                <Publish Event="NewDialog" Value="InstallDirDlg">1</Publish>
+            </Control>
+            <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+                <Publish Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
+
+            </Control>
+
+            <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUICancel)">
+                <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+            </Control>
+            </Dialog>
+        </UI>
+    </Fragment>
+</Wix>

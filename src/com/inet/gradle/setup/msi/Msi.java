@@ -67,6 +67,8 @@ public class Msi extends AbstractSetupTask {
 
     private List<MsiLocalizedResource> i18n               = new ArrayList<>();
 
+    private List<File>               externals = new ArrayList<>();
+
     /**
      * Create a new instance.
      */
@@ -481,5 +483,22 @@ public class Msi extends AbstractSetupTask {
      */
     public List<MsiLocalizedResource> getI18n() {
         return i18n;
+    }
+
+    public Msi external(File external) {
+        externals.add(external);
+        return this;
+    }
+
+    public Msi  setExternals(Iterable<File> externals) {
+        this.externals.clear();
+        for (File external : externals) {
+            this.externals.add(external);
+        }
+        return this;
+    }
+
+    public List<File> getExternals() {
+        return externals;
     }
 }

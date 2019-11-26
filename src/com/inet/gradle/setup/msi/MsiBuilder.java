@@ -177,6 +177,9 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         parameters.add( "-out" );
         parameters.add( buildDir.getAbsolutePath() + '\\' );
         parameters.add( getWxsFile().getAbsolutePath() );
+        for(File external : task.getExternals()){
+            parameters.add( external.getAbsolutePath() );
+        }
         parameters.add( "-ext" );
         parameters.add( "WixUtilExtension" );
 

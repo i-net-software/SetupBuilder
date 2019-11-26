@@ -88,7 +88,10 @@ dmg {
 
     daemonUser = "testingUser"
 }
-
+msi{
+    external file("fragmentDlg.wxs")
+    wxsTemplate = "template.wxs"
+}
 dmg.dependsOn jar
 deb.dependsOn jar
 rpm.dependsOn jar
