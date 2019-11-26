@@ -509,8 +509,7 @@ public class Msi extends AbstractSetupTask {
     }
 
     /**
-     * returns registered  external  wsx files
-     * @return
+     * @return registered  external  wsx files
      */
     public List<File> getExternals() {
         return externals;
