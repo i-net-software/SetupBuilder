@@ -488,7 +488,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Adds reference to external wsx file
      * @param external external  wsx file
-     * @return
+     * @return this Msi instance
      */
     public Msi external(File external) {
         externals.add(external);
@@ -498,7 +498,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Sets references to external wsx files
      * @param externals external  wsx files
-     * @return
+     * @return this Msi instance
      */
     public Msi  setExternals(Iterable<File> externals) {
         this.externals.clear();
