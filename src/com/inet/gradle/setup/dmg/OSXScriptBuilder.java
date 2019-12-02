@@ -55,7 +55,6 @@ public class OSXScriptBuilder extends Template {
 
         setPlaceholder( "executable", application.getExecutable() );
         setPlaceholder( "displayName", application.getDisplayName() );
-        setPlaceholder( "serviceName", application.getMainClass() );
 
         setPlaceholder( "mainClass", application.getMainClass() );
         setPlaceholder( "mainJar", application.getMainJar() );
