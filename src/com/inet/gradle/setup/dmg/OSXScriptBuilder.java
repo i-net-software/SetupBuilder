@@ -11,11 +11,12 @@ import java.util.Set;
 
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.abstracts.Application;
+import com.inet.gradle.setup.abstracts.Service;
 
 /**
  * Create scripts from templates and replace placeholders
  * according to configuration/application
- * 
+ *
  * @author gamma
  *
  */
@@ -25,7 +26,7 @@ public class OSXScriptBuilder extends Template {
 
     /**
      * Create an OSX script using the specified template
-     * 
+     *
      * @param template to create script from
      * @throws IOException in case of errors
      */
@@ -35,7 +36,7 @@ public class OSXScriptBuilder extends Template {
 
     /**
      * Creates an instance and concatenates the script from the input lines
-     * 
+     *
      * @param script input lines
      */
     public OSXScriptBuilder( ArrayList<String> script ) {
@@ -44,7 +45,7 @@ public class OSXScriptBuilder extends Template {
 
     /**
      * Create an OSX script using the specified template
-     * 
+     *
      * @param application to use for initial setup
      * @param template to create script from
      * @throws IOException in case of errors
@@ -62,8 +63,20 @@ public class OSXScriptBuilder extends Template {
     }
 
     /**
+     * Create an OSX script using the specified template
+     *
+     * @param service to use for initial setup
+     * @param template to create script from
+     * @throws IOException in case of errors
+     */
+    public OSXScriptBuilder( Service service, String template ) throws IOException {
+        this( (Application)service, template );
+        setPlaceholder( "serviceName", service.getId() );
+    }
+
+    /**
      * Add another subscript. These will be inserted at the {{script}} tokens
-     * 
+     *
      * @param script to add
      */
     public void addScript( OSXScriptBuilder script ) {
@@ -72,9 +85,10 @@ public class OSXScriptBuilder extends Template {
 
     /**
      * Create a string containing all subscripts
-     * 
+     *
      * @return string of all the scripts.
      */
+    @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
@@ -91,10 +105,11 @@ public class OSXScriptBuilder extends Template {
 
     /**
      * Write file and set permissions
-     * 
+     *
      * @param file to write to
      * @throws IOException that can occur
      */
+    @Override
     public void writeTo( File file ) throws IOException {
 
         try (FileWriter writer = new FileWriter( file )) {

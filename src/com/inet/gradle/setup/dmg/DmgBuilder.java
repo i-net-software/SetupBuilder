@@ -35,7 +35,6 @@ import org.w3c.dom.Element;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
-import com.inet.gradle.setup.abstracts.Application;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
@@ -153,7 +152,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      */
     private void createServiceFiles() throws IOException {
 
-        Application core = new Application( setup );
+        Service core = new Service( setup );
+        core.setId( task.getApplicationIdentifier( setup ) );
 
         // Create Pre and Post install scripts
         DesktopStarter runAfter = setup.getRunAfter();

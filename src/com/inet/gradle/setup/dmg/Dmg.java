@@ -44,6 +44,8 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private Color                          backgroundColor;
 
+    private String                         applicationIdentifier;
+
     private OSXCodeSign<Dmg, SetupBuilder> codeSign;
 
     private List<LocalizedResource>        welcomePages    = new ArrayList<>();
@@ -395,5 +397,27 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public void setBackgroundColor( Color backgroundColor ) {
         this.backgroundColor = backgroundColor;
+    }
+
+    /**
+     * Returns an application identifier set for the DMG builder.
+     * It is being used as ID in the Info.plist
+     * @return the application identifier for macOS
+     */
+    public String getApplicationIdentifier( SetupBuilder setup ) {
+        if ( applicationIdentifier == null || applicationIdentifier.isEmpty() ) {
+            return setup.getAppIdentifier();
+        }
+        return applicationIdentifier;
+    }
+
+
+    /**
+     * Sets an application identifier for the DMG builder.
+     * It is being used as ID in the Info.plist
+     * @param the application identifier for macOS
+     */
+    public void setApplicationIdentifier( String applicationIdentifier ) {
+        this.applicationIdentifier = applicationIdentifier;
     }
 }
