@@ -402,6 +402,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Returns an application identifier set for the DMG builder.
      * It is being used as ID in the Info.plist
+     * @param setup the SetupBuilder instance for a fallback
      * @return the application identifier for macOS
      */
     public String getApplicationIdentifier( SetupBuilder setup ) {
@@ -415,7 +416,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Sets an application identifier for the DMG builder.
      * It is being used as ID in the Info.plist
-     * @param the application identifier for macOS
+     * @param applicationIdentifier the application identifier for macOS
      */
     public void setApplicationIdentifier( String applicationIdentifier ) {
         this.applicationIdentifier = applicationIdentifier;
