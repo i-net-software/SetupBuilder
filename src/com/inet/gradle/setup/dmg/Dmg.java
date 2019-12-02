@@ -407,11 +407,13 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public String getApplicationIdentifier( SetupBuilder setup ) {
         if ( applicationIdentifier == null || applicationIdentifier.isEmpty() ) {
-            return setup.getAppIdentifier();
+            if ( setup.getMainClass() == null || setup.getMainClass().isEmpty() ) {
+                return setup.getAppIdentifier();
+            }
+            return setup.getMainClass();
         }
         return applicationIdentifier;
     }
-
 
     /**
      * Sets an application identifier for the DMG builder.

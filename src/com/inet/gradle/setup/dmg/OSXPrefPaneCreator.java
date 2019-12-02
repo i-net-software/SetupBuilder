@@ -88,7 +88,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
         // Patch Info.plist
         File prefPanePLIST = new File( prefPaneLocation, "Contents/Info.plist" );
-        String prefPaneIdentifier = getSetupBuilder().getMainClass() != null ? getSetupBuilder().getMainClass() : getSetupBuilder().getAppIdentifier();
+        String prefPaneIdentifier = task.getApplicationIdentifier( getSetupBuilder() );
         setPlistProperty( prefPanePLIST, ":CFBundleIdentifier", prefPaneIdentifier + ".prefPane" );
         setPlistProperty( prefPanePLIST, ":CFBundleName", displayName + " Preference Pane" );
         setPlistProperty( prefPanePLIST, ":CFBundleExecutable", internalName );
@@ -104,7 +104,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
         File servicePLIST = new File( prefPaneLocation, "Contents/Resources/service.plist" );
         setPlistProperty( servicePLIST, ":Name", displayName );
-        setPlistProperty( servicePLIST, ":Label", service.getMainClass() != null ? service.getMainClass() : getSetupBuilder().getAppIdentifier() );
+        setPlistProperty( servicePLIST, ":Label", service.getId() );
 
         // Program will be set during installation.
         setPlistProperty( servicePLIST, ":Description", service.getDescription() );
