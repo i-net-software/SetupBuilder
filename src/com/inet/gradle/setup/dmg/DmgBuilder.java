@@ -83,10 +83,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             }
 
             // Build all services
-            for( Service service : setup.getServices() ) {
-                new OSXApplicationBuilder( task, setup, fileResolver ).buildService( service );
+            for( OSXApplicationBuilder builder : task.appBuilders ) {
+                builder.buildService();
                 if ( firstExecutableName == null ) {
-                    firstExecutableName = service.getDisplayName();
+                    firstExecutableName = builder.getService().getDisplayName();
                 }
             }
 

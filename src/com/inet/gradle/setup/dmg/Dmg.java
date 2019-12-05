@@ -28,6 +28,8 @@ import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
+import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.util.GradleUtils;
 
 import groovy.lang.Closure;
 
@@ -53,6 +55,8 @@ public class Dmg extends AbstractUnixSetupTask {
     private List<LocalizedResource>        conclusionPages = new ArrayList<>();
 
     private List<PreferencesLink>          preferencesLink = new ArrayList<>();
+
+    final List<OSXApplicationBuilder>      appBuilders = new ArrayList<>();
 
     private List<String>                   jreIncludes = Arrays.asList( new String[] {
         "bin/java",
@@ -80,6 +84,19 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public Dmg() {
         super( "dmg" );
+        getProject().afterEvaluate( (project) -> {
+            // if the "dmg" task should be executed then create some possible extra tasks on the end of the configuration phase
+            boolean isExecute = GradleUtils.isTaskExecute( Dmg.this, project );
+            if( isExecute ) {
+                SetupBuilder setup = getSetupBuilder();
+                for( Service service : setup.getServices() ) {
+                    ProjectInternal projInternal = (ProjectInternal)project;
+                    OSXApplicationBuilder builder = new OSXApplicationBuilder( Dmg.this, setup, projInternal.getFileResolver() );
+                    builder.configSubTasks( service );
+                    appBuilders.add( builder );
+                }
+            }
+        });
     }
 
     /**

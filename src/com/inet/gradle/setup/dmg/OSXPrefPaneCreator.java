@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -27,10 +28,40 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
     private Project project;
 
-    protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver ) {
+    private Service service;
+
+    private String displayName;
+
+    private String internalName;
+    
+    private File prefPaneSource;
+
+    protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver, Service service ) {
         super( task, setup, fileResolver );
         buildDir = task.getTemporaryDir();
         project = task.getProject();
+        this.service = service;
+
+        displayName = service.getDisplayName();
+        internalName = displayName.replaceAll( "[^A-Za-z0-9]", "" );
+
+        // Create a task and run it before, this must be called in project.afterEvaluate()
+        GradleBuild gradleBuild = project.getTasks().create("OSXPrefPaneBuildTask-"+internalName, GradleBuild.class);
+        gradleBuild.setDescription( "Run the xcodebuild task for the prefpane." );
+        gradleBuild.setTasks( Arrays.asList( "clean", "xcodebuild" ) );
+        task.dependsOn( gradleBuild );
+
+        DefaultTask gradleBuildInit = project.getTasks().create("OSXPrefPaneBuildTask-Init-"+internalName, DefaultTask.class);
+        gradleBuildInit.doFirst( (t) -> {
+            try {
+                prefPaneSource = unpackAndPatchPrefPaneSource( internalName );
+            } catch( Exception ex ) {
+                ex.printStackTrace();
+                throw new RuntimeException( ex );
+            }
+            gradleBuild.setBuildFile( new File( prefPaneSource, "build.gradle" ) );
+        } );
+        gradleBuild.dependsOn( gradleBuildInit );
     }
 
     /**
@@ -42,18 +73,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
      * @return the file to the created pref pane.
      * @throws Exception if any error occur
      */
-    void create( Service service ) throws Exception {
-
-        String displayName = service.getDisplayName();
-        String internalName = displayName.replaceAll( "[^A-Za-z0-9]", "" );
-        File prefPaneSource = unpackAndPatchPrefPaneSource( internalName );
-
-        GradleBuild gradleBuild = project.getTasks().create("OSXPrefPaneBuildTask", GradleBuild.class);
-        gradleBuild.setDescription( "Run the xcodebuild task for the prefpane." );
-        gradleBuild.setBuildFile( new File( prefPaneSource, "build.gradle" ) );
-        gradleBuild.setTasks( Arrays.asList( "clean", "xcodebuild" ) );
-        gradleBuild.execute();
-
+    void create() throws Exception {
         File prefPaneBinary = new File( prefPaneSource, "build/sym/Release/" + internalName + ".prefPane" );
 
         if( !prefPaneBinary.exists() ) {
@@ -169,7 +189,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         }
 
         // Prepare output directory
-        File outputDir = new File( buildDir, configName );
+        File outputDir = new File( buildDir, internalName );
         outputDir.mkdirs();
 
         URL dirURL = OSXPrefPaneCreator.class.getClassLoader().getResource( "com/inet/gradle/setup/dmg/preferences/build.gradle" );

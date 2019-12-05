@@ -16,6 +16,10 @@ import com.inet.gradle.setup.abstracts.Service;
  */
 public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, SetupBuilder> {
 
+    private Service service;
+
+    private OSXPrefPaneCreator prefPaneCreator;
+
     /**
      * Setup this builder.
      *
@@ -28,13 +32,31 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
     }
 
     /**
+     * Create sub tasks for a service,this must be called in project.afterEvaluate().
+     * 
+     * @param service the service
+     */
+    void configSubTasks( Service service ) {
+        this.service = service;
+        this.prefPaneCreator = new OSXPrefPaneCreator( task, getSetupBuilder(), fileResolver, service );
+    }
+
+    /**
+     * Get the service for which this builder was created or null if it only an application.
+     * 
+     * @return the service
+     */
+    Service getService() {
+        return service;
+    }
+
+    /**
      * Create Application from service provided. Also create the preference panel
      * and put it into the application. Will also create the installer wrapper package of this application
      *
-     * @param service the service
      * @throws Throwable error.
      */
-    void buildService( Service service ) throws Throwable {
+    void buildService() throws Throwable {
 
         // We need the executable. It has a different meaning than on other systems.
         if( service.getExecutable() == null || service.getExecutable().isEmpty() ) {
@@ -45,7 +67,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         prepareApplication( service, false );
         finishApplication();
         copyBundleFiles( service );
-        new OSXPrefPaneCreator( task, getSetupBuilder(), fileResolver ).create( service );
+        prefPaneCreator.create();
 
         // codesigning will be done on the final package.
         // codeSignApplication( service );
