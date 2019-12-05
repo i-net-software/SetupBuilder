@@ -48,10 +48,11 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
 /*// if gradleVersion < 4.2
 import org.gradle.api.internal.tasks.SimpleWorkResult;
+import org.gradle.internal.nativeplatform.filesystem.FileSystem;
 */// else
 import org.gradle.api.tasks.WorkResults;
+import org.gradle.internal.nativeintegration.filesystem.FileSystem;
 //// endif
-import org.gradle.internal.nativeplatform.filesystem.FileSystem;
 import org.gradle.internal.reflect.Instantiator;
 
 import com.inet.gradle.setup.util.TempPath;
