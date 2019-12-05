@@ -4,7 +4,6 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'maven'
-apply plugin: 'findbugs'
 
 apply from: "${buildscript.sourceFile.parentFile}/scripts/javapreprocessor.gradle"
 
@@ -91,21 +90,6 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     clean.doLast {
         println "Cleaning local repository folder"
         file('../repo').deleteDir()
-    }
-}
-
-findbugs {
-    toolVersion = "3.0.1"
-    // Don't worry about test classes
-    sourceSets = [sourceSets.main]
-    excludeFilter file("${projectDir}/.findbugs.xml")
-    ignoreFailures = true
-
-    tasks.withType(FindBugs) {
-        reports {
-            xml.enabled = false
-            html.enabled = true
-        }
     }
 }
 
