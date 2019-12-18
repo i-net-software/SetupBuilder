@@ -9,6 +9,7 @@
 #import <AppKit/AppKit.h>
 #include <sys/sysctl.h>
 #include <sys/proc_info.h>
+#include <libproc.h>
 #include <pwd.h>
 #import "Process.h"
 #import "Service.h"
@@ -156,9 +157,7 @@ static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
         // Call sysctl with a NULL buffer.
         
         length = 0;
-        err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1,
-                     NULL, &length,
-                     NULL, 0);
+        err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1, NULL, &length, NULL, 0);
         if (err == -1) {
             err = errno;
         }
@@ -177,9 +176,7 @@ static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
         // error, toss away our buffer and start again.
         
         if (err == 0) {
-            err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1,
-                         result, &length,
-                         NULL, 0);
+            err = sysctl( (int *) name, (sizeof(name) / sizeof(*name)) - 1, result, &length, NULL, 0);
             if (err == -1) {
                 err = errno;
             }
@@ -192,6 +189,7 @@ static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
                 err = 0;
             }
         }
+
     } while (err == 0 && ! done);
     
     // Clean up and establish post conditions.
@@ -206,8 +204,27 @@ static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
     }
     
     assert( (err == 0) == (*procList != NULL) );
-    
     return err;
+}
+
+/**
+    see https://stackoverflow.com/questions/12273546/get-name-from-pid/12274588#12274588
+ */
+static char* getBSDProcessName( pid_t pid ) {
+
+    char pathBuffer [PROC_PIDPATHINFO_MAXSIZE];
+    proc_pidpath(pid, pathBuffer, sizeof(pathBuffer));
+
+    long strLen = strlen(pathBuffer);
+    long position = strLen;
+    while(position >= 0 && pathBuffer[position] != '/')
+    {
+        position--;
+    }
+
+    char *nameBuffer = (char *) malloc(sizeof(char) * ( strLen - position +1 ));
+    strcpy(nameBuffer, pathBuffer + position + 1);
+    return nameBuffer;
 }
 
 + (NSArray*)getBSDProcessList
@@ -225,8 +242,15 @@ static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
         
         NSNumber *processID = [NSNumber numberWithInt:currentProcess->kp_proc.p_pid];
         NSString *processName = [NSString stringWithFormat: @"%s",currentProcess->kp_proc.p_comm];
-        
-        if (processID)[entry setObject:processID forKey:@"processID"];
+
+        if (processID) {
+            [entry setObject:processID forKey:@"processID"];
+            
+            // if there is a process id we'll try to figure out the process name using another function
+            // the reason is, that the kinfo_proc->p_comm is shortened and even ps uses this kind of API to retrieve the full name.
+            processName = [NSString stringWithFormat: @"%s",getBSDProcessName(currentProcess->kp_proc.p_pid)];
+        }
+
         if (processName)[entry setObject:processName forKey:@"processName"];
         
         if (user){
@@ -240,16 +264,15 @@ static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
         [processes addObject:[NSDictionary dictionaryWithDictionary:entry]];
     }
     free(mylist);
-    
+
     return [NSArray arrayWithArray:processes];
 }
 
 + (NSDictionary*)getProcessByService:(Service *)service {
     
     for ( NSDictionary *process in [Process getBSDProcessList] ) {
-        
+
         if ( [[process objectForKey:@"processName"] isEqualToString:[[service program] lastPathComponent]] ) {
-            
             NSString *path = @"/bin/ps";
             NSArray *args = [NSArray arrayWithObjects:@"-o", @"command=",[(NSNumber*)[process objectForKey:@"processID"] stringValue], nil];
             NSTask *task = [[NSTask alloc] init];
