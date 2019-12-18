@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15702" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14460.31"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15702"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -20,11 +20,11 @@
             <rect key="contentRect" x="176" y="715" width="668" height="276"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="668" height="236"/>
+                <rect key="frame" x="0.0" y="0.0" width="668" height="235"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="0gj-zc-lV2">
-                        <rect key="frame" x="20" y="88" width="128" height="128"/>
+                        <rect key="frame" x="20" y="87" width="128" height="128"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="128" id="6am-gd-Eae"/>
                             <constraint firstAttribute="height" constant="128" id="qiJ-Jl-S3e"/>
@@ -32,7 +32,7 @@
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="ProductIcon.icns" id="vSY-Z7-aCS"/>
                     </imageView>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="YSO-gs-n7c">
-                        <rect key="frame" x="166" y="192" width="448" height="24"/>
+                        <rect key="frame" x="166" y="191" width="448" height="24"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="24" id="vEe-CW-wdG"/>
                         </constraints>
@@ -43,7 +43,7 @@
                         </textFieldCell>
                     </textField>
                     <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XQW-yi-ng8">
-                        <rect key="frame" x="632" y="196" width="16" height="16"/>
+                        <rect key="frame" x="632" y="195" width="16" height="16"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="16" id="fcj-QC-8AP"/>
                             <constraint firstAttribute="height" constant="16" id="sqV-BX-1fs"/>
@@ -51,7 +51,7 @@
                         <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="gray.png" id="3s2-3a-d3i"/>
                     </imageView>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" setsMaxLayoutWidthAtFirstLayout="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fSf-Qm-wLU">
-                        <rect key="frame" x="168" y="142" width="482" height="50"/>
+                        <rect key="frame" x="168" y="141" width="482" height="50"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="50" id="lGg-6W-2Bk"/>
                         </constraints>
@@ -75,7 +75,7 @@
                         </connections>
                     </button>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="nGA-0N-RDv">
-                        <rect key="frame" x="77" y="63" width="15" height="17"/>
+                        <rect key="frame" x="77" y="63" width="15" height="16"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="v" id="Fbd-e7-JIA">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -83,7 +83,7 @@
                         </textFieldCell>
                     </textField>
                     <stackView distribution="fill" orientation="vertical" alignment="leading" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qAn-z6-xUT">
-                        <rect key="frame" x="168" y="29" width="417" height="105"/>
+                        <rect key="frame" x="168" y="29" width="417" height="104"/>
                     </stackView>
                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="QDQ-qs-DvU">
                         <rect key="frame" x="593" y="28" width="55" height="19"/>
