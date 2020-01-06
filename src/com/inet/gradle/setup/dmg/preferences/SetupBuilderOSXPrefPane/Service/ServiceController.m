@@ -30,7 +30,7 @@ NSTimer *timer;
     _service = service;
     description.stringValue = service.description;
     productName.stringValue = service.name;
-    productVersion.stringValue = [NSString stringWithFormat:@"v: %@", service.version];
+    productVersion.stringValue = [NSString stringWithFormat:@"Version %@", service.version];
     uninstall.title = localized(@"Uninstall");
     
     timer = [NSTimer scheduledTimerWithTimeInterval:5.0 target:self selector:@selector(pollStatus) userInfo:nil repeats:true];
