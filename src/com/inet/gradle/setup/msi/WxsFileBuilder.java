@@ -113,10 +113,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     void build() throws Exception {
         // Wix node
-        Element wix = (Element)doc.getFirstChild();
-        if( !"Wix".equals( wix.getTagName() ) ) {
-            throw new IllegalArgumentException( "Template does not contains a Wix root: " + wix.getTagName() );
-        }
+        Element wix = getOrCreateChild( doc, "Wix", true );
         wix.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns", "http://schemas.microsoft.com/wix/2006/wi" );
         wix.setAttributeNS( "http://www.w3.org/2000/xmlns/", "xmlns:util", "http://schemas.microsoft.com/wix/UtilExtension" );
 
