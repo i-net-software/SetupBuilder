@@ -28,14 +28,22 @@ Plugin and Gradle Version
 | 3.4.x          | 3.4 - 4.3      |
 | 4.5.x          | >= 4.5         |
 
-There is a file [SetupBuilderVersion.gradle](SetupBuilderVersion.gradle) to export the required version of SetupBuilder depending on the Gradle version. It can be used to automatically obtain the correct SetupBuilder version.
+There is a file [SetupBuilderVersion.gradle](scripts/SetupBuilderVersion.gradle) to export the required version of SetupBuilder depending on the Gradle version. It can be used to automatically obtain the correct SetupBuilder version.
 
 It can be used as followed:
 
-	apply from: "https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/SetupBuilderVersion.gradle"
-	plugins {
-		id "de.inetsoftware.setupbuilder" version setupBuilderVersion()
-	}
+    buildscript {
+        repositories {
+            maven {
+                url uri('https://plugins.gradle.org/m2/')
+            }
+        }
+        dependencies {
+            apply from: 'https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/scripts/SetupBuilderVersion.gradle'
+            classpath 'gradle.plugin.de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
+        }
+    }
+    apply plugin: 'de.inetsoftware.setupbuilder'
 
 Tasks
 ----
@@ -52,10 +60,18 @@ Sample Usage
 ----
 ### Base Sample
 
-	apply from: "https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/SetupBuilderVersion.gradle"
-	plugins {
-		id "de.inetsoftware.setupbuilder" version setupBuilderVersion()
-	}
+    buildscript {
+        repositories {
+            maven {
+                url uri('https://plugins.gradle.org/m2/')
+            }
+        }
+        dependencies {
+            apply from: 'https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/scripts/SetupBuilderVersion.gradle'
+            classpath 'gradle.plugin.de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
+        }
+    }
+    apply plugin: 'de.inetsoftware.setupbuilder'
     
     setupBuilder {
         vendor = 'i-net software'
