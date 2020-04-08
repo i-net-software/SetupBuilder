@@ -18,7 +18,7 @@ import com.inet.gradle.setup.abstracts.AbstractTask;
  */
 public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
-    private String identity, identifier, keychain, keychainPassword;
+    private String identity, productIdentity, identifier, keychain, keychainPassword;
     private boolean ignoreError, deepsign = true;
 
     /**
@@ -48,7 +48,31 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param identity to sign with
      */
     public void setIdentity(String identity) {
-        this.identity = identity;
+        this.identity = identity.replaceFirst( "Installer", "Application" );
+    }
+
+    /**
+     * Return the Identity to sign with
+     * This is the "Common Name" part from the certificate
+     * @return identity
+     */
+    public String getProductIdentity() {
+        if ( productIdentity == null && identity != null ) {
+            System.out.println( "No product identity given, trying to use the application identity by replacing 'Application' with 'Installer'" );
+            return identity.replaceFirst( "Application", "Installer" );
+        } else if ( productIdentity == null ) {
+            throw new IllegalArgumentException( "You have to define the signing identity" );
+        }
+        return productIdentity;
+    }
+
+    /**
+     * Set the Identity to sign with.
+     * This is the "Common Name" part from the certificate
+     * @param identity to sign with
+     */
+    public void setProductIdentity(String identity) {
+        this.productIdentity = identity;
     }
 
     /**
@@ -175,7 +199,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
         ArrayList<String> command = new ArrayList<>();
         command.add( "productsign" );
         command.add( "--sign" );
-        command.add( getIdentity() );
+        command.add( getProductIdentity() );
 
         if ( getKeychain() != null ) {
             command.add( "--keychain" );

@@ -70,7 +70,11 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         prefPaneCreator.create();
 
         // codesigning will be done on the final package.
-        // codeSignApplication( service );
+        if( task.getCodeSign() != null ) {
+            task.getCodeSign().signApplication( new File( buildDir, service.getDisplayName() + ".app" ) );
+        } else {
+            System.out.println( "Not codesigning the Servce: not configured" );
+        }
     }
 
     /**
