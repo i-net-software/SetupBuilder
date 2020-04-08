@@ -1,6 +1,9 @@
 package com.inet.gradle.appbundler;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
@@ -18,8 +21,23 @@ import com.inet.gradle.setup.abstracts.AbstractTask;
  */
 public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
-    private String identity, productIdentity, identifier, keychain, keychainPassword;
-    private boolean ignoreError, deepsign = true;
+    static private String INTERNAL_ENTITLEMENT =    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+                                                    "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n" + 
+                                                    "<plist version=\"1.0\">\n" + 
+                                                    "<dict>\n" + 
+                                                    "    <key>com.apple.security.cs.allow-jit</key>\n" + 
+                                                    "    <true/>\n" + 
+                                                    "    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>\n" + 
+                                                    "    <true/>\n" + 
+                                                    "    <key>com.apple.security.cs.disable-executable-page-protection</key>\n" + 
+                                                    "    <true/>\n" + 
+                                                    "    <key>com.apple.security.cs.allow-dyld-environment-variables</key>\n" + 
+                                                    "    <true/>\n" + 
+                                                    "</dict>\n" + 
+                                                    "</plist>";
+
+    private String identity, productIdentity, identifier, keychain, keychainPassword, entitlements = INTERNAL_ENTITLEMENT;
+    private boolean ignoreError, deepsign = true, hardened = true;
 
     /**
      * Setup up the Sign Tool
@@ -165,6 +183,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
         ArrayList<String> command = new ArrayList<>();
         command.add( "codesign" );
         command.add( "-f" );
+        command.add( "--timestamp" );
 
         if ( isDeepsign() ) {
             command.add( "--deep" );
@@ -182,9 +201,34 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
             command.add( "--keychain" );
             command.add( getKeychain() );
         }
+        
+        if ( isHardened() ) {
+            command.add( "--options" );
+            command.add( "runtime" );
+        }
+
+        File entitlementsTempFile = null;
+        String entitlements = getEntitlements();
+        if ( entitlements != null && entitlements.length() > 0 ) {
+            try {
+                entitlementsTempFile = Files.createTempFile( "signing", "entitlement" ).toFile();
+                try ( FileOutputStream stream = new FileOutputStream( entitlementsTempFile ) ) {
+                    stream.write( entitlements.getBytes() );
+                }
+
+                command.add( "--entitlement" );
+                command.add( entitlementsTempFile.getAbsolutePath() );
+            } catch( IOException e ) {
+                System.err.println( "Could not use the entitlements file" );
+            }
+        }
 
         command.add( path.getAbsolutePath() );
         exec( command, null, null, isIgnoreError() );
+
+        if ( entitlementsTempFile != null && entitlementsTempFile.exists() ) {
+            entitlementsTempFile.delete();
+        }
     }
 
     /**
@@ -232,5 +276,38 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     public void setDeepsign(boolean deepsign) {
         this.deepsign = deepsign;
+    }
+
+    /**
+     * Set true (default=true) to enabled hardened signing for applications. This is required prior to notarization
+     * @param hardened true if hardening is required
+     */
+    public void setHardened( boolean hardened ) {
+        this.hardened = hardened;
+    }
+    
+    /**
+     * Returns true if the signing process should add the option to sign hardened
+     * @return true if the signing process should add the option to sign hardened
+     */
+    public boolean isHardened() {
+        return hardened;
+    }
+
+    /**
+     * Returns entitlements set to use while processing the application
+     * Will only be used for the ".app" files, not the ".pkg" files
+     * @return entitlements set to use while processing the application
+     */
+    public String getEntitlements() {
+        return entitlements;
+    }
+
+    /**
+     * Set an XML content string used while signing the main application bundle
+     * @param entitlements XML content string used while signing the main application bundle
+     */
+    public void setEntitlements( String entitlements ) {
+        this.entitlements = entitlements;
     }
 }

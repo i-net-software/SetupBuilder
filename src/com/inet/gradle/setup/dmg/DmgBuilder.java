@@ -559,5 +559,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( "-o" );
         command.add( task.getSetupFile().toString() );
         exec( command );
+
+        if ( task.getCodeSign() != null ) {
+            task.getCodeSign().signApplication( new File( task.getSetupFile().toString() ) );
+        }
     }
 }

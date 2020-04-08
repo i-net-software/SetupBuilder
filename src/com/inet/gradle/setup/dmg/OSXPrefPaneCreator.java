@@ -158,13 +158,11 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         }
 
         ResourceUtils.deleteDirectory( prefPaneSource.toPath() );
-/*
-        // Sign these packages already.
-        if( task.getCodeSign() != null ) {
-            task.getCodeSign().signApplication( new File( prefPaneLocation, "Contents/Resources/" + displayName + ".app" ) );
-            task.getCodeSign().signApplication( prefPaneLocation.getAbsoluteFile() );
+
+        if ( task.getCodeSign() != null ) {
+            task.getCodeSign().signApplication( prefPaneLocation );
+            task.getCodeSign().signApplication( prefPaneHelper );
         }
-*/
     }
 
     /**
