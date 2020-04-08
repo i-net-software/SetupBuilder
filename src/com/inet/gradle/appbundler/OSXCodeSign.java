@@ -216,7 +216,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
                     stream.write( entitlements.getBytes() );
                 }
 
-                command.add( "--entitlement" );
+                command.add( "--entitlements" );
                 command.add( entitlementsTempFile.getAbsolutePath() );
             } catch( IOException e ) {
                 System.err.println( "Could not use the entitlements file" );
