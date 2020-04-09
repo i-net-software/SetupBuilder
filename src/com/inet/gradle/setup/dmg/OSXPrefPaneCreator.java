@@ -93,15 +93,15 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         File prefPaneContents = new File( prefPaneLocation, "Contents" );
         Path iconPath = getApplicationIcon().toPath();
 
-        Files.copy( iconPath, new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/Resources/applet.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        File prefPaneHelper = new File( prefPaneContents, "Resources/" + displayName + " Helper.app" );
+        // Files.copy( iconPath, new File( prefPaneContents, "Resources/" + internalName + ".app/Contents/Resources/applet.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        // File prefPaneHelper = new File( prefPaneContents, "Resources/" + displayName + " Helper.app" );
 
         //        Files.move( new File( prefPaneContents, "MacOS/" + internalName ).toPath(), new File( prefPaneContents, "MacOS/" + displayName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), prefPaneHelper.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        // Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), prefPaneHelper.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         Logging.sysout( "Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
         // Make applet binary executable
-        setApplicationFilePermissions( new File( prefPaneHelper, "Contents/MacOS/applet" ) );
+        // setApplicationFilePermissions( new File( prefPaneHelper, "Contents/MacOS/applet" ) );
 
         // Copy Icon
         Files.copy( iconPath, new File( prefPaneLocation, "Contents/Resources/ProductIcon.icns" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
@@ -116,11 +116,13 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
         addPlistProperty( prefPanePLIST, ":NSPrefPaneHelperApplication", "String", displayName + " Helper" ); // Will be used for the sudo app name
         addPlistProperty( prefPanePLIST, ":NSAppleEventsUsageDescription", "String", "Helper application to provide priviledged access to " + displayName );
 
+        /*
         File sudoPLIST = new File( prefPaneHelper, "Contents/Info.plist" );
         setPlistProperty( sudoPLIST, ":CFBundleIdentifier", prefPaneIdentifier + ".prefPane.helper" );
         setPlistProperty( sudoPLIST, ":CFBundleName", displayName + " Helper" );
         setPlistProperty( sudoPLIST, ":CFBundleExecutable", "applet" );
         addPlistProperty( sudoPLIST, ":NSAppleEventsUsageDescription", "String", "Helper application to provide priviledged access to " + displayName );
+        //*/
 
         File servicePLIST = new File( prefPaneLocation, "Contents/Resources/service.plist" );
         setPlistProperty( servicePLIST, ":Name", displayName );
@@ -161,7 +163,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
         if ( task.getCodeSign() != null ) {
             task.getCodeSign().signApplication( prefPaneLocation );
-            task.getCodeSign().signApplication( prefPaneHelper );
+            // task.getCodeSign().signApplication( prefPaneHelper );
         }
     }
 
