@@ -33,6 +33,7 @@ typedef enum {
 
 
 @property (strong, nonatomic) Service *service;
+@property (strong, nonatomic) Process *process;
 @property (strong) NSFileManager *fm;
 
 @property SERVICE_STATUS status;
@@ -48,4 +49,5 @@ typedef enum {
 - (IBAction) handleStartStopClick:(OnOffSwitchControl *)onOff;
 - (IBAction) handleUninstallClick:(NSButton *)button;
 
+-(void) setEnabled:(Boolean) enabled;
 @end

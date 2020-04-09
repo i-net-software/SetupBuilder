@@ -14,109 +14,30 @@
 #import "Process.h"
 #import "Service.h"
 
-NSTask *task = nil;
 @implementation Process
 
-+ (NSString *)executableSudoName
-{
-    static NSString *sudoName;
-    
-    if ( sudoName == nil ) {
-        NSString *plistPath = [NSString stringWithFormat:@"%@/Contents/Info.plist", [[NSBundle bundleForClass:[self class]] bundlePath]];
-        NSDictionary *plist = [[NSDictionary alloc] initWithContentsOfFile:plistPath];
-        sudoName = [plist objectForKey:@"NSPrefPaneHelperApplication"];
+- (id) initWithAuthProvider:(id<AuthorizationProvider>) auth {
+    if ( self = [self init] ) {
+        self->auth = auth;
     }
-    
-    return sudoName;
+    return self;
 }
 
--(NSString *)command:(NSString *)command asRoot:(BOOL)root withUser:(NSString *)user {
-    
-    // Escape
-    command = [command stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
-    if ( root && user != nil ) {
-        // inject a sudo
-        command = [command stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
-        command = [NSString stringWithFormat:@"sudo -u '%@' /bin/bash -c '%@'", user, command ];
-    }
-    
-    NSString *sudoHelperPath = [NSString stringWithFormat:@"%@/%@.app", [[NSBundle bundleForClass:[self class]] resourcePath], [Process executableSudoName]];
-    NSMutableString *scriptSource = [NSMutableString stringWithFormat:@"tell application \"%@\"\n exec%@(\"%@\")\n end tell\n", sudoHelperPath, root ? @"sudo" : @"", command];
-    
-    return scriptSource;
-}
-
--(NSString *)execIntermediate:(NSString *)command asRoot:(BOOL)root withUser:(NSString *)user async:(BOOL)async {
-    
-    NSString *scriptSource = [self command:command asRoot:root withUser:user];
-    DLog(@"Executing command via NSTask: %@", scriptSource);
-
-    if ( task != nil ) {
-        [task terminate];
-    }
-    
-    NSPipe *output = [NSPipe pipe];
-    task = [[NSTask alloc] init];
-
-    task.launchPath = @"/usr/bin/osascript";
-    task.arguments = @[@"-e", scriptSource];
-    
-    
-    [task setStandardError:output];
-    [task setStandardOutput:output];
-    [task setTerminationHandler:^(NSTask *task){
-        const char *result = [[output.fileHandleForReading readDataToEndOfFile] bytes];
-        DLog(@"Result of `%@` was %@", scriptSource, result!=NULL?[NSString stringWithUTF8String:result]:@"NULL");
-        task = nil;
+// Executes a batch of commands using the helper app.
+- (BOOL) runHelperTaskList:(NSArray *)argList {
+    BOOL __block failed = YES;
+    [argList enumerateObjectsUsingBlock:^(id obj, NSUInteger _, BOOL *stop) {
+        NSArray *args = (NSArray*)obj;
+        int res = [self->auth runHelperAsRootWithArgs:args];
+        if (res != 0) {
+            NSLog(@"Error: running helper with args `%@` failed with code %d", [args componentsJoinedByString:@" "], res);
+            *stop = failed = YES;
+        }
     }];
-    
-    [task launch];
-    if ( !async ) {
-        [task waitUntilExit];
-        const char *result = [[output.fileHandleForReading readDataToEndOfFile] bytes];
-        return result!=NULL?[NSString stringWithUTF8String:result]:@"";
-    }
-
-    return @"";
-}
-
--(NSString *) execute:(NSString *)command {
-    return [self execIntermediate:command asRoot:NO withUser:nil async:NO];
-}
-
--(NSString *) executeSudo:(NSString *)command {
-    return [self execIntermediate:command asRoot:YES withUser:nil async:NO];
-}
-
--(NSString *) executeAsync:(NSString *)command {
-    return [self execIntermediate:command asRoot:NO withUser:nil async:YES];
-}
-
--(NSString *) executeAsyncSudo:(NSString *)command withUser:(NSString *)user {
-    return [self execIntermediate:command asRoot:YES withUser:user async:YES];
-}
-
-+(void) killSudoHelper {
-    DLog(@"Killing helper");
-    
-    if ( task != nil ) {
-        [task terminate];
-    }
-    NSString *sudoHelperPath = [NSString stringWithFormat:@"%@/%@.app", [[NSBundle bundleForClass:[self class]] resourcePath], [Process executableSudoName]];
-    NSString *scriptSource = [NSString stringWithFormat:@"tell application \"%@\"\n stopscript()\n end tell\n", sudoHelperPath];
-/*
-    NSString *kill = [NSString stringWithFormat:@"killall -m osascript"];
-    DLog(@"Killing NOW: %@", kill);
-    system([kill UTF8String]);
-*/
-    NSTask *task = [[NSTask alloc] init];
-    task.launchPath = @"/usr/bin/osascript";
-    task.arguments = @[@"-e", scriptSource];
-    [task launch];
+    return !failed;
 }
 
 typedef struct kinfo_proc kinfo_proc;
-
 static int GetBSDProcessList(kinfo_proc **procList, size_t *procCount)
 // Returns a list of all BSD processes on the system.  This routine
 // allocates the list and puts it in *procList and a count of the

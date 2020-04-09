@@ -7,20 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Authorization.h"
 
 @class Service;
-@interface Process : NSObject
+@interface Process : NSObject {
 
-@property AuthorizationRef authref;
+    id<AuthorizationProvider> auth;
+}
 
+- (id) initWithAuthProvider:(id<AuthorizationProvider>) auth;
+- (BOOL) runHelperTaskList:(NSArray *)argList;
 
--(NSString *) execute:(NSString *)command;
--(NSString *) executeSudo:(NSString *)command;
--(NSString *) executeAsync:(NSString *)command;
--(NSString *) executeAsyncSudo:(NSString *)command withUser:(NSString *)user;
-
-+(void) killSudoHelper;
-+(NSString *)executableSudoName;
 +(NSArray*)getBSDProcessList;
 +(NSDictionary*)getProcessByService:(Service *)service;
 

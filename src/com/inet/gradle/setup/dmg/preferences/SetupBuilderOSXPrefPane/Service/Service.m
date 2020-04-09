@@ -23,31 +23,34 @@
 
 - (id) initWithPlistURL:(NSURL *)plistURL
 {
-    self = [super init];
-    self.plist = plistURL;
-      
-    NSDictionary *plistData = [[NSDictionary alloc] initWithContentsOfURL:self.plist];
-    self.identifier = [plistData objectForKey:@"Label"];
-    self.name = [plistData objectForKey:@"Name"];
-    
-    NSNumber *shouldUseSudo = [plistData objectForKey:@"RunAsRoot"];
-    if (shouldUseSudo == nil) {
-        self.useSudo = NO;
-    } else {
-        self.useSudo = [shouldUseSudo boolValue];
-    }
-    
-    NSNumber *shouldRunAtLogin = [plistData objectForKey:@"RunAtBoot"];
-    if (shouldRunAtLogin == nil) {
-        self.runAtBoot = NO;
-    } else {
-        self.runAtBoot = [shouldRunAtLogin boolValue];
+    if ( self = [super init] ) {
+
+        self.plist = plistURL;
+          
+        NSDictionary *plistData = [[NSDictionary alloc] initWithContentsOfURL:self.plist];
+        self.identifier = [plistData objectForKey:@"Label"];
+        self.name = [plistData objectForKey:@"Name"];
+        
+        NSNumber *shouldUseSudo = [plistData objectForKey:@"RunAsRoot"];
+        if (shouldUseSudo == nil) {
+            self.useSudo = NO;
+        } else {
+            self.useSudo = [shouldUseSudo boolValue];
+        }
+        
+        NSNumber *shouldRunAtLogin = [plistData objectForKey:@"RunAtBoot"];
+        if (shouldRunAtLogin == nil) {
+            self.runAtBoot = NO;
+        } else {
+            self.runAtBoot = [shouldRunAtLogin boolValue];
+        }
+
+        description = [plistData objectForKey:@"Description"];
+        version = [plistData objectForKey:@"Version"];
+        program = [plistData objectForKey:@"Program"];
+        starter = [plistData objectForKey:@"starter"]; // List of starter actions for the pref pane
     }
 
-    description = [plistData objectForKey:@"Description"];
-    version = [plistData objectForKey:@"Version"];
-    program = [plistData objectForKey:@"Program"];
-    starter = [plistData objectForKey:@"starter"]; // List of starter actions for the pref pane
     return self;
 }
 
@@ -70,7 +73,5 @@
 - (BOOL) isServiceRunning {
     return [Process getProcessByService:self] != nil;
 }
-
-
 
 @end

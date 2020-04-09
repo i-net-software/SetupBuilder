@@ -7,14 +7,22 @@
 //
 
 #import <PreferencePanes/PreferencePanes.h>
+#import <SecurityInterface/SFAuthorizationView.h>
+
+#import "Authorization.h"
 
 @class ServiceController, Service;
-@interface SetupBuilderOSXPrefPane : NSPreferencePane
+@interface SetupBuilderOSXPrefPane : NSPreferencePane <AuthorizationProvider>
 {
     IBOutlet ServiceController *serviceController;
-    IBOutlet Service *service;
+    IBOutlet SFAuthorizationView *authView;
+
+    Service *service;
+    NSBundle *bundle;
+    NSString *helperPath;
 }
 
+- (id)initWithBundle:(NSBundle *)bundle;
 - (void)mainViewDidLoad;
 - (void)didUnselect;
 

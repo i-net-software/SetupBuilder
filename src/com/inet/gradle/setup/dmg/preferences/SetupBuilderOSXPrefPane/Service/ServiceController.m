@@ -98,44 +98,23 @@ NSTimer *timer;
         case SERVICE_STOPPING:
             self.status = isRunning ? self.status : SERVICE_STOPPED;
     }
-//*
-    // Nothing
-/*/
-    if ( self.status != SERVICE_RUNNING ) {
-        Process *p = [[Process alloc] init];
-        
-        NSString *output;
-        NSString *launchCtlCommand = [NSString stringWithFormat:@"/bin/launchctl list | grep %@$", self.service.identifier];
-        if (self.service.useSudo) {
-            output = [p executeSudo:launchCtlCommand];
-        } else {
-            output = [p execute:launchCtlCommand];
-        }
-        
-        if ([output length] > 0) {
-            self.status = SERVICE_RUNNING;
-        }
-    }
-//*/
+
     return self.status != currentState;
     
+}
+
+-(void) setEnabled:(Boolean) enabled; {
+    [onOffSwitch setEnabled:enabled];
 }
 
 -(void) stop {
     self.status = SERVICE_STOPPING;
     [self updateStatusIndicator];
     
-    Process *p = [[Process alloc] init];
-    NSString *runCommand = [NSString stringWithFormat:@"/bin/launchctl unload \"%@\"", [self.service pathForService]];
-    NSString *cleanupCommand = [NSString stringWithFormat:@"rm \"%@\"", [self.service pathForService]];
-
-    if (self.service.useSudo) {
-        [p executeSudo:runCommand];
-        [p executeSudo:cleanupCommand];
-    } else {
-        [p execute:runCommand];
-        [p execute:cleanupCommand];
-    }
+    [self.process runHelperTaskList:@[
+        @[ @"run", LAUNCHCTL_PATH, @"unload", [self.service pathForService] ],
+        @[ @"run", @"rm", [self.service pathForService] ]
+    ]];
 }
 
 -(void) start {
@@ -143,20 +122,13 @@ NSTimer *timer;
     self.status = SERVICE_STARTING;
     [self updateStatusIndicator];
     
-    Process *p = [[Process alloc] init];
-    
     // there are cases that the service can not be restarted. Especially if it was killed.
     NSString *source = [NSString stringWithUTF8String:[self.service.plist fileSystemRepresentation]];
-    NSString *copyCommand = [NSString stringWithFormat:@"ln \"%@\" \"%@\" || /bin/launchctl unload \"%@\"", source, [self.service pathForService], [self.service pathForService]];
-    NSString *runCommand = [NSString stringWithFormat:@"/bin/launchctl load \"%@\"", [self.service pathForService]];
 
-    if (self.service.useSudo) {
-        [p executeSudo:copyCommand];
-        [p executeSudo:runCommand];
-    } else {
-        [p execute:copyCommand];
-        [p execute:runCommand];
-    }
+    [self.process runHelperTaskList:@[
+        @[ @"run", @"ln", source, [self.service pathForService] ],
+        @[ @"run", LAUNCHCTL_PATH, @"load", [self.service pathForService] ]
+    ]];
 }
 
 -(void)buttonAction:(NSButton *)button {
@@ -175,13 +147,9 @@ NSTimer *timer;
         
         // Sending action
         DLog(@"Executing action: %@", action);
-        Process *p = [[Process alloc] init];
-
-        if ( asRoot ) {
-            [p executeAsyncSudo:action withUser:[starter valueForKey:@"asuser"]]; // go into working directory and then execute.
-        } else {
-            [p executeAsync:action]; // go into working directory and then execute.
-        }
+        [self.process runHelperTaskList:@[
+            asRoot ? @[ @"run", @"/bin/bash", @"-c", action ] : @[ @"run", @"sudo", @"-u", [starter valueForKey:@"asuser"], [NSString stringWithFormat:@"/bin/bash -c '%@'", action ] ]
+        ]];
     }
 }
 
@@ -229,7 +197,7 @@ NSTimer *timer;
     DLog(@"Status: %d; runAsRoot: %d, runAtLogin: %d", self.status, self.service.useSudo, self.service.runAtBoot);
     
     [statusIndicator setImage:[[NSImage alloc] initByReferencingFile:[[NSBundle bundleForClass:[self class]] pathForResource:statusImageName ofType:@"png"]]];
-//    [statusIndicator.cell accessibilitySetOverrideValue:statusImageAccessibilityDescription forAttribute:NSAccessibilityDescriptionAttribute];
+
     [statusIndicator setNeedsDisplay:YES];
 }
 
@@ -254,13 +222,14 @@ NSTimer *timer;
         
         // Everything goes down the drain now!
         DLog(@"Removing the application now");
-        Process *p = [[Process alloc] init];
         [NSSearchPathForDirectoriesInDomains(NSPreferencePanesDirectory, NSAllDomainsMask, YES) enumerateObjectsUsingBlock:^(NSString *path, NSUInteger idx, BOOL *stop){
             NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[self class]] bundlePath] lastPathComponent]];
             if ( [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
-                [p executeSudo:[NSString stringWithFormat:@"rm \"%@\"", prefPane]];
-                [Process killSudoHelper];
-                *stop = YES;
+                [self.process runHelperTaskList:@[
+                    @[ @"run", @"rm", prefPane ]
+                ]];
+
+                 *stop = YES;
             }
         }];
     }

@@ -7,3 +7,12 @@
 //
 
 #define DLog(...) NSLog(@"%s %@", __PRETTY_FUNCTION__, [NSString stringWithFormat:__VA_ARGS__])
+
+// Helper binary name
+#define HELPER_BINARY @"helper"
+
+// Path where to look for launch services
+#define LAUNCHDAEMONS_PATH @"/Library/LaunchDaemons"
+
+// Path to launchctl executable
+#define LAUNCHCTL_PATH @"/bin/launchctl"

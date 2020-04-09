@@ -7,8 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Process.h"
 
 @interface Service : NSObject
+
 @property (retain) NSURL* plist;
 @property (retain) NSString* identifier;
 @property (retain) NSString* name;
