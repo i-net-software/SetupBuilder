@@ -16,7 +16,9 @@
 }
 
 - (id) initWithAuthProvider:(id<AuthorizationProvider>) auth;
+
 - (BOOL) runHelperTaskList:(NSArray *)argList;
+- (void) runTaskAsync:(NSString *)argument;
 
 +(NSArray*)getBSDProcessList;
 +(NSDictionary*)getProcessByService:(Service *)service;

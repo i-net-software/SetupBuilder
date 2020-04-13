@@ -43,6 +43,7 @@ typedef enum {
 -(BOOL) serviceStatusChanged;
 -(void) updateStatusIndicator;
 -(void) pollStatus;
+
 -(NSString *)currentBundlePath;
 -(NSString *)userForStarter:(NSDictionary *)starter;
 

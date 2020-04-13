@@ -42,6 +42,7 @@ NSTimer *timer;
         [view removeFromSuperview];
     }];
     
+    [[uninstall cell] setBackgroundColor:[NSColor redColor]];
     NSString *asRootString = localized(@"runAsRoot");
 
     for ( NSDictionary *starter in [service starter] ) {
@@ -146,10 +147,15 @@ NSTimer *timer;
         if ( ![title isEqualToString:button.title] ) { continue; }
         
         // Sending action
-        DLog(@"Executing action: %@", action);
-        [self.process runHelperTaskList:@[
-            asRoot ? @[ @"run", @"/bin/bash", @"-c", action ] : @[ @"run", @"sudo", @"-u", [starter valueForKey:@"asuser"], [NSString stringWithFormat:@"/bin/bash -c '%@'", action ] ]
-        ]];
+        if ( asRoot ) {
+            DLog(@"Executing action: %@ as service user", action);
+            [self.process runHelperTaskList:@[
+                @[ @"run", @"sudo", @"-u", [starter valueForKey:@"asuser"], [NSString stringWithFormat:@"/bin/bash -c '%@'", action ] ]
+            ]];
+        } else {
+            DLog(@"Executing action: %@ as task", action);
+            [self.process runTaskAsync: action];
+        }
     }
 }
 

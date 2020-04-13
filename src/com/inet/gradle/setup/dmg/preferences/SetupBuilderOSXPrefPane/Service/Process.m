@@ -14,6 +14,7 @@
 #import "Process.h"
 #import "Service.h"
 
+NSTask *task = nil;
 @implementation Process
 
 - (id) initWithAuthProvider:(id<AuthorizationProvider>) auth {
@@ -35,6 +36,31 @@
         }
     }];
     return !failed;
+}
+
+- (void) runTaskAsync:(NSString *)argument {
+
+    if ( task != nil ) {
+        [task terminate];
+    }
+
+    NSPipe *output = [NSPipe pipe];
+    task = [[NSTask alloc] init];
+
+    task.launchPath = @"/bin/bash";
+    task.arguments = @[@"-c", argument];
+
+    [task setStandardError:output];
+    [task setStandardOutput:output];
+    [task setTerminationHandler:^(NSTask *task){
+        const char *result = [[output.fileHandleForReading readDataToEndOfFile] bytes];
+        DLog(@"Result of `%@` was %@", argument, result!=NULL?[NSString stringWithUTF8String:result]:@"NULL");
+        task = nil;
+        
+    }];
+    
+    // Fire and forget
+    [task launch];
 }
 
 typedef struct kinfo_proc kinfo_proc;
