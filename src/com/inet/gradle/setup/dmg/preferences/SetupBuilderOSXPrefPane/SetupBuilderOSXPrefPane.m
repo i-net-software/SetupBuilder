@@ -46,6 +46,7 @@
     [serviceController setService:service];
     [serviceController setProcess: [[Process alloc] initWithAuthProvider: self]];
     [serviceController pollStatus];
+    [self updateUI];
 }
 
 - (void)updateUI {

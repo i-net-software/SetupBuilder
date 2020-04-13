@@ -17,6 +17,7 @@
 @synthesize status;
 
 NSTimer *timer;
+NSArray *authenticationButtons;
 
 #define localized(name) NSLocalizedStringFromTableInBundle(name, @"Strings", [NSBundle bundleForClass:[self class]], NULL)
 
@@ -44,6 +45,7 @@ NSTimer *timer;
     
     [[uninstall cell] setBackgroundColor:[NSColor redColor]];
     NSString *asRootString = localized(@"runAsRoot");
+    NSMutableArray *internalAuthenticationButtons = [NSMutableArray array];
 
     for ( NSDictionary *starter in [service starter] ) {
         
@@ -66,13 +68,11 @@ NSTimer *timer;
         [colorTitle addAttribute:NSForegroundColorAttributeName value:[NSColor linkColor] range:titleRange];
         [colorTitle addAttribute:NSUnderlineColorAttributeName value:[NSColor linkColor] range:titleRange];
         [colorTitle addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:titleRange];
-/*
+
         if ( asRoot ) {
-            titleRange = NSMakeRange([colorTitle length] - [asRootString length], [colorTitle length]);
-            [colorTitle addAttribute:NSForegroundColorAttributeName value:[NSColor redColor] range:titleRange];
-            [colorTitle addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleNone] range:titleRange];
+            [internalAuthenticationButtons addObject:button];
         }
-*/
+
         [button setAttributedTitle:colorTitle];
         
         [button setShowsBorderOnlyWhileMouseInside:YES];
@@ -83,6 +83,9 @@ NSTimer *timer;
         [button setAction:@selector(buttonAction:)];
         [actionList addArrangedSubview:button];
     }
+    
+    authenticationButtons = internalAuthenticationButtons;
+    DLog(@"Added %lu Buttons to the as-service-user list", (unsigned long)authenticationButtons.count);
 }
 
 -(BOOL) serviceStatusChanged {
@@ -106,6 +109,13 @@ NSTimer *timer;
 
 -(void) setEnabled:(Boolean) enabled; {
     [onOffSwitch setEnabled:enabled];
+    [uninstall setEnabled:enabled];
+    
+    [authenticationButtons enumerateObjectsUsingBlock:^(id obj, NSUInteger _, BOOL *stop) {
+        if ( [obj isKindOfClass:[NSButton class]] ) {
+            [(NSButton *)obj setEnabled:enabled];
+        }
+    }];
 }
 
 -(void) stop {
