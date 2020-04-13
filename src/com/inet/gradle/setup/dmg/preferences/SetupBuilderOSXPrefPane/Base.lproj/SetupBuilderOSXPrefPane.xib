@@ -18,12 +18,12 @@
         <window title="≪ do not localize ≫" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" deferred="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="F0z-JX-Cv5" userLabel="PrefPane">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="176" y="715" width="668" height="367"/>
+            <rect key="contentRect" x="176" y="715" width="668" height="336"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
             <value key="minSize" type="size" width="668" height="235"/>
             <value key="maxSize" type="size" width="668" height="235"/>
-            <view key="contentView" misplaced="YES" id="se5-gp-TjO">
-                <rect key="frame" x="0.0" y="0.0" width="668" height="367"/>
+            <view key="contentView" id="se5-gp-TjO">
+                <rect key="frame" x="0.0" y="0.0" width="668" height="337"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="Fta-K8-I76" customClass="SFAuthorizationView">
@@ -168,7 +168,7 @@
                     <constraint firstAttribute="bottom" secondItem="Fta-K8-I76" secondAttribute="bottom" constant="20" symbolic="YES" id="xj7-gA-Obq"/>
                 </constraints>
             </view>
-            <point key="canvasLocation" x="270" y="12"/>
+            <point key="canvasLocation" x="270" y="-4"/>
         </window>
         <customObject id="lHB-bB-yFt" customClass="ServiceController">
             <connections>
@@ -181,15 +181,6 @@
                 <outlet property="uninstall" destination="9DR-V3-OT9" id="ZzI-3a-hbg"/>
             </connections>
         </customObject>
-        <button verticalHuggingPriority="750" id="6tX-Ky-9hV">
-            <rect key="frame" x="0.0" y="0.0" width="127" height="25"/>
-            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-            <buttonCell key="cell" type="roundTextured" title="Textured Rounded" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="oMV-8c-bnK">
-                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                <font key="font" metaFont="system"/>
-            </buttonCell>
-            <point key="canvasLocation" x="281" y="337"/>
-        </button>
     </objects>
     <resources>
         <image name="ProductIcon.icns" width="128" height="128"/>
