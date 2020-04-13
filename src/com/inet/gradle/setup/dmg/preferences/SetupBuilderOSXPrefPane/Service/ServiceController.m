@@ -61,20 +61,11 @@ NSArray *authenticationButtons;
         NSButton *button = [[NSButton alloc] init];
         button.title = title;
 
-        NSMutableAttributedString *colorTitle = [[NSMutableAttributedString alloc] initWithAttributedString:[button attributedTitle]];
-//        DLog(@"title: %@", colorTitle);
-
-        NSRange titleRange = NSMakeRange(0, [colorTitle length]);
-        [colorTitle addAttribute:NSForegroundColorAttributeName value:[NSColor linkColor] range:titleRange];
-        [colorTitle addAttribute:NSUnderlineColorAttributeName value:[NSColor linkColor] range:titleRange];
-        [colorTitle addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:titleRange];
-
         if ( asRoot ) {
             [internalAuthenticationButtons addObject:button];
         }
 
-        [button setAttributedTitle:colorTitle];
-        
+        [self updatebuttonTitleUnderlineColor:button];
         [button setShowsBorderOnlyWhileMouseInside:YES];
         [button setBordered:YES];
         [button setBezelStyle:NSRecessedBezelStyle];
@@ -86,6 +77,17 @@ NSArray *authenticationButtons;
     
     authenticationButtons = internalAuthenticationButtons;
     DLog(@"Added %lu Buttons to the as-service-user list", (unsigned long)authenticationButtons.count);
+}
+
+-(void) updatebuttonTitleUnderlineColor:(NSButton *)button {
+    NSMutableAttributedString *colorTitle = [[NSMutableAttributedString alloc] initWithAttributedString:[button attributedTitle]];
+    NSRange titleRange = NSMakeRange(0, [colorTitle length]);
+
+    NSColor *color = button.isEnabled ? [NSColor linkColor] : [NSColor disabledControlTextColor];
+    [colorTitle addAttribute:NSForegroundColorAttributeName value:color range:titleRange];
+    [colorTitle addAttribute:NSUnderlineColorAttributeName value:color range:titleRange];
+    [colorTitle addAttribute:NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSUnderlineStyleSingle] range:titleRange];
+    [button setAttributedTitle:colorTitle];
 }
 
 -(BOOL) serviceStatusChanged {
@@ -113,7 +115,9 @@ NSArray *authenticationButtons;
     
     [authenticationButtons enumerateObjectsUsingBlock:^(id obj, NSUInteger _, BOOL *stop) {
         if ( [obj isKindOfClass:[NSButton class]] ) {
-            [(NSButton *)obj setEnabled:enabled];
+            NSButton *button = (NSButton *)obj;
+            [button setEnabled:enabled];
+            [self updatebuttonTitleUnderlineColor:button];
         }
     }];
 }
