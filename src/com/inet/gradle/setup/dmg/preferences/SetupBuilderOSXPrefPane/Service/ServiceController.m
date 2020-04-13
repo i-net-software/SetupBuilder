@@ -164,7 +164,7 @@ NSArray *authenticationButtons;
         if ( asRoot ) {
             DLog(@"Executing action: %@ as service user", action);
             [self.process runHelperTaskList:@[
-                @[ @"run", @"sudo", @"-u", [starter valueForKey:@"asuser"], [NSString stringWithFormat:@"/bin/bash -c '%@'", action ] ]
+                @[ @"run", @"/usr/bin/sudo", @"-u", [starter valueForKey:@"asuser"], @"/bin/bash", @"-c", action ]
             ]];
         } else {
             DLog(@"Executing action: %@ as task", action);

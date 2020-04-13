@@ -34,7 +34,9 @@
 			<key>title</key>
 			<string>Test Link - keeps open</string>
 			<key>action</key>
-			<string>/usr/bin/osascript -e &quot;display dialog \\&quot;Hello World\\&quot;&quot;</string>
+			<string>/usr/bin/osascript -e &quot;display dialog \&quot;Hello World\&quot;&quot;</string>
+			<key>asuser</key>
+			<string>root</string>
 		</dict>
 	</array>
 </dict>
