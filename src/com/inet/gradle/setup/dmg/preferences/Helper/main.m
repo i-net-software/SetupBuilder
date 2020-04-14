@@ -18,9 +18,16 @@
 #import <stdio.h>
 #import <string.h>
 #import <unistd.h>
-#include <Foundation/Foundation.h>
 
-BOOL setRunAtBoot(NSString*,BOOL);
+#include <Foundation/Foundation.h>
+#include "Service.h"
+#include "Variables.h"
+
+#include "NSArray+ArrayHelper.h"
+#include "NSString+MD5.h"
+
+int execCommand(NSString *command, NSArray *arguments, int expectedStatus);
+BOOL checkCommand( const char * arg, NSString* expectedCommand );
 
 /* This helper tool is used to launch actions with elevated privileges.
  # helper run <program> <arguments...>
@@ -30,26 +37,88 @@ int main(int argc, const char * argv[]) {
         fprintf(stderr, "Usage: %s <run> [arguments...]\n", argv[0]);
         return 1;
     }
+
     /* This is required for launchctl to connect to the right launchd
        when executed via AuthorizationExecuteWithPrivileges */
     if (setuid(0) != 0) {
         perror("setuid");
         return 2;
     }
-    if (!strcmp(argv[1], "run")) {
-        if (argc < 3) {
-            fprintf(stderr, "Usage: %s run <program> [arguments...]\n", argv[0]);
+
+    NSURL *plist = [[NSBundle bundleForClass:[Service class]] URLForResource:@"service" withExtension:@"plist"];
+    Service *service = [[Service alloc] initWithPlistURL:plist];
+    NSString *servicePath = [service pathForService];
+    
+    if (checkCommand(argv[1], SERVICE_ACTION_REMOVE ) && [servicePath isEqualToMD5CString:argv[2]] ) {
+
+        execCommand(LAUNCHCTL_PATH, @[ @"unload", servicePath ], 4);
+        return execCommand(@"rm", @[ servicePath ], 0);
+
+    } else if (checkCommand(argv[1], SERVICE_ACTION_INSTALL ) && [servicePath isEqualToMD5CString:argv[2]] ) {
+
+        // there are cases that the service can not be restarted. Especially if it was killed.
+        NSString *source = [NSString stringWithUTF8String:[service.plist fileSystemRepresentation]];
+        int returnCode = execCommand(@"ln", @[ source, servicePath ], 4);
+        if ( returnCode != 4) {
+            fprintf(stderr, "Could not link the given service list file\n");
             return 1;
         }
-        fprintf(stderr, "Running `%s`", argv[2]);
-        for (int i=3; i<argc; i++) {
-            fprintf(stderr, " `%s`", argv[i]);
+        
+        return execCommand(LAUNCHCTL_PATH, @[ @"load", servicePath ], 0);
+
+    } else if ( checkCommand( argv[1], SERVICE_ACTION_RUNAS ) ) {
+
+        NSDictionary *starter = [service starterForHash:argv[2] ];
+        if ( starter == nil ) {
+            fprintf(stderr, "Unknown run as user command with hash: %s\n", argv[2]);
+            return 1;
         }
-        execvp(argv[2], (char* const*)&argv[2]);
-        perror("execvp");
-        return 3;
+
+        NSString *asUser = [Service userFor:starter];
+        if ( [@"root" isEqualToString:[asUser lowercaseString] ] ) {
+            fprintf(stderr, "Cowardly refusing to run command hash `%s` as the _root_ user\n", argv[2]);
+            return 1;
+        }
+        
+        return execCommand( @"sudo", @[ @"-u", asUser, @"/bin/bash", @"-c", [Service actionFor:starter] ], 4 );
+    } else if ( checkCommand( argv[1], SERVICE_ACTION_UNINSTALL_SOFTWARE ) ) {
+        
+        int __block responseCode = 1;
+        [NSSearchPathForDirectoriesInDomains(NSPreferencePanesDirectory, NSAllDomainsMask, YES) enumerateObjectsUsingBlock:^(NSString *path, NSUInteger idx, BOOL *stop){
+
+            NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[Service class]] bundlePath] lastPathComponent]];
+
+            if ( [prefPane isEqualToMD5CString:argv[2]] && [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
+                responseCode = execCommand(@"rm", @[ prefPane ], 4);
+                *stop = YES;
+            }
+        }];
+
+        return responseCode;
     } else {
-            fprintf(stderr, "Unknown action: %s\n", argv[1]);
+        fprintf(stderr, "Unknown action: %s\n", argv[1]);
         return 1;
     }
+}
+
+/**
+    Run the Command given with the parameters set
+ */
+int execCommand(NSString *command, NSArray *arguments, int expectedStatus) {
+
+    char** args = [arguments getArray];
+    fprintf(stderr, "Running `%s %s`\n", [command UTF8String], [[arguments componentsJoinedByString:@" "] UTF8String]);
+
+    execvp([command UTF8String], args );
+
+    [NSArray freeArray:args];
+    perror("execvp");
+    return expectedStatus;
+}
+
+/**
+ Check if the given Argument is actually the command we'd like it to be
+ */
+BOOL checkCommand( const char * arg, NSString* expectedCommand ) {
+    return !strcmp(arg, [expectedCommand UTF8String] );
 }

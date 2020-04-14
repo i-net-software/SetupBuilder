@@ -19,6 +19,12 @@
 		300AAE361B60E4C700953A78 /* ServiceController.h in Headers */ = {isa = PBXBuildFile; fileRef = 300AAE301B60E4C700953A78 /* ServiceController.h */; };
 		300AAE371B60E4C700953A78 /* ServiceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE311B60E4C700953A78 /* ServiceController.m */; };
 		303114CE1B6120950017C421 /* service.plist in Resources */ = {isa = PBXBuildFile; fileRef = 303114CD1B6120950017C421 /* service.plist */; };
+		306353702445BED2009C183B /* Variables.h in Headers */ = {isa = PBXBuildFile; fileRef = 3063536F2445BE8A009C183B /* Variables.h */; };
+		306353722445BEE2009C183B /* Variables.h in Headers */ = {isa = PBXBuildFile; fileRef = 3063536F2445BE8A009C183B /* Variables.h */; };
+		306353742445CDE0009C183B /* NSArray+ArrayHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 306353732445CDE0009C183B /* NSArray+ArrayHelper.h */; };
+		306353762445D487009C183B /* NSArray+ArrayHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 306353752445D487009C183B /* NSArray+ArrayHelper.m */; };
+		306353782445DE1B009C183B /* NSString+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = 306353772445DE1B009C183B /* NSString+MD5.m */; };
+		306353792445DE1B009C183B /* NSString+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = 306353772445DE1B009C183B /* NSString+MD5.m */; };
 		3066D9D61B60D49400729DB7 /* SetupBuilderOSXPrefPane.h in Headers */ = {isa = PBXBuildFile; fileRef = 3066D9D51B60D49400729DB7 /* SetupBuilderOSXPrefPane.h */; };
 		3066D9D81B60D49400729DB7 /* SetupBuilderOSXPrefPane.m in Sources */ = {isa = PBXBuildFile; fileRef = 3066D9D71B60D49400729DB7 /* SetupBuilderOSXPrefPane.m */; };
 		3066D9DD1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3066D9DB1B60D49400729DB7 /* SetupBuilderOSXPrefPane.xib */; };
@@ -31,6 +37,7 @@
 		3095D5BC243F407500239605 /* helper in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3095D5AB243F199000239605 /* helper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		30C2C9D81C61DC9600EA672C /* PrefixHeader.pch in Headers */ = {isa = PBXBuildFile; fileRef = 30C2C9D71C61DC9600EA672C /* PrefixHeader.pch */; };
 		30C477F11C4FB61E006FC2AA /* Strings.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30C477F31C4FB61E006FC2AA /* Strings.strings */; };
+		30D0826B2444E47E00A0F089 /* Service.m in Sources */ = {isa = PBXBuildFile; fileRef = 300AAE2F1B60E4C700953A78 /* Service.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +85,11 @@
 		300AAE301B60E4C700953A78 /* ServiceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceController.h; sourceTree = "<group>"; };
 		300AAE311B60E4C700953A78 /* ServiceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceController.m; sourceTree = "<group>"; };
 		303114CD1B6120950017C421 /* service.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = service.plist; sourceTree = "<group>"; };
+		3063536F2445BE8A009C183B /* Variables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Variables.h; sourceTree = "<group>"; };
+		306353732445CDE0009C183B /* NSArray+ArrayHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSArray+ArrayHelper.h"; sourceTree = "<group>"; };
+		306353752445D487009C183B /* NSArray+ArrayHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+ArrayHelper.m"; sourceTree = "<group>"; };
+		306353772445DE1B009C183B /* NSString+MD5.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+MD5.m"; sourceTree = "<group>"; };
+		3063537A2445DE8B009C183B /* NSString+MD5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+MD5.h"; sourceTree = "<group>"; };
 		3066D9D01B60D49400729DB7 /* SetupBuilderOSXPrefPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SetupBuilderOSXPrefPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
 		3066D9D41B60D49400729DB7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3066D9D51B60D49400729DB7 /* SetupBuilderOSXPrefPane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SetupBuilderOSXPrefPane.h; sourceTree = "<group>"; };
@@ -149,8 +161,6 @@
 				3095D592243F182B00239605 /* Authorization.h */,
 				300AAE2C1B60E4C700953A78 /* Process.h */,
 				300AAE2D1B60E4C700953A78 /* Process.m */,
-				300AAE2E1B60E4C700953A78 /* Service.h */,
-				300AAE2F1B60E4C700953A78 /* Service.m */,
 				300AAE301B60E4C700953A78 /* ServiceController.h */,
 				300AAE311B60E4C700953A78 /* ServiceController.m */,
 			);
@@ -160,6 +170,7 @@
 		3066D9C61B60D49400729DB7 = {
 			isa = PBXGroup;
 			children = (
+				30D0826A2444E39700A0F089 /* Common */,
 				3066D9D21B60D49400729DB7 /* SetupBuilderOSXPrefPane */,
 				3095D5AC243F199000239605 /* Helper */,
 				3066D9D11B60D49400729DB7 /* Products */,
@@ -213,17 +224,41 @@
 			isa = PBXGroup;
 			children = (
 				3095D5B7243F19F400239605 /* main.m */,
+				306353732445CDE0009C183B /* NSArray+ArrayHelper.h */,
+				306353752445D487009C183B /* NSArray+ArrayHelper.m */,
 			);
 			path = Helper;
+			sourceTree = "<group>";
+		};
+		30D0826A2444E39700A0F089 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				300AAE2E1B60E4C700953A78 /* Service.h */,
+				300AAE2F1B60E4C700953A78 /* Service.m */,
+				3063536F2445BE8A009C183B /* Variables.h */,
+				306353772445DE1B009C183B /* NSString+MD5.m */,
+				3063537A2445DE8B009C183B /* NSString+MD5.h */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		306353712445BEDD009C183B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				306353722445BEE2009C183B /* Variables.h in Headers */,
+				306353742445CDE0009C183B /* NSArray+ArrayHelper.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3066D9CD1B60D49400729DB7 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				306353702445BED2009C183B /* Variables.h in Headers */,
 				300AAE341B60E4C700953A78 /* Service.h in Headers */,
 				300AAE121B60D9A800953A78 /* OnOffSwitchControlCell.h in Headers */,
 				300AAE361B60E4C700953A78 /* ServiceController.h in Headers */,
@@ -262,6 +297,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3095D5AF243F199000239605 /* Build configuration list for PBXNativeTarget "helper" */;
 			buildPhases = (
+				306353712445BEDD009C183B /* Headers */,
 				3095D5A7243F199000239605 /* Sources */,
 				3095D5A8243F199000239605 /* Frameworks */,
 				3095D5A9243F199000239605 /* CopyFiles */,
@@ -343,6 +379,7 @@
 				3066D9D81B60D49400729DB7 /* SetupBuilderOSXPrefPane.m in Sources */,
 				300AAE331B60E4C700953A78 /* Process.m in Sources */,
 				300AAE371B60E4C700953A78 /* ServiceController.m in Sources */,
+				306353782445DE1B009C183B /* NSString+MD5.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -350,7 +387,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30D0826B2444E47E00A0F089 /* Service.m in Sources */,
 				3095D5B8243F19F400239605 /* main.m in Sources */,
+				306353792445DE1B009C183B /* NSString+MD5.m in Sources */,
+				306353762445D487009C183B /* NSArray+ArrayHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

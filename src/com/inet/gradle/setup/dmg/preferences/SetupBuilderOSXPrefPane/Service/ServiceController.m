@@ -10,6 +10,7 @@
 #import "OnOffSwitchControl.h"
 #import "Process.h"
 #import "Service.h"
+#import "NSString+MD5.h"
 
 @implementation ServiceController
 
@@ -18,13 +19,6 @@
 
 NSTimer *timer;
 NSArray *authenticationButtons;
-
-#define localized(name) NSLocalizedStringFromTableInBundle(name, @"Strings", [NSBundle bundleForClass:[self class]], NULL)
-
-- (NSString *)userForStarter:(NSDictionary *)starter {
-    NSString *user = [starter valueForKey:@"asuser"];
-    return user != nil ? user : @"root";
-}
 
 - (void)setService:(Service *)service
 {
@@ -44,24 +38,18 @@ NSArray *authenticationButtons;
     }];
     
     [[uninstall cell] setBackgroundColor:[NSColor redColor]];
-    NSString *asRootString = localized(@"runAsRoot");
     NSMutableArray *internalAuthenticationButtons = [NSMutableArray array];
 
     for ( NSDictionary *starter in [service starter] ) {
         
-        NSString *action = [starter valueForKey:@"action"];
-        NSString *title = [starter valueForKey:@"title"];
+        NSString *title = [Service titleFor:starter];
+        NSString *action = [Service actionFor:starter];
         if ( title == nil || action == nil ) { continue; }
-        
-        BOOL asRoot = [[starter valueForKey:@"asroot"] boolValue];
-        if ( asRoot ) {
-            title = [title stringByAppendingString:[NSString stringWithFormat:asRootString, [self userForStarter:starter]]];
-        }
-        
+
         NSButton *button = [[NSButton alloc] init];
         button.title = title;
 
-        if ( asRoot ) {
+        if ( [Service runAsRoot:starter] ) {
             [internalAuthenticationButtons addObject:button];
         }
 
@@ -79,7 +67,7 @@ NSArray *authenticationButtons;
     DLog(@"Added %lu Buttons to the as-service-user list", (unsigned long)authenticationButtons.count);
 }
 
--(void) updatebuttonTitleUnderlineColor:(NSButton *)button {
+- (void)updatebuttonTitleUnderlineColor:(NSButton *)button {
     NSMutableAttributedString *colorTitle = [[NSMutableAttributedString alloc] initWithAttributedString:[button attributedTitle]];
     NSRange titleRange = NSMakeRange(0, [colorTitle length]);
 
@@ -90,10 +78,11 @@ NSArray *authenticationButtons;
     [button setAttributedTitle:colorTitle];
 }
 
--(BOOL) serviceStatusChanged {
+- (BOOL)serviceStatusChanged {
 
     SERVICE_STATUS currentState = self.status;
-    BOOL isRunning = [self.service isServiceRunning];
+
+    BOOL isRunning = [Process getProcessByService:self.service] != nil;
     switch (self.status) {
         case SERVICE_STOPPED:
         case SERVICE_RUNNING:
@@ -109,7 +98,7 @@ NSArray *authenticationButtons;
     
 }
 
--(void) setEnabled:(Boolean) enabled; {
+- (void)setEnabled:(Boolean) enabled; {
     [onOffSwitch setEnabled:enabled];
     [uninstall setEnabled:enabled];
     
@@ -122,53 +111,35 @@ NSArray *authenticationButtons;
     }];
 }
 
--(void) stop {
+- (void)stop {
     self.status = SERVICE_STOPPING;
     [self updateStatusIndicator];
     
-    [self.process runHelperTaskList:@[
-        @[ @"run", LAUNCHCTL_PATH, @"unload", [self.service pathForService] ],
-        @[ @"run", @"rm", [self.service pathForService] ]
-    ]];
+    [self.process runHelperTaskList:@[ SERVICE_ACTION_REMOVE, [[self.service pathForService] md5] ] ];
 }
 
--(void) start {
+- (void)start {
     
     self.status = SERVICE_STARTING;
     [self updateStatusIndicator];
-    
-    // there are cases that the service can not be restarted. Especially if it was killed.
-    NSString *source = [NSString stringWithUTF8String:[self.service.plist fileSystemRepresentation]];
 
-    [self.process runHelperTaskList:@[
-        @[ @"run", @"ln", source, [self.service pathForService] ],
-        @[ @"run", LAUNCHCTL_PATH, @"load", [self.service pathForService] ]
-    ]];
+    [self.process runHelperTaskList:@[ SERVICE_ACTION_INSTALL, [[self.service pathForService] md5] ] ];
 }
 
 -(void)buttonAction:(NSButton *)button {
     
-    NSString *asRootString = localized(@"runAsRoot");
     for ( NSDictionary *starter in [_service starter] ) {
         
-        NSString *title = [starter valueForKey:@"title"];
-        NSString *action = [NSString stringWithFormat:@"cd \"%@\"; %@", [self currentBundlePath], [starter valueForKey:@"action"]];
-        BOOL asRoot = [[starter valueForKey:@"asroot"] boolValue];
-        if ( asRoot ) {
-            title = [title stringByAppendingString:[NSString stringWithFormat:asRootString, [self userForStarter:starter]]];
-        }
-
+        NSString *title = [Service titleFor:starter];
         if ( ![title isEqualToString:button.title] ) { continue; }
-        
+
         // Sending action
-        if ( asRoot ) {
-            DLog(@"Executing action: %@ as service user", action);
-            [self.process runHelperTaskList:@[
-                @[ @"run", @"/usr/bin/sudo", @"-u", [starter valueForKey:@"asuser"], @"/bin/bash", @"-c", action ]
-            ]];
+        if ( [Service runAsRoot:starter] ) {
+            DLog(@"Executing action with title %@ as service user", title);
+            [self.process runHelperTaskList: @[ SERVICE_ACTION_RUNAS, [[Service actionFor:starter] md5] ] ];
         } else {
-            DLog(@"Executing action: %@ as task", action);
-            [self.process runTaskAsync: action];
+            DLog(@"Executing action: %@ as task", [Service actionFor:starter]);
+            [self.process runTaskAsync: [Service actionFor:starter]];
         }
     }
 }
@@ -187,13 +158,13 @@ NSArray *authenticationButtons;
     return [[[bundle stringByDeletingPathExtension] lastPathComponent] isEqualToString:[[parentApp stringByDeletingPathExtension] lastPathComponent]] ? parentApp : bundle;
 }
 
--(void)pollStatus {
+- (void)pollStatus {
     if ( [self serviceStatusChanged] ) {
         [self updateStatusIndicator];
     }
 }
 
--(void) updateStatusIndicator {
+- (void)updateStatusIndicator {
     
     NSString *statusImageName;
     NSString *statusImageAccessibilityDescription;
@@ -243,12 +214,10 @@ NSArray *authenticationButtons;
         // Everything goes down the drain now!
         DLog(@"Removing the application now");
         [NSSearchPathForDirectoriesInDomains(NSPreferencePanesDirectory, NSAllDomainsMask, YES) enumerateObjectsUsingBlock:^(NSString *path, NSUInteger idx, BOOL *stop){
+
             NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[self class]] bundlePath] lastPathComponent]];
             if ( [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
-                [self.process runHelperTaskList:@[
-                    @[ @"run", @"rm", prefPane ]
-                ]];
-
+                [self.process runHelperTaskList:@[ SERVICE_ACTION_UNINSTALL_SOFTWARE, [prefPane md5] ] ];
                  *stop = YES;
             }
         }];

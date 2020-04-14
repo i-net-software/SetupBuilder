@@ -26,16 +26,13 @@ NSTask *task = nil;
 
 // Executes a batch of commands using the helper app.
 - (BOOL) runHelperTaskList:(NSArray *)argList {
-    BOOL __block failed = YES;
-    [argList enumerateObjectsUsingBlock:^(id obj, NSUInteger _, BOOL *stop) {
-        NSArray *args = (NSArray*)obj;
-        int res = [self->auth runHelperAsRootWithArgs:args];
-        if (res != 0) {
-            NSLog(@"Error: running helper with args `%@` failed with code %d", [args componentsJoinedByString:@" "], res);
-            *stop = failed = YES;
-        }
-    }];
-    return !failed;
+    int res = [self->auth runHelperAsRootWithArgs:argList];
+    if (res != 0) {
+        NSLog(@"Error: running helper with args `%@` failed with code %d", [argList componentsJoinedByString:@" "], res);
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (void) runTaskAsync:(NSString *)argument {
@@ -234,7 +231,7 @@ static char* getBSDProcessName( pid_t pid ) {
             NSData *outputData = [[[task standardOutput] fileHandleForReading] availableData];
             NSString* command = [[NSString alloc] initWithData:outputData encoding:NSASCIIStringEncoding];
             command = [command substringToIndex:MIN(service.program.length,command.length)];
-/*
+//*
             // NOOP
 /*/
             DLog(@"Arguments: %@", args);
