@@ -6,14 +6,14 @@
 //  Copyright © 2020 i-net software. All rights reserved.
 //
 
-#import <AppKit/AppKit.h>
-
-
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSArray ()
+@interface NSArray (NSArrayHelper)
+
+- (char*_Nonnull*_Nonnull)getArray;
++ (void)freeArray:(char *_Nonnull*_Nonnull)array;
 
 @end
 

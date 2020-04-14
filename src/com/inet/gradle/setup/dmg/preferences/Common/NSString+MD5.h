@@ -9,5 +9,12 @@
 #ifndef NSString_MD5_h
 #define NSString_MD5_h
 
+@interface NSString (MD5)
+
+- (NSString *) md5;
+- (BOOL) isEqualToMD5CString:(const char *)aString;
+
+@end
+
 
 #endif /* NSString_MD5_h */
