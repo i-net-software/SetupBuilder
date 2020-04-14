@@ -23,12 +23,6 @@
 	<key>starter</key>
 	<array>
 		<dict>
-			<key>title</key>
-			<string>Test Link</string>
-			<key>action</key>
-			<string>echo &quot;Hello World&quot;</string>
-		</dict>
-		<dict>
 			<key>asroot</key>
 			<true/>
 			<key>title</key>
@@ -37,6 +31,12 @@
 			<string>/usr/bin/osascript -e &quot;display dialog \&quot;Hello World\&quot;&quot;</string>
 			<key>asuser</key>
 			<string>root</string>
+		</dict>
+		<dict>
+			<key>title</key>
+			<string>Test Link</string>
+			<key>action</key>
+			<string>echo &quot;Hello World&quot;</string>
 		</dict>
 	</array>
 </dict>
