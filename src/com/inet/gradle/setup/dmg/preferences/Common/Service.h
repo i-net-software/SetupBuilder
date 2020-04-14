@@ -22,9 +22,13 @@
 @property bool useSudo;
 @property bool runAtBoot;
 
-
 - (id) initWithPlistURL:(NSURL *)plistURL;
 - (NSString *)pathForService;
-- (BOOL) isServiceRunning;
+- (NSDictionary *)starterForHash:(const char *)md5;
+
++ (NSString *)userFor:(NSDictionary *)starter;
++ (NSString *)titleFor:(NSDictionary *)starter;
++ (NSString *)actionFor:(NSDictionary *)starter;
++ (BOOL)runAsRoot:(NSDictionary *)starter;
 
 @end

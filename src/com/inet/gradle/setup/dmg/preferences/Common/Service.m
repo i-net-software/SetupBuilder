@@ -7,7 +7,8 @@
 //
 
 #import "Service.h"
-#import "Process.h"
+#import "Variables.h"
+#import "NSString+MD5.h"
 
 @implementation Service
 
@@ -59,19 +60,57 @@
     NSString *plistFile = [NSString stringWithFormat:@"/tmp/%@.plist", self.identifier];
     if (self.runAtBoot) {
         if (self.useSudo) {
-            plistFile = [NSString stringWithFormat:@"/Library/LaunchDaemons/%@.plist", self.identifier];
+            plistFile = [NSString stringWithFormat:@"%@/%@.plist", LAUNCHDAEMONS_PATH, self.identifier];
         } else {
-            plistFile = [NSString stringWithFormat:@"%@/Library/LaunchAgents/%@.plist", NSHomeDirectory(), self.identifier];
+            plistFile = [NSString stringWithFormat:@"%@%@/%@.plist", NSHomeDirectory(), LAUNCHAGENTS_PATH, self.identifier];
         }
-        plistFile =[NSString stringWithFormat:@"/Library/LaunchDaemons/%@.plist", self.identifier];
+        plistFile =[NSString stringWithFormat:@"%@/%@.plist", LAUNCHDAEMONS_PATH, self.identifier];
     }
     
-    DLog(@"Path for service: %@", plistFile);
+    /* DLog(@"Path for service: %@", plistFile); */
     return plistFile;
 }
 
-- (BOOL) isServiceRunning {
-    return [Process getProcessByService:self] != nil;
+- (NSDictionary *)starterForHash:(const char*)md5 {
+    
+    for ( NSDictionary *starter in self->starter ) {
+        if ( [[Service actionFor:starter] isEqualToMD5CString:md5] ) {
+            return starter;
+        }
+    }
+    
+    return nil;
+}
+
+/**
+    Determin the user for the given Starter
+ */
++ (NSString *)userFor:(NSDictionary *)starter {
+    NSString *user = [starter valueForKey:@"asuser"];
+    return user != nil ? user : @"root";
+}
+
+/**
+   Determin the title for the given Starter
+*/
++ (NSString *)titleFor:(NSDictionary *)starter {
+
+    NSString *title = [starter valueForKey:@"title"];
+    NSString *asRootString = localized(@"runAsRoot");
+
+    if ( [self runAsRoot:starter] ) {
+        title = [title stringByAppendingString:[NSString stringWithFormat:asRootString, [self userFor:starter]]];
+    }
+
+    return title;
+}
+
++ (NSString *)actionFor:(NSDictionary *)starter {
+    return [starter valueForKey:@"action"];
+}
+
++ (BOOL)runAsRoot:(NSDictionary *)starter {
+    return [[starter valueForKey:@"asroot"] boolValue];
 }
 
 @end
