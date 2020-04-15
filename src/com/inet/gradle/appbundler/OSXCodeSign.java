@@ -7,10 +7,16 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.util.ConfigureUtil;
 
+import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
+import com.inet.gradle.setup.dmg.Dmg;
+
+import groovy.lang.Closure;
 
 /**
  * Create code signature for packages. Deep Signing.
@@ -38,6 +44,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     private String identity, productIdentity, identifier, keychain, keychainPassword, entitlements = INTERNAL_ENTITLEMENT;
     private boolean ignoreError, deepsign = true, hardened = true;
+    private OSXNotarize<T, S> notarization = null;
 
     /**
      * Setup up the Sign Tool
@@ -309,5 +316,35 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     public void setEntitlements( String entitlements ) {
         this.entitlements = entitlements;
+    }
+
+    /**
+     * Notarize the given file. It should be the final artifact.
+     * This operation can take up to several minutes, including the upload to Apple
+     * @param notarizeFile the file to notarize 
+     */
+    public void notarize( File notarizeFile ) {
+        if ( notarization == null ) {
+            return; // notarization not requested
+        }
+
+        notarization.run( notarizeFile, this );
+    }
+
+    /**
+     * Set the notarization information
+     * @param closure the notarization information
+     */
+    public void notarization( Closure<OSXNotarize<T, S>> closure ) {
+        ProjectInternal project = (ProjectInternal)task.getProject();
+        this.notarization = ConfigureUtil.configure( closure, new OSXNotarize<T, S>(getTask(), project.getFileResolver()) );
+    }
+
+    /**
+     * Returns the notarization information
+     * @return the notarization information
+     */
+    public OSXNotarize<T, S> getNotarization() {
+        return notarization;
     }
 }

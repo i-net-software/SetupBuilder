@@ -32,6 +32,7 @@ import javax.imageio.ImageIO;
 import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
+import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
@@ -560,8 +561,11 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( task.getSetupFile().toString() );
         exec( command );
 
-        if ( task.getCodeSign() != null ) {
-            task.getCodeSign().signApplication( new File( task.getSetupFile().toString() ) );
+        OSXCodeSign<Dmg, SetupBuilder> codeSign = task.getCodeSign();
+        if ( codeSign != null ) {
+            File finalImage = new File( task.getSetupFile().toString() );
+            codeSign.signApplication( finalImage );
+            codeSign.notarize( finalImage );
         }
     }
 }
