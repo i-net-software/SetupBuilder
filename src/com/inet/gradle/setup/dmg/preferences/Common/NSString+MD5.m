@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CommonCrypto/CommonDigest.h>
+#import "Variables.h"
 
 @implementation NSString (MD5)
 
