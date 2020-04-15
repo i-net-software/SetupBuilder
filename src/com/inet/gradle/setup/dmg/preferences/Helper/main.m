@@ -70,18 +70,22 @@ int main(int argc, const char * argv[]) {
 
     } else if ( checkCommand( argv[1], SERVICE_ACTION_UNINSTALL_SOFTWARE ) ) {
            
-           int __block responseCode = 1;
-           [NSSearchPathForDirectoriesInDomains(NSPreferencePanesDirectory, NSAllDomainsMask, YES) enumerateObjectsUsingBlock:^(NSString *path, NSUInteger idx, BOOL *stop){
-               NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[Service class]] bundlePath] lastPathComponent]];
-               if ( [prefPane isEqualToMD5CString:argv[2]] && [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
-                   const char *prefPaneC = [prefPane UTF8String];
-                   const char *remove[] = { "rm", prefPaneC };
-                   responseCode = execCommand( 2, remove );
-                   *stop = YES;
-               }
-           }];
+        BOOL __block responseCode = NO;
+        const char __block *prefPaneC;
+        [NSSearchPathForDirectoriesInDomains(NSPreferencePanesDirectory, NSAllDomainsMask, YES) enumerateObjectsUsingBlock:^(NSString *path, NSUInteger idx, BOOL *stop){
+            NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[Service class]] bundlePath] lastPathComponent]];
+            if ( [prefPane isEqualToMD5CString:argv[2]] && [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
+                prefPaneC = [prefPane UTF8String];
+                *stop = responseCode = YES;
+            }
+        }];
 
-           return responseCode;
+        if ( responseCode ) {
+            const char *remove[] = { "rm", prefPaneC };
+            return execCommand( 2, remove );
+        }
+
+        return 4;
 
     } else if ( checkCommand( argv[1], SERVICE_ACTION_RUNAS ) ) {
 
@@ -98,7 +102,7 @@ int main(int argc, const char * argv[]) {
             return 6;
         }
 
-        NSString *applicationRoot = [[[[service program] stringByDeletingPathExtension] stringByDeletingPathExtension] stringByDeletingPathExtension];
+        NSString *applicationRoot = [[[[service program] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
         if ( [[applicationRoot pathComponents] count] < 2 || ![[NSFileManager defaultManager] fileExistsAtPath:applicationRoot] ) {
             CLog(@"Something is wrong with the path determined as application root: %s\n", [applicationRoot UTF8String]);
             return 7;
