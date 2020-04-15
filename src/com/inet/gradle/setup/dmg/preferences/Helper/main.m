@@ -23,7 +23,6 @@
 #include "Service.h"
 #include "Variables.h"
 
-#include "NSArray+ArrayHelper.h"
 #include "NSString+MD5.h"
 
 int execCommand(NSString *command, NSArray *arguments, int expectedStatus);
@@ -34,7 +33,7 @@ BOOL checkCommand( const char * arg, NSString* expectedCommand );
  */
 int main(int argc, const char * argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <run> [arguments...]\n", argv[0]);
+        fprintf(stderr, "Usage: %s <command> [arguments...]\n", argv[0]);
         return 1;
     }
 
@@ -120,5 +119,5 @@ int execCommand(NSString *command, NSArray *arguments, int expectedStatus) {
  Check if the given Argument is actually the command we'd like it to be
  */
 BOOL checkCommand( const char * arg, NSString* expectedCommand ) {
-    return !strcmp(arg, [expectedCommand UTF8String] );
+    return !strcmp(arg, [expectedCommand UTF8String] ); // strcmp returns 0 if it is equal
 }
