@@ -75,7 +75,7 @@ public class AppBundlerGradleTask extends AbstractTask {
     /**
      * Set the needed information for signing the setup.
      * 
-     * @param closue the data for signing
+     * @param closure the data for signing
      */
     public void codeSign( Closure<AppBundler> closure ) {
         ProjectInternal project = (ProjectInternal)getProject();
