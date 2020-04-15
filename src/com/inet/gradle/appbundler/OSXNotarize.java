@@ -11,8 +11,6 @@ import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
 
-import groovy.util.XmlSlurper;
-
 public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
     private String username, passwordPlain, passwordKeychainItem, passwordEnvironmentVariable;
