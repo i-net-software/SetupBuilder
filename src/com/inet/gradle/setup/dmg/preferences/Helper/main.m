@@ -71,17 +71,18 @@ int main(int argc, const char * argv[]) {
     } else if ( checkCommand( argv[1], SERVICE_ACTION_UNINSTALL_SOFTWARE ) ) {
            
         BOOL __block responseCode = NO;
-        const char __block *prefPaneC;
+        NSString __block *_prefPane;
         [NSSearchPathForDirectoriesInDomains(NSPreferencePanesDirectory, NSAllDomainsMask, YES) enumerateObjectsUsingBlock:^(NSString *path, NSUInteger idx, BOOL *stop){
             NSString *prefPane = [path stringByAppendingPathComponent:[[[NSBundle bundleForClass:[Service class]] bundlePath] lastPathComponent]];
             if ( [prefPane isEqualToMD5CString:argv[2]] && [[NSFileManager defaultManager] fileExistsAtPath:prefPane] ) {
-                prefPaneC = [prefPane UTF8String];
+                _prefPane = [NSString stringWithFormat:@"%@", prefPane];
                 *stop = responseCode = YES;
             }
         }];
 
         if ( responseCode ) {
-            const char *remove[] = { "rm", prefPaneC };
+            const char *prefPaneC = [_prefPane UTF8String];
+            const char *remove[] = { "/bin/rm", prefPaneC };
             return execCommand( 2, remove );
         }
 
