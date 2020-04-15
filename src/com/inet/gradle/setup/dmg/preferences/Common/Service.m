@@ -78,7 +78,6 @@
             return starter;
         }
     }
-    
     return nil;
 }
 
