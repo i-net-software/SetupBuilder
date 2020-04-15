@@ -21,8 +21,6 @@
 		303114CE1B6120950017C421 /* service.plist in Resources */ = {isa = PBXBuildFile; fileRef = 303114CD1B6120950017C421 /* service.plist */; };
 		306353702445BED2009C183B /* Variables.h in Headers */ = {isa = PBXBuildFile; fileRef = 3063536F2445BE8A009C183B /* Variables.h */; };
 		306353722445BEE2009C183B /* Variables.h in Headers */ = {isa = PBXBuildFile; fileRef = 3063536F2445BE8A009C183B /* Variables.h */; };
-		306353742445CDE0009C183B /* NSArray+ArrayHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 306353732445CDE0009C183B /* NSArray+ArrayHelper.h */; };
-		306353762445D487009C183B /* NSArray+ArrayHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 306353752445D487009C183B /* NSArray+ArrayHelper.m */; };
 		306353782445DE1B009C183B /* NSString+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = 306353772445DE1B009C183B /* NSString+MD5.m */; };
 		306353792445DE1B009C183B /* NSString+MD5.m in Sources */ = {isa = PBXBuildFile; fileRef = 306353772445DE1B009C183B /* NSString+MD5.m */; };
 		3066D9D61B60D49400729DB7 /* SetupBuilderOSXPrefPane.h in Headers */ = {isa = PBXBuildFile; fileRef = 3066D9D51B60D49400729DB7 /* SetupBuilderOSXPrefPane.h */; };
@@ -86,8 +84,6 @@
 		300AAE311B60E4C700953A78 /* ServiceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceController.m; sourceTree = "<group>"; };
 		303114CD1B6120950017C421 /* service.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = service.plist; sourceTree = "<group>"; };
 		3063536F2445BE8A009C183B /* Variables.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Variables.h; sourceTree = "<group>"; };
-		306353732445CDE0009C183B /* NSArray+ArrayHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSArray+ArrayHelper.h"; sourceTree = "<group>"; };
-		306353752445D487009C183B /* NSArray+ArrayHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+ArrayHelper.m"; sourceTree = "<group>"; };
 		306353772445DE1B009C183B /* NSString+MD5.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+MD5.m"; sourceTree = "<group>"; };
 		3063537A2445DE8B009C183B /* NSString+MD5.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+MD5.h"; sourceTree = "<group>"; };
 		3066D9D01B60D49400729DB7 /* SetupBuilderOSXPrefPane.prefPane */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SetupBuilderOSXPrefPane.prefPane; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -224,8 +220,6 @@
 			isa = PBXGroup;
 			children = (
 				3095D5B7243F19F400239605 /* main.m */,
-				306353732445CDE0009C183B /* NSArray+ArrayHelper.h */,
-				306353752445D487009C183B /* NSArray+ArrayHelper.m */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -250,7 +244,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				306353722445BEE2009C183B /* Variables.h in Headers */,
-				306353742445CDE0009C183B /* NSArray+ArrayHelper.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,7 +383,6 @@
 				30D0826B2444E47E00A0F089 /* Service.m in Sources */,
 				3095D5B8243F19F400239605 /* main.m in Sources */,
 				306353792445DE1B009C183B /* NSString+MD5.m in Sources */,
-				306353762445D487009C183B /* NSArray+ArrayHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
