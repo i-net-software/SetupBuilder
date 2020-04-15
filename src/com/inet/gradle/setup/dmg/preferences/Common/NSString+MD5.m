@@ -27,6 +27,7 @@
 
 - (BOOL) isEqualToMD5CString:(const char *)aString
 {
+    DLog(@"Checking if `%@` (%@) matches `%s`", self, [self md5], aString);
     return [[self md5] isEqualToString:[NSString stringWithCString:aString encoding:NSASCIIStringEncoding]];
 }
 
