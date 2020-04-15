@@ -120,6 +120,26 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
+     * Adds default commands for the xcrun process
+     * @param command the list of commands so far
+     */
+    private void addDefaultOptionsToXCRunCommand( ArrayList<String> command ) {
+        command.add( "-u" );
+        command.add( username );
+        command.add( "-p" );
+        command.add( getPasswordElement() );
+
+        if ( ascProvider != null ) {
+            command.add( "--asc-provider" );
+            command.add( ascProvider );
+        }
+
+        // Receive an XML answer
+        command.add( "--output-format" );
+        command.add( "xml" );
+    }
+
+    /**
      * Start the notarization process for the given file
      * @param notarizeFile the file to notarize
      * @return the UUID for the process to keep working with
@@ -134,24 +154,77 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( notarizeFile.getAbsolutePath() );
         command.add( "--primary-bundle-id" );
         command.add( notarizeFile.getName() );
-        command.add( "-u" );
-        command.add( username );
-        command.add( "-p" );
-        command.add( getPasswordElement() );
-
-        if ( ascProvider != null ) {
-            command.add( "--asc-provider" );
-            command.add( ascProvider );
-        }
-
-        // Receive an XML answer
-        command.add( "--output-format" );
-        command.add( "xml" );
-
+        addDefaultOptionsToXCRunCommand( command );
+        
         OutputStream output = new ByteArrayOutputStream();
         exec( command, null, output  );
         output.toString();
 
         return null;
+    }
+
+    /**
+     * Wait until the notarization process is done.
+     * @param UUID the ID of the task to check against
+     */
+    private void waitForNotarization( String UUID ) {
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "xcrun" );
+        command.add( "altool" );
+        command.add( "--notarize-info" );
+        command.add( UUID );
+        addDefaultOptionsToXCRunCommand( command );
+
+    }
+
+    /**
+     * Validate the original file against the Apple directory
+     * @param notarizeFile the file to notarize
+     * @return true if vaildation was OK
+     */
+    private boolean validateApplication( File notarizeFile ) {
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "xcrun" );
+        command.add( "altool" );
+        command.add( "--validate-app" );
+        command.add( "-f" );
+        command.add( notarizeFile.getAbsolutePath() );
+        addDefaultOptionsToXCRunCommand( command );
+
+        return false;
+    }
+
+    /**
+     * Staple the original file with the notarization result
+     * @param notarizeFile the file to staple
+     */
+    private void stapleApplication( File notarizeFile ) {
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "xcrun" );
+        command.add( "stapler" );
+        command.add( "staple" );
+        command.add( "-v" );
+        command.add( notarizeFile.getAbsolutePath() );
+        exec( command );
+    }
+
+    /**
+     * Staple the original file with the notarization result
+     * @param notarizeFile the file to staple
+     */
+    private boolean validateStapledApplication( File notarizeFile ) {
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "xcrun" );
+        command.add( "stapler" );
+        command.add( "validate" );
+        command.add( "-v" );
+        command.add( notarizeFile.getAbsolutePath() );
+        exec( command );
+
+        return false;
     }
 }
