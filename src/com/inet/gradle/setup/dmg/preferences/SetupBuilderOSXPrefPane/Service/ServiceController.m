@@ -139,7 +139,7 @@ NSArray *authenticationButtons;
             [self.process runHelperTaskList: @[ SERVICE_ACTION_RUNAS, [[Service actionFor:starter] md5] ] ];
         } else {
             DLog(@"Executing action: %@ as task", [Service actionFor:starter]);
-            [self.process runTaskAsync: [Service actionFor:starter]];
+            [self.process runTaskAsync: [Service actionFor:starter] from:[_service pathForService]];
         }
     }
 }

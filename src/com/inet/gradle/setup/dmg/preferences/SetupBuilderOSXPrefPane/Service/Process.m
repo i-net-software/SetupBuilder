@@ -35,7 +35,7 @@ NSTask *task = nil;
     return YES;
 }
 
-- (void) runTaskAsync:(NSString *)argument {
+- (void) runTaskAsync:(NSString *)argument from:(NSString *)workingDirectory {
 
     if ( task != nil ) {
         [task terminate];
@@ -44,6 +44,7 @@ NSTask *task = nil;
     NSPipe *output = [NSPipe pipe];
     task = [[NSTask alloc] init];
 
+    task.currentDirectoryPath = workingDirectory;
     task.launchPath = @"/bin/bash";
     task.arguments = @[@"-c", argument];
 
