@@ -119,6 +119,7 @@ public class Service extends Application {
 
     /**
      * Returns the path to write the daemon logs to.
+     * @return the path to write the daemon logs to.
      */
     public String getLogPath() {
         return logPath;
@@ -126,6 +127,7 @@ public class Service extends Application {
 
     /**
      * Sets the path to write the daemon logs to.
+     * @param logPath the path to write daemon logs to
      */
     public void setLogPath( String logPath ) {
         this.logPath = logPath;
@@ -133,6 +135,7 @@ public class Service extends Application {
 
     /**
      * Returns the daemon log file name prefix.
+     * @return the daemon log file name prefix.
      */
     public String getLogPrefix() {
         return logPrefix;
@@ -140,6 +143,7 @@ public class Service extends Application {
 
     /**
      * Sets the daemon log file name prefix.
+     * @param logPrefix the daemon log file name prefix.
      */
     public void setLogPrefix( String logPrefix ) {
         this.logPrefix = logPrefix;
@@ -147,6 +151,7 @@ public class Service extends Application {
 
     /**
      * Returns the daemon log level.
+     * @return the daemon log level.
      */
     public String getLogLevel() {
         return logLevel;
@@ -154,6 +159,7 @@ public class Service extends Application {
 
     /**
      * Sets the daemon log level.
+     * @param logLevel the daemon log level.
      */
     public void setLogLevel( String logLevel ) {
         this.logLevel = logLevel;
@@ -161,6 +167,7 @@ public class Service extends Application {
 
     /**
      * Returns the file name for storing the running process id. Actual file is created in the LogPath directory.
+     * @return the file name for storing the running process id. Actual file is created in the LogPath directory.
      */
     public String getPidFile() {
         return pidFile;
@@ -168,6 +175,7 @@ public class Service extends Application {
 
     /**
      * Sets the file name for storing the running process id. Actual file is created in the LogPath directory.
+     * @param pidFile the file name for storing the running process id. Actual file is created in the LogPath directory.
      */
     public void setPidFile( String pidFile ) {
         this.pidFile = pidFile;
@@ -176,6 +184,7 @@ public class Service extends Application {
     /**
      * Returns the redirected stderr filename. If named auto file is created in the LogPath directory with the name
      * {@code service-stderr.YEAR-MONTH-DAY.log}.
+     * @return the redirected stderr filename.
      */
     public String getStdError() {
         return stdError;
@@ -184,6 +193,7 @@ public class Service extends Application {
     /**
      * Sets the redirected stderr filename. If named auto file is created in the LogPath directory with the name
      * {@code service-stderr.YEAR-MONTH-DAY.log}.
+     * @param stdError the redirected stderr filename.
      */
     public void setStdError( String stdError ) {
         this.stdError = stdError;
@@ -192,6 +202,7 @@ public class Service extends Application {
     /**
      * Returns the redirected stdout filename. If named auto file is created inside LogPath with the name
      * {@code service-stdout.YEAR-MONTH-DAY.log}.
+     * @return the redirected stdout filename.
      */
     public String getStdOutput() {
         return stdOutput;
@@ -200,6 +211,7 @@ public class Service extends Application {
     /**
      * Sets the redirected stdout filename. If named auto file is created inside LogPath with the name
      * {@code service-stdout.YEAR-MONTH-DAY.log}.
+     * @param stdOutput the redirected stdout filename.
      */
     public void setStdOutput( String stdOutput ) {
         this.stdOutput = stdOutput;
@@ -208,6 +220,7 @@ public class Service extends Application {
     /**
      * Returns the directory added to the search path used to locate the DLLs for the JVM. This directory is added both
      * in front of the PATH environment variable and as a parameter to the SetDLLDirectory function.
+     * @return the directory added to the search path used to locate the DLLs for the JVM
      */
     public String getLibraryPath() {
         return libraryPath;
@@ -216,6 +229,7 @@ public class Service extends Application {
     /**
      * Sets the directory added to the search path used to locate the DLLs for the JVM. This directory is added both
      * in front of the PATH environment variable and as a parameter to the SetDLLDirectory function.
+     * @param libraryPath the directory added to the search path used to locate the DLLs for the JVM
      */
     public void setLibraryPath( String libraryPath ) {
         this.libraryPath = libraryPath;
@@ -223,6 +237,7 @@ public class Service extends Application {
 
     /**
      * Returns the JAVA_HOME used by the service.
+     * @return the JAVA_HOME used by the service.
      */
     public String getJavaHome() {
         return javaHome;
@@ -230,6 +245,7 @@ public class Service extends Application {
 
     /**
      * Sets a different JAVA_HOME than defined by JAVA_HOME environment variable.
+     * @param javaHome the JAVA_HOME used by the service.
      */
     public void setJavaHome( String javaHome ) {
         this.javaHome = javaHome;
@@ -237,8 +253,8 @@ public class Service extends Application {
 
     /**
      * Returns the configured jvm.
-     *
      * @see #setJvm(String)
+     * @return the configured jvm.
      */
     public String getJvm() {
         return jvm;
@@ -247,6 +263,7 @@ public class Service extends Application {
     /**
      * Set either {@code auto} (i.e. find the JVM from the Windows registry) or the full path to the jvm.dll.
      * Environment variable expansion can be used.
+     * @param jvm the jvm to configure.
      */
     public void setJvm( String jvm ) {
         this.jvm = jvm;
