@@ -33,7 +33,7 @@ BOOL checkCommand( const char * arg, NSString* expectedCommand );
  */
 int main(int argc, const char * argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <command> [arguments...]\n", argv[0]);
+        CLog(@"Usage: %s <command> [arguments...]\n", argv[0]);
         return 1;
     }
 
@@ -87,25 +87,25 @@ int main(int argc, const char * argv[]) {
 
         NSDictionary *starter = [service starterForHash:argv[2] ];
         if ( starter == nil ) {
-            fprintf(stderr, "Unknown run as user command with hash: %s\n", argv[2]);
+            CLog(@"Unknown run as user command with hash: %s\n", argv[2]);
             return 5;
         }
 
         NSString *asUser = [Service userFor:starter];
         const char *asUserC = [asUser UTF8String];
         if ( [@"root" isEqualToString:[asUser lowercaseString] ] ) {
-            fprintf(stderr, "Cowardly refusing to run command hash `%s` as the _root_ user\n", argv[2]);
+            CLog(@"Cowardly refusing to run command hash `%s` as the _root_ user\n", argv[2]);
             return 6;
         }
 
         NSString *applicationRoot = [[[[service program] stringByDeletingPathExtension] stringByDeletingPathExtension] stringByDeletingPathExtension];
         if ( [[applicationRoot pathComponents] count] < 2 || ![[NSFileManager defaultManager] fileExistsAtPath:applicationRoot] ) {
-            fprintf(stderr, "Something is wrong with the path determined as application root: %s\n", [applicationRoot UTF8String]);
+            CLog(@"Something is wrong with the path determined as application root: %s\n", [applicationRoot UTF8String]);
             return 7;
         }
         
         if ( ![[[NSBundle bundleForClass:[Service class]] bundlePath] hasPrefix:applicationRoot] ) {
-            fprintf(stderr, "The application root '%s' is not a parent path of the current preferences bundle!\n", [applicationRoot UTF8String]);
+            CLog(@"The application root '%s' is not a parent path of the current preferences bundle!\n", [applicationRoot UTF8String]);
             return 8;
         }
         
@@ -115,7 +115,7 @@ int main(int argc, const char * argv[]) {
         return execCommand( 9, sudoing );
 
     } else {
-        fprintf(stderr, "Unknown action: `%s`\n", argv[1]);
+        CLog(@"Unknown action: `%s`\n", argv[1]);
         return 1;
     }
 }

@@ -10,6 +10,13 @@
 #define Variables_h
 
 #define DLog(...) NSLog(@"%s %@", __PRETTY_FUNCTION__, [NSString stringWithFormat:__VA_ARGS__])
+
+//*
+#define CLog(...) DLog(__VA_ARGS__)
+/*/
+#define CLog(...) fprintf(stderr, "%s %s", __PRETTY_FUNCTION__, [[NSString stringWithFormat:__VA_ARGS__] UTF8String])
+//*/
+
 #define localized(name) NSLocalizedStringFromTableInBundle(name, @"Strings", [NSBundle bundleForClass:[self class]], NULL)
 
 // Helper binary name
