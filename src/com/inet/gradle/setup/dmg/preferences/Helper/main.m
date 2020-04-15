@@ -114,10 +114,9 @@ int main(int argc, const char * argv[]) {
             return 8;
         }
         
-        const char *workingDir = [[NSString stringWithFormat:@"PWD=%@", applicationRoot] UTF8String];
-        const char *action = [[Service actionFor:starter] UTF8String];
-        const char *sudoing[] = { "sudo", "-b","-u", asUserC, "-i", workingDir, "/bin/bash", "-c", action, NULL };
-        return execCommand( 9, sudoing );
+        const char *action = [[NSString stringWithFormat:@"cd \"%@\"; %@", applicationRoot, [Service actionFor:starter]] UTF8String];
+        const char *sudoing[] = { "sudo","-u", asUserC, "-b","/bin/bash", "-c", action, NULL };
+        return execCommand( 7, sudoing );
 
     } else {
         CLog(@"Unknown action: `%s`\n", argv[1]);
