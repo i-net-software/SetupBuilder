@@ -77,9 +77,9 @@ public class AppBundlerGradleTask extends AbstractTask {
      * 
      * @param closue the data for signing
      */
-    public void codeSign( Closure<AppBundler> closue ) {
+    public void codeSign( Closure<AppBundler> closure ) {
         ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closue, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, project.getFileResolver()) );
+        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, project.getFileResolver()) );
     }
 
     /**
