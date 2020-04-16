@@ -225,7 +225,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                             ArrayList<String> command = new ArrayList<>();
                             command.add( "xcrun" );
                             command.add( "altool" );
-                            command.add( "--notarize-info" );
+                            command.add( "--notarization-info" );
                             command.add( UUID );
                             addDefaultOptionsToXCRunCommand( command );
 
