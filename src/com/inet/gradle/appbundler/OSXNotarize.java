@@ -251,7 +251,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 synchronized( lock ) {
 
                     try {
-                        do {
+                        while( true ) {
+
                             ArrayList<String> command = new ArrayList<>();
                             command.add( "xcrun" );
                             command.add( "altool" );
@@ -264,37 +265,35 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                                 System.out.println( output );
                             }
 
-                            try {
-                                Map<String, Object> plist = Plist.fromXml( output );
-                                Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
-                                if( info == null ) {
-                                    throw new IllegalStateException( "There was no notarization information present." );
-                                }
-
-                                String status = (String)info.get( "Status" );
-                                if( status == null ) {
-                                    throw new IllegalStateException( "There was no Status present in the notarization information." );
-                                }
-
-                                if( status.equalsIgnoreCase( "success" ) ) {
-                                    // This is what we have been waiting for!
-                                    returnStatus[0] = true;
-                                    break;
-                                } else if( status.equalsIgnoreCase( "invalid" ) ) {
-                                    System.out.println( "The response status was 'invalid'. Please check the online logfile for problems:" );
-                                    System.out.println( info.get( "LogFileURL" ) );
-                                    break;
-                                }
-
-                                // Else continue;
-                                System.out.println( "Status was: '" + status + "'. Will wait a minute now." );
-                                Thread.sleep( 1000 * 60 );
-
-                            } catch( ClassCastException | XmlParseException | InterruptedException e ) {
-                                throw new IllegalArgumentException( e );
+                            Map<String, Object> plist = Plist.fromXml( output );
+                            Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
+                            if( info == null ) {
+                                throw new IllegalStateException( "There was no notarization information present." );
                             }
 
-                        } while( true );
+                            String status = (String)info.get( "Status" );
+                            if( status == null ) {
+                                throw new IllegalStateException( "There was no Status present in the notarization information." );
+                            }
+
+                            if( status.equalsIgnoreCase( "success" ) ) {
+                                // This is what we have been waiting for!
+                                returnStatus[0] = true;
+                                break;
+                            } else if( status.equalsIgnoreCase( "invalid" ) ) {
+                                System.out.println( "The response status was 'invalid'. Please check the online logfile for problems:" );
+                                System.out.println( info.get( "LogFileURL" ) );
+                                break;
+                            }
+
+                            // Else continue;
+                            System.out.println( "Status was: '" + status + "'. Will wait a minute now." );
+                            Thread.sleep( 1000 * 60 );
+
+                        }
+
+                    } catch( ClassCastException | XmlParseException | InterruptedException e ) {
+                        throw new IllegalArgumentException( e );
                     } finally {
                         lock.notifyAll();
                     }
