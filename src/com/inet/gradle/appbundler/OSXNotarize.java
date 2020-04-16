@@ -34,12 +34,13 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     public void run( File notarizeFile ) {
         System.out.println( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
 
+        codesign.unlockKeychain(); // Unlock the keychain before the action is run
         String UUID = requestNotarization( notarizeFile ); // This will hang and wait until the upload is done
         if ( UUID == null ) {
             throw new IllegalStateException( "The notarization process has returned with an unexpected error." );
         } 
 
-        // // This will hang and wait until notarization is done
+        // This will hang and wait until notarization is done
         if ( !waitForNotarization( UUID ) ) {
             throw new IllegalStateException( "The application was not notarized" );
         }
@@ -126,7 +127,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     private String getPasswordElement() {
         if ( passwordKeychainItem != null ) {
-            codesign.unlockKeychain(); // Unlock the keychain before the action is run
             return "@keychain:" + passwordKeychainItem;
         } else if ( passwordEnvironmentVariable != null ) {
             return "@env:" + passwordEnvironmentVariable;
@@ -246,6 +246,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                                     returnStatus[0] = true;
                                     break;
                                 } else if ( status.equalsIgnoreCase( "invalid" ) ) {
+                                    System.out.println( "The response status was 'invalid'. Please check the online logfile for problems:" );
+                                    System.out.println( info.get( "LogFileURL" ) );
                                     break;
                                 }
 
@@ -269,7 +271,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         thread.start();
         synchronized( lock ) {
             try {
-                thread.wait();
+                lock.wait();
             } catch ( InterruptedException e ) {
                 e.printStackTrace();
             }
