@@ -109,7 +109,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
      * @param parameters command line
      * @param input optional InputStream for the process
      * @param output optional OutputStream for the process
-     * @param ignoreExitValue true, does not throw an exception if the return code is not equals sero.
+     * @param ignoreExitValue true, does not throw an exception if the return code is not equals zero.
      */
     @SuppressWarnings( "resource" )
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, boolean ignoreExitValue ) {
