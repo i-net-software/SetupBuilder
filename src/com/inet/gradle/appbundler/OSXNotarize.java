@@ -20,6 +20,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     private String ascProvider;
 
+    private boolean debugOutput = false;
+
     private OSXCodeSign<T, S> codesign;
 
     public OSXNotarize( T task, FileResolver fileResolver, OSXCodeSign<T, S> codesign ) {
@@ -119,7 +121,23 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     public String getAscProvider() {
         return ascProvider;
     }
-    
+
+    /**
+     * Set the state of debugging. If true: will output the XMLContent from the tools
+     * @param debugOutput the state of debugging
+     */
+    public void setDebugOutput( boolean debugOutput ) {
+        this.debugOutput = debugOutput;
+    }
+
+    /**
+     * Returns the state of debugging. If true: will output the XMLContent from the tools
+     * @return the state of debugging. 
+     */
+    public boolean isDebugOutput() {
+        return debugOutput;
+    }
+
     /**
      * Returns the password item set for the current request.
      * It will throw an IllegalArgumentException if none of the fields
@@ -179,6 +197,9 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         addDefaultOptionsToXCRunCommand( command );
 
         String output = exec( command.toArray( new String[command.size()] ) );
+        if ( isDebugOutput() ) {
+            System.out.println( output );
+        }
 
         try {
             Map<String, Object> plist = Plist.fromXml( output );
@@ -230,6 +251,9 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                             addDefaultOptionsToXCRunCommand( command );
 
                             String output = exec( command.toArray( new String[command.size()] ) );
+                            if ( isDebugOutput() ) {
+                                System.out.println( output );
+                            }
 
                             try {
                                 Map<String, Object> plist = Plist.fromXml( output );
@@ -294,6 +318,10 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( "staple" );
         command.add( "-v" );
         command.add( notarizeFile.getAbsolutePath() );
-        exec( false, command.toArray( new String[command.size()] ) );
+
+        String output = exec( false, command.toArray( new String[command.size()] ) );
+        if ( isDebugOutput() ) {
+            System.out.println( output );
+        }
     }
 }
