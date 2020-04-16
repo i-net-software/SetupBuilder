@@ -38,7 +38,9 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         String UUID = requestNotarization( notarizeFile ); // This will hang and wait until the upload is done
         if ( UUID == null ) {
             throw new IllegalStateException( "The notarization process has returned with an unexpected error." );
-        } 
+        }
+
+        System.out.println( "The RequestUUID for notarization is: " + UUID );
 
         // This will hang and wait until notarization is done
         if ( !waitForNotarization( UUID ) ) {
@@ -261,7 +263,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
                         } while (true);
                     } finally {
-                        notify();
+                        lock.notifyAll();
                     }
                 }
             }
