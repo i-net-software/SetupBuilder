@@ -3,10 +3,17 @@ package com.inet.gradle.appbundler;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.gradle.api.internal.file.FileResolver;
 
+import com.inet.gradle.appbundler.utils.xmlwise.Plist;
+import com.inet.gradle.appbundler.utils.xmlwise.XmlParseException;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
@@ -14,10 +21,14 @@ import com.inet.gradle.setup.abstracts.AbstractTask;
 public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T,S> {
 
     private String username, passwordPlain, passwordKeychainItem, passwordEnvironmentVariable;
+
     private String ascProvider;
 
-    public OSXNotarize( T task, FileResolver fileResolver ) {
+    private OSXCodeSign<T, S> codesign;
+
+    public OSXNotarize( T task, FileResolver fileResolver, OSXCodeSign<T, S> codesign ) {
         super( task, fileResolver );
+        this.codesign = codesign;
     }
 
     /**
@@ -25,8 +36,21 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param notarizeFile the file to notarize
      * @param codesign the codesigning object for keychain interaction 
      */
-    public void run( File notarizeFile, OSXCodeSign<T, S> codesign ) {
+    public void run( File notarizeFile ) {
         System.out.println( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
+
+        String UUID = requestNotarization( notarizeFile ); // This will hang and wait until the upload is done
+        if ( UUID == null ) {
+            throw new IllegalStateException( "The notarization process has returned with an unexpected error." );
+        } 
+
+        // // This will hang and wait until notarization is done
+        if ( !waitForNotarization( UUID ) ) {
+            throw new IllegalStateException( "The application was not notarized" );
+        }
+
+        // Will throw if the exit value was not 0
+        stapleApplication( notarizeFile );
     }
 
     /**
@@ -107,6 +131,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     private String getPasswordElement() {
         if ( passwordKeychainItem != null ) {
+            codesign.unlockKeychain(); // Unlock the keychain before the action is run
             return "@keychain:" + passwordKeychainItem;
         } else if ( passwordEnvironmentVariable != null ) {
             return "@env:" + passwordEnvironmentVariable;
@@ -141,7 +166,9 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * Start the notarization process for the given file
      * @param notarizeFile the file to notarize
      * @return the UUID for the process to keep working with
+     * @throws XmlParseException in case the received plist xml file was erroneous
      */
+    @SuppressWarnings( "unchecked" )
     private String requestNotarization( File notarizeFile ) {
 
         ArrayList<String> command = new ArrayList<>();
@@ -153,10 +180,29 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( "--primary-bundle-id" );
         command.add( notarizeFile.getName() );
         addDefaultOptionsToXCRunCommand( command );
-        
-        OutputStream output = new ByteArrayOutputStream();
-        exec( command, null, output  );
-        output.toString();
+
+        String output = exec( command.toArray( new String[command.size()] ) );
+
+        try {
+            Map<String, Object> plist = Plist.fromXml( output );
+
+            // Check for product errors during upload
+            List<String> productErrors = (List<String>)plist.computeIfPresent( "product-errors", (String key, Object value) ->
+                ((List<Map<String,Object>>)value).stream().map( entry -> entry.get( "message" ) )
+                .collect( Collectors.toList() )
+            );
+            if ( productErrors != null && productErrors.size() > 0 ) {
+                throw new IllegalStateException( String.join( "\n", productErrors ) );
+            }
+
+            // Return the request UUID for later use
+            return (String)plist.computeIfPresent( "notarization-upload", (String key, Object value) ->
+                ((Map<String, String>)value).get( "RequestUUID" )
+            );
+
+        } catch( ClassCastException | XmlParseException e ) {
+            e.printStackTrace();
+        }
 
         return null;
     }
@@ -164,34 +210,78 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Wait until the notarization process is done.
      * @param UUID the ID of the task to check against
+     * @return 
      */
-    private void waitForNotarization( String UUID ) {
+    private boolean waitForNotarization( String UUID ) {
 
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "xcrun" );
-        command.add( "altool" );
-        command.add( "--notarize-info" );
-        command.add( UUID );
-        addDefaultOptionsToXCRunCommand( command );
+        Boolean returnStatus[] = { false };
+        Object lock = new Object();
+        Thread thread = new Thread( new Runnable() {
 
-    }
+            @Override
+            @SuppressWarnings( "unchecked" )
+            public void run() {
+                synchronized( lock ) {
 
-    /**
-     * Validate the original file against the Apple directory
-     * @param notarizeFile the file to notarize
-     * @return true if vaildation was OK
-     */
-    private boolean validateApplication( File notarizeFile ) {
+                    try {
+                        do {
+                            ArrayList<String> command = new ArrayList<>();
+                            command.add( "xcrun" );
+                            command.add( "altool" );
+                            command.add( "--notarize-info" );
+                            command.add( UUID );
+                            addDefaultOptionsToXCRunCommand( command );
 
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "xcrun" );
-        command.add( "altool" );
-        command.add( "--validate-app" );
-        command.add( "-f" );
-        command.add( notarizeFile.getAbsolutePath() );
-        addDefaultOptionsToXCRunCommand( command );
+                            String output = exec( command.toArray( new String[command.size()] ) );
 
-        return false;
+                            try {
+                                Map<String, Object> plist = Plist.fromXml( output );
+                                Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
+                                if ( info == null ) {
+                                    throw new IllegalStateException( "There was no notarization information present." );
+                                }
+
+                                String status = (String)info.get( "Status" );
+                                if ( status == null ) {
+                                    throw new IllegalStateException( "There was no Status present in the notarization information." );
+                                }
+
+                                if ( status.equalsIgnoreCase( "success" ) ) {
+                                    // This is what we have been waiting for!
+                                    returnStatus[0] = true;
+                                    break;
+                                } else if ( status.equalsIgnoreCase( "invalid" ) ) {
+                                    break;
+                                }
+
+                                // Else continue;
+                                System.out.println( "Status was: '" + status + "'. Will wait a minute now." );
+                                Thread.sleep( 1000 * 60 );
+
+                            } catch( ClassCastException | XmlParseException | InterruptedException e ) {
+                                throw new IllegalArgumentException( e );
+                            }
+
+                        } while (true);
+                    } finally {
+                        notify();
+                    }
+                }
+            }
+
+        } );
+
+        thread.start();
+        synchronized( lock ) {
+            try {
+                thread.wait();
+            } catch ( InterruptedException e ) {
+                e.printStackTrace();
+            }
+        }
+
+        // Done waiting for notarization
+        return returnStatus[0];
     }
 
     /**
@@ -199,30 +289,12 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param notarizeFile the file to staple
      */
     private void stapleApplication( File notarizeFile ) {
-
         ArrayList<String> command = new ArrayList<>();
         command.add( "xcrun" );
         command.add( "stapler" );
         command.add( "staple" );
         command.add( "-v" );
         command.add( notarizeFile.getAbsolutePath() );
-        exec( command );
-    }
-
-    /**
-     * Staple the original file with the notarization result
-     * @param notarizeFile the file to staple
-     */
-    private boolean validateStapledApplication( File notarizeFile ) {
-
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "xcrun" );
-        command.add( "stapler" );
-        command.add( "validate" );
-        command.add( "-v" );
-        command.add( notarizeFile.getAbsolutePath() );
-        exec( command );
-
-        return false;
+        exec( false, command.toArray( new String[command.size()] ) );
     }
 }

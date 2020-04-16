@@ -10,11 +10,9 @@ import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
-import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
-import com.inet.gradle.setup.dmg.Dmg;
 
 import groovy.lang.Closure;
 
@@ -168,7 +166,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      * Unlocks the keychain if the password is not null.
      * Will unlock the default login.keychain if no other is set.
      */
-    private void unlockKeychain() {
+    protected void unlockKeychain() {
         if ( getKeychainPassword() == null ) {
             return;
         }
@@ -328,7 +326,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
             return; // notarization not requested
         }
 
-        notarization.run( notarizeFile, this );
+        notarization.run( notarizeFile );
     }
 
     /**
@@ -337,7 +335,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     public void notarization( Closure<OSXNotarize<T, S>> closure ) {
         ProjectInternal project = (ProjectInternal)task.getProject();
-        this.notarization = ConfigureUtil.configure( closure, new OSXNotarize<T, S>(getTask(), project.getFileResolver()) );
+        this.notarization = ConfigureUtil.configure( closure, new OSXNotarize<T, S>(getTask(), project.getFileResolver(), this) );
     }
 
     /**
