@@ -34,7 +34,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Execute the notarization ion the given file
      * @param notarizeFile the file to notarize
-     * @param codesign the codesigning object for keychain interaction 
      */
     public void run( File notarizeFile ) {
         System.out.println( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
