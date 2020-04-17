@@ -239,6 +239,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param UUID the ID of the task to check against
      * @return true if the process was successful
      */
+    @SuppressWarnings( "unchecked" )
     private boolean waitForNotarization( String UUID ) {
 
         try {
