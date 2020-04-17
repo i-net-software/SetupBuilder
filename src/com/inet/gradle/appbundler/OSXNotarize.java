@@ -31,7 +31,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Execute the notarization ion the given file
-     * 
+     *
      * @param notarizeFile the file to notarize
      */
     public void run( File notarizeFile ) {
@@ -57,7 +57,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Returns the name of the environment variable that will be used to
      * retrieve the password used for notarization. PLEASE DO NOT USE.
-     * 
+     *
      * @return the name of the environment variable with the password
      */
     public String getPasswordEnvironmentVariable() {
@@ -67,7 +67,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Set the name of a keychain item that is going to be used for retrieving the password.
      * Note: The username in the item has to match the one given in this API
-     * 
+     *
      * @param passwordKeychainItem the name if the keychain item used for notarization
      */
     public void setPasswordKeychainItem( String passwordKeychainItem ) {
@@ -77,7 +77,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Set the name of an environment variable that should be used to
      * retrieve the password used for notarization. Please refrain from using this, use {@link OSXNotarize#setPasswordKeychainItem} instead
-     * 
+     *
      * @param passwordEnvironmentVariable the name of an environment variable with the password
      */
     public void setPasswordEnvironmentVariable( String passwordEnvironmentVariable ) {
@@ -87,7 +87,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Returns the name of the keychain item that will be used to retrieve the password.
      * NOTE: the username has to match!
-     * 
+     *
      * @return the name of the keychain item that will be used for retrieving the password
      */
     public String getPasswordKeychainItem() {
@@ -96,7 +96,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Set a plain password to be used for notarization. THIS IS DISCOURAGED
-     * 
+     *
      * @param passwordPlain the plain password to be used for notarization.
      */
     public void setPasswordPlain( String passwordPlain ) {
@@ -105,7 +105,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Returns the plain password used for notarization. PLEASE DO NOT USE!
-     * 
+     *
      * @return the plain password used for notarization.
      */
     public String getPasswordPlain() {
@@ -115,7 +115,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     /**
      * Set the ASC provider which is equired with --notarize-app and --notarization-history
      * when a user account is associated with multiple providers.
-     * 
+     *
      * @param ascProvider the ASC provider
      */
     public void setAscProvider( String ascProvider ) {
@@ -124,7 +124,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Returns the ASC provider
-     * 
+     *
      * @return the ASC provider
      */
     public String getAscProvider() {
@@ -133,7 +133,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Set the state of debugging. If true: will output the XMLContent from the tools
-     * 
+     *
      * @param debugOutput the state of debugging
      */
     public void setDebugOutput( boolean debugOutput ) {
@@ -142,7 +142,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Returns the state of debugging. If true: will output the XMLContent from the tools
-     * 
+     *
      * @return the state of debugging.
      */
     public boolean isDebugOutput() {
@@ -153,7 +153,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * Returns the password item set for the current request.
      * It will throw an IllegalArgumentException if none of the fields
      * for the password items have been set.
-     * 
+     *
      * @return the password item set for the current request.
      */
     private String getPasswordElement() {
@@ -170,7 +170,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Adds default commands for the xcrun process
-     * 
+     *
      * @param command the list of commands so far
      */
     private void addDefaultOptionsToXCRunCommand( ArrayList<String> command ) {
@@ -191,7 +191,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Start the notarization process for the given file
-     * 
+     *
      * @param notarizeFile the file to notarize
      * @return the UUID for the process to keep working with
      * @throws XmlParseException in case the received plist xml file was erroneous
@@ -235,89 +235,60 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Wait until the notarization process is done.
-     * 
+     *
      * @param UUID the ID of the task to check against
      * @return true if the process was successful
      */
     private boolean waitForNotarization( String UUID ) {
 
-        Boolean returnStatus[] = { false };
-        Object lock = new Object();
-        Thread thread = new Thread( new Runnable() {
+        try {
+            while( true ) {
 
-            @Override
-            @SuppressWarnings( "unchecked" )
-            public void run() {
-                synchronized( lock ) {
+                ArrayList<String> command = new ArrayList<>();
+                command.add( "xcrun" );
+                command.add( "altool" );
+                command.add( "--notarization-info" );
+                command.add( UUID );
+                addDefaultOptionsToXCRunCommand( command );
 
-                    try {
-                        while( true ) {
-
-                            ArrayList<String> command = new ArrayList<>();
-                            command.add( "xcrun" );
-                            command.add( "altool" );
-                            command.add( "--notarization-info" );
-                            command.add( UUID );
-                            addDefaultOptionsToXCRunCommand( command );
-
-                            String output = exec( command.toArray( new String[command.size()] ) );
-                            if( isDebugOutput() ) {
-                                System.out.println( output );
-                            }
-
-                            Map<String, Object> plist = Plist.fromXml( output );
-                            Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
-                            if( info == null ) {
-                                throw new IllegalStateException( "There was no notarization information present." );
-                            }
-
-                            String status = (String)info.get( "Status" );
-                            if( status == null ) {
-                                throw new IllegalStateException( "There was no Status present in the notarization information." );
-                            }
-
-                            if( status.equalsIgnoreCase( "success" ) ) {
-                                // This is what we have been waiting for!
-                                returnStatus[0] = true;
-                                break;
-                            } else if( status.equalsIgnoreCase( "invalid" ) ) {
-                                System.out.println( "The response status was 'invalid'. Please check the online logfile for problems:" );
-                                System.out.println( info.get( "LogFileURL" ) );
-                                break;
-                            }
-
-                            // Else continue;
-                            System.out.println( "Status was: '" + status + "'. Will wait a minute now." );
-                            Thread.sleep( 1000 * 60 );
-
-                        }
-
-                    } catch( ClassCastException | XmlParseException | InterruptedException e ) {
-                        throw new IllegalArgumentException( e );
-                    } finally {
-                        lock.notifyAll();
-                    }
+                String output = exec( command.toArray( new String[command.size()] ) );
+                if( isDebugOutput() ) {
+                    System.out.println( output );
                 }
+
+                Map<String, Object> plist = Plist.fromXml( output );
+                Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
+                if( info == null ) {
+                    throw new IllegalStateException( "There was no notarization information present." );
+                }
+
+                String status = (String)info.get( "Status" );
+                if( status == null ) {
+                    throw new IllegalStateException( "There was no Status present in the notarization information." );
+                }
+
+                if( status.equalsIgnoreCase( "success" ) ) {
+                    // This is what we have been waiting for!
+                    return true;
+                } else if( status.equalsIgnoreCase( "invalid" ) ) {
+                    System.out.println( "The response status was 'invalid'. Please check the online logfile for problems:" );
+                    System.out.println( info.get( "LogFileURL" ) );
+                    return false;
+                }
+
+                // Else continue;
+                System.out.println( "Status was: '" + status + "'. Will wait a minute now." );
+                Thread.sleep( 1000 * 60 );
             }
 
-        } );
-
-        thread.start();
-        synchronized( lock ) {
-            try {
-                lock.wait();
-            } catch( InterruptedException e ) {
-                e.printStackTrace();
-            }
+        } catch( ClassCastException | XmlParseException | InterruptedException e ) {
+            throw new IllegalArgumentException( e );
         }
-
-        // Done waiting for notarization
-        return returnStatus[0];
     }
 
     /**
      * Staple the original file with the notarization result
-     * 
+     *
      * @param notarizeFile the file to staple
      */
     private void stapleApplication( File notarizeFile ) {
