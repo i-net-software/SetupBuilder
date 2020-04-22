@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.gradle.api.internal.changedetection.state.IntegerValueSnapshot;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.appbundler.utils.xmlwise.Plist;
@@ -30,13 +31,15 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Execute the notarization ion the given file
+     * Execute the notarization on the given file
      *
      * @param notarizeFile the file to notarize
      */
     public void run( File notarizeFile ) {
         System.out.println( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
 
+        checkForRunningNotarizationProcess();
+        
         codesign.unlockKeychain(); // Unlock the keychain before the action is run
         String UUID = requestNotarization( notarizeFile ); // This will hang and wait until the upload is done
         if( UUID == null ) {
@@ -284,6 +287,40 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         } catch( ClassCastException | XmlParseException | InterruptedException e ) {
             throw new IllegalArgumentException( e );
+        }
+    }
+
+    /**
+     * This method checks for other processes running the notarization, since Apple
+     * does not allow multiple uploads simultaneously 
+     */
+    private void checkForRunningNotarizationProcess() {
+
+        while( true ) {
+
+            try {
+                ArrayList<String> command = new ArrayList<>();
+                command.add( "bash" );
+                command.add( "-c" );
+                command.add( "ps aux | grep notarize-app | grep -v grep | wc -l" );
+    
+                String output = exec( command.toArray( new String[command.size()] ) );
+                if ( debugOutput ) {
+                    System.out.println( "Response: `" + output + "`" );
+                }
+
+                Integer lineCount = new Integer( output );
+                if ( lineCount == 0 ) {
+                    return; // Done
+                }
+    
+                // Else continue;
+                System.out.println( "There was another process notarizing. Will wait a minute now." );
+                Thread.sleep( 1000 * 60 );
+
+            } catch( NumberFormatException | InterruptedException e ) {
+                return; // Done
+            }
         }
     }
 
