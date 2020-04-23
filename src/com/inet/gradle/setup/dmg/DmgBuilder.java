@@ -450,6 +450,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         command.add( tempPath.get() );
 
         exec( command );
+        try {
+            Thread.sleep( 3000 );
+        } catch( InterruptedException e ) {
+        } // Waiting 2 seconds now
     }
 
     /**
