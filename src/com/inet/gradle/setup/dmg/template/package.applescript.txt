@@ -36,3 +36,4 @@ end tell
 tell application "Finder"
     close infoWindow
 end tell
+# Leave newLine at the end 

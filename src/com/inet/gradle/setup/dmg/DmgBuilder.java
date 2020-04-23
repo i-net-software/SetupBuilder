@@ -17,6 +17,7 @@ package com.inet.gradle.setup.dmg;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -434,6 +435,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      * @throws IOException in case of errors
      */
     private void attach() throws IOException {
+
+        // Try to eject all images of the same name before we start with our script
+        exec ( true, "/usr/bin/osascript", "-e", "tell application \"Finder\" to eject \"" + setup.getApplication() + "\"" );
+
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/hdiutil" );
         command.add( "attach" );

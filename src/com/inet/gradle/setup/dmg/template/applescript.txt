@@ -11,7 +11,11 @@ try
         set iconSize to {{iconSize}}
 
         tell disk "{{displayName}}"
+
+            log "Starting to set options of the DiskImage {{displayName}}"
+
             open
+
             set current view of container window to icon view
             set toolbar visible of container window to false
             set statusbar visible of container window to false
@@ -23,8 +27,11 @@ try
             set arrangement of theViewOptions to not arranged
 
             set icon size of theViewOptions to iconSize
+
             try
                 set text size of theViewOptions to {{fontSize}}
+            on error errText
+                log "Error setting 'theViewOptions' with error (will continue): " & errText
             end try
 
             set ourXPos to (windowWidth - 2.0 * iconSize) / 3.0 + iconSize / 3.0
@@ -35,19 +42,27 @@ try
                 set position of item "{{executable}}.app" of container window to {ourXPos, yPos}
                 make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
                 set position of item "Applications" of container window to {appXPos, yPos}
+            on error errText
+                log "Error setting 'Applications Link' with error (will continue): " & errText
             end try
 
             try
                 set ourXPos to windowWidth / 2.0
                 set position of item "{{executable}}.pkg" of container window to {ourXPos, yPos}
+            on error errText
+                log "Error setting 'executable postion' with error (will continue): " & errText
             end try
 
             try
                 set background color of theViewOptions to {{backgroundColor}}
+            on error errText
+                log "Error setting 'background color' with error (will continue): " & errText
             end try
 
             try
                 set background picture of theViewOptions to file ".resources:background{{backgroundExt}}"
+            on error errText
+                log "Error setting 'background picture' with error (will continue): " & errText
             end try
 
             update without registering applications
@@ -57,6 +72,9 @@ try
             open
 
             close
+
+            log "Done with the DiskImage {{displayName}}"
         end tell
     end tell
 end try
+# Leave newLine at the end 
