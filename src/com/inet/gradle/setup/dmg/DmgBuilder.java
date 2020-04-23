@@ -41,7 +41,6 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
-import com.inet.gradle.setup.util.Logging;
 import com.inet.gradle.setup.util.TempPath;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
@@ -343,15 +342,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         Element title = xmlFile.getOrCreateChild( distribution, "title" );
         xmlFile.addNodeText( title, setup.getApplication() );
 
-        // Product node
-        File backgroundImage = task.getSetupBackgroundImage();
-        if( backgroundImage != null ) {
-            Files.copy( backgroundImage.toPath(), tempPath.getTempFile( "resources", backgroundImage.getName() ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            Element background = xmlFile.getOrCreateChild( distribution, "background", false );
-            xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
-            xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
-            xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
-        }
+        // Background Image node
+        setBackgroundImage( distribution, xmlFile, false, task.getSetupBackgroundImage() );
+        setBackgroundImage( distribution, xmlFile, true, task.getSetupDarkBackgroundImage() );
 
         // Welcome Node
         List<LocalizedResource> welcomePages = task.getWelcomePages();
@@ -388,6 +381,24 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         xmlFile.save();
     }
 
+    /**
+     * Set a background image for the package installer
+     * @param distribution the root element
+     * @param xmlFile the current xml file builder
+     * @param isDark true, if this is the dark mode
+     * @param backgroundImage the image to set 
+     * @throws IOException in case the File operation failed
+     */
+    private void setBackgroundImage(Element distribution, XmlFileBuilder<?> xmlFile, boolean isDark, File backgroundImage) throws IOException {
+        if( backgroundImage != null ) {
+            Files.copy( backgroundImage.toPath(), tempPath.getTempFile( "resources", backgroundImage.getName() ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+            Element background = xmlFile.getOrCreateChild( distribution, "background-darkAqua", false );
+            xmlFile.addAttributeIfNotExists( background, "file", backgroundImage.getName() );
+            xmlFile.addAttributeIfNotExists( background, "alignment", "left" );
+            xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
+        }
+    }
+    
     /**
      * Check a file for the correct setup text-resource type
      *

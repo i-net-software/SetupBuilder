@@ -40,7 +40,7 @@ import groovy.lang.Closure;
  */
 public class Dmg extends AbstractUnixSetupTask {
 
-    private Object                         backgroundImage, setupBackground, setupIcon;
+    private Object                         backgroundImage, setupDarkBackground, setupBackground, setupIcon;
 
     private Integer                        windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
 
@@ -323,6 +323,25 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public void setSetupBackgroundImage( Object setupBackground ) {
         this.setupBackground = setupBackground;
+    }
+
+    /**
+     * Returns a dark background image for the package installer
+     * @return a dark background image for the package installer
+     */
+    public File getSetupDarkBackgroundImage() {
+        if( setupDarkBackground != null ) {
+            return getProject().file( setupDarkBackground );
+        }
+        return null;
+    }
+    
+    /**
+     * Set the dark background image for the package installer 
+     * @param setupDarkBackground
+     */
+    public void setSetupDarkBackgroundImage( Object setupDarkBackground ) {
+        this.setupDarkBackground = setupDarkBackground;
     }
 
     /**
