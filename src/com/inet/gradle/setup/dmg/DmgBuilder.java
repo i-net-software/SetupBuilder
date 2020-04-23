@@ -520,9 +520,13 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
 
-        Logging.sysout( "Setting DMG display options." );
-        Logging.sysout( applescript.toString() );
-        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
+        task.getProject().getLogger().lifecycle( "\tSetting DMG display options." );
+        task.getProject().getLogger().debug( applescript.toString() );
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), baos, true );
+        task.getProject().getLogger().lifecycle( "\tDone Setting DMG display options. Ignoring errors if there were any" );
+        task.getProject().getLogger().lifecycle( "\t" + baos.toString() );
     }
 
     /**
@@ -539,9 +543,13 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "/usr/bin/osascript" );
 
-        Logging.sysout( "Setting display options for package." );
-        Logging.sysout( applescript.toString() );
-        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), null, true );
+        task.getProject().getLogger().lifecycle( "\tSetting display options for package." );
+        task.getProject().getLogger().debug( applescript.toString() );
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), baos, true );
+        task.getProject().getLogger().lifecycle( "\tDone Setting DMG display options for package. Ignoring errors if there were any" );
+        task.getProject().getLogger().lifecycle( "\t" + baos.toString() );
     }
 
     /**

@@ -78,7 +78,7 @@ public class AbstractSetupBuilder implements SetupSources {
 
         //init default location
         setDestinationDir( new File( "distributions" ) );
-        Logging.sysout( "setting default Destination to: " + getDestinationDir() );
+        project.getLogger().lifecycle( "setting default Destination to: " + getDestinationDir() );
     }
 
     @Override

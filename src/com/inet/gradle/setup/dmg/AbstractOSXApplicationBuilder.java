@@ -78,7 +78,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
 
         String appName = application.getDisplayName();
 
-        Logging.sysout( "BuildDir now: " + buildDir );
+        task.getProject().getLogger().lifecycle( "\tBuildDir now: " + buildDir );
         appBundler.setOutputDirectory( buildDir );
         appBundler.setName( appName );
         appBundler.setDisplayName( appName );

@@ -98,7 +98,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
 
         //        Files.move( new File( prefPaneContents, "MacOS/" + internalName ).toPath(), new File( prefPaneContents, "MacOS/" + displayName ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         // Files.move( new File( prefPaneContents, "Resources/" + internalName + ".app" ).toPath(), prefPaneHelper.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        Logging.sysout( "Unpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
+        task.getProject().getLogger().lifecycle( "\tUnpacked the Preference Pane to: " + prefPaneContents.getAbsolutePath() );
 
         // Make applet binary executable
         // setApplicationFilePermissions( new File( prefPaneHelper, "Contents/MacOS/applet" ) );

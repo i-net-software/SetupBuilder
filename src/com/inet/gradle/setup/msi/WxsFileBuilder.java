@@ -368,7 +368,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         String id = addFile( component, file, segments, isAddFiles );
 
         // Debug Output of files that will be added
-        task.getProject().getLogger().debug( "adding file: '" +file.toString() + "' '" + name + "' '" + id + "' '" + pathID + "' '" + compID + "' '" + String.join( "%", segments ) + "'" );
+        task.getProject().getLogger().debug( "\t\tadding file: '" +file.toString() + "' '" + name + "' '" + id + "' '" + pathID + "' '" + compID + "' '" + String.join( "%", segments ) + "'" );
 
         // save the jvm.dll position
         if( name.equals( "jvm.dll" ) ) {
