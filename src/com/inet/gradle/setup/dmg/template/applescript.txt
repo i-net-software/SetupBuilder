@@ -1,6 +1,6 @@
 try
     tell application "Finder"
-
+        
         #Prepare centering on screen
         set screenSize to bounds of window of desktop
         set screenWidth to item 3 of screenSize
@@ -12,7 +12,7 @@ try
 
         tell disk "{{displayName}}"
 
-            log "Starting to set options of the DiskImage {{displayName}}"
+            log "## Starting to set options of the DiskImage {{displayName}}"
 
             open
 
@@ -73,7 +73,7 @@ try
 
             close
 
-            log "Done with the DiskImage {{displayName}}"
+            log "## Done with the DiskImage {{displayName}}"
         end tell
     end tell
 end try
