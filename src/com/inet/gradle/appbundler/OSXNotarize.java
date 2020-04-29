@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.gradle.api.internal.changedetection.state.IntegerValueSnapshot;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.appbundler.utils.xmlwise.Plist;
