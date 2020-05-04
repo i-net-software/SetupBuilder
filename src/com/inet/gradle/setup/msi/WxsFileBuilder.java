@@ -482,7 +482,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param jre the jre string to match
      * @return returns a list of matching jre folders
      */
-    private static List<File> getMatchingJREs(File parent, String jre) {
+    private List<File> getMatchingJREs(File parent, String jre) {
     	// Always remove "1." from the version number. It is optionally included in the pattern below
         if (jre.length() > 2 && jre.startsWith( "1." )) {
         	jre = jre.substring(2);
@@ -499,12 +499,13 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      * @param jreDir the jre directory that is being checked for validity
      * @return returns true if there is a valid jre here
      */
-    private static boolean isValidJRE( File jreDir ) {
+    private boolean isValidJRE( File jreDir ) {
         if( !jreDir.isDirectory() ) {
             return false;
         }
         if( jreDir.getName().startsWith( "jdk" ) && !new File( jreDir, "jre" ).isDirectory() ) {
             //starting with java 11, the jdk no longer has a subdirectory "jre"
+            task.getProject().getLogger().lifecycle( "JDK without JRE is skipped: " + jreDir + "\tIf you want embedded this JDK you must set the path directly." );
             return false;
         }
         return true;
