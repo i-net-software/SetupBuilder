@@ -489,9 +489,25 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         }
         Pattern jreMatcher = Pattern.compile("\\Aj(re|dk)-?(1\\.)?"+Pattern.quote(jre));
         List<File> versions = Arrays.asList(
-        	parent.listFiles(file->file.isDirectory() && jreMatcher.matcher(file.getName()).find())
+        	parent.listFiles(file->jreMatcher.matcher(file.getName()).find() && isValidJRE(file))
         );
         return versions;
+    }
+
+    /**
+     * Checks if a specific directory is valid as a jre.  if it's a jdk, make sure a jre exists.
+     * @param jreDir the jre directory that is being checked for validity
+     * @return returns true if there is a valid jre here
+     */
+    private static boolean isValidJRE( File jreDir ) {
+        if( !jreDir.isDirectory() ) {
+            return false;
+        }
+        if( jreDir.getName().startsWith( "jdk" ) && !new File( jreDir, "jre" ).isDirectory() ) {
+            //starting with java 11, the jdk no longer has a subdirectory "jre"
+            return false;
+        }
+        return true;
     }
 
     /**
