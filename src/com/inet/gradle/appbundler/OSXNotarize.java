@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.internal.impldep.aQute.lib.strings.Strings;
 
 import com.inet.gradle.appbundler.utils.xmlwise.Plist;
 import com.inet.gradle.appbundler.utils.xmlwise.XmlParseException;
@@ -49,7 +50,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         // This will hang and wait until notarization is done
         if( !waitForNotarization( UUID ) ) {
-            throw new IllegalStateException( "The application was not notarized" );
+            throw new IllegalStateException( "The application was not notarized." );
         }
 
         // Will throw if the exit value was not 0
@@ -166,7 +167,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         } else if( passwordPlain != null ) {
             return passwordPlain;
         } else {
-            throw new IllegalArgumentException( "At least on of the parameters have to be set: passwordKeychainItem, passwordEnvironmentVariable or passwordPlain" );
+            throw new IllegalArgumentException( "At least on of the parameters has to be set: passwordKeychainItem, passwordEnvironmentVariable or passwordPlain" );
         }
     }
 
@@ -236,6 +237,20 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
+     * Wait for a minute. Will print the status if given
+     * @param status the status to print
+     * @throws InterruptedException in case the thread was interrupted
+     */
+    private void waitWithStatus( String status ) throws InterruptedException {
+        if ( status != null ) {
+            System.out.println( "Status was: '" + status + "'." );
+        }
+
+        System.out.println( "Will wait a minute now." );
+        Thread.sleep( 1000 * 60 );
+    }
+
+    /**
      * Wait until the notarization process is done.
      *
      * @param UUID the ID of the task to check against
@@ -244,8 +259,11 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     @SuppressWarnings( "unchecked" )
     private boolean waitForNotarization( String UUID ) {
 
+        int acceptedFailureCount = 5;
+        List<String> lastErrors = new ArrayList<>();
+
         try {
-            while( true ) {
+            while( true && acceptedFailureCount > 0 ) {
 
                 ArrayList<String> command = new ArrayList<>();
                 command.add( "xcrun" );
@@ -262,12 +280,18 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 Map<String, Object> plist = Plist.fromXml( output );
                 Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
                 if( info == null ) {
-                    throw new IllegalStateException( "There was no notarization information present." );
+                    acceptedFailureCount--;
+                    lastErrors.add( "There was no notarization information present. Was I too fast?" );
+                    waitWithStatus( null );
+                    continue;
                 }
 
                 String status = (String)info.get( "Status" );
                 if( status == null ) {
-                    throw new IllegalStateException( "There was no Status present in the notarization information." );
+                    acceptedFailureCount--;
+                    lastErrors.add( "There was no Status present in the notarization information.\n\n" + output );
+                    waitWithStatus( null );
+                    continue;
                 }
 
                 if( status.equalsIgnoreCase( "success" ) ) {
@@ -279,14 +303,13 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                     return false;
                 }
 
-                // Else continue;
-                System.out.println( "Status was: '" + status + "'. Will wait a minute now." );
-                Thread.sleep( 1000 * 60 );
+                waitWithStatus( status );
             }
-
         } catch( ClassCastException | XmlParseException | InterruptedException e ) {
             throw new IllegalArgumentException( e );
         }
+
+        throw new IllegalArgumentException( Strings.join( "\n", lastErrors ) );
     }
 
     /**
