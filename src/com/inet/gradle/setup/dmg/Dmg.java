@@ -318,7 +318,6 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set the background image for the setup
-     *
      * @param setupBackground to set
      */
     public void setSetupBackgroundImage( Object setupBackground ) {
@@ -338,13 +337,14 @@ public class Dmg extends AbstractUnixSetupTask {
     
     /**
      * Set the dark background image for the package installer 
-     * @param setupDarkBackground
+     * @param setupDarkBackground to set
      */
     public void setSetupDarkBackgroundImage( Object setupDarkBackground ) {
         this.setupDarkBackground = setupDarkBackground;
     }
 
     /**
+     * Returns the setup icon
      * @return the setupIcon
      */
     public Object getSetupIcon() {
@@ -355,6 +355,7 @@ public class Dmg extends AbstractUnixSetupTask {
     }
 
     /**
+     * Set up the setup icon
      * @param setupIcon the setupIcon to set
      */
     public void setSetupIcon( Object setupIcon ) {
@@ -363,7 +364,6 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return the list of preferences links
-     *
      * @return preferences links
      */
     public List<PreferencesLink> getPreferencesLinks() {
@@ -372,7 +372,6 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set a preferences link
-     *
      * @param link the link
      */
     public void preferencesLink( Object link ) {
