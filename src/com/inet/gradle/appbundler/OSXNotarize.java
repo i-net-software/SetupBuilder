@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.internal.impldep.aQute.lib.strings.Strings;
 
 import com.inet.gradle.appbundler.utils.xmlwise.Plist;
 import com.inet.gradle.appbundler.utils.xmlwise.XmlParseException;
@@ -309,7 +308,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
             throw new IllegalArgumentException( e );
         }
 
-        throw new IllegalArgumentException( Strings.join( "\n", lastErrors ) );
+        throw new IllegalArgumentException( String.join( "\n", lastErrors ) );
     }
 
     /**
