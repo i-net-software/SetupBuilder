@@ -21,7 +21,8 @@ Const ForWriting = 2
 Const TristateTrue = -1
 
 ' Check arg count, and display help if argument not present or contains ?
-Dim argCount:argCount = Wscript.Arguments.Count
+Dim argCount
+argCount = Wscript.Arguments.Count
 If argCount > 0 Then If InStr(1, Wscript.Arguments(0), "?", vbTextCompare) > 0 Then argCount = 0
 If (argCount = 0) Then
 	Wscript.Echo "Windows Installer database substorage managment utility" &_
