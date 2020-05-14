@@ -67,7 +67,9 @@ public class Msi extends AbstractSetupTask {
 
     private List<MsiLocalizedResource> i18n               = new ArrayList<>();
 
-    private List<File>               externals = new ArrayList<>();
+    private List<File>                 externals = new ArrayList<>();
+
+    private boolean                    skipValidation = false;
 
     /**
      * Create a new instance.
@@ -513,5 +515,21 @@ public class Msi extends AbstractSetupTask {
      */
     public List<File> getExternals() {
         return externals;
+    }
+
+    /**
+     * Returns if the skipValidation is requested
+     * @return the skipValidation
+     */
+    public boolean isSkipValidation() {
+        return skipValidation;
+    }
+
+    /**
+     * Set that the skipValidation is requested
+     * @param skipValidation the skipValidation to set
+     */
+    public void setSkipValidation( boolean skipValidation ) {
+        this.skipValidation = skipValidation;
     }
 }

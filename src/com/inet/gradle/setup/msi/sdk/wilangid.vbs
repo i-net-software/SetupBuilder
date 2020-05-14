@@ -17,7 +17,8 @@ Const msiViewModifyAssign         = 3
 Const msiViewModifyReplace        = 4
 Const msiViewModifyDelete         = 6
 
-Dim argCount:argCount = Wscript.Arguments.Count
+Dim argCount
+argCount = Wscript.Arguments.Count
 If argCount > 0 Then If InStr(1, Wscript.Arguments(0), "?", vbTextCompare) > 0 Then argCount = 0
 If (argCount = 0) Then
 	message = "Windows Installer utility to manage language and codepage values for a package." &_

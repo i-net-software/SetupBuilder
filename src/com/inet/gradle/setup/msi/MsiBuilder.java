@@ -221,6 +221,11 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
             parameters.add( "-dWixUILicenseRtf=\"" + localizedRtfFile.getAbsolutePath() + "\"" );
         }
 
+        // Check if we should skip msi validation
+        if ( task.isSkipValidation() ) {
+            parameters.add( "-sval" );
+        }
+
         parameters.add( "*.wixobj" );
         callWixTool( "light.exe", parameters );
         return out;
