@@ -135,8 +135,11 @@ NSArray *authenticationButtons;
 
         // Sending action
         if ( [Service runAsRoot:starter] ) {
-            DLog(@"Executing action with title '%@' as service user", title);
-            [self.process runHelperTaskList: @[ SERVICE_ACTION_RUNAS, [[Service actionFor:starter] md5] ] ];
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{
+                DLog(@"Executing action with title '%@' as service user", title);
+                [self.process runHelperTaskList: @[ SERVICE_ACTION_RUNAS, [[Service actionFor:starter] md5] ] ];
+            });
         } else {
             DLog(@"Executing action: '%@' as task", [Service actionFor:starter]);
             [self.process runTaskAsync: [Service actionFor:starter] from:[self currentBundlePath]];
