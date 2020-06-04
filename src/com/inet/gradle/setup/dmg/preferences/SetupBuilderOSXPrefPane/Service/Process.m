@@ -54,11 +54,19 @@ NSTask *task = nil;
         const char *result = [[output.fileHandleForReading readDataToEndOfFile] bytes];
         DLog(@"Result of `%@` was %@", argument, result!=NULL?[NSString stringWithUTF8String:result]:@"NULL");
         task = nil;
-        
     }];
-    
+
     // Fire and forget
-    [task launch];
+    DLog(@"Launching '%@' in '%@'", argument, workingDirectory);
+    if (@available(macOS 10.13, *)) {
+        NSError *error = nil;
+        if ( ![task launchAndReturnError: &error] ) {
+            DLog(@"Error code was: '%ld'", (long)error.code);
+        }
+    } else {
+        [task launch];
+    }
+    DLog(@"Done Launching");
 }
 
 typedef struct kinfo_proc kinfo_proc;
