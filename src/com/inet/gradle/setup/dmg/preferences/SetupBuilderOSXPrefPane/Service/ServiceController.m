@@ -135,8 +135,8 @@ NSArray *authenticationButtons;
 
         // Sending action
         if ( [Service runAsRoot:starter] ) {
-            static dispatch_once_t onceToken;
-            dispatch_once(&onceToken, ^{
+            dispatch_queue_t getPeopleQueue = dispatch_queue_create("Authenticated Command Dispatch Queue", NULL);
+            dispatch_async(getPeopleQueue, ^{
                 DLog(@"Executing action with title '%@' as service user", title);
                 [self.process runHelperTaskList: @[ SERVICE_ACTION_RUNAS, [[Service actionFor:starter] md5] ] ];
             });
