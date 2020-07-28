@@ -48,6 +48,8 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private String                         applicationIdentifier;
 
+    private boolean                        aquaSystemAppearanceRequired = false;
+    
     private OSXCodeSign<Dmg, SetupBuilder> codeSign;
 
     private List<LocalizedResource>        welcomePages    = new ArrayList<>();
@@ -457,5 +459,21 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public void setApplicationIdentifier( String applicationIdentifier ) {
         this.applicationIdentifier = applicationIdentifier;
+    }
+
+    /**
+     * Returns true, if the application requires the aqua system appearance. False by default
+     * @return true, if the application requires the aqua system appearance.
+     */
+    public boolean isAquaSystemAppearanceRequired() {
+        return aquaSystemAppearanceRequired;
+    }
+
+    /**
+     * Define, that the application requires the system appearance. False by default
+     * @param aquaSystemAppearanceRequired true, if the system appearance is required.
+     */
+    public void setAquaSystemAppearanceRequired( boolean aquaSystemAppearanceRequired ) {
+        this.aquaSystemAppearanceRequired = aquaSystemAppearanceRequired;
     }
 }

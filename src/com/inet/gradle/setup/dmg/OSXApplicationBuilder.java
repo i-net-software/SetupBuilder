@@ -7,6 +7,7 @@ import org.gradle.api.internal.file.FileResolver;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 import com.inet.gradle.setup.abstracts.Service;
+import com.oracle.appbundler.PlistEntry;
 
 /**
  * Build an OSX Application - service
@@ -96,6 +97,12 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         for( String scheme: application.getSchemes() ) {
             addScheme( scheme );
         }
+
+
+        PlistEntry requiresAquaSystemAppearance = new PlistEntry();
+        requiresAquaSystemAppearance.setKey( "NSRequiresAquaSystemAppearance" );
+        requiresAquaSystemAppearance.setValue( new Boolean( task.isAquaSystemAppearanceRequired() ).toString() );
+        getAppBundler().addConfiguredPlistEntry( requiresAquaSystemAppearance );
 
         finishApplication();
         copyBundleFiles( application );
