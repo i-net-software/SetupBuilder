@@ -11,7 +11,7 @@ group = 'de.inetsoftware'
 version = '1.9'
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
