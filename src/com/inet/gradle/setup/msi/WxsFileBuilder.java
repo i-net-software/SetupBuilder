@@ -983,25 +983,28 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                         String iconID = addFile( iconFile, new String[] { iconFile.getName() } );
                         addAttributeIfNotExists( progID, "Icon", iconID );
                     }
-                    Element extension = getOrCreateChildById( progID, "Extension", fileExtension );
-                    addAttributeIfNotExists( extension, "ContentType", docType.getMimetype() );
-                    Element verb = getOrCreateChildById( extension, "Verb", "open" );
                     Element reg = addRegistryKey( component, "HKCR", id(pID + "\\shell\\open"), pID + "\\shell\\open" );
                     addRegistryValue( reg, "FriendlyAppName", "string", setup.getApplication() );
-                    String targetFile = cmd.relativTarget;
-                    if( targetFile.startsWith( "[INSTALLDIR]" ) ) {
-                        targetFile = targetFile.substring( "[INSTALLDIR]".length() ); // for the id we need to cut the [INSTALLDIR]. For java command there is ever a directory
-                    }
-                    String[] segments = segments( targetFile );
-                    addAttributeIfNotExists( verb, "TargetFile", id( segments, segments.length ) );
 
                     // add the file parameter if not in the command already
                     String arguments = cmd.arguments;
                     if ( !arguments.contains( "%1" ) ) {
                         arguments += " \"%1\"";
                     }
-
-                    addAttributeIfNotExists( verb, "Argument", arguments );
+                    
+                    // registering the file extensions the old way will overwrite the default, which we don't want to do.
+                    // so we must do it all on our own
+                    Element reg_command = addRegistryKey( component, "HKCR", id(pID + "\\shell\\open\\command"), pID + "\\shell\\open\\command" );
+                    addRegistryValue( reg_command, null, "string", "[INSTALLDIR]runtime\\bin\\javaw.exe " + arguments );
+                    Element regkey = getOrCreateChildById( component, "RegistryKey", id(fileExtension + "\\OpenWithProgids") );
+                    addAttributeIfNotExists( regkey, "Root", "HKCR" );
+                    addAttributeIfNotExists( regkey, "Key", "." + fileExtension + "\\OpenWithProgids" );
+                    addAttributeIfNotExists( regkey, "ForceCreateOnInstall", "yes" ); // there must be one attribute with yes
+                    addAttributeIfNotExists( regkey, "ForceDeleteOnUninstall", "no" ); // no, we don't want to delete it
+                    Element ele = addRegistryValue( regkey, pID, "string", "" );
+                    addAttributeIfNotExists( ele, "KeyPath", "yes" ); // so we don't need a value, without it the value must be not empty
+                    
+                    
                 }
             }
         }
