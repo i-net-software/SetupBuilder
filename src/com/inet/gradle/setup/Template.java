@@ -48,7 +48,7 @@ public class Template {
     }
 
     /**
-     * Replaces occurences of the placeholder <tt>{{NAME}}</tt> to the specified content.
+     * Replaces occurences of the placeholder <code>{{NAME}}</code> to the specified content.
      * @param placeholder the name of the placerholder
      * @param content the content to which to placeholder will be replaces
      * @return template

@@ -57,7 +57,7 @@ public class DesktopStarter extends ProtocolHandler {
     /**
      * Returns the mime types separated by semicolon.
      *
-     * @return the mime types or <tt>null</tt> if not set
+     * @return the mime types or <code>null</code> if not set
      */
     public String getMimeTypes() {
         return mimeTypes;
@@ -77,7 +77,7 @@ public class DesktopStarter extends ProtocolHandler {
     /**
      * Returns the categories separated by semicolon.
      *
-     * @return the categories or <tt>null</tt> if not set
+     * @return the categories or <code>null</code> if not set
      */
     public String getCategories() {
         return categories;

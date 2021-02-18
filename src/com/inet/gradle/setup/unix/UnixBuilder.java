@@ -159,7 +159,7 @@ public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder
      * Sets the permissions of the specified file, either to 644 (non-executable) or 755 (executable).
      *
      * @param file the file
-     * @param executable if set to <tt>true</tt> the executable bit will be set
+     * @param executable if set to <code>true</code> the executable bit will be set
      * @throws IOException on errors when setting the permissions
      */
     // share

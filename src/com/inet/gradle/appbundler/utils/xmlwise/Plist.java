@@ -20,7 +20,7 @@ import java.io.Closeable;
  * that can be trivially read from java. It also provides a simple way to convert a nested
  * {@code Map<String, Object>} into an xml plist representation.
  * <p>
- * The following mapping will be done when converting from plist to <tt>Map</tt>:
+ * The following mapping will be done when converting from plist to <code>Map</code>:
  * <pre>
  * true/false -&gt; Boolean
  * real -&gt; Double

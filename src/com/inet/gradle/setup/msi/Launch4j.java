@@ -28,7 +28,7 @@ public class Launch4j extends DesktopStarter {
     /**
      * Returns the requested execution level
      *
-     * @return the requested execution level, <tt>"requireAdministrator"</tt> by default or <tt>null</tt> if unset
+     * @return the requested execution level, <code>"requireAdministrator"</code> by default or <code>null</code> if unset
      */
     public String getRequestedExecutionLevel() {
         return requestedExecutionLevel;
