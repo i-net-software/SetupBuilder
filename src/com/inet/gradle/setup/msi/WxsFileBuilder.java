@@ -987,15 +987,15 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
                     addRegistryValue( reg, "FriendlyAppName", "string", setup.getApplication() );
 
                     // add the file parameter if not in the command already
-                    String arguments = cmd.arguments;
-                    if ( !arguments.contains( "%1" ) ) {
-                        arguments += " \"%1\"";
+                    String command = cmd.full;
+                    if ( !cmd.arguments.contains( "%1" ) ) {
+                        command += " \"%1\"";
                     }
                     
                     // registering the file extensions the old way will overwrite the default, which we don't want to do.
                     // so we must do it all on our own
                     Element reg_command = addRegistryKey( component, "HKCR", id(pID + "\\shell\\open\\command"), pID + "\\shell\\open\\command" );
-                    addRegistryValue( reg_command, null, "string", "[INSTALLDIR]runtime\\bin\\javaw.exe " + arguments );
+                    addRegistryValue( reg_command, null, "string",  command );
                     Element regkey = getOrCreateChildById( component, "RegistryKey", id(fileExtension + "\\OpenWithProgids") );
                     addAttributeIfNotExists( regkey, "Root", "HKCR" );
                     addAttributeIfNotExists( regkey, "Key", "." + fileExtension + "\\OpenWithProgids" );
