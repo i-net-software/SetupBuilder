@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 i-net software
+ * Copyright 2015 - 2021 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,8 +171,11 @@ public class AbstractSetupBuilder implements SetupSources {
             return version;
         }
         Object version = project.getProperties().get( "version" );
-        if( version != null && !"unspecified".equalsIgnoreCase((String)version) ) {
-            return version.toString();
+        if( version != null ) {
+            String strVersion = version.toString();
+            if( !"unspecified".equalsIgnoreCase( strVersion ) ) {
+                return strVersion;
+            }
         }
         return "1.0";
     }
