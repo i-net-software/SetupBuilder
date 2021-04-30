@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 i-net software
+ * Copyright 2015 - 2021 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,10 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
     private List<String>               deleteFiles             = new ArrayList<>();
 
     private List<String>               deleteFolders           = new ArrayList<>();
+
+    private String                     minUpdateVersion;
+
+    private String                     minUpdateMessage;
 
     /**
      * Create a new instance.
@@ -274,5 +278,46 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      */
     public void longDescription( Object description ) {
         LocalizedResource.addLocalizedResource( this, longDescription, description );
+    }
+
+    /**
+     * Return the minimum supported version for an update.
+     *
+     * @return the version or null
+     */
+    public String getMinimumUpdateVersion() {
+        return minUpdateVersion;
+    }
+
+    /**
+     * Return the minimum supported version error message.
+     *
+     * @return the message or null
+     */
+    public String getMinimumUpdateMessage() {
+        return minUpdateMessage;
+    }
+
+    /**
+     * Set the oldest version which will be updated. If an already installed version is older then the update will be cancel.
+     * A default error message is used.
+     * @param version the version
+     */
+    public void minimumUpdateVersion( String version ) {
+        minimumUpdateVersion( version, null );
+    }
+
+    /**
+     * Set the oldest version which will be updated. If an already installed version is older then the update will be cancel.
+     * If no message is set a default error message is used.
+     * @param version the version
+     * @param message the error message for the user
+     */
+    public void minimumUpdateVersion( String version, String message ) {
+        if( version != null && message == null ) {
+            message = "Updates are only supported from version " + version + " or later.";
+        }
+        minUpdateVersion = version;
+        minUpdateMessage = message;
     }
 }

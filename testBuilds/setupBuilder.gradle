@@ -43,6 +43,8 @@ setupBuilder {
     from jar.outputs
 
     bundleJre = 1.8
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
     mainClass = 'com.inet.testapplication.TestLauncher'
     mainJar = 'testBuilds.jar'
 
@@ -57,6 +59,8 @@ setupBuilder {
         displayName = "i-net TestLaunch Server"
         id = "helpdesk"
     }
+    version = "3.0"
+    minimumUpdateVersion "2.5"
 }
 
 configure( [ deb, rpm ] ) {
@@ -88,10 +92,13 @@ dmg {
 
     daemonUser = "testingUser"
 }
+
 msi{
-    external file("fragmentDlg.wxs")
-    wxsTemplate = "template.wxs"
+    languages = ["en-us"]
+    //external file("fragmentDlg.wxs")
+    //wxsTemplate = "template.wxs"
 }
+
 dmg.dependsOn jar
 deb.dependsOn jar
 rpm.dependsOn jar

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 i-net software
+ * Copyright 2015 - 2021 i-net software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,6 +144,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         if( task.getMultiInstanceCount() <= 1 ) {
             Element update = getOrCreateChild( product, "MajorUpgrade" );
             addAttributeIfNotExists( update, "AllowDowngrades", "yes" );
+
+            addMinimumVersionCheck();
         }
 
         // Directory
@@ -228,6 +230,29 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             }
 
             addRegistryValue( registrySubKey, null, "string", fullCommand );
+        }
+    }
+
+    /**
+     * Add a minimum version for update check if set.
+     */
+    private void addMinimumVersionCheck() {
+        String version = setup.getMinimumUpdateVersion();
+        String message = setup.getMinimumUpdateMessage();
+        if( version != null && message != null ) {
+            // https://stackoverflow.com/questions/65787694/wix-prevent-only-certain-older-versions-from-being-updated
+
+            Element upgrade = getOrCreateChildById( product, "Upgrade", getGuid( "UpgradeCode" ) );
+            Element upgradeVersion = getOrCreateChildByKeyValue( upgrade, "UpgradeVersion", "Property", "UNSUPPORTED_UPGRADE_VERSION_FOUND" );
+            addAttributeIfNotExists( upgradeVersion, "OnlyDetect", "yes" );
+            addAttributeIfNotExists( upgradeVersion, "Maximum", version );
+            addAttributeIfNotExists( upgradeVersion, "IncludeMaximum", "no" );
+
+            Element customAction = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "UpgrateFromVersionNotSupported" );
+            addAttributeIfNotExists( customAction, "Error", message );
+
+            Element action = addCustomActionToSequence( "UpgrateFromVersionNotSupported", false, "FindRelatedProducts", true, null );
+            action.setTextContent( "UNSUPPORTED_UPGRADE_VERSION_FOUND" );
         }
     }
 
