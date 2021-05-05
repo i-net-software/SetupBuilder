@@ -33,6 +33,7 @@ setupBuilder {
     application = "Setup Builder Test"
     description = 'Build a test Programm.'
     icons = "test-icon.icns"
+    vendor = 'Sample Company Inc.'
 
     licenseFile "license_en.txt"
     licenseFile {
@@ -57,7 +58,7 @@ setupBuilder {
     }
     service {
         displayName = "i-net TestLaunch Server"
-        id = "helpdesk"
+        id = "testservice"
     }
     version = "3.0"
     minimumUpdateVersion "2.5"
@@ -97,6 +98,7 @@ msi{
     languages = ["en-us"]
     //external file("fragmentDlg.wxs")
     //wxsTemplate = "template.wxs"
+    multiInstanceCount = 10
 }
 
 dmg.dependsOn jar

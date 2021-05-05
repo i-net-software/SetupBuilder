@@ -145,7 +145,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element update = getOrCreateChild( product, "MajorUpgrade" );
             addAttributeIfNotExists( update, "AllowDowngrades", "yes" );
 
-            addMinimumVersionCheck();
+            addMinimumVersionCheck( getGuid( "UpgradeCode" ), 0 );
         }
 
         // Directory
@@ -235,24 +235,26 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
 
     /**
      * Add a minimum version for update check if set.
+     * @param upgradeCode the GUID of the upgrade code
+     * @param instance the instance number
      */
-    private void addMinimumVersionCheck() {
+    private void addMinimumVersionCheck( String upgradeCode, int instance ) {
         String version = setup.getMinimumUpdateVersion();
         String message = setup.getMinimumUpdateMessage();
         if( version != null && message != null ) {
             // https://stackoverflow.com/questions/65787694/wix-prevent-only-certain-older-versions-from-being-updated
 
-            Element upgrade = getOrCreateChildById( product, "Upgrade", getGuid( "UpgradeCode" ) );
-            Element upgradeVersion = getOrCreateChildByKeyValue( upgrade, "UpgradeVersion", "Property", "UNSUPPORTED_UPGRADE_VERSION_FOUND" );
+            Element upgrade = getOrCreateChildById( product, "Upgrade", upgradeCode );
+            Element upgradeVersion = getOrCreateChildByKeyValue( upgrade, "UpgradeVersion", "Property", "UNSUPPORTED_UPGRADE_VERSION_FOUND_" + instance );
             addAttributeIfNotExists( upgradeVersion, "OnlyDetect", "yes" );
             addAttributeIfNotExists( upgradeVersion, "Maximum", version );
             addAttributeIfNotExists( upgradeVersion, "IncludeMaximum", "no" );
 
-            Element customAction = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "UpgrateFromVersionNotSupported" );
+            Element customAction = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "UpgrateFromVersionNotSupported_" + instance );
             addAttributeIfNotExists( customAction, "Error", message );
 
-            Element action = addCustomActionToSequence( "UpgrateFromVersionNotSupported", false, "FindRelatedProducts", true, null );
-            action.setTextContent( "UNSUPPORTED_UPGRADE_VERSION_FOUND" );
+            Element action = addCustomActionToSequence( "UpgrateFromVersionNotSupported_" + instance, false, "FindRelatedProducts", true, null );
+            action.setTextContent( "UNSUPPORTED_UPGRADE_VERSION_FOUND_" + instance );
         }
     }
 
@@ -1427,6 +1429,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element upgradeVersion = getOrCreateChildByKeyValue( upgrade, "UpgradeVersion", "Property", "WIX_UPGRADE_DETECTED_" + i );
             addAttributeIfNotExists( upgradeVersion, "Minimum", "0.0.0.0" );
             addAttributeIfNotExists( upgradeVersion, "MigrateFeatures", "yes" );
+
+            addMinimumVersionCheck( guid, i );
         }
         Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
         Element removeExistingProducts = getOrCreateChild( executeSequence, "RemoveExistingProducts" );
