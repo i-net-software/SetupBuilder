@@ -303,6 +303,15 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
      * A default error message is used.
      * @param version the version
      */
+    public void setMinimumUpdateMessage( String version ) {
+        minimumUpdateVersion( version, null );
+    }
+
+    /**
+     * Set the oldest version which will be updated. If an already installed version is older then the update will be cancel.
+     * A default error message is used.
+     * @param version the version
+     */
     public void minimumUpdateVersion( String version ) {
         minimumUpdateVersion( version, null );
     }
