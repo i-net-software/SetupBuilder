@@ -31,7 +31,8 @@ class SignTool {
     private String       password, sha1;
 
     private List<String> timestamps = Arrays.asList( //
-                                                    "http://timestamp.verisign.com/scripts/timstamp.dll", //
+                                                    "http://time.certum.pl", //
+                                                    //"http://timestamp.verisign.com/scripts/timstamp.dll", // no connect possible
                                                     "http://timestamp.globalsign.com/scripts/timestamp.dll", //
                                                     "http://tsa.starfieldtech.com", //
                                                     "http://timestamp.comodoca.com/authenticode" // certificate is expired
