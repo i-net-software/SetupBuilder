@@ -253,7 +253,8 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             Element customAction = getOrCreateChildByKeyValue( product, "CustomAction", "Id", "UpgrateFromVersionNotSupported_" + instance );
             addAttributeIfNotExists( customAction, "Error", message );
 
-            Element action = addCustomActionToSequence( "UpgrateFromVersionNotSupported_" + instance, false, "FindRelatedProducts", true, null );
+            // we use "LaunchConditions" because there are more free unique sequence numbers
+            Element action = addCustomActionToSequence( "UpgrateFromVersionNotSupported_" + instance, false, "LaunchConditions", true, null );
             action.setTextContent( "UNSUPPORTED_UPGRADE_VERSION_FOUND_" + instance );
         }
     }
@@ -1430,7 +1431,12 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
             addAttributeIfNotExists( upgradeVersion, "Minimum", "0.0.0.0" );
             addAttributeIfNotExists( upgradeVersion, "MigrateFeatures", "yes" );
 
-            addMinimumVersionCheck( guid, i );
+            if( i < 100 ) {
+                // There are only a limit actions possible after "LaunchConditions" that we limit this feature to 100.
+                // If there are more then the error is: "error LGHT0179 : The InstallUISequence table contains an action 'UpgrateFromVersionNotSupported_3' which cannot have a unique sequence number because it is scheduled before or after action 'LaunchConditions'.  There is not enough room before or after this action to assign a unique sequence number.  Please schedule one of the actions differently so that it will be in a position with more sequence numbers available.  Please note that sequence numbers must be an integer in the range 1 - 32767 (inclusive).
+                // https://github.com/wixtoolset/wix3/blob/develop/src/tools/wix/Data/actions.xml
+                addMinimumVersionCheck( guid, i );
+            }
         }
         Element executeSequence = getOrCreateChild( product, "InstallExecuteSequence" );
         Element removeExistingProducts = getOrCreateChild( executeSequence, "RemoveExistingProducts" );
