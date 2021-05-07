@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.Executor;
 
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.initialization.DefaultBuildCancellationToken;
+import org.gradle.internal.concurrent.DefaultExecutorFactory;
 import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.util.IndentationOutputStream;
@@ -132,19 +132,9 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         /*// if gradleVersion < 4.5
         DefaultExecAction action = new DefaultExecAction( fileResolver );
         //// elif gradleVersion < 4.8
-        DefaultExecAction action = new DefaultExecAction( fileResolver, new Executor() {
-            @Override
-            public void execute( Runnable command ) {
-                command.run();
-            }
-        } );
+        DefaultExecAction action = new DefaultExecAction( fileResolver, new DefaultExecutorFactory().create( "exec setup" ) );
         */// else
-        DefaultExecAction action = new DefaultExecAction( fileResolver, new Executor() {
-            @Override
-            public void execute( Runnable command ) {
-                command.run();
-            }
-        }, new DefaultBuildCancellationToken());
+        DefaultExecAction action = new DefaultExecAction( fileResolver, new DefaultExecutorFactory().create( "exec setup" ), new DefaultBuildCancellationToken());
         //// endif
         action.setCommandLine( parameters );
         action.setIgnoreExitValue( ignoreExitValue );
@@ -156,6 +146,7 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
             output = new IndentationOutputStream( System.out );
         }
         action.setStandardOutput( output );
+        action.setErrorOutput( output );
         try {
             action.execute();
             output.flush();

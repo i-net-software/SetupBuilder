@@ -59,4 +59,12 @@ public class IndentationOutputStream extends FilterOutputStream {
         }
         super.flush();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void close() throws IOException {
+        // Ignore to not close System.out
+    }
 }
