@@ -55,7 +55,8 @@
 #define JVM_RUNTIME "$JVM_RUNTIME"
 
 #define JAVA_RUNTIME  "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home"
-#define LIBJLI_DY_LIB "lib/jli/libjli.dylib"
+#define LIBJLI_DY_LIB_11 "lib/jli/libjli.dylib"
+#define LIBJLI_DY_LIB "lib/libjli.dylib"
 #define DEPLOY_LIB    "lib/deploy.jar"
 
 //*
@@ -233,7 +234,11 @@ int launch(char *commandName, int progargc, char *progargv[]) {
         javaDylib = [runtimePath stringByAppendingPathComponent:@LIBJLI_DY_LIB];
         javaDylibFileExists = [fm fileExistsAtPath:javaDylib isDirectory:&isDir];
         if (!javaDylibFileExists || isDir) {
-            javaDylib = NULL;
+            javaDylib = [runtimePath stringByAppendingPathComponent:@LIBJLI_DY_LIB_11];
+            javaDylibFileExists = [fm fileExistsAtPath:javaDylib isDirectory:&isDir];
+            if (!javaDylibFileExists || isDir) {
+                javaDylib = NULL;
+            }
         }
         
         if (isDebugging) {
@@ -244,6 +249,14 @@ int launch(char *commandName, int progargc, char *progargv[]) {
         // Search for the runtimePath, then make it a libjli.dylib path.
         runtimePath = findJavaDylib (jvmRequired, jrePreferred, jdkPreferred, isDebugging, exactVersionMatch);
         javaDylib = [runtimePath stringByAppendingPathComponent:@LIBJLI_DY_LIB];
+
+        NSFileManager *fm = [[NSFileManager alloc] init];
+
+        BOOL isDir;
+        BOOL javaDylibFileExists = [fm fileExistsAtPath:javaDylib isDirectory:&isDir];
+        if (!javaDylibFileExists || isDir) {
+            javaDylib = [runtimePath stringByAppendingPathComponent:@LIBJLI_DY_LIB_11];
+        }
         
         if (isDebugging) {
             DLog(@"Java Runtime Dylib Path: '%@'", convertRelativeFilePath(javaDylib));
