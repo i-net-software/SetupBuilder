@@ -1,57 +1,52 @@
-apply plugin: 'java'
-
-task getXCrun(type: Exec) {
-    commandLine "xcrun"
-    args "--show-sdk-path"
-    standardOutput = new ByteArrayOutputStream()
-    ext.run = { return standardOutput.toString().trim() }
+plugins {
+    id "org.openbakery.xcode-plugin" version "0.20.1"
 }
 
-task compileNativeStarter(type: Exec) {
+apply plugin: 'java'
 
-    dependsOn getXCrun
+task prepareXCodeBuild() {
 
-    def outputFile = new File( "${buildDir}", "JavaAppLauncher" )
-    doFirst {
+	doLast {
         def javahome = System.getProperty( "java.home" )
-        println javahome += "/..";
+        def javahomeJRE = javahome;
+        
+        if ( file("${javahomeJRE}/../jre").exists() ) {
+        	javahomeJRE += "/../jre";
+        }
+        
+        def LIBJLI_DY_LIB="${javahomeJRE}/lib/libjli.dylib"
+        if ( !file(LIBJLI_DY_LIB).exists() ) {
+			LIBJLI_DY_LIB="${javahomeJRE}/lib/jli/libjli.dylib"
+        }
 
-        args "-v"
-        args "-arch"
-        args "x86_64"
-        args "-arch"
-        args "i386"
-        args "-I"
-        args "${javahome}/include"
-        args "-I"
-        args "${javahome}/include/darwin"
-        args "-DLIBJLI_DYLIB=\"${javahome}/jre/lib/jli/libjli.dylib\""
-        args "-framework"
-        args "Cocoa"
-        args "-F"
-        args "${javahome}/../.."
-        args "-isysroot"
-        args "${getXCrun.run()}"
-        args "-mmacosx-version-min=10.7"
-        args "-fobjc-exceptions"
-        args "-std=c99"
-        args "-o"
-        args outputFile
-        args "main.m"
-    }
+        println "JAVA_HOME: ${javahome}";
+        println "JAVA_HOME_JRE: ${javahomeJRE}";
+        println "LIBJLI_DY_LIB: ${LIBJLI_DY_LIB}";
+        
+        xcodebuild.environment = [
+			"JAVA_HOME_PATH": new String("${javahomeJRE}")
+			"LIBJLI_DYLIB": new String("${LIBJLI_DY_LIB}")
+        ]
+	}
+}
 
-    doLast {
+task finalizeXCodeBuild() {
+	doLast {
+	    def outputFile = new File( "${buildDir}/sym/Release", "JavaAppLauncher" )
         outputFile.setExecutable( true, false)
         copy {
             from( outputFile )
             into('../src/com/oracle/appbundler')
         }
-    }
-
-    workingDir "."
-    outputs.file( outputFile )
-
-    commandLine "/usr/bin/gcc"
+	}
 }
 
-defaultTasks = ["compileNativeStarter", "clean"]
+xcodebuild {
+	scheme = 'JavaAppLauncher'
+	target = 'JavaAppLauncher'
+	configuration = 'Release'
+	type = 'macOS'
+	destination = "${buildDir}" 
+}
+
+defaultTasks = [ "prepareXCodeBuild", "xcodebuild", "finalizeXCodeBuild", "clean"]
