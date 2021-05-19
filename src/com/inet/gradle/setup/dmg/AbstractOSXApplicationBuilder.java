@@ -32,7 +32,6 @@ import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
 import com.inet.gradle.setup.abstracts.Application;
 import com.inet.gradle.setup.abstracts.DocumentType;
-import com.inet.gradle.setup.util.Logging;
 import com.oracle.appbundler.AppBundlerTask;
 import com.oracle.appbundler.Architecture;
 import com.oracle.appbundler.Argument;
@@ -147,6 +146,9 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         Architecture x86_64 = new Architecture();
         x86_64.setName( "x86_64" );
         appBundler.addConfiguredArch( x86_64 );
+        
+        // Add all native libraries
+        ((Dmg)task).getNativeLibraries().forEach( set -> appBundler.addConfiguredLibraryPath( set ) );
     }
 
     /**

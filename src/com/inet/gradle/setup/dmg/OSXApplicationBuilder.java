@@ -98,7 +98,6 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
             addScheme( scheme );
         }
 
-
         PlistEntry requiresAquaSystemAppearance = new PlistEntry();
         requiresAquaSystemAppearance.setKey( "NSRequiresAquaSystemAppearance" );
         requiresAquaSystemAppearance.setValue( new Boolean( task.isAquaSystemAppearanceRequired() ).toString() );

@@ -20,7 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.util.ConfigureUtil;
 
@@ -42,51 +44,53 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private Object                         backgroundImage, setupDarkBackground, setupBackground, setupIcon;
 
-    private int                            windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
+    private int                            windowWidth                  = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
 
     private Color                          backgroundColor;
 
     private String                         applicationIdentifier;
 
     private boolean                        aquaSystemAppearanceRequired = false;
-    
+
     private OSXCodeSign<Dmg, SetupBuilder> codeSign;
 
-    private List<LocalizedResource>        welcomePages    = new ArrayList<>();
+    private List<LocalizedResource>        welcomePages                 = new ArrayList<>();
 
-    private List<LocalizedResource>        conclusionPages = new ArrayList<>();
+    private List<LocalizedResource>        conclusionPages              = new ArrayList<>();
 
-    private List<PreferencesLink>          preferencesLink = new ArrayList<>();
+    private List<PreferencesLink>          preferencesLink              = new ArrayList<>();
 
-    final List<OSXApplicationBuilder>      appBuilders = new ArrayList<>();
+    final List<OSXApplicationBuilder>      appBuilders                  = new ArrayList<>();
 
-    private List<String>                   jreIncludes = Arrays.asList( new String[] {
-        "bin/java",
-        "lib/",
-        "COPYRIGHT",
-        "LICENSE",
-        "README",
-        "THIRDPARTYLICENSEREADME-JAVAFX.txt",
-        "THIRDPARTYLICENSEREADME.txt",
-        "Welcome.html"
-    });
+    private List<String>                   jreIncludes                  = Arrays.asList( new String[] {
+                    "bin/java",
+                    "lib/",
+                    "COPYRIGHT",
+                    "LICENSE",
+                    "README",
+                    "THIRDPARTYLICENSEREADME-JAVAFX.txt",
+                    "THIRDPARTYLICENSEREADME.txt",
+                    "Welcome.html"
+    } );
 
-    private List<String>                   jreExcludes = Arrays.asList( new String[] {
-        "lib/deploy/",
-        "lib/deploy.jar",
-        "lib/javaws.jar",
-        "lib/libdeploy.dylib",
-        "lib/libnpjp2.dylib",
-        "lib/plugin.jar",
-        "lib/security/javaws.policy"
-    });
+    private List<String>                   jreExcludes                  = Arrays.asList( new String[] {
+                    "lib/deploy/",
+                    "lib/deploy.jar",
+                    "lib/javaws.jar",
+                    "lib/libdeploy.dylib",
+                    "lib/libnpjp2.dylib",
+                    "lib/plugin.jar",
+                    "lib/security/javaws.policy"
+    } );
+
+    private List<Object>                   nativeLibraries              = new ArrayList<>();
 
     /**
      * Create the task.
      */
     public Dmg() {
         super( "dmg" );
-        getProject().afterEvaluate( (project) -> {
+        getProject().afterEvaluate( ( project ) -> {
             // if the "dmg" task should be executed then create some possible extra tasks on the end of the configuration phase
             boolean isExecute = GradleUtils.isTaskExecute( Dmg.this, project );
             if( isExecute ) {
@@ -98,7 +102,7 @@ public class Dmg extends AbstractUnixSetupTask {
                     appBuilders.add( builder );
                 }
             }
-        });
+        } );
     }
 
     /**
@@ -320,6 +324,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set the background image for the setup
+     * 
      * @param setupBackground to set
      */
     public void setSetupBackgroundImage( Object setupBackground ) {
@@ -328,6 +333,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Returns a dark background image for the package installer
+     * 
      * @return a dark background image for the package installer
      */
     public File getSetupDarkBackgroundImage() {
@@ -336,9 +342,10 @@ public class Dmg extends AbstractUnixSetupTask {
         }
         return null;
     }
-    
+
     /**
-     * Set the dark background image for the package installer 
+     * Set the dark background image for the package installer
+     * 
      * @param setupDarkBackground to set
      */
     public void setSetupDarkBackgroundImage( Object setupDarkBackground ) {
@@ -347,6 +354,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Returns the setup icon
+     * 
      * @return the setupIcon
      */
     public Object getSetupIcon() {
@@ -358,6 +366,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set up the setup icon
+     * 
      * @param setupIcon the setupIcon to set
      */
     public void setSetupIcon( Object setupIcon ) {
@@ -366,6 +375,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Return the list of preferences links
+     * 
      * @return preferences links
      */
     public List<PreferencesLink> getPreferencesLinks() {
@@ -374,6 +384,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set a preferences link
+     * 
      * @param link the link
      */
     public void preferencesLink( Object link ) {
@@ -382,6 +393,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Get a list of string - defining files - that should be included in the bundled JRE
+     * 
      * @return the jreIncludes
      */
     public List<String> getJreIncludes() {
@@ -390,6 +402,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set a list of string - defining files - that should be included in the bundled JRE
+     * 
      * @param jreIncludes the jreIncludes to set
      */
     public void setJreIncludes( List<String> jreIncludes ) {
@@ -398,6 +411,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Get a list of string - defining files - that should be excluded from the bundled JRE
+     * 
      * @return the jreExclude
      */
     public List<String> getJreExcludes() {
@@ -406,6 +420,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Set a list of string - defining files - that should be excluded from the bundled JRE
+     * 
      * @param jreExclude the jreExclude to set
      */
     public void setJreExcludes( List<String> jreExclude ) {
@@ -414,19 +429,18 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Returns the converted background color as apple script string
+     * 
      * @return the backgroundColor as apple script color string
      */
     public String getBackgroundColor() {
-        if ( backgroundColor == null ) {
+        if( backgroundColor == null ) {
             // Fallback
-            backgroundColor = new Color(255, 255, 255);
+            backgroundColor = new Color( 255, 255, 255 );
         }
 
         return "{" +
-               String.join( ", ", Arrays.asList( String.valueOf(backgroundColor.getRed()*257),
-                                                 String.valueOf(backgroundColor.getGreen()*257),
-                                                 String.valueOf(backgroundColor.getBlue()*257 )) ) +
-                "}";
+                        String.join( ", ", Arrays.asList( String.valueOf( backgroundColor.getRed() * 257 ), String.valueOf( backgroundColor.getGreen() * 257 ), String.valueOf( backgroundColor.getBlue() * 257 ) ) ) +
+                        "}";
     }
 
     /**
@@ -439,12 +453,13 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Returns an application identifier set for the DMG builder.
      * It is being used as ID in the Info.plist
+     * 
      * @param setup the SetupBuilder instance for a fallback
      * @return the application identifier for macOS
      */
     public String getApplicationIdentifier( SetupBuilder setup ) {
-        if ( applicationIdentifier == null || applicationIdentifier.isEmpty() ) {
-            if ( setup.getMainClass() == null || setup.getMainClass().isEmpty() ) {
+        if( applicationIdentifier == null || applicationIdentifier.isEmpty() ) {
+            if( setup.getMainClass() == null || setup.getMainClass().isEmpty() ) {
                 return setup.getAppIdentifier();
             }
             return setup.getMainClass();
@@ -455,6 +470,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Sets an application identifier for the DMG builder.
      * It is being used as ID in the Info.plist
+     * 
      * @param applicationIdentifier the application identifier for macOS
      */
     public void setApplicationIdentifier( String applicationIdentifier ) {
@@ -463,6 +479,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Returns true, if the application requires the aqua system appearance. False by default
+     * 
      * @return true, if the application requires the aqua system appearance.
      */
     public boolean isAquaSystemAppearanceRequired() {
@@ -471,9 +488,30 @@ public class Dmg extends AbstractUnixSetupTask {
 
     /**
      * Define, that the application requires the system appearance. False by default
+     * 
      * @param aquaSystemAppearanceRequired true, if the system appearance is required.
      */
     public void setAquaSystemAppearanceRequired( boolean aquaSystemAppearanceRequired ) {
         this.aquaSystemAppearanceRequired = aquaSystemAppearanceRequired;
+    }
+    
+    /**
+     * add a native library using any gradle compatible file syntax
+     * @param library a native library to add
+     */
+    public void nativeLibraries( Object library ) {
+        nativeLibraries.add( library );
+    }
+    
+    /**
+     * Returns the list of native libraries set for the current project
+     * @return the list of native libraries set for the current project
+     */
+    public List<FileSet> getNativeLibraries() {
+        return nativeLibraries.stream().map( e -> {
+            FileSet set = new FileSet();
+            set.setDir( getProject().file( e ) );
+            return set;
+        } ).collect( Collectors.toList() );
     }
 }
