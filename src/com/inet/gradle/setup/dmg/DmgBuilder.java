@@ -527,10 +527,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         applescript.setPlaceholder( "executable", firstExecutableName );
 
         applescript.setPlaceholder( "backgroundColor", task.getBackgroundColor() );
-        applescript.setPlaceholder( "windowWidth", task.getWindowWidth().toString() );
-        applescript.setPlaceholder( "windowHeight", task.getWindowHeight().toString() );
-        applescript.setPlaceholder( "iconSize", task.getIconSize().toString() );
-        applescript.setPlaceholder( "fontSize", task.getFontSize().toString() );
+        applescript.setPlaceholder( "windowWidth", ""+task.getWindowWidth() );
+        applescript.setPlaceholder( "windowHeight", ""+task.getWindowHeight() );
+        applescript.setPlaceholder( "iconSize", ""+task.getIconSize() );
+        applescript.setPlaceholder( "fontSize", ""+task.getFontSize() );
 
         if( task.getBackgroundImage() != null ) {
             String name = task.getBackgroundImage().getName();
