@@ -42,7 +42,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private Object                         backgroundImage, setupDarkBackground, setupBackground, setupIcon;
 
-    private Integer                        windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
+    private int                            windowWidth     = 400, windowHeight = 300, iconSize = 128, fontSize = 14, windowWidthCorrection = 0, windowHeightCorrection = 22;
 
     private Color                          backgroundColor;
 
@@ -115,7 +115,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return width of Finder view
      */
-    public Integer getWindowWidth() {
+    public int getWindowWidth() {
         return windowWidth + windowWidthCorrection;
     }
 
@@ -124,7 +124,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @param windowWidth width of Finder view
      */
-    public void setWindowWidth( Integer windowWidth ) {
+    public void setWindowWidth( int windowWidth ) {
         this.windowWidth = windowWidth;
     }
 
@@ -135,7 +135,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return width correction of Finder view
      */
-    public Integer getWindowWidthCorrection() {
+    public int getWindowWidthCorrection() {
         return windowWidthCorrection;
     }
 
@@ -146,7 +146,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @param windowWidthCorrection width of Finder view
      */
-    public void setWindowWidthCorrection( Integer windowWidthCorrection ) {
+    public void setWindowWidthCorrection( int windowWidthCorrection ) {
         this.windowWidthCorrection = windowWidthCorrection;
     }
 
@@ -155,7 +155,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return height of Finder view
      */
-    public Integer getWindowHeight() {
+    public int getWindowHeight() {
         return windowHeight + windowHeightCorrection;
     }
 
@@ -164,7 +164,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @param windowHeight of Finder view
      */
-    public void setWindowHeight( Integer windowHeight ) {
+    public void setWindowHeight( int windowHeight ) {
         this.windowHeight = windowHeight;
     }
 
@@ -175,7 +175,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return width correction of Finder view
      */
-    public Integer getWindowHeightCorrection() {
+    public int getWindowHeightCorrection() {
         return windowHeightCorrection;
     }
 
@@ -186,7 +186,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @param windowHeightCorrection height of Finder view
      */
-    public void setWindowHeightCorrection( Integer windowHeightCorrection ) {
+    public void setWindowHeightCorrection( int windowHeightCorrection ) {
         this.windowHeightCorrection = windowHeightCorrection;
     }
 
@@ -195,7 +195,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return size of icons in Finder view
      */
-    public Integer getIconSize() {
+    public int getIconSize() {
         return iconSize;
     }
 
@@ -204,7 +204,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @param iconSize of icons in Finder view
      */
-    public void setIconSize( Integer iconSize ) {
+    public void setIconSize( int iconSize ) {
         this.iconSize = iconSize;
     }
 
@@ -234,7 +234,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return font size for Finder View
      */
-    public Integer getFontSize() {
+    public int getFontSize() {
         return fontSize;
     }
 
@@ -243,7 +243,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @param fontSize size for Finder View
      */
-    public void setFontSize( Integer fontSize ) {
+    public void setFontSize( int fontSize ) {
         this.fontSize = fontSize;
     }
 
