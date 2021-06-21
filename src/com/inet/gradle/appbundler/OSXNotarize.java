@@ -330,8 +330,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                     System.out.println( "Response: `" + output + "`" );
                 }
 
-                Integer lineCount = new Integer( output );
-                if ( lineCount == 0 ) {
+                Integer lineCount = Integer.valueOf( output );
+                if ( lineCount.intValue() == 0 ) {
                     return; // Done
                 }
     
