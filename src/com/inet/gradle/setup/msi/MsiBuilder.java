@@ -63,7 +63,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         try {
 
             File wxsFile = getWxsFile();
-            URL template = task.getWxsTemplate();
+            URL template = task.getWxsTemplateURL();
             new WxsFileBuilder( task, setup, wxsFile, buildDir, template, false ).build();
             template = wxsFile.toURI().toURL();
 

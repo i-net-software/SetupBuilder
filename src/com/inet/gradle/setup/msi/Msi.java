@@ -28,6 +28,9 @@ import java.util.List;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
@@ -126,6 +129,7 @@ public class Msi extends AbstractSetupTask {
      * Get the architecture of the installer.
      * @return the architecture
      */
+    @Input
     public String getArch() {
         if( arch != null ) {
             return arch;
@@ -173,6 +177,7 @@ public class Msi extends AbstractSetupTask {
      * Get the file of the banner or null
      * @return the file
      */
+    @InputFile
     public File getBannerBmp() {
         if( bannerBmp != null ) {
             return getProject().file( bannerBmp );
@@ -194,6 +199,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the BMP
      */
+    @InputFile
     public File getDialogBmp() {
         if( dialogBmp != null ) {
             return getProject().file( dialogBmp );
@@ -234,11 +240,25 @@ public class Msi extends AbstractSetupTask {
      * @return the template
      * @throws MalformedURLException if any error occur
      */
-    public URL getWxsTemplate() throws MalformedURLException {
+    public URL getWxsTemplateURL() throws MalformedURLException {
         if( wxsTemplate != null ) {
             return getProject().file( wxsTemplate ).toURI().toURL();
         }
         return getClass().getResource( "template.wxs" );
+    }
+
+    /**
+     * Get a file to a *.wxs file for the WIX Toolset
+     *
+     * @return the template
+     * @throws MalformedURLException if any error occur
+     */
+    @InputFile
+    public File getWxsTemplate() throws MalformedURLException {
+        if( wxsTemplate != null ) {
+            return getProject().file( wxsTemplate );
+        }
+        return null;
     }
 
     /**
@@ -255,6 +275,7 @@ public class Msi extends AbstractSetupTask {
      * Get the languages that the setup should be support. The list must at minimum one element.
      * @return a list of languages
      */
+    @Input
     public List<MsiLanguages> getLanguages() {
         ArrayList<MsiLanguages> result = new ArrayList<>();
         if( languages == null ) {
@@ -297,6 +318,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the version
      */
+    @Input
     public double getMinOS() {
         return minOS;
     }
@@ -351,6 +373,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return instance count
      */
+    @Input
     public int getMultiInstanceCount() {
         return multiInstanceCount;
     }
@@ -399,6 +422,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the scope
      */
+    @Input
     public InstallScope getInstallScope() {
         if( installScope != null ) {
             return installScope;
@@ -421,6 +445,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the scripts
      */
+    @Input
     public List<String> getPreGUI() {
         return preGUI;
     }
@@ -513,6 +538,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * @return registered  external  wsx files
      */
+    @InputFiles
     public List<File> getExternals() {
         return externals;
     }
