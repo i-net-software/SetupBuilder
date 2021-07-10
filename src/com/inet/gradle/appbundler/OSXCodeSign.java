@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
+import org.gradle.api.Action;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
@@ -331,11 +331,12 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Set the notarization information
-     * @param closure the notarization information
+     * @param action the notarization information
      */
-    public void notarization( Closure<OSXNotarize<T, S>> closure ) {
+    public void notarization( Action<? super OSXNotarize<? super T, ? super S>> action ) {
         ProjectInternal project = (ProjectInternal)task.getProject();
-        this.notarization = ConfigureUtil.configure( closure, new OSXNotarize<T, S>(getTask(), project.getFileResolver(), this) );
+        this.notarization = new OSXNotarize<T, S>(getTask(), project.getFileResolver(), this);
+        action.execute(this.notarization);
     }
 
     /**

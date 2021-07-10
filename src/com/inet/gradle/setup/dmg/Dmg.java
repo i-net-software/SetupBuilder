@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.tools.ant.types.FileSet;
+import org.gradle.api.Action;
 import org.gradle.api.internal.project.ProjectInternal;
-import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.SetupBuilder;
@@ -254,11 +254,12 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Set the needed information for signing the setup.
      *
-     * @param closure the data for signing
+     * @param action the data for signing
      */
-    public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closure ) {
+    public void setCodeSign( Action<? super OSXCodeSign<? super Dmg,? super SetupBuilder>> action ) {
         ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<Dmg, SetupBuilder>( this, project.getFileResolver() ) );
+        codeSign = new OSXCodeSign<>(this, project.getFileResolver());
+        action.execute(codeSign);
     }
 
     /**
@@ -385,10 +386,12 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Set a preferences link
      * 
-     * @param link the link
+     * @param action the link
      */
-    public void preferencesLink( Object link ) {
-        preferencesLink.add( ConfigureUtil.configure( (Closure<?>)link, new PreferencesLink() ) );
+    public void preferencesLink( Action<? super PreferencesLink> action ) {
+        final PreferencesLink link = new PreferencesLink();
+        action.execute(link);
+        preferencesLink.add(link);
     }
 
     /**

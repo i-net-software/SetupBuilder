@@ -25,13 +25,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
 import com.inet.gradle.setup.util.ResourceUtils;
@@ -219,10 +219,11 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set the needed information for signing the setup.
      *
-     * @param closue the data for signing
+     * @param action the data for signing
      */
-    public void signTool( Closure<SignTool> closue ) {
-        signTool = ConfigureUtil.configure( closue, new SignTool() );
+    public void signTool( Action<? super SignTool> action ) {
+        signTool = new SignTool();
+        action.execute(signTool);
     }
 
     /**
@@ -352,10 +353,11 @@ public class Msi extends AbstractSetupTask {
     /**
      * Register a lauch4j configuration. Every configuration create an *.exe file with the given settings.
      *
-     * @param closue the closure of the launch4j definition
+     * @param action the closure of the launch4j definition
      */
-    public void launch4j( Closure<Launch4j> closue ) {
-        Launch4j launcher = ConfigureUtil.configure( closue, new Launch4j( getSetupBuilder() ) );
+    public void launch4j( Action<Launch4j> action ) {
+        Launch4j launcher = new Launch4j( getSetupBuilder() );
+        action.execute(launcher);
         launch4j.add( launcher );
     }
 
