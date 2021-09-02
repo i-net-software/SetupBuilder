@@ -32,6 +32,7 @@ import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.internal.file.copy.CopySpecSource;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
 
 //// if gradleVersion >= 3.0
 import org.gradle.api.Transformer;
@@ -125,31 +126,37 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     }
 
     @Override
+    @Internal
     default Integer getDirMode() {
         return getRootSpec().getDirMode();
     }
 
     @Override
+    @Internal
     default DuplicatesStrategy getDuplicatesStrategy() {
         return getRootSpec().getDuplicatesStrategy();
     }
 
     @Override
+    @Internal
     default Set<String> getExcludes() {
         return getRootSpec().getExcludes();
     }
 
     @Override
+    @Internal
     default Integer getFileMode() {
         return getRootSpec().getFileMode();
     }
 
     @Override
+    @Internal
     default boolean getIncludeEmptyDirs() {
         return getRootSpec().getIncludeEmptyDirs();
     }
 
     @Override
+    @Internal
     default Set<String> getIncludes() {
         return getRootSpec().getIncludes();
     }
@@ -185,6 +192,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     }
 
     @Override
+    @Internal
     default boolean isCaseSensitive() {
         return getRootSpec().isCaseSensitive();
     }
@@ -245,6 +253,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
     }
 
     @Override
+    @Internal
     default String getFilteringCharset() {
         return getRootSpec().getFilteringCharset();
     }

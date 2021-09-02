@@ -18,6 +18,8 @@ package com.inet.gradle.setup.abstracts;
 import java.util.ArrayList;
 
 import com.inet.gradle.setup.SetupBuilder;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Internal;
 
 /**
  * Base task for all setup builder tasks.
@@ -48,6 +50,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
      * 
      * @return the instance of the SetupBuilder
      */
+    @Internal
     public SetupBuilder getSetupBuilder() {
         return (SetupBuilder)super.getAbstractSetupBuilder();
     }
@@ -57,6 +60,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
      * 
      * @return the preinst specified in the gradle script
      */
+    @Input
     public ArrayList<String> getPreinst() {
         return preinst;
     }
@@ -75,6 +79,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
      * 
      * @return the postinst specified in the gradle script
      */
+    @Input
     public ArrayList<String> getPostinst() {
         return postinst;
     }
@@ -93,6 +98,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
      * 
      * @return the prerm specified in the gradle script
      */
+    @Input
     public ArrayList<String> getPrerm() {
         return prerm;
     }
@@ -111,6 +117,7 @@ public abstract class AbstractSetupTask extends AbstractTask {
      * 
      * @return the postrm specified in the gradle script
      */
+    @Input
     public ArrayList<String> getPostrm() {
         return postrm;
     }

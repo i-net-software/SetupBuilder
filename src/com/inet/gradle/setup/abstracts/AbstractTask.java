@@ -42,7 +42,10 @@ import org.gradle.api.internal.file.copy.CopySpecResolver;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
@@ -220,11 +223,13 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      * Return the setupBuilder using the specified type
      * @return setupBuilder
      */
+    @Internal
     protected AbstractSetupBuilder getAbstractSetupBuilder() {
         return setupBuilder;
     }
 
     @Override
+    @Internal
     public CopySpecInternal getRootSpec() {
         return rootSpec;
     }
@@ -272,6 +277,8 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      *
      * @return the extension
      */
+    @Input
+    @Optional
     public String getExtension() {
         return extension;
     }
@@ -290,6 +297,8 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      *
      * @return The classifier. May be null.
      */
+    @Input
+    @Optional
     public String getClassifier() {
         return classifier;
     }
@@ -307,6 +316,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      * {@inheritDoc}
      */
     @Override
+    @Input
     public String getDescription() {
         String desc = super.getDescription();
         if( desc != null && !desc.isEmpty() ) {
@@ -319,6 +329,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
      * Get the version of the task. If not set the version of the setup is returned
      * @return the version
      */
+    @Input
     public String getVersion() {
         if ( version != null ) {
             return version;
