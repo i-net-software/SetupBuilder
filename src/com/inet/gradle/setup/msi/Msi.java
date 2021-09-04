@@ -37,6 +37,7 @@ import com.inet.gradle.setup.abstracts.AbstractSetupTask;
 import com.inet.gradle.setup.util.ResourceUtils;
 
 import groovy.lang.Closure;
+import org.gradle.api.tasks.Optional;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.
@@ -121,6 +122,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return true, if only 32 bit
      */
+    @Input
     boolean isOnly32Bit() {
         return only32bit;
     }
@@ -163,6 +165,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return true, if 64 bit.
      */
+    @Input
     boolean is64Bit() {
         switch( getArch() ) {
             case "x64":
@@ -178,6 +181,7 @@ public class Msi extends AbstractSetupTask {
      * @return the file
      */
     @InputFile
+    @Optional
     public File getBannerBmp() {
         if( bannerBmp != null ) {
             return getProject().file( bannerBmp );
@@ -200,6 +204,7 @@ public class Msi extends AbstractSetupTask {
      * @return the BMP
      */
     @InputFile
+    @Optional
     public File getDialogBmp() {
         if( dialogBmp != null ) {
             return getProject().file( dialogBmp );
@@ -231,6 +236,8 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the settings or null
      */
+    @Input
+    @Optional
     public SignTool getSignTool() {
         return signTool;
     }
@@ -241,6 +248,7 @@ public class Msi extends AbstractSetupTask {
      * @return the template
      * @throws MalformedURLException if any error occur
      */
+    @Input
     public URL getWxsTemplateURL() throws MalformedURLException {
         if( wxsTemplate != null ) {
             return getProject().file( wxsTemplate ).toURI().toURL();
@@ -255,6 +263,7 @@ public class Msi extends AbstractSetupTask {
      * @throws MalformedURLException if any error occur
      */
     @InputFile
+    @Optional
     public File getWxsTemplate() throws MalformedURLException {
         if( wxsTemplate != null ) {
             return getProject().file( wxsTemplate );
@@ -366,6 +375,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the registered launcher
      */
+    @Input
     public List<Launch4j> getLaunch4js() {
         return launch4j;
     }
@@ -396,6 +406,7 @@ public class Msi extends AbstractSetupTask {
      * @return the URL
      * @throws MalformedURLException if any error occur
      */
+    @Input
     public URL getMultiInstanceScript() throws MalformedURLException {
         if( multiInstanceScript != null ) {
             return getProject().file( multiInstanceScript ).toURI().toURL();
@@ -484,6 +495,7 @@ public class Msi extends AbstractSetupTask {
      * Returns if the runAfter is optional
      * @return the runAfterIsOptional
      */
+    @Input
     public boolean isRunAfterOptional() {
         return runAfterIsOptional;
     }
@@ -510,6 +522,7 @@ public class Msi extends AbstractSetupTask {
      * return the file for optional language resource locations
      * @return the localized resources
      */
+    @Input
     public List<MsiLocalizedResource> getI18n() {
         return i18n;
     }
@@ -549,6 +562,7 @@ public class Msi extends AbstractSetupTask {
      * Returns if the skipValidation is requested
      * @return the skipValidation
      */
+    @Input
     public boolean isSkipValidation() {
         return skipValidation;
     }
