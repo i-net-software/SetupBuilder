@@ -3,7 +3,7 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 apply from: "${buildscript.sourceFile.parentFile}/scripts/javapreprocessor.gradle"
 
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
+    api gradleApi()
 }
 
 sourceSets {
@@ -46,14 +46,6 @@ sourceSets {
             srcDirs = ['src']
             exclude '**/*.java'
             exclude '**/package.html'
-        }
-    }
-    test { 
-        java {
-            srcDirs = ['src']
-            if ( !version.equalsIgnoreCase(baseVersion) ) {
-                srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
-            }
         }
     }
 }
@@ -79,13 +71,19 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
 } else {
     println "Uploading into local '../repo'"
     version += System.getenv('DEPLOY') != null ?'':'-SNAPSHOT' // setting version to snapshot
-    uploadArchives {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
         repositories {
-            mavenDeployer {
-                repository(url: uri('../repo'))
+            maven {
+                url = '../repo'
             }
         }
     }
+    publish.dependsOn 'assemble'
 
     clean.doLast {
         println "Cleaning local repository folder"

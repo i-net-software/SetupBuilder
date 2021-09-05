@@ -185,6 +185,7 @@ class JPPTask extends DefaultTask {
         getProject().getTasks().JPP.enabled = true
     }
 
+    @Input
     HashMap<String,HashMap<String, String>> getJPPSources() {
         return jppSources;
     }

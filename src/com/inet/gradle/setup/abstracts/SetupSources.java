@@ -38,6 +38,10 @@ import org.gradle.api.tasks.Internal;
 import org.gradle.api.Transformer;
 //// endif
 
+/*//if gradleVersion >= 7.2
+import org.gradle.api.file.ExpandDetails;
+*///endif
+
 /**
  * Implementation of the CopySpec interface.
  * 
@@ -296,4 +300,11 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         return getRootSpec().filesMatching( arg0, arg1 );
     }
     //// endif
+
+    /*// if gradleVersion >= 7.2
+    @Override
+    default CopySpec expand( Map<String,?> arg0, Action<? super ExpandDetails> arg1 ) {
+        return getRootSpec().expand( arg0, arg1 );
+    }
+    */// endif
 }

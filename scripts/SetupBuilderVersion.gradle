@@ -14,5 +14,6 @@ ext.setupBuilderVersion = { buildVersion = '+' ->
     if( gVersion >= VersionNumber.parse( '4.2' ) ) version = '4.2'
     if( gVersion >= VersionNumber.parse( '4.5' ) ) version = '4.5'
     if( gVersion >= VersionNumber.parse( '4.8' ) ) version = '4.8'
+    if( gVersion >= VersionNumber.parse( '7.2' ) ) version = '7.2'
     return version + '.' + buildVersion
 }

@@ -62,6 +62,11 @@ import com.inet.gradle.setup.util.TempPath;
 
 import groovy.lang.Closure;
 
+/*// if gradleVersion >= 7.0
+import org.gradle.api.internal.DocumentationRegistry;
+import org.gradle.api.model.ObjectFactory;
+*/// endif
+
 /**
  * Base class for all setup task.
  *
@@ -176,9 +181,11 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
         /*// if gradleVersion < 3.4
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
-        */// else
+        */// elif gradleVersion < 7.2
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem(), true );
-        //// endif
+        /*// else
+        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getObjectFactory(), getFileSystem(), true, getDocumentationRegistry() );
+        */// endif
 
         CopyAction copyAction = new CopyAction() {
             @Override
@@ -213,6 +220,18 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
     protected FileLookup getFileLookup() {
         throw new UnsupportedOperationException();
     }
+
+    /*// if gradleVersion >= 7.0
+    @Inject
+    protected DocumentationRegistry getDocumentationRegistry() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected ObjectFactory getObjectFactory() {
+        throw new UnsupportedOperationException();
+    }
+    */// endif
 
     /**
      * The platform depending build.
