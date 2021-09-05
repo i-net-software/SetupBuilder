@@ -16,6 +16,7 @@
 package com.inet.gradle.setup.unix.deb;
 
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Input;
 
 import com.inet.gradle.setup.unix.Unix;
 
@@ -53,6 +54,7 @@ public class Deb extends Unix {
         new DebBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 
+    @Input
     public String getPriority() {
         return priority;
     }
@@ -61,6 +63,7 @@ public class Deb extends Unix {
         this.priority = priority;
     }
 
+    @Input
     public String getInstallSize() {
         return installSize;
     }
@@ -69,6 +72,7 @@ public class Deb extends Unix {
         this.installSize = installSize;
     }
 
+    @Input
     @Override
     public String getRecommends() {
         return recommends;
@@ -92,6 +96,7 @@ public class Deb extends Unix {
      * They will only have impact when checkPackages is enabled.
      * @return the lintianOptions
      */
+    @Input
     public String getLintianOptions() {
         return lintianOptions;
     }
@@ -105,6 +110,7 @@ public class Deb extends Unix {
         this.lintianOptions = lintianOptions;
     }
 
+    @Input
     public String getMaintainerEmail() {
         return maintainerEmail;
     }
@@ -113,6 +119,7 @@ public class Deb extends Unix {
         this.maintainerEmail = maintainerEmail;
     }
 
+    @Input
     public String getChanges() {
         return changes;
     }
@@ -121,6 +128,7 @@ public class Deb extends Unix {
         this.changes = changes;
     }
 
+    @Input
     @Override
     public String getArchitecture() {
         String architecture = super.getArchitecture();

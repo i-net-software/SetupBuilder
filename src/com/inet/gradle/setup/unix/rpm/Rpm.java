@@ -18,6 +18,8 @@ package com.inet.gradle.setup.unix.rpm;
 import java.util.ArrayList;
 
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 
 import com.inet.gradle.setup.unix.Unix;
 
@@ -68,6 +70,7 @@ public class Rpm extends Unix {
      *
      * @return the summary specified in the gradle script
      */
+    @Input
     public String getSummary() {
         if( summary != null ) {
             return summary;
@@ -90,6 +93,8 @@ public class Rpm extends Unix {
      *
      * @return the release specified in the gradle script
      */
+    @Input
+    @Optional
     public String getRelease() {
         return release;
     }
@@ -109,6 +114,8 @@ public class Rpm extends Unix {
      *
      * @return the license specified in the gradle script
      */
+    @Input
+    @Optional
     public String getLicense() {
         return license;
     }
@@ -128,6 +135,8 @@ public class Rpm extends Unix {
      *
      * @return the backward compatibility for old rpm versions
      */
+    @Input
+    @Optional
     public boolean isBackwardCompatible() {
         return backwardCompatible;
     }
@@ -147,6 +156,8 @@ public class Rpm extends Unix {
      *
      * @return the prep specified in the gradle script
      */
+    @Input
+    @Optional
     public ArrayList<String> getSpecHeader() {
         return specHeader;
     }
@@ -166,6 +177,8 @@ public class Rpm extends Unix {
      *
      * @return the prep specified in the gradle script
      */
+    @Input
+    @Optional
     public ArrayList<String> getPrep() {
         return prep;
     }
@@ -185,6 +198,8 @@ public class Rpm extends Unix {
      *
      * @return the clean specified in the gradle script
      */
+    @Input
+    @Optional
     public ArrayList<String> getClean() {
         return clean;
     }
@@ -204,6 +219,8 @@ public class Rpm extends Unix {
      *
      * @return the install specified in the gradle script
      */
+    @Input
+    @Optional
     public ArrayList<String> getInstall() {
         return install;
     }
@@ -223,6 +240,8 @@ public class Rpm extends Unix {
      *
      * @return the build specified in the gradle script
      */
+    @Input
+    @Optional
     public ArrayList<String> getBuild() {
         return build;
     }
@@ -238,6 +257,7 @@ public class Rpm extends Unix {
     }
 
     @Override
+    @Input
     public String getArchitecture() {
         String architecture = super.getArchitecture();
         if( architecture == null || architecture.length() == 0 ) {

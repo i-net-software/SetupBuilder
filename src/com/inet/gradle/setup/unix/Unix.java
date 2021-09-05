@@ -17,6 +17,11 @@ package com.inet.gradle.setup.unix;
 
 import java.io.File;
 
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.Optional;
+
 import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
 
 /**
@@ -67,6 +72,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
      *
      * @return the section
      */
+    @Input
     public String getSection() {
         if( section != null ) {
             return section;
@@ -86,6 +92,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * The current architecture
      * @return current architecture
      */
+    @Input
+    @Optional
     public String getArchitecture() {
         return architecture;
     }
@@ -102,6 +110,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * The recommended package dependencies
      * @return recommended package dependencies
      */
+    @Input
+    @Optional
     public String getRecommends() {
         return recommends;
     }
@@ -118,6 +128,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * The package dependencies
      * @return package dependencies
      */
+    @Input
+    @Optional
     public String getDepends() {
         return depends;
     }
@@ -134,6 +146,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * Homepage of the author
      * @return homepage of the author
      */
+    @Input
+    @Optional
     public String getHomepage() {
         return homepage;
     }
@@ -150,6 +164,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * Returns the installation root where the program directory should be located. Default is /usr/share + basename
      * @return the installation root directory
      */
+    @Input
     public String getInstallationRoot() {
         if( installationRoot == null ) {
             return "/usr/share/" + getSetupBuilder().getApplication().toLowerCase().replaceAll("[^a-z0-9-_]", "-");
@@ -172,6 +187,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * Returns the a default service configuration file This will be included in the service starter
      * @return the default service file
      */
+    @InputFile
+    @Optional
     public File getDefaultServiceFile() {
         if( defaultServiceFile != null ) {
             return getProject().file( defaultServiceFile );
@@ -192,6 +209,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * This allows to modify and enhance the service.
      * @return the additional service file
      */
+    @Input
+    @Optional
     public String getAdditionalServiceScript() {
         return additionalServiceScript != null ? additionalServiceScript : "" ;
     }
@@ -225,6 +244,8 @@ public abstract class Unix extends AbstractUnixSetupTask {
      *
      * @return the value
      */
+    @InputDirectory
+    @Optional
     public File getBundleJre() {
 
         Object jre = bundleJre;

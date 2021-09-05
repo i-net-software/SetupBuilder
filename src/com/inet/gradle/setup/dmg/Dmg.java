@@ -25,6 +25,9 @@ import java.util.stream.Collectors;
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.Action;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.Optional;
 
 import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.SetupBuilder;
@@ -119,6 +122,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return width of Finder view
      */
+    @Input
     public int getWindowWidth() {
         return windowWidth + windowWidthCorrection;
     }
@@ -139,6 +143,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return width correction of Finder view
      */
+    @Input
     public int getWindowWidthCorrection() {
         return windowWidthCorrection;
     }
@@ -159,6 +164,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return height of Finder view
      */
+    @Input
     public int getWindowHeight() {
         return windowHeight + windowHeightCorrection;
     }
@@ -179,6 +185,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return width correction of Finder view
      */
+    @Input
     public int getWindowHeightCorrection() {
         return windowHeightCorrection;
     }
@@ -199,6 +206,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return size of icons in Finder view
      */
+    @Input
     public int getIconSize() {
         return iconSize;
     }
@@ -217,6 +225,8 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return background Image for Finder View
      */
+    @InputFile
+    @Optional
     public File getBackgroundImage() {
         if( backgroundImage != null ) {
             return getProject().file( backgroundImage );
@@ -238,6 +248,7 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return font size for Finder View
      */
+    @Input
     public int getFontSize() {
         return fontSize;
     }
@@ -297,6 +308,8 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return welcome page
      */
+    @Input
+    @Optional
     public List<LocalizedResource> getWelcomePages() {
         return welcomePages.size() > 0 ? welcomePages : getSetupBuilder().getLongDescriptions();
     }
@@ -316,6 +329,8 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return background image
      */
+    @InputFile
+    @Optional
     public File getSetupBackgroundImage() {
         if( setupBackground != null ) {
             return getProject().file( setupBackground );
@@ -337,6 +352,8 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return a dark background image for the package installer
      */
+    @InputFile
+    @Optional
     public File getSetupDarkBackgroundImage() {
         if( setupDarkBackground != null ) {
             return getProject().file( setupDarkBackground );
@@ -358,6 +375,8 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return the setupIcon
      */
+    @Input
+    @Optional
     public Object getSetupIcon() {
         if( setupIcon == null ) {
             return getSetupBuilder().getIcons();
@@ -379,6 +398,8 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return preferences links
      */
+    @Input
+    @Optional
     public List<PreferencesLink> getPreferencesLinks() {
         return preferencesLink;
     }
@@ -399,6 +420,8 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return the jreIncludes
      */
+    @Input
+    @Optional
     public List<String> getJreIncludes() {
         return jreIncludes;
     }
@@ -417,6 +440,8 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return the jreExclude
      */
+    @Input
+    @Optional
     public List<String> getJreExcludes() {
         return jreExcludes;
     }
@@ -435,6 +460,7 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return the backgroundColor as apple script color string
      */
+    @Input
     public String getBackgroundColor() {
         if( backgroundColor == null ) {
             // Fallback
@@ -485,6 +511,7 @@ public class Dmg extends AbstractUnixSetupTask {
      * 
      * @return true, if the application requires the aqua system appearance.
      */
+    @Input
     public boolean isAquaSystemAppearanceRequired() {
         return aquaSystemAppearanceRequired;
     }
@@ -510,6 +537,7 @@ public class Dmg extends AbstractUnixSetupTask {
      * Returns the list of native libraries set for the current project
      * @return the list of native libraries set for the current project
      */
+    @Input
     public List<FileSet> getNativeLibraries() {
         return nativeLibraries.stream().map( e -> {
             FileSet set = new FileSet();

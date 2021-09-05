@@ -1,5 +1,7 @@
 package com.inet.gradle.setup.abstracts;
 
+import org.gradle.api.tasks.Input;
+
 /**
  * An abstract base for the Unix SetupTask
  * @author gamma
@@ -18,6 +20,7 @@ public abstract class AbstractUnixSetupTask extends AbstractSetupTask {
      *
      * @return the user for the daemon
      */
+    @Input
     public String getDaemonUser() {
         if( daemonUser.trim().isEmpty() ) {
             return "root";
