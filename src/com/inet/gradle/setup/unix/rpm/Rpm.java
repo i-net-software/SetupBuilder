@@ -136,7 +136,6 @@ public class Rpm extends Unix {
      * @return the backward compatibility for old rpm versions
      */
     @Input
-    @Optional
     public boolean isBackwardCompatible() {
         return backwardCompatible;
     }
