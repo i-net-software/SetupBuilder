@@ -17,6 +17,7 @@ package com.inet.gradle.setup.unix.deb;
 
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 
 import com.inet.gradle.setup.unix.Unix;
 
@@ -55,6 +56,7 @@ public class Deb extends Unix {
     }
 
     @Input
+    @Optional
     public String getPriority() {
         return priority;
     }
@@ -64,6 +66,7 @@ public class Deb extends Unix {
     }
 
     @Input
+    @Optional
     public String getInstallSize() {
         return installSize;
     }
@@ -73,6 +76,7 @@ public class Deb extends Unix {
     }
 
     @Input
+    @Optional
     @Override
     public String getRecommends() {
         return recommends;
@@ -111,6 +115,7 @@ public class Deb extends Unix {
     }
 
     @Input
+    @Optional
     public String getMaintainerEmail() {
         return maintainerEmail;
     }
@@ -120,6 +125,7 @@ public class Deb extends Unix {
     }
 
     @Input
+    @Optional
     public String getChanges() {
         return changes;
     }
