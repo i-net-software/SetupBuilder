@@ -20,6 +20,7 @@ import java.io.File;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 
 import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
@@ -59,6 +60,7 @@ public abstract class Unix extends AbstractUnixSetupTask {
      * Default variables for every unix daemon
      * @return the prefilled variables
      */
+    @Internal
     public String getVariablesTemplate() {
         String variables = "";
         variables += "APPLICATION_DISPLAY_NAME=\"" + getSetupBuilder().getApplication() + "\"\n";
