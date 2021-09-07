@@ -14,7 +14,7 @@ env:
    - LIB_GRADLE_VERSION=4.8 DEPLOY=true
    - LIB_GRADLE_VERSION=4.8.1
    - LIB_GRADLE_VERSION=4.10.2
-   - LIB_GRADLE_VERSION=7.2
+   - LIB_GRADLE_VERSION=7.2 DEPLOY=true
   global:
     # The next declaration is the encrypted gradlePublishKey
     - secure: tzRoJbjW38G0YcSRuf53+koo/ZixIrA1vHJ9StOfafZOJzKyoASkbFa2EpUKmp3CXBWvUSTVo59j7ywUSyWW+L+G+CRnYqkDTktySJ/LAHjR0CH5dJCUodwcwtZkBje/RQZ//ZuPO2I7wY/aqHfj/E8pg2h9Y+nOd2v9R904/5b5gck9nM1Tr74YE2dJDm3h0QKrMqx6/oT7KVTWQpTNeLxcdrdNn5yxllqn4YDF70gEksoSuJeFR2l5lwSlTTseKI7Q7mGYI1Tg/PSZoxlPz3DGFmSe+9sewRnN9ZnjQDEY06/GmrGQHGv9MV1azvenlFHrt9lIbHnEo0GBqxNpeFfMd4+B9oeEmL8roapNSq0TCgVvOzda/G5KyY8TgLEi+k7WrZaWGvbW+AorU5ntenWEzSWz3b5lpwnwXxrPyyRnaKd3R5mRYj+LL10hlHAiWpvXn+v6ptD2OunE6l3JEm+wln+6wZjJBqBhl1jsv3LOd5siezFGqqOzC6FN6UgkTZqsgMfROzoqklFv3Ko8fU4e6oo9VzI/cJGcFHFO4M+dOHyYZbKl8hfvi1Bf44UpYo914sdwmWGIAZ8J6V2xtCqTnyN1bi/EQuKAkE2400laduCt/rnGyR8IefcM6iFxjufR5jCXpXBhbQ0cQ//pUT0eW4ssjqKvt9RrJmt/Mew=
