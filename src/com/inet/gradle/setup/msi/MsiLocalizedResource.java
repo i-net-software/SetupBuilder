@@ -3,6 +3,7 @@ package com.inet.gradle.setup.msi;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -22,13 +23,13 @@ import groovy.lang.Closure;
  * @author Gerry Weißbach
  *
  */
-public class MsiLocalizedResource {
+public class MsiLocalizedResource implements Serializable {
 
     private MsiLanguages locale;
 
     private Object       resource;
 
-    private SetupBuilder setup;
+    private transient SetupBuilder setup;
 
     private boolean      overridable;
 
