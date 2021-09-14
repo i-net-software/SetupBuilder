@@ -132,6 +132,9 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
                         }
                         try( InputStream input = details.open() ) {
                             Files.copy( input, f.toPath(), StandardCopyOption.REPLACE_EXISTING );
+                            Files.setPosixFilePermissions(
+                                    f.toPath(),
+                                    Files.getPosixFilePermissions(details.getFile().toPath()));
                         }
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);

@@ -173,6 +173,17 @@ public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder
             perms.add( PosixFilePermission.OWNER_EXECUTE );
             perms.add( PosixFilePermission.GROUP_EXECUTE );
             perms.add( PosixFilePermission.OTHERS_EXECUTE );
+        } else {
+        	Set<PosixFilePermission> posixFilePermissions = Files.getPosixFilePermissions(file.toPath());
+        	if(posixFilePermissions.contains(PosixFilePermission.OWNER_EXECUTE)) {
+        		perms.add( PosixFilePermission.OWNER_EXECUTE );        		
+        	}
+        	if(posixFilePermissions.contains(PosixFilePermission.GROUP_EXECUTE)) {
+        		perms.add( PosixFilePermission.GROUP_EXECUTE );        		
+        	}
+        	if(posixFilePermissions.contains(PosixFilePermission.OTHERS_EXECUTE)) {
+        		perms.add( PosixFilePermission.OTHERS_EXECUTE );        		
+        	}
         }
         try {
             Files.setPosixFilePermissions( file.toPath(), perms );
