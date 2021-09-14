@@ -28,6 +28,7 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
+import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.appbundler.OSXCodeSign;
 import com.inet.gradle.setup.SetupBuilder;
@@ -262,6 +263,16 @@ public class Dmg extends AbstractUnixSetupTask {
         this.fontSize = fontSize;
     }
 
+    /**
+     * Set the needed information for signing the setup.
+     *
+     * @param closure the data for signing
+     */
+    public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closure ) {
+        ProjectInternal project = (ProjectInternal)getProject();
+        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<Dmg, SetupBuilder>( this, project.getFileResolver() ) );
+    }
+    
     /**
      * Set the needed information for signing the setup.
      *

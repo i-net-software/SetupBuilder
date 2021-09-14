@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
+import org.gradle.util.ConfigureUtil;
 
 import groovy.lang.Closure;
 
@@ -111,6 +112,19 @@ public class DesktopStarter extends ProtocolHandler {
         StartMenu, ApplicationMenu, InstallDir, DesktopDir;
     }
 
+    /**
+     * Register a file extensions.
+     *
+     * @param closue document type
+     */
+    public void documentType( Closure<?> closue ) {
+        DocumentType doc = ConfigureUtil.configure( closue, new DocumentType( setup ) );
+        if( doc.getFileExtension() == null || doc.getFileExtension().size() == 0 ) {
+            throw new GradleException( "The documentType has to contain at least one file extension." );
+        }
+        documentTypes.add( doc );
+    }
+    
     /**
      * Register a file extensions.
      *

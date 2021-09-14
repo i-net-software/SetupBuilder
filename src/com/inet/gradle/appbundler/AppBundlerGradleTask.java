@@ -22,6 +22,7 @@ import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractTask;
 
@@ -72,6 +73,16 @@ public class AppBundlerGradleTask extends AbstractTask {
         }
     }    
 
+    /**
+     * Set the needed information for signing the setup.
+     * 
+     * @param closure the data for signing
+     */
+    public void codeSign( Closure<AppBundler> closure ) {
+        ProjectInternal project = (ProjectInternal)getProject();
+        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, project.getFileResolver()) );
+    }
+    
     /**
      * Set the needed information for signing the setup.
      * 

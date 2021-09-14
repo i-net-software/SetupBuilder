@@ -32,6 +32,7 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
 import com.inet.gradle.setup.util.ResourceUtils;
@@ -224,6 +225,15 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set the needed information for signing the setup.
      *
+     * @param closue the data for signing
+     */
+    public void signTool( Closure<SignTool> closue ) {
+        signTool = ConfigureUtil.configure( closue, new SignTool() );
+    }
+    
+    /**
+     * Set the needed information for signing the setup.
+     *
      * @param action the data for signing
      */
     public void signTool( Action<? super SignTool> action ) {
@@ -359,6 +369,16 @@ public class Msi extends AbstractSetupTask {
         this.minOS = minVersion;
     }
 
+    /**
+     * Register a lauch4j configuration.
+     *
+     * @param closue the closure of the launch4j definition
+     */
+    public void launch4j( Closure<Launch4j> closue ) {
+        Launch4j service = ConfigureUtil.configure( closue, new Launch4j( getSetupBuilder() ) );
+        launch4j.add( service );
+    }
+    
     /**
      * Register a lauch4j configuration. Every configuration create an *.exe file with the given settings.
      *

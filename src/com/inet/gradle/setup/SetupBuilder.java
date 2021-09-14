@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
@@ -127,6 +128,15 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
     /**
      * Set a command that run after the installer.
      *
+     * @param closure the command
+     */
+    public void runAfter( Closure<?> closure ) {
+        runAfter = ConfigureUtil.configure( closure, new DesktopStarter( this ) );
+    }
+    
+    /**
+     * Set a command that run after the installer.
+     *
      * @param action the command
      */
     public void runAfter( Action<? super DesktopStarter> action ) {
@@ -156,6 +166,15 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
     /**
      * Set a command that run run before the uninstaller.
      *
+     * @param closue the command
+     */
+    public void runBeforeUninstall( Closure<DesktopStarter> closue ) {
+        runBeforeUninstall = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
+    }
+    
+    /**
+     * Set a command that run run before the uninstaller.
+     *
      * @param action the command
      */
     public void runBeforeUninstall( Action<? super DesktopStarter> action ) {
@@ -163,6 +182,16 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
         action.execute(runBeforeUninstall);
     }
 
+    /**
+     * Register a service.
+     *
+     * @param closue the closure of the service definition
+     */
+    public void service( Closure<Service> closue ) {
+        Service service = ConfigureUtil.configure( closue, new Service( this ) );
+        services.add( service );
+    }
+    
     /**
      * Register a service.
      *
@@ -183,6 +212,16 @@ public class SetupBuilder extends AbstractSetupBuilder implements SetupSources {
         return services;
     }
 
+    /**
+     * Register a desktop starter.
+     *
+     * @param closue the closure of the desktop starter's definition
+     */
+    public void desktopStarter( Closure<?> closue ) {
+        DesktopStarter service = ConfigureUtil.configure( closue, new DesktopStarter( this ) );
+        desktopStarters.add( service );
+    }
+    
     /**
      * Register a desktop starter.
      *
