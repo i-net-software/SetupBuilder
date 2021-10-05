@@ -1,0 +1,27 @@
+[Unit]
+
+Description={{description}}
+#Documentation=
+#Requires=
+#Wants=
+#BindsTo=
+#Before=
+#After=
+#Conflicts=
+#Condition=
+#Assert=
+
+[Service]
+Type=simple
+ExecStart={{daemonExec}} {{javaVMArguments}} -cp "{{mainJar}}" {{mainClass}} {{startArguments}}
+#ExecReload=
+WorkingDirectory={{workdir}}
+Restart=on-failure
+User={{daemonUser}}
+
+[Install]
+WantedBy=multi-user.target
+#RequiredBy=
+#Alias=
+#Also=
+#DefaultInstance=

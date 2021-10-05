@@ -158,16 +158,53 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
         initScript.setPlaceholder( "daemonExec", javaMainExecutable );
         initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
-        String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
+        String initScriptFile = "BUILD/" + installationRoot + "/service_scripts/" + serviceUnixName;
         initScript.writeTo( createFile( initScriptFile , true ) );
-        controlBuilder.addConfFile( initScriptFile );
 
+
+        
+        String systemdTemplate = "unix/systemd.service";
+        Template systemdScript = new Template( systemdTemplate  );
+        systemdScript.setPlaceholder( "name", serviceUnixName );
+        systemdScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
+        systemdScript.setPlaceholder( "displayName", setup.getApplication() );
+        systemdScript.setPlaceholder( "description", service.getDescription() );
+        systemdScript.setPlaceholder( "wait", "2" );
+
+        systemdScript.setPlaceholder( "workdir", workingDir );
+        systemdScript.setPlaceholder( "mainJar", mainJarPath );
+        systemdScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+        systemdScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
+
+        systemdScript.setPlaceholder( "mainClass", service.getMainClass() );
+        systemdScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        systemdScript.setPlaceholder( "daemonExec", javaMainExecutable );
+        systemdScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+
+        String systemdScriptFile = "BUILD/" + installationRoot + "/service_scripts/" + serviceUnixName + ".service";
+        systemdScript.writeTo( createFile( systemdScriptFile , true ) );
+        
         controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && service \"" + serviceUnixName + "\" stop || true" );
 
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTHEAD, "if [ -d \"/etc/init.d\" ] ; then\n"
+        		+ "echo copy service to /etc/init.d\n"
+        		+ "\\cp \"" + installationRoot + "/service_scripts/" + serviceUnixName + "\" /etc/init.d\n"
+        		+ "chcon -u system_u -t initrc_exec_t /etc/init.d/" + serviceUnixName + "\n"
+        		+ "else\n"
+        		+ "echo copy service to /usr/lib/systemd/system\n"
+        		+ "\\cp \"" + installationRoot + "/service_scripts/" + serviceUnixName + ".service" + "\" /usr/lib/systemd/system\n"
+                + "\nfi" );
+        
         controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
                         + "echo replace path\n"
                         + "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
                         + "\nfi" );
+        
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "if [ ! -f /etc/pam.d/passwd ] && [ ! -f /etc/pam.d/helpdesk ] ; then\n"
+        		+ "echo create pam link for " + serviceUnixName + "\n"
+        		+ "ln -s /etc/pam.d/smtp /etc/pam.d/" + serviceUnixName + "\n"
+        		+ "\nfi" );
 
         // copy a default service file if set
         if( task.getDefaultServiceFile() != null ) {
@@ -176,12 +213,21 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
         }
 
         controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " && systemctl enable " + serviceUnixName + " ) || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl enable " + serviceUnixName + ".service ) || true" );
         if ( task.shouldStartDefaultService() ) {
-            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " start || true" );
+            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "service " + serviceUnixName + " start || true" );
         }
 
         controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && service " + serviceUnixName + " stop || true" );
         controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );
+        
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ] ; then\n"
+        		+ "rm \"/etc/init.d/" + serviceUnixName + "\"\n"
+                + "\nfi" );
+        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "if [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] ; then\n"
+        		+ "rm \"/usr/lib/systemd/system/" + serviceUnixName + ".service\"\n"
+        		+ "\nfi" );
     }
 
     /**

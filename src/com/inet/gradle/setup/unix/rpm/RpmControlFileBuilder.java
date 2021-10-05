@@ -331,7 +331,7 @@ class RpmControlFileBuilder {
         }
 
         if( setup.getServices() != null && setup.getServices().size() > 0 ) {
-            controlWriter.write( "/etc/init.d/*" + NEWLINE );
+        	controlWriter.write( "\"" + rpm.getInstallationRoot() + "/service_scripts/*\"" + NEWLINE ); // nimmt anscheinend nicht die Files in der Root
         }
 
         if( rpm.getDefaultServiceFile() != null ) {
