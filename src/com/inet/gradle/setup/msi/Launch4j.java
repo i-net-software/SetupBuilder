@@ -1,9 +1,11 @@
 package com.inet.gradle.setup.msi;
 
+import java.io.Serializable;
+
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 
-public class Launch4j extends DesktopStarter {
+public class Launch4j extends DesktopStarter implements Serializable {
 
     private String requestedExecutionLevel = "requireAdministrator";
 
