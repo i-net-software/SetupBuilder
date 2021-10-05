@@ -15,6 +15,7 @@
  */
 package com.inet.gradle.setup.msi;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,7 +25,7 @@ import java.util.List;
  * @author Volker Berlin
  *
  */
-class SignTool {
+class SignTool implements Serializable {
 
     private Object       certificate;
 
