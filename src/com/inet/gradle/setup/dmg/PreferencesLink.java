@@ -1,5 +1,7 @@
 package com.inet.gradle.setup.dmg;
 
+import java.io.Serializable;
+
 /**
  * Link for the preferences
  * Takes a title and an action
@@ -7,7 +9,7 @@ package com.inet.gradle.setup.dmg;
  * @author gamma
  *
  */
-public class PreferencesLink {
+public class PreferencesLink implements Serializable {
 
     private String  title;
 
