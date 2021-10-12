@@ -63,7 +63,7 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
     preparePublish.dependsOn 'publishPluginJavaDocsJar'
     preparePublish.dependsOn 'jar'
     preparePublish.dependsOn 'publishPluginJar'
-    println "Uploading into internal Repository 'fileserver'"
+    println "Uploading into internal Repository"
 
     if ( System.getProperty("snapshot") ) {
         version += '-SNAPSHOT' // setting version to snapshot

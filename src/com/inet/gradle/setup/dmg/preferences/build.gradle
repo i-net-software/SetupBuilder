@@ -29,7 +29,7 @@ sourceSets {
 
 if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
-    println "Uploading into internal Repository 'fileserver'"
+    println "Uploading into internal Repository"
     
     preparePublish.dependsOn 'sourcesJar'
     if ( System.getProperty("snapshot") ) {
