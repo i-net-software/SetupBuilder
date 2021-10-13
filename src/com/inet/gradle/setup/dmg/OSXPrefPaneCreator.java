@@ -18,7 +18,6 @@ import org.gradle.api.tasks.GradleBuild;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.Service;
-import com.inet.gradle.setup.util.Logging;
 import com.inet.gradle.setup.util.ReplacingInputStream;
 import com.inet.gradle.setup.util.ResourceUtils;
 
