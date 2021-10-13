@@ -1,5 +1,5 @@
 plugins {
-    id "org.openbakery.xcode-plugin" version "0.20.1"
+    id "org.openbakery.xcode-plugin" version "0.21.0"
 }
 
 apply plugin: 'java'
@@ -24,7 +24,7 @@ task prepareXCodeBuild() {
         println "LIBJLI_DY_LIB: ${LIBJLI_DY_LIB}";
         
         xcodebuild.environment = [
-			"JAVA_HOME_PATH": new String("${javahomeJRE}")
+			"JAVA_HOME_PATH": new String("${javahomeJRE}"),
 			"LIBJLI_DYLIB": new String("${LIBJLI_DY_LIB}")
         ]
 	}
