@@ -60,10 +60,6 @@
 #define LIBJLI_DY_LIB "libjli.dylib"
 #define DEPLOY_LIB    "lib/deploy.jar"
 
-
-#define DLog(...) NSLog(@"%s %@", __PRETTY_FUNCTION__, [NSString stringWithFormat:__VA_ARGS__])
-
-
 typedef int (JNICALL *JLI_Launch_t)(int argc, char ** argv,
 int jargc, const char** jargv,
 int appclassc, const char** appclassv,
