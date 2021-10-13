@@ -80,7 +80,7 @@
 		DDBFB37726540685004040E5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1300;
 				TargetAttributes = {
 					DDBFB37E26540685004040E5 = {
 						CreatedOnToolsVersion = 12.4;
@@ -173,6 +173,7 @@
 		DDBFB38826540685004040E5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
