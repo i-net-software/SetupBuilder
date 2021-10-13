@@ -47,7 +47,7 @@ public class TypeDeclaration implements IconContainer {
     public TypeDeclaration() {
         this.conformsTo = Arrays.asList(new String[]{"public.data"});
     }
-
+    
     public boolean isImported() {
         return imported;
     }
@@ -92,16 +92,16 @@ public class TypeDeclaration implements IconContainer {
         if (icon == null) { return null; }
 
         File ifile = new File (icon);
-
+        
         if (! ifile.exists ( ) || ifile.isDirectory ( )) { return null; }
 
         return ifile;
     }
-
+    
     public boolean hasIcon() {
         return icon != null;
     }
-
+    
     public List<String> getConformsTo() {
         return conformsTo;
     }

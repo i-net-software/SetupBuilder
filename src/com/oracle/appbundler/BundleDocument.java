@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 
+
 /**
  * Represent a CFBundleDocument.
  */
@@ -47,7 +48,7 @@ public class BundleDocument implements IconContainer {
         stringArray[0] = Character.toUpperCase(stringArray[0]);
         return new String(stringArray);
     }
-
+    
     public void setExtensions(String extensionsString) {
         extensions = getListFromCommaSeparatedString(extensionsString, "Extensions", true);
     }
@@ -64,16 +65,16 @@ public class BundleDocument implements IconContainer {
             final String attributeName) {
         return getListFromCommaSeparatedString(listAsString, attributeName, false);
     }
-
+            
     public static List<String> getListFromCommaSeparatedString(String listAsString,
             final String attributeName, final boolean lowercase) {
         if(listAsString == null) {
             throw new BuildException(attributeName + " can't be null");
         }
-
+        
         String[] splittedListAsString = listAsString.split(",");
         List<String> stringList = new ArrayList<String>();
-
+        
         for (String extension : splittedListAsString) {
             String cleanExtension = extension.trim();
             if (lowercase) {
@@ -83,13 +84,13 @@ public class BundleDocument implements IconContainer {
                 stringList.add(cleanExtension);
             }
         }
-
+        
         if (stringList.size() == 0) {
             throw new BuildException(attributeName + " list must not be empty");
         }
         return stringList;
     }
-
+    
     public void setIcon(String icon) {
       this.icon = icon;
     }
@@ -101,11 +102,11 @@ public class BundleDocument implements IconContainer {
     public void setRole(String role) {
       this.role = capitalizeFirst(role);
     }
-
+    
     public void setHandlerRank(String handlerRank) {
       this.handlerRank = capitalizeFirst(handlerRank);
     } 
-
+      
     public void setIsPackage(String isPackageString) {
         if(isPackageString.trim().equalsIgnoreCase("true")) {
             this.isPackage = true;
@@ -113,7 +114,7 @@ public class BundleDocument implements IconContainer {
             this.isPackage = false;
         }
     }
-
+    
     public String getIcon() {
         return icon;
     }
@@ -129,33 +130,33 @@ public class BundleDocument implements IconContainer {
     public String getHandlerRank() {
         return handlerRank;
     }
-
+    
     public List<String> getExtensions() {
         return extensions;
     }
-
+    
     public List<String> getContentTypes() {
         return contentTypes;
     }
-
+    
     public List<String> getExportableTypes() {
         return exportableTypes;
     }
-
+    
     public File getIconFile() {
         if (icon == null) { return null; }
 
         File ifile = new File (icon);
-
+        
         if (! ifile.exists ( ) || ifile.isDirectory ( )) { return null; }
 
         return ifile;
     }
-
+    
     public boolean hasIcon() {
         return icon != null;
     }
-
+    
     public boolean isPackage() {
         return isPackage;
     }
@@ -182,7 +183,7 @@ public class BundleDocument implements IconContainer {
                 s.append(exportableType).append(" ");
             }
         }
-
+        
         return s.toString();
     }
 }
