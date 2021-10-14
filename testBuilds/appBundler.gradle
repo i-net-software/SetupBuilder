@@ -30,7 +30,7 @@ appBundler {
 
     from jar.outputs
 
-    bundleJre = 1.8
+    bundleJre = 11
     mainClass = 'com.inet.testapplication.TestLauncher'
     mainJar = 'testBuilds.jar'
 }
