@@ -1,12 +1,20 @@
-plugins {
-    id "org.openbakery.xcode-plugin" version "0.21.0"
-}
+// see https://github.com/TheInfiniteKind/appbundler
 
 apply plugin: 'java'
 
-task prepareXCodeBuild() {
+task getXCrun(type: Exec) {
+    commandLine "xcrun"
+    args "--show-sdk-path"
+    standardOutput = new ByteArrayOutputStream()
+    ext.run = { return standardOutput.toString().trim() }
+}
 
-	doLast {
+task compileNativeStarter(type: Exec) {
+
+    dependsOn getXCrun
+    def outputFile = new File( "${buildDir}", "JavaAppLauncher" )
+    doFirst {
+
         def javahome = System.getProperty( "java.home" )
         def javahomeJRE = javahome;
         
@@ -22,31 +30,41 @@ task prepareXCodeBuild() {
         println "JAVA_HOME: ${javahome}";
         println "JAVA_HOME_JRE: ${javahomeJRE}";
         println "LIBJLI_DY_LIB: ${LIBJLI_DY_LIB}";
-        
-        xcodebuild.environment = [
-			"JAVA_HOME_PATH": new String("${javahomeJRE}"),
-			"LIBJLI_DYLIB": new String("${LIBJLI_DY_LIB}")
-        ]
-	}
-}
 
-task finalizeXCodeBuild() {
-	doLast {
-	    def outputFile = new File( "${buildDir}/sym/Release", "JavaAppLauncher" )
+		args "-v"
+        args "-arch"
+        args "x86_64"
+        args "-I"
+        args "${javahome}/include"
+        args "-I"
+        args "${javahome}/include/darwin"
+        args "-DLIBJLI_DYLIB=\"${LIBJLI_DY_LIB}\""
+        args "-framework"
+        args "Cocoa"
+        args "-F"
+        args "${javahome}/../.."
+        args "-isysroot"
+        args "${getXCrun.run()}"
+        args "-mmacosx-version-min=10.7"
+        args "-fobjc-exceptions"
+        args "-std=c99"
+        args "-o"
+        args outputFile
+        args "main.m"
+    }
+
+    doLast {
         outputFile.setExecutable( true, false)
         copy {
             from( outputFile )
             into('../src/com/oracle/appbundler')
         }
-	}
+    }
+
+    workingDir "."
+    outputs.file( outputFile )
+
+    commandLine "/usr/bin/gcc"
 }
 
-xcodebuild {
-	scheme = 'JavaAppLauncher'
-	target = 'JavaAppLauncher'
-	configuration = 'Release'
-	type = 'macOS'
-	destination = "${buildDir}" 
-}
-
-defaultTasks = [ "prepareXCodeBuild", "xcodebuild", "finalizeXCodeBuild", "clean"]
+defaultTasks = ["compileNativeStarter", "clean"]
