@@ -289,6 +289,8 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return the settings or null
      */
+    @Input
+    @Optional
     public OSXCodeSign<Dmg, SetupBuilder> getCodeSign() {
         return codeSign;
     }

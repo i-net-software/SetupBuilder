@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -37,13 +38,13 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
  * @param <T> the task
  * @param <S> the builder type
  */
-public abstract class AbstractBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> {
+public abstract class AbstractBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> implements Serializable {
 
-    protected T task;
+    protected transient T task;
 
-    protected FileResolver fileResolver;
+    protected transient FileResolver fileResolver;
 
-    protected File buildDir;
+    protected transient File buildDir;
 
     /**
      * Builder abstraction
