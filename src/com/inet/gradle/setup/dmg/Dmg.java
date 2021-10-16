@@ -301,6 +301,8 @@ public class Dmg extends AbstractUnixSetupTask {
      *
      * @return welcome page
      */
+    @Input
+    @Optional
     public List<LocalizedResource> getConclusionPages() {
         return conclusionPages;
     }

@@ -1,6 +1,7 @@
 package com.inet.gradle.setup.abstracts;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
@@ -15,11 +16,11 @@ import groovy.lang.Closure;
  * @author Gerry Weißbach
  *
  */
-public class LocalizedResource {
+public class LocalizedResource implements Serializable {
 
     private Locale locale;
     private Object resource;
-    private SetupBuilder setup;
+    private transient SetupBuilder setup;
 
     /**
      * Stub Object for localized resources
