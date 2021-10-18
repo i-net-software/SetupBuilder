@@ -21,6 +21,9 @@ import java.io.File;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Nested;
+import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.ConfigureUtil;
 
@@ -47,6 +50,8 @@ public class AppBundlerGradleTask extends AbstractTask {
      * Get the app builder
      * @return the app builder
      */
+    @Nested
+    @Optional
     public AppBundler getAppBuilder() {
         return (AppBundler)super.getAbstractSetupBuilder();
     }
@@ -99,6 +104,8 @@ public class AppBundlerGradleTask extends AbstractTask {
      * 
      * @return the settings or null
      */
+    @Input
+    @Optional
     public OSXCodeSign<AppBundlerGradleTask,AppBundler> getCodeSign() {
         return codeSign;
     }

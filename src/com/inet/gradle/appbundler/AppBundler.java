@@ -17,6 +17,8 @@
 package com.inet.gradle.appbundler;
 
 import org.gradle.api.Project;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Optional;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.SetupSources;
@@ -41,6 +43,7 @@ public class AppBundler extends AbstractSetupBuilder implements SetupSources {
     /**
      * {@inheritDoc}
      */
+    @Input
     @Override
     public String getArchiveName() {
         return getApplication();
@@ -51,6 +54,8 @@ public class AppBundler extends AbstractSetupBuilder implements SetupSources {
      * This can be used instead of the mainJar
      * @return the launcher file
      */
+    @Input
+    @Optional
     public String getJnlpLauncherName() {
         return jnlpLauncherName;
     }

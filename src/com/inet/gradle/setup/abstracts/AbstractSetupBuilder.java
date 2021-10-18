@@ -24,9 +24,13 @@ import org.gradle.api.Project;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.internal.file.copy.CopySpecInternal;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.Optional;
+import org.gradle.api.tasks.OutputDirectories;
 
 import com.inet.gradle.setup.image.ImageFactory;
-import com.inet.gradle.setup.util.Logging;
 
 import groovy.lang.Closure;
 
@@ -81,6 +85,7 @@ public class AbstractSetupBuilder implements SetupSources {
         project.getLogger().lifecycle( "setting default Destination to: " + getDestinationDir() );
     }
 
+    @Internal
     @Override
     public CopySpecInternal getRootSpec() {
         return rootSpec;
@@ -91,6 +96,7 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the project
      */
+    @Internal
     public Project getProject() {
         return project;
     }
@@ -98,6 +104,7 @@ public class AbstractSetupBuilder implements SetupSources {
     /**
      * Override to remove the annotation OutputDirectories in the Copy task. {@inheritDoc}
      */
+    @OutputDirectories
     public File getDestinationDir() {
         return new File( project.getBuildDir(), String.valueOf( destinationDir ) );
     }
@@ -106,6 +113,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * All the inputs
      * @return FileTree
      */
+    @InputFiles
     @Override
     public FileTree getSource() {
         FileTree allSource = rootSpec.buildRootResolver().getAllSource();
@@ -128,6 +136,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * Vendor of this setup
      * @return vendor
      */
+    @Input
     public String getVendor() {
         if( vendor != null ) {
             return vendor;
@@ -147,6 +156,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * Return the name of the application
      * @return name of the application
      */
+    @Input
     public String getApplication() {
         if( application != null ) {
             return application;
@@ -166,6 +176,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * Get the version of the setup. If not set a version of 1.0 is returned
      * @return the version
      */
+    @Input
     public String getVersion() {
         if( version != null ) {
             return version;
@@ -194,6 +205,7 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the application identifier
      */
+    @Input
     public String getAppIdentifier() {
         if( appIdentifier != null ) {
             return appIdentifier;
@@ -218,6 +230,7 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the setup file name
      */
+    @Input
     public String getArchiveName() {
         if( archiveName != null ) {
             return archiveName;
@@ -237,6 +250,8 @@ public class AbstractSetupBuilder implements SetupSources {
      * Get the icons for the setup.
      * @return the icons
      */
+    @Input
+    @Optional
     public Object getIcons() {
         return icons;
     }
@@ -248,6 +263,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * @return the icon file
      * @throws IOException if an error occurs
      */
+    @Internal
     public File getIconForType( File buildDir, String type ) throws IOException {
         return ImageFactory.getImageFile( project, getIcons(), buildDir, type);
     }
@@ -267,6 +283,8 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the value
      */
+    @Input
+    @Optional
     public Object getBundleJre() {
         return bundleJre;
     }
@@ -287,6 +305,8 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the target
      */
+    @Input
+    @Optional
     public String getBundleJreTarget() {
         if( bundleJreTarget != null ) {
             if( bundleJreTarget.startsWith( "/" ) ) {
@@ -314,6 +334,8 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the class name
      */
+    @Input
+    @Optional
     public String getMainClass() {
         return mainClass;
     }
@@ -332,6 +354,8 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return the main jar
      */
+    @Input
+    @Optional
     public String getMainJar() {
         return mainJar;
     }
@@ -351,6 +375,7 @@ public class AbstractSetupBuilder implements SetupSources {
      *
      * @return true, if enabled
      */
+    @Internal
     public boolean isFailOnEmptyFrom() {
         return failOnEmptyFrom;
     }
@@ -368,6 +393,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * Get a global description. Never null.
      * @return the description
      */
+    @Input
     public String getDescription() {
         if( description == null ) {
             return "";
@@ -387,6 +413,7 @@ public class AbstractSetupBuilder implements SetupSources {
      * Get the Copyright information.
      * @return the copyright notice
      */
+    @Input
     public String getCopyright() {
         if( copyright != null ) {
             return copyright;
