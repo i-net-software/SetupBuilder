@@ -148,7 +148,9 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         appBundler.addConfiguredArch( x86_64 );
         
         // Add all native libraries
-        ((Dmg)task).getNativeLibraries().forEach( set -> appBundler.addConfiguredLibraryPath( set ) );
+        if( task instanceof Dmg ) {
+            ((Dmg)task).getNativeLibraries().forEach( set -> appBundler.addConfiguredLibraryPath( set ) );
+        }
     }
 
     /**
