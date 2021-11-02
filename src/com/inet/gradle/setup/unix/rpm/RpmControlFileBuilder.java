@@ -331,7 +331,8 @@ class RpmControlFileBuilder {
         }
 
         if( setup.getServices() != null && setup.getServices().size() > 0 ) {
-        	controlWriter.write( "\"" + rpm.getInstallationRoot() + "/service_scripts/*\"" + NEWLINE ); // nimmt anscheinend nicht die Files in der Root
+        	controlWriter.write( "/etc/init.d/*" + NEWLINE ); // the default script is always installed here
+        	controlWriter.write( "/usr/lib/systemd/system/*" + NEWLINE ); // the default script is always installed here
         }
 
         if( rpm.getDefaultServiceFile() != null ) {
@@ -343,6 +344,7 @@ class RpmControlFileBuilder {
         }
 
     }
+    
 
     /**
      * This is used to clean up the build directory tree. Normally RPM does this for you.
