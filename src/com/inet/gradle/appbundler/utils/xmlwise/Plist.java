@@ -318,7 +318,7 @@ public final class Plist
                 case INTEGER:
                     return new XmlElement("integer", o.toString());
                 case TRUE:
-                    return new XmlElement(((Boolean) o) ? "true" : "false");
+                    return new XmlElement(((Boolean) o).booleanValue() ? "true" : "false");
                 case DATE:
                     return new XmlElement("date", m_dateFormat.format((Date) o));
                 case STRING:
@@ -475,7 +475,7 @@ public final class Plist
     private Number parseInt(String value)
     {
         Long l = Long.valueOf(value);
-        if (l.intValue() == l) return l.intValue();
+        if ( l.intValue() == l ) return Integer.valueOf( l.intValue() );
         return l;
     }
 

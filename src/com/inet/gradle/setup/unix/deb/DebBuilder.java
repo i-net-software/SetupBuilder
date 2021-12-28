@@ -219,7 +219,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
                 try (Scanner scanner = new Scanner( localizedResource.getResource(), "UTF8" )) {
                     while ( scanner.hasNextLine() ) {
                         String line = scanner.nextLine();
-                        content.append( " " + ( line.isEmpty() ? '.' : line) + "\n" );
+                        content.append( " " + ( line.isEmpty() ? "." : line) + "\n" );
                     }
                 } finally {
                     fw.write( content.toString() );

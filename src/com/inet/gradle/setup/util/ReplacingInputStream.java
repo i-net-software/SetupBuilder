@@ -250,7 +250,7 @@ public class ReplacingInputStream extends FilterInputStream {
         // Conform to the contract defined by InputStream class.
         if (b == null) {
             throw new NullPointerException(String.format("Can't process ReplaceFilterInputStream.read() for the "
-                    + "null buffer reference. Given offset: %d, length: %d", off, len));
+                    + "null buffer reference. Given offset: %d, length: %d", Integer.valueOf( off ), Integer.valueOf( len )));
         }
         if (off < 0) {
             throw new ArrayIndexOutOfBoundsException("Can't process ReplaceFilterInputStream.read(). "
@@ -263,7 +263,7 @@ public class ReplacingInputStream extends FilterInputStream {
         if (len > b.length - off) {
             throw new ArrayIndexOutOfBoundsException(String.format("Can't process ReplaceFilterInputStream.read(). "
                     + "Reason: given length (%d) is more than buffer's max available length "
-                    + "(%d, implied by buffer length (%d) - offset (%d))", len, b.length - off, b.length, off));
+                    + "(%d, implied by buffer length (%d) - offset (%d))", Integer.valueOf( len ), Integer.valueOf( b.length - off ), Integer.valueOf( b.length ), Integer.valueOf( off )));
         }
 
         ByteBuffer bufferToUse;
@@ -327,6 +327,7 @@ public class ReplacingInputStream extends FilterInputStream {
      * @param iterables arrays which max length value we are interested in
      * @return largest length between all given arrays
      */
+    @SafeVarargs
     private static int getMaxLength(Iterable<byte[]>... iterables) {
         int result = -1;
         for (Iterable<byte[]> iterable : iterables) {
@@ -373,6 +374,7 @@ public class ReplacingInputStream extends FilterInputStream {
                 ReplacementResult replacementResult = tryToReplace(buffer, entry.getKey(), entry.getValue());
                 switch (replacementResult) {
                     case NOT_MATCHED:
+                    case REPLACED:
                         continue;
                     case NOT_ENOUGH_DATA:
                         continueIteration = false;

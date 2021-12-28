@@ -162,7 +162,7 @@ class DebControlFileBuilder {
                 try (Scanner scanner = new Scanner( localizedResource.getResource(), "UTF8" )) {
                     while ( scanner.hasNextLine() ) {
                         String line = scanner.nextLine();
-                        content.append( " " + ( line.isEmpty() ? '.' : line) + NEWLINE );
+                        content.append( " " + ( line.isEmpty() ? "." : line) + NEWLINE );
                     }
                 } finally {
                     controlWriter.write( content.toString() );
