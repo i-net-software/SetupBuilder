@@ -82,7 +82,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     public String getProductIdentity() {
         if ( productIdentity == null && identity != null ) {
-            System.out.println( "No product identity given, trying to use the application identity by replacing 'Application' with 'Installer'" );
+            task.getProject().getLogger().info( "No product identity given, trying to use the application identity by replacing 'Application' with 'Installer'" );
             return identity.replaceFirst( "Application", "Installer" );
         } else if ( productIdentity == null ) {
             throw new IllegalArgumentException( "You have to define the signing identity" );
@@ -225,7 +225,7 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
                 command.add( "--entitlements" );
                 command.add( entitlementsTempFile.getAbsolutePath() );
             } catch( IOException e ) {
-                System.err.println( "Could not use the entitlements file" );
+                task.getProject().getLogger().error( "Could not use the entitlements file" );
             }
         }
 

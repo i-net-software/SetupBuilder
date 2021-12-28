@@ -74,7 +74,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         if( task.getCodeSign() != null ) {
             task.getCodeSign().signApplication( new File( buildDir, service.getDisplayName() + ".app" ) );
         } else {
-            System.out.println( "Not codesigning the Servce: not configured" );
+            task.getProject().getLogger().info( "Not codesigning the Servce: not configured" );
         }
     }
 

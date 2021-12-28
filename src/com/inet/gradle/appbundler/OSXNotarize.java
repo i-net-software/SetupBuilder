@@ -1,6 +1,8 @@
 package com.inet.gradle.appbundler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param notarizeFile the file to notarize
      */
     public void run( File notarizeFile ) {
-        System.out.println( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
+        task.getProject().getLogger().info( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
 
         checkForRunningNotarizationProcess();
         
@@ -45,7 +47,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
             throw new IllegalStateException( "The notarization process has returned with an unexpected error." );
         }
 
-        System.out.println( "The RequestUUID for notarization is: " + UUID );
+        task.getProject().getLogger().info( "The RequestUUID for notarization is: " + UUID );
 
         // This will hang and wait until notarization is done
         if( !waitForNotarization( UUID ) ) {
@@ -213,7 +215,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         String output = exec( command.toArray( new String[command.size()] ) );
         if( isDebugOutput() ) {
-            System.out.println( output );
+            task.getProject().getLogger().debug( output );
         }
 
         try {
@@ -229,7 +231,15 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
             return (String)plist.computeIfPresent( "notarization-upload", ( String key, Object value ) -> ((Map<String, String>)value).get( "RequestUUID" ) );
 
         } catch( ClassCastException | XmlParseException e ) {
-            e.printStackTrace();
+            if ( !isDebugOutput() ) {
+                // Debug in addition
+                task.getProject().getLogger().error( output );
+            }
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            PrintStream stream = new PrintStream( bos );
+            e.printStackTrace( stream  );
+            task.getProject().getLogger().debug( bos.toString() );
         }
 
         return null;
@@ -242,10 +252,10 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      */
     private void waitWithStatus( String status ) throws InterruptedException {
         if ( status != null ) {
-            System.out.println( "Status was: '" + status + "'." );
+            task.getProject().getLogger().info( "Status was: '" + status + "'." );
         }
 
-        System.out.println( "Will wait a minute now." );
+        task.getProject().getLogger().info( "Will wait a minute now." );
         Thread.sleep( 1000 * 60 );
     }
 
@@ -272,9 +282,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 addDefaultOptionsToXCRunCommand( command );
 
                 String output = exec( command.toArray( new String[command.size()] ) );
-                if( isDebugOutput() ) {
-                    System.out.println( output );
-                }
+                task.getProject().getLogger().debug( output );
 
                 Map<String, Object> plist = Plist.fromXml( output );
                 Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
@@ -297,8 +305,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                     // This is what we have been waiting for!
                     return true;
                 } else if( status.equalsIgnoreCase( "invalid" ) ) {
-                    System.out.println( "The response status was 'invalid'. Please check the online logfile for problems:" );
-                    System.out.println( info.get( "LogFileURL" ) );
+                    task.getProject().getLogger().error( "The response status was 'invalid'. Please check the online logfile for problems:" );
+                    task.getProject().getLogger().error( info.get( "LogFileURL" ).toString() );
                     return false;
                 }
 
@@ -327,7 +335,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     
                 String output = exec( command.toArray( new String[command.size()] ) );
                 if ( debugOutput ) {
-                    System.out.println( "Response: `" + output + "`" );
+                    task.getProject().getLogger().info( "Response: `" + output + "`" );
                 }
 
                 Integer lineCount = Integer.valueOf( output );
@@ -336,7 +344,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 }
     
                 // Else continue;
-                System.out.println( "There was another process notarizing. Will wait a minute now." );
+                task.getProject().getLogger().info( "There was another process notarizing. Will wait a minute now." );
                 Thread.sleep( 1000 * 60 );
 
             } catch( NumberFormatException | InterruptedException e ) {
@@ -360,7 +368,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         String output = exec( false, command.toArray( new String[command.size()] ) );
         if( isDebugOutput() ) {
-            System.out.println( output );
+            task.getProject().getLogger().debug( output );
         }
     }
 }
