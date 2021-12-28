@@ -58,6 +58,7 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Reference;
+import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.resources.FileResource;
 
 import com.inet.gradle.setup.util.ResourceUtils;
@@ -533,7 +534,7 @@ public class AppBundlerTask extends Task {
         if (classPathRef != null) {
           org.apache.tools.ant.types.Path classpath =
             (org.apache.tools.ant.types.Path) classPathRef.getReferencedObject(getProject());
-          Iterator iter = classpath.iterator();
+          Iterator<Resource> iter = classpath.iterator();
           while (iter.hasNext()) {
             Object resource = iter.next();
             if (resource instanceof FileResource) {
@@ -644,12 +645,12 @@ public class AppBundlerTask extends Task {
             writeProperty(xout, "NSHumanReadableCopyright", copyright, 2);
             writeProperty(xout, "LSMinimumSystemVersion", minimumSystemVersion, 2);
             writeProperty(xout, "LSApplicationCategoryType", applicationCategory, 2);
-            writeProperty(xout, "LSUIElement", hideDockIcon, 2);
-            writeProperty(xout, "NSHighResolutionCapable", highResolutionCapable, 2);
-            writeProperty(xout, "NSSupportsAutomaticGraphicsSwitching", supportsAutomaticGraphicsSwitching, 2);
-            writeProperty(xout, "IgnorePSN", ignorePSN, 2);
+            writeProperty(xout, "LSUIElement", Boolean.valueOf( hideDockIcon ), 2);
+            writeProperty(xout, "NSHighResolutionCapable", Boolean.valueOf( highResolutionCapable ), 2);
+            writeProperty(xout, "NSSupportsAutomaticGraphicsSwitching", Boolean.valueOf( supportsAutomaticGraphicsSwitching ), 2);
+            writeProperty(xout, "IgnorePSN", Boolean.valueOf( ignorePSN ), 2);
 
-            writeProperty(xout, "NSRequiresAquaSystemAppearance", requiresAquaAppearance, 2);
+            writeProperty(xout, "NSRequiresAquaSystemAppearance", Boolean.valueOf( requiresAquaAppearance ), 2);
             
             if(registeredProtocols.size() > 0){
                 writeKey(xout, "CFBundleURLTypes", 2);
@@ -684,8 +685,8 @@ public class AppBundlerTask extends Task {
 
             writeProperty(xout, "JVMRunPrivileged", privileged, 2);
 
-            writeProperty(xout, "JREPreferred", jrePreferred, 2);
-            writeProperty(xout, "JDKPreferred", jdkPreferred, 2);
+            writeProperty(xout, "JREPreferred", Boolean.valueOf( jrePreferred ), 2);
+            writeProperty(xout, "JDKPreferred", Boolean.valueOf( jdkPreferred ), 2);
 
             writeProperty(xout, "WorkingDirectory", workingDirectory, 2);
 
@@ -701,7 +702,7 @@ public class AppBundlerTask extends Task {
             }
 
             // Write whether launcher be verbose with debug msgs
-            writeProperty(xout, "JVMDebug", isDebug, 2);
+            writeProperty(xout, "JVMDebug", Boolean.valueOf( isDebug ), 2);
 
             // Write jar launcher name
             writeProperty(xout, "JVMJARLauncher", jarLauncherName, 2);
@@ -841,7 +842,7 @@ public class AppBundlerTask extends Task {
     private void writeProperty(XMLStreamWriter xout, String key, Boolean value, int indentationDepth) throws XMLStreamException {
         if (value != null) {
             writeKey(xout, key, indentationDepth);
-            writeBoolean(xout, value, indentationDepth);
+            writeBoolean(xout, value.booleanValue(), indentationDepth);
         }
     }
 
@@ -885,7 +886,7 @@ public class AppBundlerTask extends Task {
         writeStringArray(xout, "LSItemContentTypes", contentTypes, indentationDepth + 2);
       } else {
         writeStringArray(xout, "CFBundleTypeExtensions", bundleDocument.getExtensions(), indentationDepth + 2);
-        writeProperty(xout, "LSTypeIsPackage", bundleDocument.isPackage(), indentationDepth + 2);
+        writeProperty(xout, "LSTypeIsPackage", Boolean.valueOf( bundleDocument.isPackage() ), indentationDepth + 2);
       }
       writeStringArray(xout, "NSExportableTypes", bundleDocument.getExportableTypes(), indentationDepth + 2);
 
