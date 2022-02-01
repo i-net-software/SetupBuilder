@@ -299,8 +299,19 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
+            
+            String mime = "";
             if( starter.getMimeTypes() != null ) {
-                fw.write( "MimeType=" + starter.getMimeTypes() + "\n" );
+            	mime = starter.getMimeTypes();
+            }
+            for( String scheme: starter.getSchemes() ) {
+            	if(mime.length() > 0) {
+            		mime = mime + ";";
+            	}
+            	mime = mime + "x-scheme-handler/" +scheme;
+            }
+            if( mime.length() > 0 ) {
+                fw.write( "MimeType=" + mime + "\n" );
             }
             if( starter.getCategories() != null ) {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );

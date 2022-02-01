@@ -195,7 +195,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         }
 
         if( !daemonuser.equalsIgnoreCase( "root" ) ) {
-            controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "userdel -r " + daemonuser + " 2> /dev/null || true \n" + "groupdel " + daemonuser + " 2> /dev/null || true \n" + "fi" );
+            controlBuilder.addTailScriptFragment( Script.POSTRM, "if [ \"$1\" = \"purge\" ] ; then\n" + "pkill -U " + daemonuser + " 2> /dev/null || true \n" + "sleep 2 \n" + "userdel -r " + daemonuser + " 2> /dev/null || true \n" + "groupdel " + daemonuser + " 2> /dev/null || true \n" + "fi" );
         }
 
     }
@@ -398,8 +398,18 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             fw.write( "Terminal=false\n" );
             fw.write( "StartupNotify=true\n" );
             fw.write( "Type=Application\n" );
+            String mime = "";
             if( starter.getMimeTypes() != null ) {
-                fw.write( "MimeType=" + starter.getMimeTypes() + "\n" );
+            	mime = starter.getMimeTypes();
+            }
+            for( String scheme: starter.getSchemes() ) {
+            	if(mime.length() > 0) {
+            		mime = mime + ";";
+            	}
+            	mime = mime + "x-scheme-handler/" +scheme;
+            }
+            if( mime.length() > 0 ) {
+                fw.write( "MimeType=" + mime + "\n" );
             }
             if( starter.getCategories() != null ) {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
