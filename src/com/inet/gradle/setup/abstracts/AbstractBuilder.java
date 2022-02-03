@@ -17,11 +17,13 @@ package com.inet.gradle.setup.abstracts;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.initialization.DefaultBuildCancellationToken;
@@ -150,9 +152,14 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         action.setErrorOutput( output );
         try {
             action.execute();
-            output.flush();
         } catch( Throwable th ) {
             throw new RuntimeException( th );
+        } finally {
+            try {
+                output.flush();
+            } catch( IOException e ) {
+                task.getProject().getLogger().error( e.getLocalizedMessage() );
+            }
         }
     }
 
