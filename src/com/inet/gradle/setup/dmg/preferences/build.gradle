@@ -57,18 +57,6 @@ task sourcesJar(type: Jar) {
         configurations.archives.artifacts.removeAll{ it.classifier != "sources" } // only leave gthe sources
     }
 }
-/*
-publishing {
-    publications {
-        myPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            pom.withXml {
-                asNode().appendNode('description', 'Preference Pane sources')
-            }
-        }
-    }
-}*/
 
 compileJava.enabled = false
 classes.enabled = false
