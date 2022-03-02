@@ -173,7 +173,6 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
      * @return file to prefpane sources
      * @throws Exception in case of errors.
      */
-    @SuppressWarnings( "serial" )
     private File unpackAndPatchPrefPaneSource( String internalName ) throws Exception {
 
         // Create Config and load Dependencies.
