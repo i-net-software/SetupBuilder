@@ -6,7 +6,7 @@ RUNAFTER_WORKINGDIR="$TARGET_LOCATION/{{installationSubdirectory}}{{displayName}
 RUNINBACKGROUND="{{inBackground}}"
 
 # this is to be inteded with an embedded JRE and existing jars only
-if [ ! -z "$JAVAEXECUTABLE" ]; then
+if [ -n "$JAVAEXECUTABLE" ]; then
 
     # enable monitor for jobs
     set -o monitor
