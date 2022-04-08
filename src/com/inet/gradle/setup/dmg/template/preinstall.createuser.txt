@@ -46,12 +46,11 @@ dscl . -delete "/Users/${DEAMON_USER}" AuthenticationAuthority                  
 
 # Unusable password for standard users
 dscl . -create "/Users/${DEAMON_USER}" Password \*                                      || echo "Password can not be set"
-# dscl . -read "/Users/${DEAMON_USER}"
 
 # Add user to group user and staff, but check first! Mojave removed the user group
 dseditgroup -o edit -a "${DEAMON_USER}" -t "$(dscl . -read "/Groups/user" RecordName 2> /dev/null | awk '{print $2}')" "$(dscl . -read "/Groups/staff" RecordName 2> /dev/null | awk '{print $2}')" || echo "Default groups could not be added to user"
 #########################################################################################################
 
 # make home directory
-[ -z "$OLDUID" ] && mkdir -p "${HOME_DIRECTORY}/Library/Preferences"                    || echo "HomeDirectory and preferences should already exist" 
-[ -z "$OLDUID" ] && chown -R "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}"        || echo "Directory permissions have been set before"
+[ ! -d "${HOME_DIRECTORY}" ] && mkdir -p "${HOME_DIRECTORY}/Library/Preferences"                     || echo "HomeDirectory and preferences should already exist" 
+[ -d "${HOME_DIRECTORY}" ] && chown -R "${DEAMON_USER}:${DEAMON_USER}" "${HOME_DIRECTORY}"           || echo "Directory permissions have been set before"
