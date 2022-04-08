@@ -17,8 +17,8 @@ fi
 OLDUID=$(dscl . -read "/Users/${DEAMON_USER}" UniqueID 2> /dev/null | awk '{print $2}')
 OLDGID=$(dscl . -read "/Groups/${DEAMON_USER}" PrimaryGroupID 2> /dev/null | awk '{print $2}')
 
-NEXTUID=$([ ! -z "$OLDUID" ] && echo "$OLDUID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
-NEXTGID=$([ ! -z "$OLDGID" ] && echo "$OLDGID" || dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+NEXTUID=$([ -n "$OLDUID" ] && echo "$OLDUID" || dscl . -list /Users UniqueID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
+NEXTGID=$([ -n "$OLDGID" ] && echo "$OLDGID" || dscl . -list /Groups PrimaryGroupID | awk 'BEGIN{i=0}{if($2>i&&$2<500)i=$2}END{print i+1}')
 
 echo "I am Batman, or: $(whoami)"
 echo "Will use '${NEXTUID}' as UserID and '${NEXTGID}' as group ID for User '${DEAMON_USER}'"
@@ -40,7 +40,7 @@ dscl . -create "/Users/${DEAMON_USER}" NFSHomeDirectory "${HOME_DIRECTORY}"     
 dscl . -create "/Users/${DEAMON_USER}" UserShell /usr/bin/false                         || echo "UserShell can not be set"
 dscl . -create "/Users/${DEAMON_USER}" RealName "${SERVICE_DESCRIPTION} Administrator"  || echo "RealName can not be set"
 
-# Revoke Rights
+# Revoke Permissions
 dscl . -delete "/Users/${DEAMON_USER}" PasswordPolicyOptions                            || echo "PasswordPolicyOptions can not be removed"
 dscl . -delete "/Users/${DEAMON_USER}" AuthenticationAuthority                          || echo "AuthenticationAuthority can not be removed"
 

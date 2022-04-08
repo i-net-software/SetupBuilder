@@ -66,10 +66,6 @@ if [[ $FLAG -eq 1 ]]; then
     echo "# Cleanup"
     rm "$PKGTMP"
 
-    if [ -f "$AGENT_DESTINATION" ]; then
-        rm "$AGENT_DESTINATION"
-    fi
-
     echo "# Done"
     echo "########################################"
     # Remove watcher for this uninstall script
@@ -81,6 +77,10 @@ if [[ $FLAG -eq 1 ]]; then
         if [ -d "/opt/{{serviceName}}" ]; then 
             rm -rf "/opt/{{serviceName}}"
         fi
+    fi
+
+    if [ -f "$AGENT_DESTINATION" ]; then
+        rm "$AGENT_DESTINATION"
     fi
 fi
 
