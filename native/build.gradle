@@ -34,6 +34,8 @@ task compileNativeStarter(type: Exec) {
 		args "-v"
         args "-arch"
         args "x86_64"
+        args "-arch"
+        args "arm64"
         args "-I"
         args "${javahome}/include"
         args "-I"
