@@ -143,12 +143,10 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         appBundler.setIgnorePSN( true ); // Ignore this argument.
         appBundler.setCopyright( setup.getCopyright() );
         appBundler.setIcon( getApplicationIcon() );
-        Architecture x86_64 = new Architecture();
-        x86_64.setName( "x86_64" );
-        appBundler.addConfiguredArch( x86_64 );
-        
+
         // Add all native libraries
         if( task instanceof Dmg ) {
+            ((Dmg)task).getArchitecture().forEach( arch -> appBundler.addConfiguredArch( Architecture.from( arch ) ) );
             ((Dmg)task).getNativeLibraries().forEach( set -> appBundler.addConfiguredLibraryPath( set ) );
         }
     }

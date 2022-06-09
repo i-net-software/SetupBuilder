@@ -42,4 +42,10 @@ public class Architecture {
     public String toString() {
         return name;
     }
+
+    public static Architecture from( String name ) {
+        Architecture architecture = new Architecture();
+        architecture.setName( name );
+        return architecture;
+    }
 }

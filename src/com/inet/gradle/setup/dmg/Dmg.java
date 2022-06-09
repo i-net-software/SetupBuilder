@@ -36,6 +36,7 @@ import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.GradleUtils;
+import com.oracle.appbundler.Architecture;
 
 import groovy.lang.Closure;
 
@@ -63,9 +64,11 @@ public class Dmg extends AbstractUnixSetupTask {
     private List<LocalizedResource>        conclusionPages              = new ArrayList<>();
 
     private List<PreferencesLink>          preferencesLink              = new ArrayList<>();
+    
+    private List<String>                   architecture                 = Arrays.asList( "x86_64" );
 
     final List<OSXApplicationBuilder>      appBuilders                  = new ArrayList<>();
-
+    
     private List<String>                   jreIncludes                  = Arrays.asList( new String[] {
                     "bin/java",
                     "lib/",
@@ -469,6 +472,24 @@ public class Dmg extends AbstractUnixSetupTask {
     public void setJreExcludes( List<String> jreExclude ) {
         this.jreExcludes = jreExclude;
     }
+    
+    /**
+     * Get a list of supported architectures that will be added to the Info.plist file
+     * @return the list of architectures
+     */
+    @Input
+    @Optional
+    public List<String> getArchitecture() {
+        return architecture;
+    }
+    
+    /**
+     * Create a list of architectures from the given input list of strings. 
+     * @param architecture the list of supported architectures
+     */
+    public void setArchitecture( List<String> architecture ) {
+        this.architecture = architecture;
+    }
 
     /**
      * Returns the converted background color as apple script string
@@ -482,9 +503,7 @@ public class Dmg extends AbstractUnixSetupTask {
             backgroundColor = new Color( 255, 255, 255 );
         }
 
-        return "{" +
-                        String.join( ", ", Arrays.asList( String.valueOf( backgroundColor.getRed() * 257 ), String.valueOf( backgroundColor.getGreen() * 257 ), String.valueOf( backgroundColor.getBlue() * 257 ) ) ) +
-                        "}";
+        return "{" + String.join( ", ", Arrays.asList( String.valueOf( backgroundColor.getRed() * 257 ), String.valueOf( backgroundColor.getGreen() * 257 ), String.valueOf( backgroundColor.getBlue() * 257 ) ) ) + "}";
     }
 
     /**
