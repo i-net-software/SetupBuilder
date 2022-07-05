@@ -97,17 +97,21 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     public Dmg() {
         super( "dmg" );
+        getProject().getLogger().lifecycle( "\tCreating afterEvaluate task."  );
         getProject().afterEvaluate( ( project ) -> {
             // if the "dmg" task should be executed then create some possible extra tasks on the end of the configuration phase
             boolean isExecute = GradleUtils.isTaskExecute( Dmg.this, project );
             if( isExecute ) {
                 SetupBuilder setup = getSetupBuilder();
+                project.getLogger().lifecycle( "\tPreparing " + setup.getServices().size() + " appBuilders."  );
                 for( Service service : setup.getServices() ) {
                     ProjectInternal projInternal = (ProjectInternal)project;
                     OSXApplicationBuilder builder = new OSXApplicationBuilder( Dmg.this, setup, projInternal.getFileResolver() );
                     builder.configSubTasks( service );
                     appBuilders.add( builder );
                 }
+            } else {
+                project.getLogger().lifecycle( "\tDMG is not marked for task execution."  );
             }
         } );
     }
@@ -118,6 +122,7 @@ public class Dmg extends AbstractUnixSetupTask {
     @Override
     public void build() {
         ProjectInternal project = (ProjectInternal)getProject();
+        getProject().getLogger().lifecycle( "\tStarting the build."  );
         new DmgBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
     }
 

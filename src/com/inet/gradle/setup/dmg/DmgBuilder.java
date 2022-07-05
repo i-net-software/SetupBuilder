@@ -76,6 +76,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      */
     public void build() throws RuntimeException {
 
+        task.getProject().getLogger().lifecycle( "\tRunning the build."  );
         tempPath = new TempPath( new File( setup.getProject().getBuildDir(), "tmp/SetupBuilder" ).toPath() );
 
         try {
@@ -83,6 +84,8 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
                 throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
             }
 
+            task.getProject().getLogger().lifecycle( "\tPreparing " + task.appBuilders.size() + " services."  );
+            
             // Build all services
             for( OSXApplicationBuilder builder : task.appBuilders ) {
                 builder.buildService();
