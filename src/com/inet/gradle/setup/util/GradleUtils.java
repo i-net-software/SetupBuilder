@@ -37,7 +37,7 @@ public abstract class GradleUtils {
         List<String> startTasks = project.getGradle().getStartParameter().getTaskNames();
         TaskContainer tasks = project.getTasks();
         for( String startTaskName : startTasks ) {
-            if( Objects.equals( name, startTaskName ) ) {
+            if( Objects.equals( name, startTaskName ) || startTaskName.endsWith( ":" + name )  ) {
                 // direct call of the task in the command line
                 return true;
             }
