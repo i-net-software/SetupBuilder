@@ -268,11 +268,12 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     @SuppressWarnings( "unchecked" )
     private boolean waitForNotarization( String UUID ) {
 
+        String output = "";
         int acceptedFailureCount = 5;
         List<String> lastErrors = new ArrayList<>();
 
-        try {
-            while( true && acceptedFailureCount > 0 ) {
+        while( true && acceptedFailureCount > 0 ) {
+            try {
 
                 ArrayList<String> command = new ArrayList<>();
                 command.add( "xcrun" );
@@ -281,7 +282,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 command.add( UUID );
                 addDefaultOptionsToXCRunCommand( command );
 
-                String output = exec( command.toArray( new String[command.size()] ) );
+                output = exec( command.toArray( new String[command.size()] ) );
                 task.getProject().getLogger().debug( output );
 
                 Map<String, Object> plist = Plist.fromXml( output );
@@ -311,9 +312,15 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 }
 
                 waitWithStatus( status );
+            } catch( ClassCastException | XmlParseException | InterruptedException e ) {
+                lastErrors.add( e.getMessage() );
+                lastErrors.add( output + "\n\n" );
+                try {
+                    waitWithStatus( null );
+                } catch ( InterruptedException ie ) {
+                    // ignore
+                }
             }
-        } catch( ClassCastException | XmlParseException | InterruptedException e ) {
-            throw new IllegalArgumentException( e );
         }
 
         throw new IllegalArgumentException( String.join( "\n", lastErrors ) );
