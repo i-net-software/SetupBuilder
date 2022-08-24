@@ -61,6 +61,8 @@ import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.resources.FileResource;
 
+import org.gradle.api.logging.Logger;
+
 import com.inet.gradle.setup.util.ResourceUtils;
 
 /**
@@ -132,7 +134,14 @@ public class AppBundlerTask extends Task {
     private static final String STRING_TAG = "string";
 
     private static final int BUFFER_SIZE = 2048;
+    
+    private Logger logger;
 
+    public void setLogger( Logger logger ) {
+        this.logger = logger;
+    }
+    
+    
     public void setOutputDirectory(File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
@@ -453,7 +462,18 @@ public class AppBundlerTask extends Task {
 
             // Copy executable to MacOS folder
             File executableFile = new File(macOSDirectory, executableName);
-            copy(getClass().getResource(EXECUTABLE_NAME), executableFile);
+            URL executable = null;
+            if ( architectures.size() == 1 ) {
+                // check if the is a special arch launcher
+                executable = getClass().getResource(EXECUTABLE_NAME + "_" + architectures.get( 0 ) );
+            }
+            
+            if ( executable == null ) {
+                executable = getClass().getResource(EXECUTABLE_NAME); // has to exist
+            }
+            
+            this.logger.lifecycle( "Using executable from: " + executable.toString() );
+            copy(executable, executableFile);
 
             executableFile.setExecutable(true, false);
 

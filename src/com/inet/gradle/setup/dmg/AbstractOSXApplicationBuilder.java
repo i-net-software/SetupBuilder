@@ -64,6 +64,7 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         super( task, fileResolver );
         this.setup = setup;
         appBundler = new AppBundlerTask();
+        appBundler.setLogger( setup.getProject().getLogger() );
     }
 
     /**
