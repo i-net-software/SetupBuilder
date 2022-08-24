@@ -144,6 +144,11 @@ public class TempPath {
      */
     public static void clearTemporaryFolder( Path tmp ) throws Exception {
         // Remove temporary folder and content.
+        if ( Logging.DEBUG_LOG ) {
+            Logging.sysout( "Will not remove path due to debugging: " + tmp.toString() );
+            return;
+        }
+        
         Files.walkFileTree( tmp, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException {
