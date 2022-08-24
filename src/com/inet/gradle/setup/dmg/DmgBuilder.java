@@ -26,7 +26,10 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -34,6 +37,7 @@ import org.gradle.api.internal.file.FileResolver;
 import org.w3c.dom.Element;
 
 import com.inet.gradle.appbundler.OSXCodeSign;
+import com.inet.gradle.appbundler.utils.xmlwise.Plist;
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.Template;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
@@ -43,6 +47,7 @@ import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.TempPath;
 import com.inet.gradle.setup.util.XmlFileBuilder;
+import com.oracle.appbundler.PlistEntry;
 
 /**
  * Build a DMG image for OSX.
@@ -311,11 +316,18 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      * @throws Throwable in case of error
      */
     private void createAndPatchDistributionXML() throws Throwable {
+        File productFile = tempPath.getTempFile( "product.plist" );
+        Map<String, Object> map = new HashMap<>();
+        map.put( "arch", task.getArchitecture() );
+        Plist.store( map, productFile );
+        
         ArrayList<String> command;
         // Synthesize Distribution xml
         command = new ArrayList<>();
         command.add( "/usr/bin/productbuild" );
         command.add( "--synthesize" );
+        command.add( "--product" );
+        command.add( productFile.toString() );
         command.add( "--package" );
         command.add( tempPath.getTempFile( "packages", setup.getApplication() + ".pkg" ).toString() );
         command.add( tempPath.getTempFile( "distribution.xml" ).toString() );
