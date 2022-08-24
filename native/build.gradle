@@ -9,33 +9,20 @@ task getXCrun(type: Exec) {
     ext.run = { return standardOutput.toString().trim() }
 }
 
-task compileNativeStarter(type: Exec) {
+def compileNativeStarter = { LIBJLI_DY_LIB, javahome, outputFile, List architectures ->
 
-    dependsOn getXCrun
-    def outputFile = new File( "${buildDir}", "JavaAppLauncher" )
-    doFirst {
-
-        def javahome = System.getProperty( "java.home" )
-        def javahomeJRE = javahome;
-        
-        if ( file("${javahomeJRE}/../jre").exists() ) {
-        	javahomeJRE += "/../jre";
-        }
-        
-        def LIBJLI_DY_LIB="${javahomeJRE}/lib/libjli.dylib"
-        if ( !file(LIBJLI_DY_LIB).exists() ) {
-			LIBJLI_DY_LIB="${javahomeJRE}/lib/jli/libjli.dylib"
-        }
-
-        println "JAVA_HOME: ${javahome}";
-        println "JAVA_HOME_JRE: ${javahomeJRE}";
-        println "LIBJLI_DY_LIB: ${LIBJLI_DY_LIB}";
+	def compileNative = project.tasks.create( [name: "compileNative-" + UUID.randomUUID(), type: Exec ] ) {
+	    workingDir "."
+    	commandLine "/usr/bin/gcc"
+    	outputs.file( outputFile )
 
 		args "-v"
-        args "-arch"
-        args "x86_64"
-        args "-arch"
-        args "arm64"
+		
+		for( String arch : architectures ) {
+	        args "-arch"
+	        args arch
+		}
+		
         args "-I"
         args "${javahome}/include"
         args "-I"
@@ -53,20 +40,49 @@ task compileNativeStarter(type: Exec) {
         args "-o"
         args outputFile
         args "main.m"
-    }
+	}
 
-    doLast {
-        outputFile.setExecutable( true, false)
-        copy {
-            from( outputFile )
-            into('../src/com/oracle/appbundler')
-        }
-    }
-
-    workingDir "."
-    outputs.file( outputFile )
-
-    commandLine "/usr/bin/gcc"
+	compileNative.exec()
+	outputFile.setExecutable( true, false)
+	println "Copying '${outputFile}' to destination"
+	copy {
+	    from( outputFile )
+	    into('../src/com/oracle/appbundler')
+	}
 }
 
-defaultTasks = ["compileNativeStarter", "clean"]
+task createNativeStarter {
+
+    dependsOn getXCrun
+
+    doLast {
+
+		file("${buildDir}").mkdirs()
+
+        def javahome = System.getProperty( "java.home" )
+        def javahomeJRE = javahome;
+        
+        if ( file("${javahomeJRE}/../jre").exists() ) {
+        	javahomeJRE += "/../jre";
+        }
+        
+        def LIBJLI_DY_LIB="${javahomeJRE}/lib/libjli.dylib"
+        if ( !file(LIBJLI_DY_LIB).exists() ) {
+			LIBJLI_DY_LIB="${javahomeJRE}/lib/jli/libjli.dylib"
+        }
+
+        println "JAVA_HOME: ${javahome}";
+        println "JAVA_HOME_JRE: ${javahomeJRE}";
+        println "LIBJLI_DY_LIB: ${LIBJLI_DY_LIB}";
+
+		println "Creating JavaAppLauncher"
+	    def outputFile = new File( "${buildDir}", "JavaAppLauncher" )
+    	compileNativeStarter LIBJLI_DY_LIB, javahome, outputFile, [ 'x86_64', 'arm64' ]
+
+		println "Creating JavaAppLauncher_x86_64"
+	    def outputFileX86 = new File( "${buildDir}", "JavaAppLauncher_x86_64" )
+    	compileNativeStarter LIBJLI_DY_LIB, javahome, outputFileX86, [ 'x86_64' ]
+    }
+}
+
+defaultTasks = ["clean", "createNativeStarter"]
