@@ -65,7 +65,7 @@ public class Dmg extends AbstractUnixSetupTask {
 
     private List<PreferencesLink>          preferencesLink              = new ArrayList<>();
     
-    private List<String>                   architecture                 = Arrays.asList( "x86_64" );
+    private List<String>                   architecture                 = Arrays.asList( "x86_64", "arm64" );
 
     final List<OSXApplicationBuilder>      appBuilders                  = new ArrayList<>();
     
