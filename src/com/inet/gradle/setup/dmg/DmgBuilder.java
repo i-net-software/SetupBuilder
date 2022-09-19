@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileAttribute;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.TempPath;
 import com.inet.gradle.setup.util.XmlFileBuilder;
-import com.oracle.appbundler.PlistEntry;
 
 /**
  * Build a DMG image for OSX.
@@ -109,7 +107,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
             imageSourceRoot = buildDir.toString(); // + "/" + setup.getApplication() + ".app";
 
-            // Just in case. If it still has not been set, we do not know what the user itends.
+            // Just in case. If it still has not been set, we do not know what the user intends.
             if ( firstExecutableName == null ) {
                 firstExecutableName = setup.getApplication();
             }
