@@ -97,7 +97,9 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         String mainJar = application.getMainJar();
         if( application.getWorkDir() != null ) {
             appBundler.setWorkingDirectory( new File( new File( "$APP_ROOT/Contents/Java" ), application.getWorkDir() ).toString() );
-            mainJar = new File( new File( application.getWorkDir() ), mainJar ).toString();
+            if ( mainJar != null ) { 
+                mainJar = new File( new File( application.getWorkDir() ), mainJar ).toString();
+            }
         }
 
         appBundler.setShortVersion( version );
