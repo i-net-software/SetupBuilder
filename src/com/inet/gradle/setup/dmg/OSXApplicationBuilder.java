@@ -101,6 +101,8 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
             File destinationFile = new File( buildDir, executableName );
             Files.move( executableFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
             
+            setApplicationFilePermissions( destinationFile );
+            
             if( task.getCodeSign() != null ) {
                 task.getCodeSign().signApplication( destinationFile );
             }
