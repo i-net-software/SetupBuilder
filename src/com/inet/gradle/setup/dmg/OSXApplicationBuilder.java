@@ -1,7 +1,10 @@
 package com.inet.gradle.setup.dmg;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
+import org.codehaus.groovy.control.ConfigurationException;
 import org.gradle.api.internal.file.FileResolver;
 
 import com.inet.gradle.setup.SetupBuilder;
@@ -86,8 +89,27 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
      */
     void buildApplication( DesktopStarter application ) throws Exception {
 
+        String executable = application.getExecutable();
+        if ( executable != null && executable.endsWith( ".app" ) ) {
+            // This is already a finished app. We do not have to package it again.
+            File executableFile = new File( executable );
+            if ( !executableFile.exists() ) {
+                throw new ConfigurationException( "An executable file '" + executable + "' was defined but did not exist." );
+            }
+
+            String executableName = executableFile.getName();
+            File destinationFile = new File( buildDir, executableName );
+            Files.move( executableFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
+            
+            if( task.getCodeSign() != null ) {
+                task.getCodeSign().signApplication( destinationFile );
+            }
+            
+            return;
+        }
+        
         // We need the executable. It has a different meaning than on other systems.
-        if( application.getExecutable() == null || application.getExecutable().isEmpty() ) {
+        if( executable == null || executable.isEmpty() ) {
             application.setExecutable( getSetupBuilder().getAppIdentifier() );
         }
 
