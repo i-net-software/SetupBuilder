@@ -276,28 +276,55 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         String installationRoot = task.getInstallationRoot();
         String workingDir = installationRoot + (service.getWorkDir() != null ? "/" + service.getWorkDir() : "");
         String mainJarPath = workingDir + "/" + service.getMainJar();
-
-        Template initScript = new Template( "unix/init-service.sh" );
-        initScript.setPlaceholder( "name", serviceUnixName );
         String version = task.getVersion();
-        initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
-        initScript.setPlaceholder( "displayName", setup.getApplication() );
-        initScript.setPlaceholder( "description", service.getDescription() );
-        initScript.setPlaceholder( "wait", "2" );
 
-        initScript.setPlaceholder( "workdir", workingDir );
-        initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
-        initScript.setPlaceholder( "javaVMArguments", (String.join( " ", service.getJavaVMArguments())).trim() );
+        if(task.isUseInitD()) {
+        	Template initScript = new Template( "unix/init-service.sh" );
+        	initScript.setPlaceholder( "name", serviceUnixName );
+        	initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
+        	initScript.setPlaceholder( "displayName", setup.getApplication() );
+        	initScript.setPlaceholder( "description", service.getDescription() );
+        	initScript.setPlaceholder( "wait", "2" );
 
-        initScript.setPlaceholder( "mainClass", service.getMainClass() );
-        initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
-        initScript.setPlaceholder( "daemonExec", javaMainExecutable );
-        initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+        	initScript.setPlaceholder( "workdir", workingDir );
+        	initScript.setPlaceholder( "mainJar", mainJarPath );
+        	initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+        	initScript.setPlaceholder( "javaVMArguments", (String.join( " ", service.getJavaVMArguments())).trim() );
 
-        String initScriptFile = "etc/init.d/" + serviceUnixName;
-        initScript.writeTo( createFile( initScriptFile, true ) );
+        	initScript.setPlaceholder( "mainClass", service.getMainClass() );
+        	initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+        	initScript.setPlaceholder( "daemonExec", javaMainExecutable );
+        	initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
+        	String initScriptFile = "etc/init.d/" + serviceUnixName;
+        	initScript.writeTo( createFile( initScriptFile, true ) );
+        	
+        	controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && update-rc.d " + serviceUnixName + " defaults 91 09 >/dev/null || true" );
+        	controlBuilder.addTailScriptFragment( Script.PRERM, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " stop || true" );
+        } else {
+        	String systemdTemplate = "unix/systemd.service";
+    		Template systemdScript = new Template( systemdTemplate  );
+    		systemdScript.setPlaceholder( "name", serviceUnixName );
+    		systemdScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
+    		systemdScript.setPlaceholder( "displayName", setup.getApplication() );
+    		systemdScript.setPlaceholder( "description", service.getDescription() );
+    		systemdScript.setPlaceholder( "wait", "2" );
+
+    		systemdScript.setPlaceholder( "workdir", workingDir );
+    		systemdScript.setPlaceholder( "mainJar", mainJarPath );
+    		systemdScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+    		systemdScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
+
+    		systemdScript.setPlaceholder( "mainClass", service.getMainClass() );
+    		systemdScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+    		systemdScript.setPlaceholder( "daemonExec", javaMainExecutable );
+    		systemdScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+
+    		String systemdScriptFile = "usr/lib/systemd/system/" + serviceUnixName + ".service";
+    		systemdScript.writeTo( createFile( systemdScriptFile , true ) );
+    		controlBuilder.addConfFile( systemdScriptFile );
+        }
+        
         // copy a default service file if set
         if( task.getDefaultServiceFile() != null ) {
             File serviceDestFile = new File( buildDir.getAbsolutePath(), "/etc/default/" + serviceUnixName );
@@ -305,12 +332,17 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
 
-        controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && update-rc.d " + serviceUnixName + " defaults 91 09 >/dev/null || true" );
+        
         if ( task.shouldStartDefaultService() ) {
-            controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " start || true" );
+        	if(task.isUseInitD()) {
+        		controlBuilder.addTailScriptFragment( Script.POSTINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " start || true" );
+        	} else {
+        		controlBuilder.addTailScriptFragment( Script.POSTINST, "systemctl start " + serviceUnixName + " || true" );
+        	}
+        	
         }
 
-        controlBuilder.addTailScriptFragment( Script.PRERM, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " stop || true" );
+        
         controlBuilder.addTailScriptFragment( Script.POSTRM, "[ \"$1\" = \"purge\" ] && update-rc.d " + serviceUnixName + " remove >/dev/null || true " );
     }
 

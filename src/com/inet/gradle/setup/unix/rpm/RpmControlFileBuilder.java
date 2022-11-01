@@ -331,8 +331,11 @@ class RpmControlFileBuilder {
         }
 
         if( setup.getServices() != null && setup.getServices().size() > 0 ) {
-        	controlWriter.write( "/etc/init.d/*" + NEWLINE ); // the default script is always installed here
-        	controlWriter.write( "/usr/lib/systemd/system/*" + NEWLINE ); // the default script is always installed here
+        	if(rpm.isUseInitD()) {
+        		controlWriter.write( "/etc/init.d/*" + NEWLINE ); // the default script is always installed here
+        	} else {
+        		controlWriter.write( "/usr/lib/systemd/system/*" + NEWLINE ); // the default script is always installed here
+        	}
         }
 
         if( rpm.getDefaultServiceFile() != null ) {

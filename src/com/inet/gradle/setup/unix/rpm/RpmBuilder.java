@@ -134,84 +134,90 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
      * @throws IOException on errors during creating or writing a file
      */
     private void setupService( Service service ) throws IOException {
-        String serviceUnixName = service.getId();
-        String installationRoot = task.getInstallationRoot();
-        String workingDir = installationRoot + (service.getWorkDir() != null ? "/" + service.getWorkDir() : "");
-        String mainJarPath = workingDir + "/" + service.getMainJar();
+    	String serviceUnixName = service.getId();
+    	String installationRoot = task.getInstallationRoot();
+    	String workingDir = installationRoot + (service.getWorkDir() != null ? "/" + service.getWorkDir() : "");
+    	String mainJarPath = workingDir + "/" + service.getMainJar();
+    	String version = task.getVersion();
 
-        String initTemplate = "unix/init-service.sh";
-        Template initScript = new Template( initTemplate  );
-        initScript.setPlaceholder( "name", serviceUnixName );
-        String version = task.getVersion();
-        initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
-        initScript.setPlaceholder( "displayName", setup.getApplication() );
-        initScript.setPlaceholder( "description", service.getDescription() );
-        initScript.setPlaceholder( "wait", "2" );
+    	if(task.isUseInitD()) {
+    		String initTemplate = "unix/init-service.sh";
+    		Template initScript = new Template( initTemplate  );
+    		initScript.setPlaceholder( "name", serviceUnixName );
+    		initScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
+    		initScript.setPlaceholder( "displayName", setup.getApplication() );
+    		initScript.setPlaceholder( "description", service.getDescription() );
+    		initScript.setPlaceholder( "wait", "2" );
 
-        initScript.setPlaceholder( "workdir", workingDir );
-        initScript.setPlaceholder( "mainJar", mainJarPath );
-        initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
-        initScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
+    		initScript.setPlaceholder( "workdir", workingDir );
+    		initScript.setPlaceholder( "mainJar", mainJarPath );
+    		initScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+    		initScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
 
-        initScript.setPlaceholder( "mainClass", service.getMainClass() );
-        initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
-        initScript.setPlaceholder( "daemonExec", javaMainExecutable );
-        initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+    		initScript.setPlaceholder( "mainClass", service.getMainClass() );
+    		initScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+    		initScript.setPlaceholder( "daemonExec", javaMainExecutable );
+    		initScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
 
-        String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
-        initScript.writeTo( createFile( initScriptFile , true ) );
-        controlBuilder.addConfFile( initScriptFile );
+    		String initScriptFile = "BUILD/etc/init.d/" + serviceUnixName;
+    		initScript.writeTo( createFile( initScriptFile , true ) );
+    		controlBuilder.addConfFile( initScriptFile );
 
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
+    				+ "echo replace path\n"
+    				+ "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
+    				+ "\nfi" );
+    		
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " && systemctl enable " + serviceUnixName + " ) || true" );
+            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
+            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );    
+    	} else {
 
+    		String systemdTemplate = "unix/systemd.service";
+    		Template systemdScript = new Template( systemdTemplate  );
+    		systemdScript.setPlaceholder( "name", serviceUnixName );
+    		systemdScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
+    		systemdScript.setPlaceholder( "displayName", setup.getApplication() );
+    		systemdScript.setPlaceholder( "description", service.getDescription() );
+    		systemdScript.setPlaceholder( "wait", "2" );
+
+    		systemdScript.setPlaceholder( "workdir", workingDir );
+    		systemdScript.setPlaceholder( "mainJar", mainJarPath );
+    		systemdScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
+    		systemdScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
+
+    		systemdScript.setPlaceholder( "mainClass", service.getMainClass() );
+    		systemdScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
+    		systemdScript.setPlaceholder( "daemonExec", javaMainExecutable );
+    		systemdScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+
+    		String systemdScriptFile = "BUILD/usr/lib/systemd/system/" + serviceUnixName + ".service";
+    		systemdScript.writeTo( createFile( systemdScriptFile , true ) );
+    		controlBuilder.addConfFile( systemdScriptFile );
+    		
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl enable " + serviceUnixName + " ) || true" );
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop \"" + serviceUnixName + "\" || true" );
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop " + serviceUnixName + " || true" );
+    		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl disable " + serviceUnixName + " ) || true" );
+    	}
         
-        String systemdTemplate = "unix/systemd.service";
-        Template systemdScript = new Template( systemdTemplate  );
-        systemdScript.setPlaceholder( "name", serviceUnixName );
-        systemdScript.setPlaceholder( "majorversion", version.substring( 0, version.indexOf( '.' ) ) );
-        systemdScript.setPlaceholder( "displayName", setup.getApplication() );
-        systemdScript.setPlaceholder( "description", service.getDescription() );
-        systemdScript.setPlaceholder( "wait", "2" );
-
-        systemdScript.setPlaceholder( "workdir", workingDir );
-        systemdScript.setPlaceholder( "mainJar", mainJarPath );
-        systemdScript.setPlaceholder( "startArguments", (service.getStartArguments()).trim() );
-        systemdScript.setPlaceholder( "javaVMArguments", String.join( " ", service.getJavaVMArguments()).trim() );
-
-        systemdScript.setPlaceholder( "mainClass", service.getMainClass() );
-        systemdScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
-        systemdScript.setPlaceholder( "daemonExec", javaMainExecutable );
-        systemdScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
-
-        String systemdScriptFile = "BUILD/usr/lib/systemd/system/" + serviceUnixName + ".service";
-        systemdScript.writeTo( createFile( systemdScriptFile , true ) );
-        controlBuilder.addConfFile( systemdScriptFile );
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && \"/etc/init.d/" + serviceUnixName + "\" stop || true" );
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && service \"" + serviceUnixName + "\" stop || true" );
         
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "if [ -f \"/etc/init.d/" + serviceUnixName + "\" ]  && [ \"" + installationRoot + "\" != \"$RPM_INSTALL_PREFIX\" ] ; then\n"
-                        + "echo replace path\n"
-                        + "sed -i 's|'" + installationRoot + "'|'$RPM_INSTALL_PREFIX'|g' /etc/init.d/" + serviceUnixName
-                        + "\nfi" );
-        
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "if [ ! -f /etc/pam.d/passwd ] && [ ! -f /etc/pam.d/" + serviceUnixName + " ] ; then\n"
-        		+ "echo create pam link for " + serviceUnixName + "\n"
-        		+ "ln -s /etc/pam.d/smtp /etc/pam.d/" + serviceUnixName + "\n"
-        		+ "\nfi" );
 
         // copy a default service file if set
         if( task.getDefaultServiceFile() != null ) {
             File serviceDestFile = createFile(  "BUILD/etc/sysconfig/" + serviceUnixName, true );
             Files.copy( task.getDefaultServiceFile().toPath(), serviceDestFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
         }
-
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && chkconfig --add " + serviceUnixName + " && systemctl enable " + serviceUnixName + " ) || true" );
+        
         if ( task.shouldStartDefaultService() ) {
-            controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "service " + serviceUnixName + " start || true" );
+        	if(task.isUseInitD()) {
+        		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "service " + serviceUnixName + " start || true" );
+        	} else {
+        		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "systemctl start " + serviceUnixName + " || true" );
+        	}
         }
-
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && /etc/init.d/" + serviceUnixName + " stop || true" );
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && service " + serviceUnixName + " stop || true" );
-        controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PRERMHEAD, "( [ -f \"/etc/init.d/" + serviceUnixName + "\" ] && systemctl disable " + serviceUnixName + " && chkconfig --del " + serviceUnixName + " ) || true" );
+        
     }
 
     /**
