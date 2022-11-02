@@ -213,7 +213,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         command.add( notarizeFile.getName() );
         addDefaultOptionsToXCRunCommand( command );
 
-        String output = exec( command.toArray( new String[command.size()] ) );
+        ByteArrayOutputStream error = new ByteArrayOutputStream();
+        String output = exec( true, error, command.toArray( new String[command.size()] ) );
         if( isDebugOutput() ) {
             task.getProject().getLogger().debug( output );
         }
@@ -231,15 +232,23 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
             return (String)plist.computeIfPresent( "notarization-upload", ( String key, Object value ) -> ((Map<String, String>)value).get( "RequestUUID" ) );
 
         } catch( ClassCastException | XmlParseException e ) {
+            task.getProject().getLogger().error( "An error occured while checking the noraization response." );
             if ( !isDebugOutput() ) {
                 // Debug in addition
+                task.getProject().getLogger().error( "Debug output START:" );
                 task.getProject().getLogger().error( output );
+                task.getProject().getLogger().error( "Debug output END" );
             }
 
+            task.getProject().getLogger().debug( "The Error stream produced:" );
+            task.getProject().getLogger().debug( error.toString() );
+            
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             PrintStream stream = new PrintStream( bos );
             e.printStackTrace( stream  );
+            task.getProject().getLogger().debug( "This is the exception it produced:" );
             task.getProject().getLogger().debug( bos.toString() );
+            task.getProject().getLogger().debug( "End of Output." );
         }
 
         return null;
@@ -273,6 +282,8 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         List<String> lastErrors = new ArrayList<>();
 
         while( true && acceptedFailureCount > 0 ) {
+            
+            ByteArrayOutputStream error = new ByteArrayOutputStream();
             try {
 
                 ArrayList<String> command = new ArrayList<>();
@@ -282,7 +293,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 command.add( UUID );
                 addDefaultOptionsToXCRunCommand( command );
 
-                output = exec( command.toArray( new String[command.size()] ) );
+                output = exec( true, error, command.toArray( new String[command.size()] ) );
                 task.getProject().getLogger().debug( output );
 
                 Map<String, Object> plist = Plist.fromXml( output );
@@ -314,6 +325,11 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 waitWithStatus( status );
             } catch( ClassCastException | XmlParseException | InterruptedException e ) {
                 lastErrors.add( e.getMessage() );
+                
+                lastErrors.add( "The Error stream produced:\n" );
+                lastErrors.add( error.toString() + "\n" );
+
+                lastErrors.add( "Output:\n" );
                 lastErrors.add( output + "\n\n" );
                 try {
                     waitWithStatus( null );
