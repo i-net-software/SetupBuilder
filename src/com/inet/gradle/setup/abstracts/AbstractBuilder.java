@@ -108,6 +108,23 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
 
     /**
      * Execute an external process.
+     * Returns the response.
+     *
+     * @param ignoreExitValue if the exit value should be ignored
+     * @param parameters command line
+     * @param error the error output stream
+     * @return the output
+     */
+    protected String exec( boolean ignoreExitValue, OutputStream error, String... parameters ) {
+        ArrayList<String> command = new ArrayList<>();
+        command.addAll( Arrays.asList( parameters ) );
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        exec( command, null, baos, error, ignoreExitValue );
+        return baos.toString().trim();
+    }
+
+    /**
+     * Execute an external process.
      *
      * @param parameters command line
      * @param input optional InputStream for the process
@@ -116,6 +133,20 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
      */
     @SuppressWarnings( "resource" )
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, boolean ignoreExitValue ) {
+        exec( parameters, input, output, output, ignoreExitValue );
+    }
+
+    /**
+     * Execute an external process.
+     *
+     * @param parameters command line
+     * @param input optional InputStream for the process
+     * @param output optional OutputStream for the process
+     * @param error optional error OutputStream for the process
+     * @param ignoreExitValue true, does not throw an exception if the return code is not equals zero.
+     */
+    @SuppressWarnings( "resource" )
+    protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, OutputStream error, boolean ignoreExitValue ) {
         // print command line to the log
         StringBuilder log = new StringBuilder( "\tCommand: " );
         for( String para : parameters ) {
@@ -142,14 +173,21 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
         action.setCommandLine( parameters );
         action.setIgnoreExitValue( ignoreExitValue );
         action.setWorkingDir( buildDir );
+
         if( input != null ) {
             action.setStandardInput( input );
         }
+
         if( output == null ) {
             output = new IndentationOutputStream( System.out );
         }
+
+        if( error == null ) {
+            error = new IndentationOutputStream( System.err );
+        }
+
         action.setStandardOutput( output );
-        action.setErrorOutput( output );
+        action.setErrorOutput( error );
         try {
             action.execute();
         } catch( Throwable th ) {
