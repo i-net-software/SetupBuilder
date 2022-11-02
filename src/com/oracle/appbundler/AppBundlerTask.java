@@ -682,6 +682,7 @@ public class AppBundlerTask extends Task {
                 xout.writeCharacters("\n");
 
                 writeProperty(xout, "CFBundleURLName", identifier, 4);
+                writeProperty(xout, "CFBundleTypeRole", "Editor", 4);
                 writeStringArray(xout, "CFBundleURLSchemes",registeredProtocols, 4);
 
                 writeIndentation(xout, 3);
