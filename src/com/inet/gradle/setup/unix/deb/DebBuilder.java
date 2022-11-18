@@ -322,7 +322,11 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
 
     		String systemdScriptFile = "usr/lib/systemd/system/" + serviceUnixName + ".service";
     		systemdScript.writeTo( createFile( systemdScriptFile , true ) );
-    		controlBuilder.addConfFile( systemdScriptFile );
+    		
+    		controlBuilder.addTailScriptFragment( Script.POSTINST, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl enable " + serviceUnixName + " ) || true" );
+    		controlBuilder.addTailScriptFragment( Script.PREINST, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop \"" + serviceUnixName + "\" || true" );
+    		controlBuilder.addTailScriptFragment( Script.PRERM, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop " + serviceUnixName + " || true" );
+    		controlBuilder.addTailScriptFragment( Script.PRERM, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl disable " + serviceUnixName + " ) || true" );
         }
         
         // copy a default service file if set

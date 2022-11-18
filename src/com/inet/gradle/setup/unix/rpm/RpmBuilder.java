@@ -194,7 +194,6 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
     		String systemdScriptFile = "BUILD/usr/lib/systemd/system/" + serviceUnixName + ".service";
     		systemdScript.writeTo( createFile( systemdScriptFile , true ) );
-    		controlBuilder.addConfFile( systemdScriptFile );
     		
     		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.POSTINSTTAIL, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl enable " + serviceUnixName + " ) || true" );
     		controlBuilder.addScriptFragment( RpmControlFileBuilder.Script.PREINSTHEAD, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop \"" + serviceUnixName + "\" || true" );
