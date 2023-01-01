@@ -1,39 +1,39 @@
 language: groovy
 jdk:
-  - openjdk8
+- openjdk8
 env:
   matrix:
-   - LIB_GRADLE_VERSION=3.4.1 DEPLOY=true
-   - LIB_GRADLE_VERSION=3.5.1
-   - LIB_GRADLE_VERSION=4.0.1
-   - LIB_GRADLE_VERSION=4.1
-   - LIB_GRADLE_VERSION=4.2 DEPLOY=true
-   - LIB_GRADLE_VERSION=4.2.1
-   - LIB_GRADLE_VERSION=4.5 DEPLOY=true
-   - LIB_GRADLE_VERSION=4.5.1
-   - LIB_GRADLE_VERSION=4.8 DEPLOY=true
-   - LIB_GRADLE_VERSION=4.8.1
-   - LIB_GRADLE_VERSION=4.10.2
-   - LIB_GRADLE_VERSION=7.2 DEPLOY=true
+  - LIB_GRADLE_VERSION=3.4.1 DEPLOY=true
+  - LIB_GRADLE_VERSION=3.5.1
+  - LIB_GRADLE_VERSION=4.0.1
+  - LIB_GRADLE_VERSION=4.1
+  - LIB_GRADLE_VERSION=4.2 DEPLOY=true
+  - LIB_GRADLE_VERSION=4.2.1
+  - LIB_GRADLE_VERSION=4.5 DEPLOY=true
+  - LIB_GRADLE_VERSION=4.5.1
+  - LIB_GRADLE_VERSION=4.8 DEPLOY=true
+  - LIB_GRADLE_VERSION=4.8.1
+  - LIB_GRADLE_VERSION=4.10.2
+  - LIB_GRADLE_VERSION=7.2 DEPLOY=true
   global:
     # The next declaration is the encrypted gradlePublishKey
-    - secure: tzRoJbjW38G0YcSRuf53+koo/ZixIrA1vHJ9StOfafZOJzKyoASkbFa2EpUKmp3CXBWvUSTVo59j7ywUSyWW+L+G+CRnYqkDTktySJ/LAHjR0CH5dJCUodwcwtZkBje/RQZ//ZuPO2I7wY/aqHfj/E8pg2h9Y+nOd2v9R904/5b5gck9nM1Tr74YE2dJDm3h0QKrMqx6/oT7KVTWQpTNeLxcdrdNn5yxllqn4YDF70gEksoSuJeFR2l5lwSlTTseKI7Q7mGYI1Tg/PSZoxlPz3DGFmSe+9sewRnN9ZnjQDEY06/GmrGQHGv9MV1azvenlFHrt9lIbHnEo0GBqxNpeFfMd4+B9oeEmL8roapNSq0TCgVvOzda/G5KyY8TgLEi+k7WrZaWGvbW+AorU5ntenWEzSWz3b5lpwnwXxrPyyRnaKd3R5mRYj+LL10hlHAiWpvXn+v6ptD2OunE6l3JEm+wln+6wZjJBqBhl1jsv3LOd5siezFGqqOzC6FN6UgkTZqsgMfROzoqklFv3Ko8fU4e6oo9VzI/cJGcFHFO4M+dOHyYZbKl8hfvi1Bf44UpYo914sdwmWGIAZ8J6V2xtCqTnyN1bi/EQuKAkE2400laduCt/rnGyR8IefcM6iFxjufR5jCXpXBhbQ0cQ//pUT0eW4ssjqKvt9RrJmt/Mew=
+  - secure: tzRoJbjW38G0YcSRuf53+koo/ZixIrA1vHJ9StOfafZOJzKyoASkbFa2EpUKmp3CXBWvUSTVo59j7ywUSyWW+L+G+CRnYqkDTktySJ/LAHjR0CH5dJCUodwcwtZkBje/RQZ//ZuPO2I7wY/aqHfj/E8pg2h9Y+nOd2v9R904/5b5gck9nM1Tr74YE2dJDm3h0QKrMqx6/oT7KVTWQpTNeLxcdrdNn5yxllqn4YDF70gEksoSuJeFR2l5lwSlTTseKI7Q7mGYI1Tg/PSZoxlPz3DGFmSe+9sewRnN9ZnjQDEY06/GmrGQHGv9MV1azvenlFHrt9lIbHnEo0GBqxNpeFfMd4+B9oeEmL8roapNSq0TCgVvOzda/G5KyY8TgLEi+k7WrZaWGvbW+AorU5ntenWEzSWz3b5lpwnwXxrPyyRnaKd3R5mRYj+LL10hlHAiWpvXn+v6ptD2OunE6l3JEm+wln+6wZjJBqBhl1jsv3LOd5siezFGqqOzC6FN6UgkTZqsgMfROzoqklFv3Ko8fU4e6oo9VzI/cJGcFHFO4M+dOHyYZbKl8hfvi1Bf44UpYo914sdwmWGIAZ8J6V2xtCqTnyN1bi/EQuKAkE2400laduCt/rnGyR8IefcM6iFxjufR5jCXpXBhbQ0cQ//pUT0eW4ssjqKvt9RrJmt/Mew=
     # The next declaration is the encrypted gradlePublishSecret
-    - secure: Z9rf5KL9USpw7n05xJ+6hLSxgwgepXEw+f5ZwUx9cqKr/TdjSHimjHaGrYizBjjqXxa5fXwoAXmh8dvxyp0khKvtRrhN9JU2WRJt/Kweu/hrW5F+EkrzGBIeDoAtQvLqwOVQH5usRxVBHz3OEcwiFZKldcnvpMaCJcPVpO3YGfDVoX9+dlRYJRAPYFH0LsxJFiZYFzDN3x+eeVfnucgwXkRco+8R04gJ/LGF4rQhn6FupQWk8AepvnmAhAg1HhEvWUSwmD/sQ86xHw9WqMX/PxdSb21tM8VYrj6+ZGFh8C1g7NAVkOSFQjjYSqHb1wDUBHmxMvyUw3KZiBkhFjweTpuxoPHVwbQqhFKH/WXYtnuYKoIlebR7c7CtZ11Xp9ba98PA3ADIzRvOQrPn42iyvXvqg78AROb2OtOa639znxu3lckDoU3PH/n5jHmy9awlwEZSoNkw0dM+RtJGO+X4l1kPQGoOMZVjlA/vvkfhHJqCOwZHX8O9bW/yv328jmgRMdTo8uTV9IrzqgJJgg+v7iEJ1DpBph46dFn7zPliUQWXDDCxXqXSy9V1BVFB1fTKzP9fosrbCCu3CjaTdiXBdPvKpjLE+gVJRt12rzQOKAzOcIt5GtJIkkElo2v3ofSJPdx9aET/nYJepiKW5NMxoPkq/HsMRbeQiyEs3WXqaCQ=
+  - secure: Z9rf5KL9USpw7n05xJ+6hLSxgwgepXEw+f5ZwUx9cqKr/TdjSHimjHaGrYizBjjqXxa5fXwoAXmh8dvxyp0khKvtRrhN9JU2WRJt/Kweu/hrW5F+EkrzGBIeDoAtQvLqwOVQH5usRxVBHz3OEcwiFZKldcnvpMaCJcPVpO3YGfDVoX9+dlRYJRAPYFH0LsxJFiZYFzDN3x+eeVfnucgwXkRco+8R04gJ/LGF4rQhn6FupQWk8AepvnmAhAg1HhEvWUSwmD/sQ86xHw9WqMX/PxdSb21tM8VYrj6+ZGFh8C1g7NAVkOSFQjjYSqHb1wDUBHmxMvyUw3KZiBkhFjweTpuxoPHVwbQqhFKH/WXYtnuYKoIlebR7c7CtZ11Xp9ba98PA3ADIzRvOQrPn42iyvXvqg78AROb2OtOa639znxu3lckDoU3PH/n5jHmy9awlwEZSoNkw0dM+RtJGO+X4l1kPQGoOMZVjlA/vvkfhHJqCOwZHX8O9bW/yv328jmgRMdTo8uTV9IrzqgJJgg+v7iEJ1DpBph46dFn7zPliUQWXDDCxXqXSy9V1BVFB1fTKzP9fosrbCCu3CjaTdiXBdPvKpjLE+gVJRt12rzQOKAzOcIt5GtJIkkElo2v3ofSJPdx9aET/nYJepiKW5NMxoPkq/HsMRbeQiyEs3WXqaCQ=
 before_install:
-  - echo $TRAVIS_TAG
-  - sudo apt-get -qq update
-  - sudo apt-get install -y fakeroot
+- echo $TRAVIS_TAG
+- sudo apt-get -qq update
+- sudo apt-get install -y fakeroot
 install:
   - gradle wrapper
   # upload to '../repo'
-  - ./gradlew publish
+  - "./gradlew publish"
 deploy:
   provider: releases
   api_key:
-    secure: "WsmHvOadj3bIlFHhNVUgjJ54oC+8Uwxhr3Gmuq0tLPNlPSiNwLgd/S8o/y6MYlXa0xDsp+8DDAL7Fs6M3IKhXj3Wm0WHC0XzR0gDlwnVJGkTNtBP6gmVDflWbPALyru9AxRhnvMWFRUSyvTl56sXIsencvoF6g325TwvdatAy+IXnr9jUVXrgk2WVrRpswpUYOUZcbn3W6L7hdTn/e0530um4enc2Hj9alFe5QUDFmWjdyuKRqz6Ad1/IDdRGtO580ISYYCT0YPRekyhgk3/1ASpnSvPPbZHFDjHs9azzV2ZN0fZu1MqeWn3xxyn+NjCl8+m5NkzU113Z7UZ1qdEaBBY3A/pfoDmGWbAx+p4xrFRpKJkczf3DJhdo3dtgUKlDysoA3ODcavXmjnOO0v+uqb0rSGhVE+AI0VYFdwIOyETypdKjzcVJOWUaMT9edX0oKvwjQ5gWeWvpBQUDEvxoqOGWOgjKaAUq+dmZXKGECKj8WlkmgdJF+law6rVzyvbLN6HjnnQeZog3XQmg/vfiWWj9wEwg7h26IlKMln69ew+bOn3NyYj8OMKBHaRgVl802HdRkv+IQR8hH5eltXfV/kPRiunVBY0BDzfQ9X94sMQUEuOxHTcKZdmkPofV/4vvm4+ap+K8Yl3rbSzMk9Q3yumaGORse0D3mp8+MjV9NI="
+    secure: uznsze1moDgrCPHZDZiYi6xgX/klJpkTMY6/W+8E1dGHtMsZ4sCZV8o+fbKcNTelkCbTfkYE/GRTT7zlpsU9T3ee53LiC5rXgUMBVi/gk+lViXj1V/aiBK51WmxLVd0w4pAOp8QNnIklPok1MU/wu+ZNUpmK0fsr9mqD5J8E3KBMgwz4scltmD+zWfkW11OLNI28MBfDO8lHWILHZlfRcRIAIo8yI2ErUTmmk230I6jnLJCLKUWhZeSH608tiau+UdfQIf57taqnagARWFiv/5P6ixjGw+H3s5kmquPtWfgyfReZ4AGVNcYz1VVM96bCuzMm/0y0qKVCGNy5CLvD7MUjbg8xg4g0v3f5ECp7f1DP464Fy6hurvb2sc4SVrNB4shhrrp2RViCW1HorUUJNZfusqqiRRM4rkO33K1hVAlJG77snEr+JIIgJJaezJX5zEpmEKvSaX43S1J6ky3lxX2Bt32SHSSlxVRcn88yDCAj3j4ffYywFpJMcUmqKs+SZ8wh8LFS9C0b7gw9+DxvRAn7ks0iiIL5Y3RPvSODiGE4WafBHlmcCH1xnvrfWD2TJMtyHhJqIsbo7xSIDf1cnuvgg9vbQjkr/SsGvJK/e6aisUK6mX4XxacWdOPPFKIfPpRZXtdqCUBZOXl/4pxUASCO8OfBaeCh7gMnnWCXN0E=
   file_glob: true
-  file: ./build/libs/SetupBuilder-*
+  file: "./build/libs/SetupBuilder-*"
   skip_cleanup: true
   overwrite: true
   on:
@@ -41,4 +41,4 @@ deploy:
     tags: true
     condition: $DEPLOY = true
 after_deploy:
-  - ./gradlew publishPlugin
+  - "./gradlew publishPlugin"
