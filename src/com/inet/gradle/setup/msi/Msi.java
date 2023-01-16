@@ -67,6 +67,8 @@ public class Msi extends AbstractSetupTask {
 
     private List<String>               preGUI             = new ArrayList<String>();
 
+    private List<String>               wixextensions      = new ArrayList<String>();
+    
     // Will generate a checkbox.
     private boolean                    runAfterIsOptional = false;
 
@@ -576,6 +578,29 @@ public class Msi extends AbstractSetupTask {
     @InputFiles
     public List<File> getExternals() {
         return externals;
+    }
+    
+    /**
+     * Sets list of wix extension dll's
+     * @param wixextensions extension dll's
+     * @return this Msi instance
+     */
+    public Msi setWixExtensions(Iterable<String> wixextensions) {
+        this.wixextensions.clear();
+        for (String wixextension : wixextensions) {
+            this.wixextensions.add(wixextension);
+        }
+        return this;
+    }
+
+    
+    
+    /**
+     * @return registered extensions
+     */
+    @Input
+    public List<String> getWixExtensions() {
+        return wixextensions;
     }
 
     /**
