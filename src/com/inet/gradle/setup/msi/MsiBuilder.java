@@ -180,6 +180,10 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         for(File external : task.getExternals()){
             parameters.add( external.getAbsolutePath() );
         }
+        for(String extension : task.getWixExtensions()){
+        	parameters.add( "-ext" );
+            parameters.add( extension );
+        }
         parameters.add( "-ext" );
         parameters.add( "WixUtilExtension" );
 
@@ -198,6 +202,10 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
         parameters.add( "-sice:ICE60" ); // accept *.ttf files to install in the install directory
+        for(String extension : task.getWixExtensions()){
+        	parameters.add( "-ext" );
+            parameters.add( extension );
+        }
         parameters.add( "-ext" );
         parameters.add( "WixUIExtension" );
         parameters.add( "-ext" );
