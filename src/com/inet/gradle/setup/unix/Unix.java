@@ -49,6 +49,10 @@ public abstract class Unix extends AbstractUnixSetupTask {
     private boolean startDefaultService = true;
 
     private String additionalServiceScript;
+    
+    private String servicePreScript;
+    
+    private String servicePostScript;
 
     private Object bundleJre;
 
@@ -223,6 +227,44 @@ public abstract class Unix extends AbstractUnixSetupTask {
      */
     public void setAdditionalServiceScript( String additionalServiceScript ) {
         this.additionalServiceScript = additionalServiceScript;
+    }
+    
+    /**
+     * Returns the service pre run script that will be included into the service file.
+     * This allows to execute a script before running the service command.
+     * @return the service pre run script
+     */
+    @Input
+    @Optional
+    public String getServicePreScript() {
+    	return servicePreScript != null ? servicePreScript : "" ;
+    }
+    
+    /**
+     * Set a service pre run script that will be included into the service file.
+     * @param servicePreScript a script the will be included in the service as the pre run script
+     */
+    public void setServicePreScript( String servicePreScript ) {
+    	this.servicePreScript = servicePreScript;
+    }
+    
+    /**
+     * Returns the service post run script that will be included into the service file.
+     * This allows to execute a script after running the service command.
+     * @return the service post run script
+     */
+    @Input
+    @Optional
+    public String getServicePostScript() {
+    	return servicePostScript != null ? servicePostScript : "" ;
+    }
+    
+    /**
+     * Set a service post run script that will be included into the service file.
+     * @param servicePostScript a script the will be included in the service as the post run script
+     */
+    public void setServicePostScript( String servicePostScript ) {
+    	this.servicePostScript = servicePostScript;
     }
 
     /**

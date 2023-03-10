@@ -13,7 +13,9 @@ Description={{description}}
 
 [Service]
 Type=simple
+ExecStartPre={{servicePreScript}}
 ExecStart={{daemonExec}} {{javaVMArguments}} -cp "{{mainJar}}" {{mainClass}} {{startArguments}}
+ExecStartPost={{servicePostScript}}
 #ExecReload=
 WorkingDirectory={{workdir}}
 Restart=on-failure

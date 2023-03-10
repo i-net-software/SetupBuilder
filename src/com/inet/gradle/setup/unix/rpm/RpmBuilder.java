@@ -190,7 +190,8 @@ public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
     		systemdScript.setPlaceholder( "mainClass", service.getMainClass() );
     		systemdScript.setPlaceholder( "daemonUser", task.getDaemonUser() );
     		systemdScript.setPlaceholder( "daemonExec", javaMainExecutable );
-    		systemdScript.setPlaceholder( "additionalServiceScript", task.getAdditionalServiceScript() );
+    		systemdScript.setPlaceholder( "servicePreScript", task.getServicePreScript() );
+    		systemdScript.setPlaceholder( "servicePostScript", task.getServicePostScript() );
 
     		String systemdScriptFile = "BUILD/usr/lib/systemd/system/" + serviceUnixName + ".service";
     		systemdScript.writeTo( createFile( systemdScriptFile , true ) );
