@@ -325,6 +325,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
     		systemdScript.writeTo( createFile( systemdScriptFile , true ) );
     		
     		controlBuilder.addTailScriptFragment( Script.POSTINST, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl enable " + serviceUnixName + " ) || true" );
+    		controlBuilder.addTailScriptFragment( Script.PREINST, "[ -f \"/etc/init.d/" + serviceUnixName + "\" ] && service " + serviceUnixName + " stop || true" );
     		controlBuilder.addTailScriptFragment( Script.PREINST, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop \"" + serviceUnixName + "\" || true" );
     		controlBuilder.addTailScriptFragment( Script.PRERM, "[ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl stop " + serviceUnixName + " || true" );
     		controlBuilder.addTailScriptFragment( Script.PRERM, "( [ -f \"/usr/lib/systemd/system/" + serviceUnixName + ".service\" ] && systemctl disable " + serviceUnixName + " ) || true" );
