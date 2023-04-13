@@ -413,7 +413,7 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             if( starter.getExecutable() != null ) {
                 fw.write( "Exec=\"" + task.getInstallationRoot() + "/" + starter.getExecutable() + "\"\n" );
             } else {
-                fw.write( "Exec=\"/" + consoleStarterPath + "\" %F\n" );
+                fw.write( "Exec=\"/" + consoleStarterPath + "\" %U\n" );
             }
 
             if( starter.getIcons() != null ) {
