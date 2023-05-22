@@ -68,7 +68,7 @@ public class Msi extends AbstractSetupTask {
     private List<String>               preGUI             = new ArrayList<String>();
 
     private List<String>               wixextensions      = new ArrayList<String>();
-    
+
     // Will generate a checkbox.
     private boolean                    runAfterIsOptional = false;
 
@@ -77,6 +77,8 @@ public class Msi extends AbstractSetupTask {
     private List<File>                 externals = new ArrayList<>();
 
     private boolean                    skipValidation = false;
+
+    private Closure<?>                 externalSignTool = null; 
 
     /**
      * Create a new instance.
@@ -232,7 +234,7 @@ public class Msi extends AbstractSetupTask {
     public void signTool( Closure<SignTool> closue ) {
         signTool = ConfigureUtil.configure( closue, new SignTool() );
     }
-    
+
     /**
      * Set the needed information for signing the setup.
      *
@@ -618,5 +620,23 @@ public class Msi extends AbstractSetupTask {
      */
     public void setSkipValidation( boolean skipValidation ) {
         this.skipValidation = skipValidation;
+    }
+
+    /**
+     * Set a closure with an external sign tool configuration.
+     *
+     * @param closure the data for signing
+     */
+    public void setExternalSignTool( Closure<?> externalSignTool ) {
+        this.externalSignTool = externalSignTool;
+    }
+
+    /**
+     * Get a closure with an external sign tool configuration.
+     *
+     * @param closure the data for signing
+     */
+    public Closure<?> getExternalSignTool() {
+        return externalSignTool;
     }
 }

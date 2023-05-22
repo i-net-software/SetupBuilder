@@ -319,10 +319,16 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
      * @throws IOException If any I/O error occur on loading of the sign tool
      */
     private void signTool( File file ) throws IOException {
+        if ( task.getExternalSignTool() != null ) {
+            task.getExternalSignTool().call( file );
+            return;
+        }
+
         SignTool sign = task.getSignTool();
         if( sign == null ) {
             return; // no sign information set
         }
+
         String tool = ResourceUtils.extract( getClass(), "sdk/signtool.exe", buildDir ).getAbsolutePath();
 
         // signing the file
