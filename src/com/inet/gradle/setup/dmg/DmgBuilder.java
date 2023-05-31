@@ -167,10 +167,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         task.getProject().getLogger().lifecycle( "\tPreparing the configuration" );
         OSXScriptBuilder settings = new OSXScriptBuilder( "template/dmgbuild/settings.00.script.py.txt" );
         settings.addScript( new OSXScriptBuilder( "template/dmgbuild/settings.01.base.py.txt" ) );
-        settings.addScript( iconLocations( !filesToPackage.get( 0 ).getName().endsWith( ".pkg" ) ) );
         settings.addScript( windowSettings() );
+        // The window settings prepare window size which is required in the icon locations
+        settings.addScript( iconLocations( !filesToPackage.get( 0 ).getName().endsWith( ".pkg" ) ) );
         settings.addScript( defaultViewSettings() );
         settings.writeTo( settingsFile.toFile() );
+
+        task.getProject().getLogger().debug( "\tSettings" );
+        task.getProject().getLogger().debug( settings.toString() );
 
         ArrayList<String> command = new ArrayList<>();
         command.add( dmgbuild.toString() );
