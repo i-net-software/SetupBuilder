@@ -150,16 +150,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         // pyinstaller --onefile --target-architecture universal2 dmgbuild
 
         task.getProject().getLogger().lifecycle( "\tExtracting dmgbuild" );
-        File dmgbuild = ResourceUtils.extract( getClass(), "template/dmgbuild/dmgbuild", tempPath.get( "dmgbuild" ).toFile() );
-        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-        perms.add( PosixFilePermission.OWNER_READ );
-        perms.add( PosixFilePermission.OWNER_WRITE );
-        perms.add( PosixFilePermission.GROUP_READ );
-        perms.add( PosixFilePermission.OTHERS_READ );
-        perms.add( PosixFilePermission.OWNER_EXECUTE );
-        perms.add( PosixFilePermission.GROUP_EXECUTE );
-        perms.add( PosixFilePermission.OTHERS_EXECUTE );
-        Files.setPosixFilePermissions( dmgbuild.toPath(), perms );
+        File dmgbuild = extractExecutableFile( "template/dmgbuild/dmgbuild", tempPath.get( "dmgbuild" ).toFile() );
 
         Path settingsFile = tempPath.getTempFile( "dmgbuild", "settings.py" ).toPath();
 
@@ -199,6 +190,27 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
         task.getProject().getLogger().lifecycle( "\tDone with creating the image" );
         codesignFinalImage();
+    }
+
+    /**
+     * Extract an executable resource and set file permissions accordingly
+     * @param source the source, relative to the current class
+     * @param destination the destination file
+     * @return the actual file it was extracted to
+     * @throws IOException in case of errors
+     */
+    private File extractExecutableFile( String source, File destination ) throws IOException {
+        File dmgbuild = ResourceUtils.extract( getClass(), source, destination );
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        perms.add( PosixFilePermission.OWNER_EXECUTE );
+        perms.add( PosixFilePermission.GROUP_EXECUTE );
+        perms.add( PosixFilePermission.OTHERS_EXECUTE );
+        Files.setPosixFilePermissions( dmgbuild.toPath(), perms );
+        return dmgbuild;
     }
 
     /**
@@ -304,9 +316,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             task.getCodeSign().signProduct( resultingPackage );
         }
 
-        // packageApplescript();
         File packageFile = new File( setup.getDestinationDir(), "/" + setup.getApplication() + ".pkg" );
         Files.copy( resultingPackage.toPath(), packageFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        setIconForPackage( packageFile );
         return packageFile;
     }
 
@@ -531,7 +543,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         int yPos = (windowHeight - iconSize) / 3 * 2;
 
         String appLocation = "";
-        if ( !requiresApplicationsLink ) {
+        if ( requiresApplicationsLink ) {
             // Only set the symlinks for applications if required.
             settings.setPlaceholder( "symlinks", "\"Applications\": \"/Applications\"" );
 
@@ -575,25 +587,23 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      * run a Script for the Package.
      * @throws IOException exception
      */
-/*
-    private void packageApplescript() throws IOException {
+    private void setIconForPackage( File packageFile ) throws IOException {
 
-        Template applescript = new Template( "dmg/template/package.applescript.txt" );
-        applescript.setPlaceholder( "icon", ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns" ).getAbsolutePath() );
-        applescript.setPlaceholder( "package", new File( imageSourceRoot, setup.getApplication() + ".pkg" ).getAbsolutePath() );
+        task.getProject().getLogger().lifecycle( "\tExtracting setIcon.sh" );
+        File setIcon = extractExecutableFile( "template/dmgbuild/setIcon.sh", tempPath.get( "setIcon.sh" ).toFile() );
 
         ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/osascript" );
+        command.add( setIcon.getAbsolutePath() );
+        command.add( ImageFactory.getImageFile( task.getProject(), task.getSetupIcon(), buildDir, "icns" ).getAbsolutePath() );
+        command.add( packageFile.getAbsolutePath() );
 
         task.getProject().getLogger().lifecycle( "\tSetting display options for package." );
-        task.getProject().getLogger().debug( applescript.toString() );
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), baos, true );
+        exec( true, baos, command.toArray( new String[command.size()] ) );
         task.getProject().getLogger().lifecycle( "\tDone Setting DMG display options for package. Ignoring errors if there were any" );
         task.getProject().getLogger().lifecycle( "\t" + baos.toString() );
     }
-*/
 
     /**
      * Run the code signing if applicable
