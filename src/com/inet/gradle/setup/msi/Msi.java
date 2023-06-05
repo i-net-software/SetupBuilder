@@ -625,7 +625,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Set a closure with an external sign tool configuration.
      *
-     * @param closure the data for signing
+     * @param externalSignTool the data for signing
      */
     public void setExternalSignTool( Closure<?> externalSignTool ) {
         this.externalSignTool = externalSignTool;
@@ -634,7 +634,7 @@ public class Msi extends AbstractSetupTask {
     /**
      * Get a closure with an external sign tool configuration.
      *
-     * @param closure the data for signing
+     * @return closure the data for signing
      */
     public Closure<?> getExternalSignTool() {
         return externalSignTool;
