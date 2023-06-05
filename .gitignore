@@ -5,14 +5,4 @@
 /build/
 /.gradle/
 /wrapper
-/.DS_Store
-/src/.DS_Store
-/src/com/.DS_Store
-/src/com/inet/.DS_Store
-/src/com/inet/gradle/.DS_Store
-/src/com/inet/gradle/setup/.DS_Store
-/src/com/inet/gradle/setup/dmg/.DS_Store
-/src/com/inet/gradle/setup/dmg/preferences/.DS_Store
-/src/com/inet/gradle/setup/dmg/preferences/Resources/.DS_Store
-/src/com/inet/gradle/setup/dmg/preferences/SetupBuilderOSXPrefPane/.DS_Store
-/src/com/inet/gradle/setup/dmg/preferences/SetupBuilderOSXPrefPane/lib/.DS_Store
+**/.DS_Store
