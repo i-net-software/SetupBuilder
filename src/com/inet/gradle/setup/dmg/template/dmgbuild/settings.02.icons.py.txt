@@ -1,0 +1,22 @@
+
+# Symlinks to create
+symlinks = { {{symlinks}} }
+
+# Files to hide
+# hide = [ 'Secret.data' ]
+
+# Files to hide the extension of
+# hide_extension = [ 'README.rst' ]
+
+# Volume icon
+#
+# You can either define icon, in which case that icon file will be copied to the
+# image, *or* you can define badge_icon, in which case the icon file you specify
+# will be used to badge the system's Removable Disk icon. Badge icons require
+# pyobjc-framework-Quartz.
+#
+icon = defines.get("icon", None)
+badge_icon = defines.get("badge_icon", icon_from_app(application) )
+
+# Where to put the icons
+icon_locations = { {{iconLocations}} }

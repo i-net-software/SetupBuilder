@@ -14,19 +14,16 @@ import com.oracle.appbundler.PlistEntry;
 
 /**
  * Build an OSX Application - service
- *
  * @author gamma
- *
  */
 public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, SetupBuilder> {
 
-    private Service service;
+    private Service            service;
 
     private OSXPrefPaneCreator prefPaneCreator;
 
     /**
      * Setup this builder.
-     *
      * @param task - original task
      * @param setup - original setup
      * @param fileResolver - original fileResolver
@@ -37,7 +34,6 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
     /**
      * Create sub tasks for a service,this must be called in project.afterEvaluate().
-     * 
      * @param service the service
      */
     void configSubTasks( Service service ) {
@@ -47,7 +43,6 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
 
     /**
      * Get the service for which this builder was created or null if it only an application.
-     * 
      * @return the service
      */
     Service getService() {
@@ -55,12 +50,10 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
     }
 
     /**
-     * Create Application from service provided. Also create the preference panel
-     * and put it into the application. Will also create the installer wrapper package of this application
-     *
+     * Create Application from service provided. Also create the preference panel and put it into the application. Will also create the installer wrapper package of this application
      * @throws Throwable error.
      */
-    void buildService() throws Throwable {
+    File buildService() throws Throwable {
 
         // We need the executable. It has a different meaning than on other systems.
         if( service.getExecutable() == null || service.getExecutable().isEmpty() ) {
@@ -74,42 +67,43 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         prefPaneCreator.create();
 
         // codesigning will be done on the final package.
+        File file = new File( buildDir, service.getDisplayName() + ".app" );
         if( task.getCodeSign() != null ) {
-            task.getCodeSign().signApplication( new File( buildDir, service.getDisplayName() + ".app" ) );
+            task.getCodeSign().signApplication( file );
         } else {
             task.getProject().getLogger().info( "Not codesigning the Servce: not configured" );
         }
+        return file;
     }
 
     /**
      * Create Application from the desktop starter provided
-     *
      * @param application - the application
      * @throws Exception on errors
      */
-    void buildApplication( DesktopStarter application ) throws Exception {
+    File buildApplication( DesktopStarter application ) throws Exception {
 
         String executable = application.getExecutable();
-        if ( executable != null && executable.endsWith( ".app" ) ) {
+        if( executable != null && executable.endsWith( ".app" ) ) {
             // This is already a finished app. We do not have to package it again.
             File executableFile = new File( executable );
-            if ( !executableFile.exists() ) {
+            if( !executableFile.exists() ) {
                 throw new ConfigurationException( "An executable file '" + executable + "' was defined but did not exist." );
             }
 
             String executableName = executableFile.getName();
             File destinationFile = new File( buildDir, executableName );
             Files.move( executableFile.toPath(), destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING );
-            
+
             setApplicationFilePermissions( destinationFile );
-            
+
             if( task.getCodeSign() != null ) {
                 task.getCodeSign().signApplication( destinationFile );
             }
-            
-            return;
+
+            return destinationFile;
         }
-        
+
         // We need the executable. It has a different meaning than on other systems.
         if( executable == null || executable.isEmpty() ) {
             application.setExecutable( getSetupBuilder().getAppIdentifier() );
@@ -118,7 +112,7 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         prepareApplication( application, false );
         setDocumentTypes( application.getDocumentType() );
 
-        for( String scheme: application.getSchemes() ) {
+        for( String scheme : application.getSchemes() ) {
             addScheme( scheme );
         }
 
@@ -130,8 +124,11 @@ public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, Se
         finishApplication();
         copyBundleFiles( application );
 
+        File file = new File( buildDir, application.getDisplayName() + ".app" );
         if( task.getCodeSign() != null ) {
-            task.getCodeSign().signApplication( new File( buildDir, application.getDisplayName() + ".app" ) );
+            task.getCodeSign().signApplication( file );
         }
+
+        return file;
     }
 }

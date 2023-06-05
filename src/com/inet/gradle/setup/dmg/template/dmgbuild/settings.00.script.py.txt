@@ -1,0 +1,8 @@
+import os.path
+import plistlib
+
+#
+# Here comes the included script
+#
+
+{{script}}

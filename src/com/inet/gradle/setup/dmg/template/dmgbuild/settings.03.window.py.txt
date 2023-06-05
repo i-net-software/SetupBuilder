@@ -1,0 +1,33 @@
+# .. Window configuration ......................................................
+
+# Background
+#
+# This is a STRING containing any of the following:
+#
+#    #3344ff          - web-style RGB color
+#    #34f             - web-style RGB color, short form (#34f == #3344ff)
+#    rgb(1,0,0)       - RGB color, each value is between 0 and 1
+#    hsl(120,1,.5)    - HSL (hue saturation lightness) color
+#    hwb(300,0,0)     - HWB (hue whiteness blackness) color
+#    cmyk(0,1,0,0)    - CMYK color
+#    goldenrod        - X11/SVG named color
+#    builtin-arrow    - A simple built-in background with a blue arrow
+#    /foo/bar/baz.png - The path to an image file
+#
+# The hue component in hsl() and hwb() may include a unit; it defaults to
+# degrees ('deg'), but also supports radians ('rad') and gradians ('grad'
+# or 'gon').
+#
+# Other color components may be expressed either in the range 0 to 1, or
+# as percentages (e.g. 60% is equivalent to 0.6).
+background = "{{background}}"
+
+show_status_bar = False
+show_tab_view = False
+show_toolbar = False
+show_pathbar = False
+show_sidebar = False
+sidebar_width = 180
+
+# Window position in ((x, y), (w, h)) format
+window_rect = ((100, 100), ({{windowWidth}}, {{windowHeight}}))

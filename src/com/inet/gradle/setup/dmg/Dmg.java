@@ -499,7 +499,7 @@ public class Dmg extends AbstractUnixSetupTask {
     /**
      * Returns the converted background color as apple script string
      * 
-     * @return the backgroundColor as apple script color string
+     * @return the backgroundColor as dmgbuild color string
      */
     @Input
     public String getBackgroundColor() {
@@ -508,7 +508,8 @@ public class Dmg extends AbstractUnixSetupTask {
             backgroundColor = new Color( 255, 255, 255 );
         }
 
-        return "{" + String.join( ", ", Arrays.asList( String.valueOf( backgroundColor.getRed() * 257 ), String.valueOf( backgroundColor.getGreen() * 257 ), String.valueOf( backgroundColor.getBlue() * 257 ) ) ) + "}";
+        float base = 1.0f / 255.0f;
+        return "rgb(" + String.join( ", ", Arrays.asList( String.valueOf( backgroundColor.getRed() * base ), String.valueOf( backgroundColor.getGreen() * base ), String.valueOf( backgroundColor.getBlue() * base ) ) ) + ")";
     }
 
     /**

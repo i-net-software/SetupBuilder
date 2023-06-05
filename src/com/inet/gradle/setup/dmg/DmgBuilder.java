@@ -23,12 +23,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -47,9 +51,9 @@ import com.inet.gradle.setup.image.ImageFactory;
 import com.inet.gradle.setup.util.TempPath;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
+import com.inet.gradle.setup.util.ResourceUtils;
 /**
  * Build a DMG image for OSX.
- *
  * @author Volker Berlin
  */
 public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
@@ -62,7 +66,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create a new instance
-     *
      * @param dmg the calling task
      * @param setup the shared settings
      * @param fileResolver the file Resolver
@@ -74,33 +77,34 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Build the dmg file.
-     *
      * @throws RuntimeException if any error occur
      */
     public void build() throws RuntimeException {
 
-        task.getProject().getLogger().lifecycle( "\tRunning the build."  );
+        task.getProject().getLogger().lifecycle( "\tRunning the build." );
         tempPath = new TempPath( new File( setup.getProject().getBuildDir(), "tmp/SetupBuilder" ).toPath() );
+
+        List<File> filesToPackage = new ArrayList<>();
 
         try {
             if( setup.getServices().isEmpty() && setup.getDesktopStarters().isEmpty() ) {
                 throw new IllegalArgumentException( "No Services or DesktopStarters have been defined. Will stop now." );
             }
 
-            task.getProject().getLogger().lifecycle( "\tPreparing " + task.appBuilders.size() + " services."  );
-            
+            task.getProject().getLogger().lifecycle( "\tPreparing " + task.appBuilders.size() + " services." );
+
             // Build all services
             for( OSXApplicationBuilder builder : task.appBuilders ) {
                 builder.buildService();
-                if ( firstExecutableName == null ) {
+                if( firstExecutableName == null ) {
                     firstExecutableName = builder.getService().getDisplayName();
                 }
             }
 
             // Build all standalone applications
             for( DesktopStarter application : setup.getDesktopStarters() ) {
-                new OSXApplicationBuilder( task, setup, fileResolver ).buildApplication( application );
-                if ( firstExecutableName == null ) {
+                filesToPackage.add( new OSXApplicationBuilder( task, setup, fileResolver ).buildApplication( application ) );
+                if( firstExecutableName == null ) {
                     firstExecutableName = application.getDisplayName();
                 }
             }
@@ -108,20 +112,20 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             imageSourceRoot = buildDir.toString(); // + "/" + setup.getApplication() + ".app";
 
             // Just in case. If it still has not been set, we do not know what the user intends.
-            if ( firstExecutableName == null ) {
+            if( firstExecutableName == null ) {
                 firstExecutableName = setup.getApplication();
             }
 
             if( !setup.getServices().isEmpty() ) {
                 // Create installer package
-                createPackageFromApp();
+                filesToPackage.add( createPackageFromApp() );
             }
 
             /*
              * new File ( task.getSetupFile().toString() ).createNewFile();
              * /
              */
-            createBinary();
+            createBinary( filesToPackage );
             //*/
         } catch( RuntimeException ex ) {
             ex.printStackTrace();
@@ -135,26 +139,66 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create the binary with native tools.
-     *
+     * We're using teh dmgbuild project, creating a python file with the settings.
+     * 
      * @throws Throwable
      */
-    private void createBinary() throws Throwable {
+    private void createBinary( List<File> filesToPackage ) throws Throwable {
 
-        createTempImage();
-        attach();
+        // Unpack dmgbuild - see https://github.com/dmgbuild/dmgbuild
+        // dmgbuild was packed using pyinstaller using:
+        // pyinstaller --onefile --target-architecture universal2 dmgbuild
 
-        setVolumeIcon();
-        applescript();
+        task.getProject().getLogger().lifecycle( "\tExtracting dmgbuild" );
+        File dmgbuild = ResourceUtils.extract( getClass(), "template/dmgbuild/dmgbuild", tempPath.get( "dmgbuild" ).toFile() );
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        perms.add( PosixFilePermission.OWNER_READ );
+        perms.add( PosixFilePermission.OWNER_WRITE );
+        perms.add( PosixFilePermission.GROUP_READ );
+        perms.add( PosixFilePermission.OTHERS_READ );
+        perms.add( PosixFilePermission.OWNER_EXECUTE );
+        perms.add( PosixFilePermission.GROUP_EXECUTE );
+        perms.add( PosixFilePermission.OTHERS_EXECUTE );
+        Files.setPosixFilePermissions( dmgbuild.toPath(), perms );
 
-        detach();
-        finalImage();
+        Path settingsFile = tempPath.getTempFile( "dmgbuild", "settings.py" ).toPath();
 
-        new File( setup.getDestinationDir(), "pack.temp.dmg" ).delete();
+        // Prepare the python config file
+        task.getProject().getLogger().lifecycle( "\tPreparing the configuration" );
+        OSXScriptBuilder settings = new OSXScriptBuilder( "template/dmgbuild/settings.00.script.py.txt" );
+        settings.addScript( new OSXScriptBuilder( "template/dmgbuild/settings.01.base.py.txt" ) );
+        settings.addScript( iconLocations( !filesToPackage.get( 0 ).getName().endsWith( ".pkg" ) ) );
+        settings.addScript( windowSettings() );
+        settings.addScript( defaultViewSettings() );
+        settings.writeTo( settingsFile.toFile() );
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( dmgbuild.toString() );
+        // Settings
+        command.add( "-s" );
+        command.add( settingsFile.toString() );
+
+        // Add Icon to command
+        File icons = setup.getIconForType( buildDir, "icns" );
+        if( icons != null ) {
+            command.add( "-D" );
+            command.add( "icon=" + icons.getAbsolutePath() );
+        }
+
+        command.add( "-D" );
+        command.add( "app=" + filesToPackage.get( 0 ).getAbsolutePath() );
+
+        // Name and destination
+        command.add( setup.getApplication() );
+        command.add( task.getSetupFile().toString() );
+        exec( command );
+
+        task.getProject().getLogger().lifecycle( "\tDone with creating the image" );
+        codesignFinalImage();
     }
 
     /**
      * Create the service files and the pre- and post installer scripts
-     *
      * @throws IOException in case of errors
      */
     private void createServiceFiles() throws IOException {
@@ -191,7 +235,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             OSXScriptBuilder[] list = { createUser, removeUser, postinstall };
             Arrays.asList( list ).forEach( item -> {
                 item.setPlaceholder( "daemonUser", task.getDaemonUser() );
-                item.setPlaceholder( "homeDirectory", home);
+                item.setPlaceholder( "homeDirectory", home );
             } );
 
             preinstall.addScript( createUser );
@@ -227,10 +271,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Create a package from the specified app files
-     *
      * @throws Throwable in case of errors
      */
-    private void createPackageFromApp() throws Throwable {
+    private File createPackageFromApp() throws Throwable {
 
         createServiceFiles();
         extractApplicationInformation();
@@ -257,13 +300,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             task.getCodeSign().signProduct( resultingPackage );
         }
 
-        packageApplescript();
-        Files.copy( resultingPackage.toPath(), new File( setup.getDestinationDir(), "/" + setup.getApplication() + ".pkg" ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        // packageApplescript();
+        File packageFile = new File( setup.getDestinationDir(), "/" + setup.getApplication() + ".pkg" );
+        Files.copy( resultingPackage.toPath(), packageFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        return packageFile;
     }
 
     /**
      * Extract the application information to use for the package builder
-     *
      * @throws IOException in case of errors
      */
     private void extractApplicationInformation() throws IOException {
@@ -301,16 +345,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Returns a sub directory if needed because of the installation
-     *
      * @return sub directory or ""
      */
     private String installationSubdirectory() {
-        return (setup.getServices().size() + setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "");
+        return(setup.getServices().size() + setup.getDesktopStarters().size() > 1 ? setup.getApplication() + "/" : "");
     }
 
     /**
      * Create and patch the ditribution xml file that defines the package
-     *
      * @throws Throwable in case of error
      */
     private void createAndPatchDistributionXML() throws Throwable {
@@ -318,7 +360,7 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         Map<String, Object> map = new HashMap<>();
         map.put( "arch", task.getArchitecture() );
         Plist.store( map, productFile );
-        
+
         ArrayList<String> command;
         // Synthesize Distribution xml
         command = new ArrayList<>();
@@ -336,7 +378,6 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
     /**
      * Patch the distribution file with custom settings
-     *
      * @throws Throwable in case of errors
      */
     private void patchDistributionXML() throws Throwable {
@@ -399,10 +440,10 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
      * @param distribution the root element
      * @param xmlFile the current xml file builder
      * @param isDark true, if this is the dark mode
-     * @param backgroundImage the image to set 
+     * @param backgroundImage the image to set
      * @throws IOException in case the File operation failed
      */
-    private void setBackgroundImage(Element distribution, XmlFileBuilder<?> xmlFile, boolean isDark, File backgroundImage) throws IOException {
+    private void setBackgroundImage( Element distribution, XmlFileBuilder<?> xmlFile, boolean isDark, File backgroundImage ) throws IOException {
         if( backgroundImage != null ) {
             Files.copy( backgroundImage.toPath(), tempPath.getTempFile( "resources", backgroundImage.getName() ).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
             Element background = xmlFile.getOrCreateChild( distribution, "background-darkAqua", false );
@@ -411,10 +452,9 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
             xmlFile.addAttributeIfNotExists( background, "proportional", "left" );
         }
     }
-    
+
     /**
      * Check a file for the correct setup text-resource type
-     *
      * @param file to check
      * @return file if ok, or null
      */
@@ -435,138 +475,103 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
     }
 
     /**
-     * Call hdiutil to create a temporary image.
+     * Prepares the default view settings
+     * @return the python script snippet to add
+     * @throws Throwable in case of errors
      */
-    private void createTempImage() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "create" );
-        command.add( "-srcfolder" );
-        command.add( imageSourceRoot );
-        command.add( "-fs" );
-        command.add( "HFS+" );
-        command.add( "-format" );
-        command.add( "UDRW" );
-        command.add( "-volname" );
-        command.add( setup.getApplication() );
-        command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
-        exec( command );
+    private OSXScriptBuilder defaultViewSettings() throws Throwable {
+        OSXScriptBuilder settings = new OSXScriptBuilder( "template/dmgbuild/settings.04.defaultview.py.txt" );
+
+        settings.setPlaceholder( "iconSize", "" + task.getIconSize() );
+        settings.setPlaceholder( "fontSize", "" + task.getFontSize() );
+
+        return settings;
     }
 
     /**
-     * Call hdiutil to mount temporary image
-     *
+     * Prepares the window settings, including size and background
+     * @return the python script snippet to add
+     * @throws Throwable in case of errors
+     */
+    private OSXScriptBuilder windowSettings() throws Throwable {
+
+        OSXScriptBuilder settings = new OSXScriptBuilder( "template/dmgbuild/settings.03.window.py.txt" );
+
+        String background = task.getBackgroundColor();
+        File backgroundFile = prepareBackgroundImage();
+        if ( backgroundFile != null ) {
+            background = backgroundFile.getAbsolutePath();
+        }
+
+        settings.setPlaceholder( "background", background );
+        settings.setPlaceholder( "windowWidth", "" + task.getWindowWidth() );
+        settings.setPlaceholder( "windowHeight", "" + task.getWindowHeight() );
+
+        return settings;
+    }
+
+    /**
+     * Prepares the icon positions and add symlink to applications
+     * @return the python script snippet to add
+     * @throws Throwable in case of errors
+     */
+    private OSXScriptBuilder iconLocations( boolean requiresApplicationsLink ) throws Throwable {
+        OSXScriptBuilder settings = new OSXScriptBuilder( "template/dmgbuild/settings.02.icons.py.txt" );
+
+        int windowWidth = task.getWindowWidth();
+        int windowHeight = task.getWindowHeight();
+        int iconSize = task.getIconSize();
+
+        int ourXPos = (windowWidth - 2 * iconSize) / 3 + iconSize / 3;
+        int appXPos = windowWidth - ourXPos;
+        int yPos = (windowHeight - iconSize) / 3 * 2;
+
+        String appLocation = "";
+        if ( !requiresApplicationsLink ) {
+            // Only set the symlinks for applications if required.
+            settings.setPlaceholder( "symlinks", "\"Applications\": \"/Applications\"" );
+
+            appLocation += ", \"Applications\": (" + appXPos + ", " + yPos + ")";
+        } else {
+
+            ourXPos = windowWidth / 2;
+            settings.setPlaceholder( "symlinks", "" );
+        }
+
+        settings.setPlaceholder( "iconLocations", "appname: (" + ourXPos + ", " + yPos + ")" + appLocation );
+
+        return settings;
+    }
+
+    /**
+     * Prepares the background image and update window sizes
+     * @return the file, if set, for the background image
      * @throws IOException in case of errors
      */
-    private void attach() throws IOException {
+    private File prepareBackgroundImage() throws IOException {
 
-        // Try to eject all images of the same name before we start with our script
-        exec ( true, "/usr/bin/osascript", "-e", "tell application \"Finder\" to eject \"" + setup.getApplication() + "\"" );
+        File background = task.getBackgroundImage();
 
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "attach" );
-        command.add( "-readwrite" );
-        command.add( "-noverify" );
-        command.add( "-noautoopen" );
-        command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
-        command.add( "-mountroot" );
-        command.add( tempPath.get() );
-
-        exec( command );
-        try {
-            Thread.sleep( 3000 );
-        } catch( InterruptedException e ) {
-        } // Waiting 2 seconds now
-    }
-
-    /**
-     * Call hdiutil to detach temporary image
-     */
-    private void detach() {
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "detach" );
-        command.add( tempPath.get() + "/" + setup.getApplication() );
-        exec( command );
-    }
-
-    /**
-     * Call SetFile to set the volume icon.
-     *
-     * @throws IOException IOException
-     */
-    private void setVolumeIcon() throws IOException {
-
-        // Copy Icon as file icon into attached container
-        File iconDestination = tempPath.getTempFile( setup.getApplication(), ".VolumeIcon.icns" );
-        File icons = setup.getIconForType( buildDir, "icns" );
-        if( icons == null ) {
-            throw new IllegalArgumentException( "You have to specify a valid icon file" );
-        }
-        Files.copy( icons.toPath(), iconDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-
-        exec( "SetFile", "-a", "C", iconDestination.getParent() );
-
-        if( task.getBackgroundImage() != null ) {
-            String name = task.getBackgroundImage().getName();
-            File backgroundDestination = tempPath.getTempFile( setup.getApplication(), "/.resources/background" + name.substring( name.lastIndexOf( '.' ) ) );
-            Files.createDirectories( backgroundDestination.getParentFile().toPath(), new FileAttribute[0] );
-            Files.copy( task.getBackgroundImage().toPath(), backgroundDestination.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-            BufferedImage image = ImageIO.read( backgroundDestination );
+        if( background != null ) {
+            BufferedImage image = ImageIO.read( task.getBackgroundImage() );
 
             // The image may be a non-standard one which we do not have Java access to.
             // Still it may work later on. e.g. tiffs are not directly supported in Java 8 and older
-            if ( image != null ) {
+            if( image != null ) {
                 // Override the values to use the actual image size
                 task.setWindowWidth( image.getWidth() );
                 task.setWindowHeight( image.getHeight() );
             }
         }
-    }
 
-    /**
-     * Run an apple script using the applescript.txt template
-     * This will set up the layout of the DMG window
-     *
-     * @throws IOException in case of errors
-     */
-    private void applescript() throws IOException {
-
-        Template applescript = new Template( "dmg/template/applescript.txt" );
-        applescript.setPlaceholder( "displayName", setup.getApplication() );
-
-        // Only works with the first executable in the list
-        applescript.setPlaceholder( "executable", firstExecutableName );
-
-        applescript.setPlaceholder( "backgroundColor", task.getBackgroundColor() );
-        applescript.setPlaceholder( "windowWidth", ""+task.getWindowWidth() );
-        applescript.setPlaceholder( "windowHeight", ""+task.getWindowHeight() );
-        applescript.setPlaceholder( "iconSize", ""+task.getIconSize() );
-        applescript.setPlaceholder( "fontSize", ""+task.getFontSize() );
-
-        if( task.getBackgroundImage() != null ) {
-            String name = task.getBackgroundImage().getName();
-            applescript.setPlaceholder( "backgroundExt", name.substring( name.lastIndexOf( '.' ) ) );
-        }
-
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/osascript" );
-
-        task.getProject().getLogger().lifecycle( "\tSetting DMG display options." );
-        task.getProject().getLogger().debug( applescript.toString() );
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        exec( command, new ByteArrayInputStream( applescript.toString().getBytes( StandardCharsets.UTF_8 ) ), baos, true );
-        task.getProject().getLogger().lifecycle( "\tDone Setting DMG display options. Ignoring errors if there were any" );
-        task.getProject().getLogger().lifecycle( "\t" + baos.toString() );
+        return background;
     }
 
     /**
      * run a Script for the Package.
-     *
      * @throws IOException exception
      */
+/*
     private void packageApplescript() throws IOException {
 
         Template applescript = new Template( "dmg/template/package.applescript.txt" );
@@ -584,26 +589,14 @@ public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
         task.getProject().getLogger().lifecycle( "\tDone Setting DMG display options for package. Ignoring errors if there were any" );
         task.getProject().getLogger().lifecycle( "\t" + baos.toString() );
     }
+*/
 
     /**
-     * convert to final image
+     * Run the code signing if applicable
      */
-    private void finalImage() {
-
-        ArrayList<String> command = new ArrayList<>();
-        command.add( "/usr/bin/hdiutil" );
-        command.add( "convert" );
-        command.add( setup.getDestinationDir() + "/pack.temp.dmg" );
-        command.add( "-format" );
-        command.add( "UDZO" );
-        command.add( "-imagekey" );
-        command.add( "zlib-level=9" );
-        command.add( "-o" );
-        command.add( task.getSetupFile().toString() );
-        exec( command );
-
+    private void codesignFinalImage() {
         OSXCodeSign<Dmg, SetupBuilder> codeSign = task.getCodeSign();
-        if ( codeSign != null ) {
+        if( codeSign != null ) {
             File finalImage = new File( task.getSetupFile().toString() );
             codeSign.signApplication( finalImage );
             codeSign.notarize( finalImage );
