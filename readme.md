@@ -15,6 +15,7 @@ System Requirements
 | Linux     | Lintian, FakeRoot <br> on Ubuntu: `apt-get install lintian fakeroot` |
 | Linux     | dpkg for creating Debian packages: `apt-get install dpkg`         |
 | Linux     | rpm for creating RPM packages: `apt-get install rpm`              |
+| MacOS     | hdiutil, only available on Mac                                       |
 
 Plugin and Gradle Version
 ----
