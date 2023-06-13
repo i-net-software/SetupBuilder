@@ -203,7 +203,7 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
      * @param name The tag name of the element
      * @param key the name of an attribute, can't be null
      * @param value the value, can be null for not existing
-     * @return the create of find Element
+     * @return the foudn element or null
      */
     public Element getChildRecursive( Node parent, String name, String key, String value) {
         if( name.equals( parent.getNodeName() ) ) {
