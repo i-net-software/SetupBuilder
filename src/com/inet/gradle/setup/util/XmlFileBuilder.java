@@ -211,7 +211,8 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
                 return (Element)parent;
             }
         }
-
+        
+        Node first = parent.getFirstChild();
         Element res = null;
         for( Node child = first; child != null && res == null; child = child.getNextSibling() ) {
             res = getChildRecursive(child, name, key, value);
