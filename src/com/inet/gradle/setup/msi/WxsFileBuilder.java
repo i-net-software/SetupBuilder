@@ -152,7 +152,10 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         Element directory = getOrCreateChildById( product, "Directory", "TARGETDIR" );
         addAttributeIfNotExists( directory, "Name", "SourceDir" );
         Element programFiles = getOrCreateChildById( directory, "Directory", task.is64Bit() ? "ProgramFiles64Folder" : "ProgramFilesFolder" );
-        Element appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR" );
+        Element appDirectory = getChildRecursive(programFiles, "Directory", "Id", "INSTALLDIR");
+        if( appDirectory == null ) {
+            appDirectory = getOrCreateChildById( programFiles, "Directory", "INSTALLDIR" );
+        }
         addAttributeIfNotExists( appDirectory, "Name", setup.getApplication() );
 
         //Files

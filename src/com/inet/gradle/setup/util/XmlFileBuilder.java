@@ -196,4 +196,27 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         return child;
     }
 
+    /**
+     * Get a child element (recursive search).
+     *
+     * @param parent the parent node in which we search and create
+     * @param name The tag name of the element
+     * @param key the name of an attribute, can't be null
+     * @param value the value, can be null for not existing
+     * @return the create of find Element
+     */
+    public Element getChildRecursive( Node parent, String name, String key, String value) {
+        if( name.equals( parent.getNodeName() ) ) {
+            if( Objects.equals( value, ((Element)parent).getAttribute( key ) ) || (value == null && !((Element)parent).hasAttribute( key )) ) {
+                return (Element)parent;
+            }
+        }
+
+        Element res = null;
+        for( Node child = first; child != null && res == null; child = child.getNextSibling() ) {
+            res = getChildExhaustive(child, name, key, value)
+        }
+        return (Element)res;
+    }
+
 }
