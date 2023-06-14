@@ -155,7 +155,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @return the UUID for the process to keep working with
      * @throws XmlParseException in case the received plist xml file was erroneous
      */
-    @SuppressWarnings( "unchecked" )
     private String requestNotarization( File notarizeFile ) {
 
         ArrayList<String> command = new ArrayList<>();
@@ -173,16 +172,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         try {
             Map<String, Object> plist = Plist.fromXml( output );
-
-            // Check for product errors during upload
-            List<String> productErrors = (List<String>)plist.computeIfPresent( "product-errors", ( String key, Object value ) -> ((List<Map<String, Object>>)value).stream().map( entry -> entry.get( "message" ) ).collect( Collectors.toList() ) );
-            if( productErrors != null && productErrors.size() > 0 ) {
-                throw new IllegalStateException( String.join( "\n", productErrors ) );
-            }
-
-            // Return the request UUID for later use
-            return (String)plist.computeIfPresent( "notarization-upload", ( String key, Object value ) -> ((Map<String, String>)value).get( "RequestUUID" ) );
-
+            return (String)plist.get( "id" );
         } catch( ClassCastException | XmlParseException e ) {
             task.getProject().getLogger().error( "An error occured while checking the noraization response." );
             if( !isDebugOutput() ) {
@@ -225,7 +215,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param UUID the ID of the task to check against
      * @return true if the process was successful
      */
-    @SuppressWarnings( "unchecked" )
     private boolean waitForNotarization( String UUID ) {
 
         String output = "";
@@ -247,8 +236,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 output = exec( true, error, command.toArray( new String[command.size()] ) );
                 task.getProject().getLogger().debug( output );
 
-                Map<String, Object> plist = Plist.fromXml( output );
-                Map<String, Object> info = (Map<String, Object>)plist.get( "notarization-info" );
+                Map<String, Object> info = Plist.fromXml( output );
                 if( info == null ) {
                     acceptedFailureCount--;
                     lastErrors.add( "There was no notarization information present. Was I too fast?" );
@@ -256,7 +244,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                     continue;
                 }
 
-                String status = (String)info.get( "Status" );
+                String status = (String)info.get( "status" );
                 if( status == null ) {
                     acceptedFailureCount--;
                     lastErrors.add( "There was no Status present in the notarization information.\n\n" + output );
@@ -264,12 +252,17 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                     continue;
                 }
 
-                if( status.equalsIgnoreCase( "success" ) ) {
+                if( status.equalsIgnoreCase( "Accepted" ) ) {
                     // This is what we have been waiting for!
                     return true;
-                } else if( status.equalsIgnoreCase( "invalid" ) ) {
+                } else if( status.equalsIgnoreCase( "Invalid" ) ) {
                     task.getProject().getLogger().error( "The response status was 'invalid'. Please check the online logfile for problems:" );
+                    requestLogfile( UUID );
+                    return false;
+                } else if( status.equalsIgnoreCase( "Rejected" ) ) {
+                    task.getProject().getLogger().error( "The response status was 'rejected'. Please check the online logfile for problems:" );
                     task.getProject().getLogger().error( info.get( "LogFileURL" ).toString() );
+                    requestLogfile( UUID );
                     return false;
                 }
 
@@ -293,6 +286,28 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         throw new IllegalArgumentException( String.join( "\n", lastErrors ) );
     }
 
+    /**
+     * Request the logfile of the notarization
+     * @param UUID the uuid of the process
+     */
+    private void requestLogfile( String UUID ) {
+
+        ArrayList<String> command = new ArrayList<>();
+        command.add( "xcrun" );
+        command.add( "notarytool" );
+        command.add( "log" );
+        addDefaultOptionsToXCRunCommand( command );
+        command.add( UUID );
+
+        ByteArrayOutputStream error = new ByteArrayOutputStream();
+        String output = exec( true, error, command.toArray( new String[command.size()] ) );
+        if( isDebugOutput() ) {
+            task.getProject().getLogger().debug( output );
+        }
+
+        task.getProject().getLogger().info( "Here comes the logfile of the notarization request" );
+        task.getProject().getLogger().info( output );
+    }
     /**
      * This method checks for other processes running the notarization, since Apple does not allow multiple uploads simultaneously
      */
