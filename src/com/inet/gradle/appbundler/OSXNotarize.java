@@ -18,9 +18,9 @@ import com.inet.gradle.setup.abstracts.AbstractTask;
 
 public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T, S> {
 
-    private String            username, passwordPlain, passwordKeychainItem, passwordEnvironmentVariable;
+    private String            username, passwordPlain, passwordKeychainItem;
 
-    private String            ascProvider;
+    private String            teamId;
 
     private boolean           debugOutput = false;
 
@@ -33,14 +33,13 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Execute the notarization on the given file
-     *
      * @param notarizeFile the file to notarize
      */
     public void run( File notarizeFile ) {
         task.getProject().getLogger().info( "Notarizing the given file: " + notarizeFile.getAbsolutePath() );
 
         checkForRunningNotarizationProcess();
-        
+
         codesign.unlockKeychain(); // Unlock the keychain before the action is run
         String UUID = requestNotarization( notarizeFile ); // This will hang and wait until the upload is done
         if( UUID == null ) {
@@ -59,19 +58,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Returns the name of the environment variable that will be used to
-     * retrieve the password used for notarization. PLEASE DO NOT USE.
-     *
-     * @return the name of the environment variable with the password
-     */
-    public String getPasswordEnvironmentVariable() {
-        return passwordEnvironmentVariable;
-    }
-
-    /**
-     * Set the name of a keychain item that is going to be used for retrieving the password.
-     * Note: The username in the item has to match the one given in this API
-     *
+     * Set the name of a keychain item that is going to be used for retrieving the password. Note: The username in the item has to match the one given in this API
      * @param passwordKeychainItem the name if the keychain item used for notarization
      */
     public void setPasswordKeychainItem( String passwordKeychainItem ) {
@@ -79,19 +66,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Set the name of an environment variable that should be used to
-     * retrieve the password used for notarization. Please refrain from using this, use {@link OSXNotarize#setPasswordKeychainItem} instead
-     *
-     * @param passwordEnvironmentVariable the name of an environment variable with the password
-     */
-    public void setPasswordEnvironmentVariable( String passwordEnvironmentVariable ) {
-        this.passwordEnvironmentVariable = passwordEnvironmentVariable;
-    }
-
-    /**
-     * Returns the name of the keychain item that will be used to retrieve the password.
-     * NOTE: the username has to match!
-     *
+     * Returns the name of the keychain item that will be used to retrieve the password. NOTE: the username has to match!
      * @return the name of the keychain item that will be used for retrieving the password
      */
     public String getPasswordKeychainItem() {
@@ -100,7 +75,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Set a plain password to be used for notarization. THIS IS DISCOURAGED
-     *
      * @param passwordPlain the plain password to be used for notarization.
      */
     public void setPasswordPlain( String passwordPlain ) {
@@ -109,7 +83,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Returns the plain password used for notarization. PLEASE DO NOT USE!
-     *
      * @return the plain password used for notarization.
      */
     public String getPasswordPlain() {
@@ -117,27 +90,23 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Set the ASC provider which is equired with --notarize-app and --notarization-history
-     * when a user account is associated with multiple providers.
-     *
-     * @param ascProvider the ASC provider
+     * Set the team Id which is required for the notarization.
+     * @param teamId the team Id
      */
-    public void setAscProvider( String ascProvider ) {
-        this.ascProvider = ascProvider;
+    public void setTeamId( String teamId ) {
+        this.teamId = teamId;
     }
 
     /**
-     * Returns the ASC provider
-     *
-     * @return the ASC provider
+     * Returns the team ID
+     * @return the team OD
      */
-    public String getAscProvider() {
-        return ascProvider;
+    public String getTeamId() {
+        return teamId;
     }
 
     /**
      * Set the state of debugging. If true: will output the XMLContent from the tools
-     *
      * @param debugOutput the state of debugging
      */
     public void setDebugOutput( boolean debugOutput ) {
@@ -146,7 +115,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Returns the state of debugging. If true: will output the XMLContent from the tools
-     *
      * @return the state of debugging.
      */
     public boolean isDebugOutput() {
@@ -154,48 +122,35 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Returns the password item set for the current request.
-     * It will throw an IllegalArgumentException if none of the fields
-     * for the password items have been set.
-     *
-     * @return the password item set for the current request.
-     */
-    private String getPasswordElement() {
-        if( passwordKeychainItem != null ) {
-            return "@keychain:" + passwordKeychainItem;
-        } else if( passwordEnvironmentVariable != null ) {
-            return "@env:" + passwordEnvironmentVariable;
-        } else if( passwordPlain != null ) {
-            return passwordPlain;
-        } else {
-            throw new IllegalArgumentException( "At least on of the parameters has to be set: passwordKeychainItem, passwordEnvironmentVariable or passwordPlain" );
-        }
-    }
-
-    /**
      * Adds default commands for the xcrun process
-     *
      * @param command the list of commands so far
      */
     private void addDefaultOptionsToXCRunCommand( ArrayList<String> command ) {
-        command.add( "-u" );
+        command.add( "--apple-id" );
         command.add( username );
-        command.add( "-p" );
-        command.add( getPasswordElement() );
 
-        if( ascProvider != null ) {
-            command.add( "--asc-provider" );
-            command.add( ascProvider );
+        if( passwordKeychainItem != null ) {
+            command.add( "-p" );
+            command.add( passwordKeychainItem );
+        } else if( passwordPlain != null ) {
+            command.add( "-password" );
+            command.add( passwordPlain );
+        } else {
+            throw new IllegalArgumentException( "At least on of the parameters has to be set: passwordKeychainItem, passwordEnvironmentVariable or passwordPlain" );
+        }
+
+        if( teamId != null ) {
+            command.add( "--team-id" );
+            command.add( teamId );
         }
 
         // Receive an XML answer
         command.add( "--output-format" );
-        command.add( "xml" );
+        command.add( "plist" );
     }
 
     /**
      * Start the notarization process for the given file
-     *
      * @param notarizeFile the file to notarize
      * @return the UUID for the process to keep working with
      * @throws XmlParseException in case the received plist xml file was erroneous
@@ -205,13 +160,10 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         ArrayList<String> command = new ArrayList<>();
         command.add( "xcrun" );
-        command.add( "altool" );
-        command.add( "--notarize-app" );
-        command.add( "-f" );
-        command.add( notarizeFile.getAbsolutePath() );
-        command.add( "--primary-bundle-id" );
-        command.add( notarizeFile.getName() );
+        command.add( "notarytool" );
+        command.add( "submit" );
         addDefaultOptionsToXCRunCommand( command );
+        command.add( notarizeFile.getAbsolutePath() );
 
         ByteArrayOutputStream error = new ByteArrayOutputStream();
         String output = exec( true, error, command.toArray( new String[command.size()] ) );
@@ -233,7 +185,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
         } catch( ClassCastException | XmlParseException e ) {
             task.getProject().getLogger().error( "An error occured while checking the noraization response." );
-            if ( !isDebugOutput() ) {
+            if( !isDebugOutput() ) {
                 // Debug in addition
                 task.getProject().getLogger().error( "Debug output START:" );
                 task.getProject().getLogger().error( output );
@@ -242,10 +194,10 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
             task.getProject().getLogger().debug( "The Error stream produced:" );
             task.getProject().getLogger().debug( error.toString() );
-            
+
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             PrintStream stream = new PrintStream( bos );
-            e.printStackTrace( stream  );
+            e.printStackTrace( stream );
             task.getProject().getLogger().debug( "This is the exception it produced:" );
             task.getProject().getLogger().debug( bos.toString() );
             task.getProject().getLogger().debug( "End of Output." );
@@ -260,7 +212,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @throws InterruptedException in case the thread was interrupted
      */
     private void waitWithStatus( String status ) throws InterruptedException {
-        if ( status != null ) {
+        if( status != null ) {
             task.getProject().getLogger().info( "Status was: '" + status + "'." );
         }
 
@@ -270,7 +222,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Wait until the notarization process is done.
-     *
      * @param UUID the ID of the task to check against
      * @return true if the process was successful
      */
@@ -282,16 +233,16 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         List<String> lastErrors = new ArrayList<>();
 
         while( true && acceptedFailureCount > 0 ) {
-            
+
             ByteArrayOutputStream error = new ByteArrayOutputStream();
             try {
 
                 ArrayList<String> command = new ArrayList<>();
                 command.add( "xcrun" );
-                command.add( "altool" );
-                command.add( "--notarization-info" );
-                command.add( UUID );
+                command.add( "notarytool" );
+                command.add( "info" );
                 addDefaultOptionsToXCRunCommand( command );
+                command.add( UUID );
 
                 output = exec( true, error, command.toArray( new String[command.size()] ) );
                 task.getProject().getLogger().debug( output );
@@ -325,7 +276,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 waitWithStatus( status );
             } catch( ClassCastException | XmlParseException | InterruptedException e ) {
                 lastErrors.add( e.getMessage() );
-                
+
                 lastErrors.add( "The Error stream produced:\n" );
                 lastErrors.add( error.toString() + "\n" );
 
@@ -333,7 +284,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 lastErrors.add( output + "\n\n" );
                 try {
                     waitWithStatus( null );
-                } catch ( InterruptedException ie ) {
+                } catch( InterruptedException ie ) {
                     // ignore
                 }
             }
@@ -343,8 +294,7 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * This method checks for other processes running the notarization, since Apple
-     * does not allow multiple uploads simultaneously 
+     * This method checks for other processes running the notarization, since Apple does not allow multiple uploads simultaneously
      */
     private void checkForRunningNotarizationProcess() {
 
@@ -355,17 +305,17 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                 command.add( "bash" );
                 command.add( "-c" );
                 command.add( "ps aux | grep notarize-app | grep -v grep | wc -l" );
-    
+
                 String output = exec( command.toArray( new String[command.size()] ) );
-                if ( debugOutput ) {
+                if( debugOutput ) {
                     task.getProject().getLogger().info( "Response: `" + output + "`" );
                 }
 
                 Integer lineCount = Integer.valueOf( output );
-                if ( lineCount.intValue() == 0 ) {
+                if( lineCount.intValue() == 0 ) {
                     return; // Done
                 }
-    
+
                 // Else continue;
                 task.getProject().getLogger().info( "There was another process notarizing. Will wait a minute now." );
                 Thread.sleep( 1000 * 60 );
@@ -378,7 +328,6 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     /**
      * Staple the original file with the notarization result
-     *
      * @param notarizeFile the file to staple
      */
     private void stapleApplication( File notarizeFile ) {
