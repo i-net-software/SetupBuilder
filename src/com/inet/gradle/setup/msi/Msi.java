@@ -636,6 +636,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return closure the data for signing
      */
+    @Input
     public Closure<?> getExternalSignTool() {
         return externalSignTool;
     }
