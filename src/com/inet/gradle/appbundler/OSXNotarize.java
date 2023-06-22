@@ -6,9 +6,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.api.logging.Logger;
 
 import com.inet.gradle.appbundler.utils.xmlwise.Plist;
 import com.inet.gradle.appbundler.utils.xmlwise.XmlParseException;
@@ -167,30 +167,31 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         ByteArrayOutputStream error = new ByteArrayOutputStream();
         String output = exec( true, error, command.toArray( new String[command.size()] ) );
         if( isDebugOutput() ) {
-            task.getProject().getLogger().debug( output );
+            task.getProject().getLogger().lifecycle( output );
         }
 
         try {
             Map<String, Object> plist = Plist.fromXml( output );
             return (String)plist.get( "id" );
         } catch( ClassCastException | XmlParseException e ) {
-            task.getProject().getLogger().error( "An error occured while checking the noraization response." );
+            Logger logger = task.getProject().getLogger();
+            logger.error( "An error occured while checking the noraization response." );
             if( !isDebugOutput() ) {
                 // Debug in addition
-                task.getProject().getLogger().error( "Debug output START:" );
-                task.getProject().getLogger().error( output );
-                task.getProject().getLogger().error( "Debug output END" );
+                logger.error( "Debug output START:" );
+                logger.error( output );
+                logger.error( "Debug output END" );
             }
 
-            task.getProject().getLogger().debug( "The Error stream produced:" );
-            task.getProject().getLogger().debug( error.toString() );
+            logger.error( "The Error stream produced:" );
+            logger.error( error.toString() );
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             PrintStream stream = new PrintStream( bos );
             e.printStackTrace( stream );
-            task.getProject().getLogger().debug( "This is the exception it produced:" );
-            task.getProject().getLogger().debug( bos.toString() );
-            task.getProject().getLogger().debug( "End of Output." );
+            logger.error( "This is the exception it produced:" );
+            logger.error( bos.toString() );
+            logger.error( "End of Output." );
         }
 
         return null;
