@@ -32,6 +32,7 @@ import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
@@ -636,7 +637,7 @@ public class Msi extends AbstractSetupTask {
      *
      * @return closure the data for signing
      */
-    @Input
+    @Internal
     public Closure<?> getExternalSignTool() {
         return externalSignTool;
     }
