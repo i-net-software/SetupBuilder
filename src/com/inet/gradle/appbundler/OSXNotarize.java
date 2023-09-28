@@ -262,7 +262,10 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
                     return false;
                 } else if( status.equalsIgnoreCase( "Rejected" ) ) {
                     task.getProject().getLogger().error( "The response status was 'rejected'. Please check the online logfile for problems:" );
-                    task.getProject().getLogger().error( info.get( "LogFileURL" ).toString() );
+                    Object logFileURL = info.get( "LogFileURL" );
+                    if ( logFileURL != null ) {
+                        task.getProject().getLogger().error( logFileURL.toString() );
+                    }
                     requestLogfile( UUID );
                     return false;
                 }
