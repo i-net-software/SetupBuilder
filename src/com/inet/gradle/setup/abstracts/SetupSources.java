@@ -21,13 +21,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.gradle.api.Action;
-//// if gradleVersion >= 3.0
-import org.gradle.api.Transformer;
-import org.gradle.api.file.ConfigurableFilePermissions;
 import org.gradle.api.file.CopyProcessingSpec;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.DuplicatesStrategy;
-import org.gradle.api.file.ExpandDetails;
 import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileTreeElement;
@@ -36,9 +32,19 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
-
 import groovy.lang.Closure;
+
+//// if gradleVersion >= 3.0
+import org.gradle.api.Transformer;
 //// endif
+
+////if gradleVersion >= 7.2
+import org.gradle.api.file.ExpandDetails;
+////endif
+
+////if gradleVersion >= 8.0
+import org.gradle.api.file.ConfigurableFilePermissions;
+////endif
 
 /**
  * Implementation of the CopySpec interface.
