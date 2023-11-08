@@ -9,7 +9,7 @@
 
 import java.util.StringTokenizer;
 import java.util.regex.*;
-
+import org.gradle.util.VersionNumber
 
 /**
  * Java Preprocessor.

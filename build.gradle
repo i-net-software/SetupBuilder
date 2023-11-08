@@ -9,9 +9,9 @@ apply from: "${buildscript.sourceFile.parentFile}/scripts/javapreprocessor.gradl
 
 group = 'de.inetsoftware'
 
-def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '4.10.2'    // Gradle version for the wrapper
-def buildVersion    = '19'                                                     // build version
-def baseVersion     = '8.0'                                                     // Base Version to build, depends on gradle version.
+def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '8.1.0'     // Gradle version for the wrapper
+def buildVersion    = '19'                                                  // build version
+def baseVersion     = '8.0'                                                 // Base Version to build, depends on gradle version.
 
 wrapper.gradleVersion = LIB_GRADLE_VERSION
 def gVersion = org.gradle.util.VersionNumber.parse( gradle.gradleVersion )
