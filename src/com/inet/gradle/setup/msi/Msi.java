@@ -33,13 +33,13 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.Optional;
 import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractSetupTask;
 import com.inet.gradle.setup.util.ResourceUtils;
 
 import groovy.lang.Closure;
-import org.gradle.api.tasks.Optional;
 
 /**
  * The msi Gradle task. It build a msi setup for Windows.

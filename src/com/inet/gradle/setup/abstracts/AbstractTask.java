@@ -30,6 +30,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
+import org.gradle.api.internal.DocumentationRegistry;
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.FileLookup;
@@ -42,6 +43,9 @@ import org.gradle.api.internal.file.copy.CopySpecResolver;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
+////if gradleVersion >= 7.0
+import org.gradle.api.model.ObjectFactory;
+////endif
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -184,11 +188,11 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
         /*// if gradleVersion < 3.4
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
-        */// elif gradleVersion < 7.2
+        //// elif gradleVersion < 7.2
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem(), true );
-        /*// else
+        */// else
         CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getObjectFactory(), getFileSystem(), true, getDocumentationRegistry() );
-        */// endif
+        //// endif
 
         CopyAction copyAction = new CopyAction() {
             @Override
@@ -224,7 +228,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         throw new UnsupportedOperationException();
     }
 
-    /*// if gradleVersion >= 7.0
+    //// if gradleVersion >= 7.0
     @Inject
     protected DocumentationRegistry getDocumentationRegistry() {
         throw new UnsupportedOperationException();
@@ -234,7 +238,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
     protected ObjectFactory getObjectFactory() {
         throw new UnsupportedOperationException();
     }
-    */// endif
+    //// endif
 
     /**
      * The platform depending build.

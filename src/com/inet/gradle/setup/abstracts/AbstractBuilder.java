@@ -23,7 +23,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.initialization.DefaultBuildCancellationToken;

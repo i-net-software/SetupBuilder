@@ -167,7 +167,7 @@ public class ResourceUtils {
             return new File(dirURL.toURI());
         }
 
-        if (dirURL.getProtocol().equals("jar")) {
+        if (dirURL != null && dirURL.getProtocol().equals("jar")) {
             // a JAR path
             String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); //strip out only the JAR file
 
