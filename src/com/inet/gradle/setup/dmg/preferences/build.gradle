@@ -21,7 +21,11 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi()
+    if ( gVersion <= VersionNumber.parse( '7.0' ) ) {
+        compile gradleApi()
+    } else {
+        implementation gradleApi()
+    }
 }
 
 sourceSets {
