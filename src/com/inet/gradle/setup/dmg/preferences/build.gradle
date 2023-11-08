@@ -4,11 +4,17 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
+import org.gradle.util.VersionNumber
+def gVersion = VersionNumber.parse( gradle.gradleVersion )
+if ( gVersion <= VersionNumber.parse( '7.6' ) ) {
+    apply plugin: 'maven'
+}
+
+
 group = 'de.inetsoftware'
-version = '1.9'
+version = '2.0'
 
 repositories {
     mavenCentral()
@@ -30,12 +36,12 @@ sourceSets {
 if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
     println "Uploading into internal Repository"
-    
+
     preparePublish.dependsOn 'sourcesJar'
     if ( System.getProperty("snapshot") ) {
         version += '-SNAPSHOT' // setting version to snapshot
     }
-    
+
 } else {
     println "Uploading into local '../repo'"
     version += '-SNAPSHOT' // setting version to snapshot
