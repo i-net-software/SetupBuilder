@@ -459,6 +459,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
      * {@inheritDoc}
      */
     @Override
+    @Internal
     default CopyProcessingSpec dirPermissions( Action<? super ConfigurableFilePermissions> arg0 ) {
         return getRootSpec().dirPermissions( arg0 );
     }
@@ -467,6 +468,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
      * {@inheritDoc}
      */
     @Override
+    @Internal
     default CopyProcessingSpec filePermissions( Action<? super ConfigurableFilePermissions> arg0 ) {
         return getRootSpec().filePermissions( arg0 );
     }
@@ -475,6 +477,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
      * {@inheritDoc}
      */
     @Override
+    @Internal
     default Property<ConfigurableFilePermissions> getDirPermissions() {
         return getRootSpec().getDirPermissions();
     }
@@ -483,6 +486,7 @@ public interface SetupSources extends CopySpec, CopySpecSource {
      * {@inheritDoc}
      */
     @Override
+    @Internal
     default Property<ConfigurableFilePermissions> getFilePermissions() {
         return getRootSpec().getFilePermissions();
     }
