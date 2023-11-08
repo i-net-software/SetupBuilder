@@ -8,7 +8,7 @@ apply plugin: 'maven-publish'
 
 import org.gradle.util.VersionNumber
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
-if ( gVersion <= VersionNumber.parse( '7.6' ) ) {
+if ( gVersion <= VersionNumber.parse( '7.0' ) ) {
     apply plugin: 'maven'
 }
 
