@@ -81,9 +81,9 @@ public class Launch4jCreator {
                 config.setVisible( false );
                 config.setTransitive( false );
                 DependencyHandler dependencies = project.getDependencies();
-                dependencies.add( configName, "net.sf.launch4j:launch4j:3.12" );
-                dependencies.add( configName, "net.sf.launch4j:launch4j:3.12:workdir-win32" );
-                dependencies.add( configName, "com.thoughtworks.xstream:xstream:1.4.11.1" );
+                dependencies.add( configName, "net.sf.launch4j:launch4j:3.50" );
+                dependencies.add( configName, "net.sf.launch4j:launch4j:3.50:workdir-win32" );
+                dependencies.add( configName, "com.thoughtworks.xstream:xstream:1.4.20" );
             }
 
             ArrayList<URL> urls = new ArrayList<>();

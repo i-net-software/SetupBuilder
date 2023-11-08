@@ -96,7 +96,7 @@ class Launch4jConfig extends XmlFileBuilder<Msi> {
         } else {
             getOrCreateChild( jre, "minVersion" ).setTextContent( System.getProperty( "java.version" ) );
         }
-        getOrCreateChild( jre, "runtimeBits" ).setTextContent( task.is64Bit() ? "64" : "32" );
+        getOrCreateChild( jre, "requires64Bit" ).setTextContent( task.is64Bit() ? "true" : "false" );
 
         // Add all JVM Arguments
         for( String argument : launch.getJavaVMArguments() ) {
