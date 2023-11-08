@@ -49,7 +49,7 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
 } else {
     println "Uploading into local '../repo'"
     version += '-SNAPSHOT' // setting version to snapshot
-    uploadArchives {
+    publishing {
         repositories {
             mavenDeployer {
                 repository(url: uri('../repo'))
@@ -59,7 +59,7 @@ if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists
 }
 
 task sourcesJar(type: Jar) {
-    uploadArchives.dependsOn sourcesJar
+    publishing.dependsOn sourcesJar
     from sourceSets.main.resources
     classifier "sources"
 
