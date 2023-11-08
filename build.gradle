@@ -150,3 +150,16 @@ task runSetupBuilderTestTasks(type: GradleBuild) {
     tasks = ['clean', dependingTask]
 }
 
+afterEvaluate {
+    // The first one ususally wins.
+    project.tasks.withType( Copy ).all {
+        println "Setting Duplication Strategy in afterEvaluate: ${it}"
+        duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    }
+
+    // The first one ususally wins.
+    project.tasks.withType( Jar ).all {
+        println "Setting Duplication Strategy in afterEvaluate: ${it}"
+        duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    }
+}
