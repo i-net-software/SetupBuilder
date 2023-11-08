@@ -1,76 +1,20 @@
-plugins {
-    id "com.gradle.plugin-publish" version "0.9.1"
-    id "org.openbakery.xcode-plugin" version "0.21.0"
+buildscript {
+  repositories {
+    maven {
+      url('https://openbakery.org/repository/')
+    }
+  mavenCentral()
+  }
+
+  dependencies {
+    classpath "org.openbakery:xcode-plugin:0.23.+"
+  }
 }
 
-apply plugin: 'java'
-apply plugin: 'maven-publish'
-
-import org.gradle.util.VersionNumber
-def gVersion = VersionNumber.parse( gradle.gradleVersion )
-if ( gVersion <= VersionNumber.parse( '7.0' ) ) {
-    apply plugin: 'maven'
-}
-
+apply plugin: "org.openbakery.xcode-plugin"
 
 group = 'de.inetsoftware'
 version = '2.0'
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    if ( gVersion <= VersionNumber.parse( '7.0' ) ) {
-        compile gradleApi()
-    } else {
-        implementation gradleApi()
-    }
-}
-
-sourceSets {
-    main {
-        resources {
-            srcDirs = ['.']
-            exclude 'build'
-        }
-    }
-}
-
-if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
-    apply from: '../BuildScripts/base.gradle' // for internal build system
-    println "Uploading into internal Repository"
-
-    preparePublish.dependsOn 'sourcesJar'
-    if ( System.getProperty("snapshot") ) {
-        version += '-SNAPSHOT' // setting version to snapshot
-    }
-
-} else {
-    println "Uploading into local '../repo'"
-    version += '-SNAPSHOT' // setting version to snapshot
-    publishing {
-        repositories {
-            mavenDeployer {
-                repository(url: uri('../repo'))
-            }
-        }
-    }
-}
-
-task sourcesJar(type: Jar) {
-    publishing.dependsOn sourcesJar
-    from sourceSets.main.resources
-    classifier "sources"
-
-    doLast {
-        configurations.archives.artifacts.removeAll{ it.classifier != "sources" } // only leave gthe sources
-    }
-}
-
-compileJava.enabled = false
-classes.enabled = false
-jar.enabled = false
 
 xcodebuild {
   scheme = 'SetupBuilderOSXPrefPane'
