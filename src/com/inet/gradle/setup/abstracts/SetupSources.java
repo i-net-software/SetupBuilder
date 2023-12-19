@@ -28,7 +28,6 @@ import org.gradle.api.file.FileCopyDetails;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.FileTreeElement;
 import org.gradle.api.internal.file.copy.CopySpecSource;
-import org.gradle.api.provider.Property;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -44,6 +43,7 @@ import org.gradle.api.file.ExpandDetails;
 
 ////if gradleVersion >= 8.0
 import org.gradle.api.file.ConfigurableFilePermissions;
+import org.gradle.api.provider.Property;
 ////endif
 
 /**
