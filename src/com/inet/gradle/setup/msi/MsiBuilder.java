@@ -17,7 +17,11 @@ package com.inet.gradle.setup.msi;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -37,16 +41,14 @@ import groovy.lang.Closure;
 
 /**
  * Build a MSI setup for Windows.
- *
  * @author Volker Berlin
  */
-class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
+class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
 
     private SetupBuilder setup;
 
     /**
      * Create a new instance
-     *
      * @param msi the calling task
      * @param setup the shared settings
      * @param fileResolver the file Resolver
@@ -124,7 +126,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
         for( MsiLocalizedResource msiLocalizedResource : i18n ) {
             File result = msiLocalizedResource.getResource();
-            if ( result != null ) {
+            if( result != null ) {
                 i18nFiles.add( result.getAbsolutePath() );
             }
         }
@@ -134,7 +136,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Create the lauch4j starter if there was set some and add it to the sources.
-     *
      * @throws Exception if any error occur
      */
     private void buildLauch4j() throws Exception {
@@ -157,7 +158,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Call a program from the WIX installation.
-     *
      * @param tool the program name
      * @param parameters the parameters
      */
@@ -177,11 +177,11 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         parameters.add( "-out" );
         parameters.add( buildDir.getAbsolutePath() + '\\' );
         parameters.add( getWxsFile().getAbsolutePath() );
-        for(File external : task.getExternals()){
+        for( File external : task.getExternals() ) {
             parameters.add( external.getAbsolutePath() );
         }
-        for(String extension : task.getWixExtensions()){
-        	parameters.add( "-ext" );
+        for( String extension : task.getWixExtensions() ) {
+            parameters.add( "-ext" );
             parameters.add( extension );
         }
         parameters.add( "-ext" );
@@ -192,7 +192,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Call the light.exe tool.
-     *
      * @param language the target language
      * @param languageResources the language resource files
      * @return the generated msi file
@@ -202,8 +201,8 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
         parameters.add( "-sice:ICE60" ); // accept *.ttf files to install in the install directory
-        for(String extension : task.getWixExtensions()){
-        	parameters.add( "-ext" );
+        for( String extension : task.getWixExtensions() ) {
+            parameters.add( "-ext" );
             parameters.add( extension );
         }
         parameters.add( "-ext" );
@@ -216,7 +215,7 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         parameters.add( "-cultures:" + language.getCulture() + ";neutral" );
 
         // Add locations
-        if ( languageResources != null ) {
+        if( languageResources != null ) {
             for( String location : languageResources ) {
                 parameters.add( "-loc" );
                 parameters.add( location );
@@ -225,12 +224,12 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
         // Set a localized EULA file
         File localizedRtfFile = MsiLocalizedResource.localizedRtfFile( task.getTemporaryDir(), language );
-        if ( localizedRtfFile.exists() ) {
-            parameters.add( "-dWixUILicenseRtf=\"" + localizedRtfFile.getAbsolutePath() + "\"" );
+        if( localizedRtfFile.exists() ) {
+            parameters.add( "-dWixUILicenseRtf=" + localizedRtfFile.getAbsolutePath() );
         }
 
         // Check if we should skip msi validation
-        if ( task.isSkipValidation() ) {
+        if( task.isSkipValidation() ) {
             parameters.add( "-sval" );
         }
 
@@ -241,7 +240,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Change the language ID of a *.msi file.
-     *
      * @param file a msi file
      * @param language the target language
      */
@@ -258,7 +256,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Set all languages IDs for which translations was added.
-     *
      * @param mui the multilingual user interface (MUI) installer file
      * @param langIDs a comma separated list of languages IDs
      */
@@ -275,7 +272,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Call the msitran.exe tool and create a transform file (*.mst).
-     *
      * @param mui the multilingual user interface (MUI) installer file
      * @param file the current msi file
      * @param language current language
@@ -314,12 +310,11 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Sign a file if the needed information are set.
-     *
      * @param file file to sign
      * @throws IOException If any I/O error occur on loading of the sign tool
      */
     private void signTool( File file ) throws IOException {
-        if ( task.getExternalSignTool() != null ) {
+        if( task.getExternalSignTool() != null ) {
             task.getExternalSignTool().call( file );
             return;
         }
@@ -384,9 +379,28 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
         }
     }
 
+    private static boolean isValidEncoding( String input, Charset charset ) {
+        return Charset.forName( charset.name() ).newEncoder().canEncode( input );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, OutputStream error, boolean ignoreExitValue ) {
+
+        // check for non-iso parameters
+        for( String string : parameters ) {
+            if( !isValidEncoding( string, StandardCharsets.ISO_8859_1 ) ) {
+                task.getProject().getLogger().error( String.format( "The following parameter contains illegal non-ISO characters which are not supported: '%s'", string ) );
+            }
+        }
+
+        super.exec( parameters, input, output, error, ignoreExitValue );
+    }
+
     /**
      * Get the name of the wxs file
-     *
      * @return the xml file
      */
     private File getWxsFile() {
@@ -395,7 +409,6 @@ class MsiBuilder extends AbstractBuilder<Msi,SetupBuilder> {
 
     /**
      * Get the calling path (include name) of a WIX tool
-     *
      * @param tool the name of the tool file
      * @return the path
      */
