@@ -58,6 +58,7 @@ import com.inet.gradle.setup.abstracts.DocumentType;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.ProtocolHandler;
 import com.inet.gradle.setup.abstracts.Service;
+import com.inet.gradle.setup.msi.Msi.InstallScope;
 import com.inet.gradle.setup.util.ResourceUtils;
 import com.inet.gradle.setup.util.XmlFileBuilder;
 
@@ -322,17 +323,18 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
      */
     private void saveLoadLastInstallDir() {
         String key = "Software\\" + setup.getVendor() + '\\' + setup.getApplication() + '\\' + "LastInstallDir";
+        String root = task.getInstallScope() == InstallScope.perMachine ? "HKLM" : "HKCU"; // does not use HKLM for an installer with perUser scope
 
         // save the INSTALLDIR to the registry
         Element component = getComponent( installDir, "install_path" );
-        Element regkey = addRegistryKey( component, "HKLM", "install_path_reg", key );
+        Element regkey = addRegistryKey( component, root, "install_path_reg", key );
         addRegistryValue( regkey, null, "string", "[INSTALLDIR]" );
 
         // load the INSTALLDIR from the registry
         Element lastInstalldir = getOrCreateChildById( product, "Property", "INSTALLDIR" );
         addAttributeIfNotExists( lastInstalldir, "Secure", "yes" );
         Element search = getOrCreateChildById( lastInstalldir, "RegistrySearch", "SearchInstallDir" );
-        addAttributeIfNotExists( search, "Root", "HKLM" );
+        addAttributeIfNotExists( search, "Root", root );
         addAttributeIfNotExists( search, "Key", key );
         addAttributeIfNotExists( search, "Type", "directory" );
     }
