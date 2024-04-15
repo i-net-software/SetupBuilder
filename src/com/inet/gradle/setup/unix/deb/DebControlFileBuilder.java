@@ -227,7 +227,9 @@ class DebControlFileBuilder {
         if( ( recommends == null || recommends.length() == 0 ) && setup.getBundleJre() != null ) {
             recommends = "openjdk-8-jre | openjdk-8-jdk | default-jre | default-jdk, libgtk2-perl";
         }
-        controlWriter.write( "Recommends: " + recommends + NEWLINE );
+        if( recommends != null && recommends.length() > 0 ) {
+            controlWriter.write( "Recommends: " + recommends + NEWLINE );
+        }
     }
 
     /**
