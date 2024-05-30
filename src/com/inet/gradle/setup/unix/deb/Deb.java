@@ -41,6 +41,8 @@ public class Deb extends Unix {
     private String  maintainerEmail;
 
     private String  changes;
+    
+    private String  compression;
 
     public Deb() {
         super( "deb" );
@@ -132,6 +134,16 @@ public class Deb extends Unix {
 
     public void setChanges( String changes ) {
         this.changes = changes;
+    }
+    
+    @Input
+    @Optional
+    public String getCompression() {
+        return compression;
+    }
+    
+    public void setCompression( String compression ) {
+        this.compression = compression;
     }
 
     @Input

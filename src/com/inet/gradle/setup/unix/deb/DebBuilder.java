@@ -547,6 +547,12 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
         ArrayList<String> command = new ArrayList<>();
         command.add( "fakeroot" );
         command.add( "dpkg-deb" );
+        
+        String compression = task.getCompression();
+        if(compression != null && !compression.isEmpty()) {
+            command.add( "-Z" + compression );
+        }
+        
         command.add( "--build" );
         command.add( buildDir.getAbsolutePath() );
         command.add( task.getSetupFile().getPath() );
