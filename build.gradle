@@ -167,3 +167,21 @@ afterEvaluate {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }
+
+// hack the Eclipse .classpath file
+apply plugin: 'eclipse'
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                // Entferne Ressourcen-Einträge, die falsch gesetzt wurden
+                classpath.entries.removeAll { entry ->
+                    if ( entry.kind == 'src' ) {
+                        entry.excludes = []
+                        entry.path.contains( 'preparedSrc' )
+                    }
+                }
+            }
+        }
+    }
+}
