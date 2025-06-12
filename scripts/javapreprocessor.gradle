@@ -9,7 +9,6 @@
 
 import java.util.StringTokenizer;
 import java.util.regex.*;
-import org.gradle.util.VersionNumber
 
 /**
  * Java Preprocessor.
@@ -195,7 +194,7 @@ compileJava.dependsOn( 'JPP' )
 
 task JPP ( type : JPPTask) {
 
-    description '===  Pre-Process Java sources  ==='
+    description = '===  Pre-Process Java sources  ==='
     JPP.enabled = false
 
     doLast {

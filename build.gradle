@@ -1,10 +1,11 @@
 plugins {
-    id "com.gradle.plugin-publish" version "0.15.0"
+    id "com.gradle.plugin-publish" version "1.3.1"
 }
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
+apply from: "${buildscript.sourceFile.parentFile}/scripts/VersionNumber.gradle"
 apply from: "${buildscript.sourceFile.parentFile}/scripts/javapreprocessor.gradle"
 
 group = 'de.inetsoftware'
@@ -14,7 +15,7 @@ def buildVersion    = '22'                                                  // b
 def baseVersion     = '8.0'                                                 // Base Version to build, depends on gradle version.
 
 wrapper.gradleVersion = LIB_GRADLE_VERSION
-def gVersion = org.gradle.util.VersionNumber.parse( gradle.gradleVersion )
+def gVersion = VersionNumber.parse( gradle.gradleVersion )
 println 'Gradle version: ' + gVersion
 
 // Fetch version from script.
@@ -23,7 +24,7 @@ version = setupBuilderVersion(buildVersion)
 baseVersion += '.' + buildVersion
 println 'SetupBuilder version: ' + version
 
-sourceCompatibility = 1.8
+java.sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
 
 repositories {
@@ -97,19 +98,21 @@ javadoc {
     exclude "**/icns"
 }
 
-pluginBundle {
+gradlePlugin {
     website = 'https://github.com/i-net-software/SetupBuilder'
     vcsUrl = 'https://github.com/i-net-software/SetupBuilder'
     description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
-    tags = ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ]
 
     plugins {
         setupBuilderPlugin {
             id = 'de.inetsoftware.setupbuilder'
+            implementationClass = 'com.inet.gradle.setup.SetupBuilderPlugin'
             displayName = 'Gradle Setup Builder plugin'
+            tags = ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ]
         }
         appBunderPlugin {
             id = 'de.inetsoftware.appbundler'
+            implementationClass = 'com.inet.gradle.setup.SetupBuilderPlugin'
             displayName = 'Gradle Application Bundler plugin for OSX'
             tags = ['app']
         }
@@ -146,7 +149,8 @@ if (Os.isFamily(Os.FAMILY_MAC)) {
 // run the following task as a dependency to the "check"-task.
 task runSetupBuilderTestTasks(type: GradleBuild) {
     check.dependsOn runSetupBuilderTestTasks
-    buildFile = 'testBuilds/setupBuilder.gradle'
+    dir = file('testBuilds')
+    startParameter.projectProperties = ['org.gradle.buildFile' : 'setupBuilder.gradle'] // should rename setupBuilder.gradle to build.gradle
     tasks = ['clean', dependingTask]
 }
 
@@ -154,12 +158,12 @@ afterEvaluate {
     // The first one ususally wins.
     project.tasks.withType( Copy ).all {
         println "Setting Duplication Strategy in afterEvaluate: ${it}"
-        duplicatesStrategy DuplicatesStrategy.EXCLUDE
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     // The first one ususally wins.
     project.tasks.withType( Jar ).all {
         println "Setting Duplication Strategy in afterEvaluate: ${it}"
-        duplicatesStrategy DuplicatesStrategy.EXCLUDE
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }
