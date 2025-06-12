@@ -1,0 +1,37 @@
+public class VersionNumber implements Comparable<VersionNumber> {
+    List<Integer> parts
+
+    VersionNumber( String version ) {
+        parts = version.tokenize('.').collect { it.isInteger() ? it.toInteger() : 0 }
+    }
+
+    public static VersionNumber parse( String version ) {
+        return new VersionNumber( version );
+    }
+
+    @Override
+    int compareTo( VersionNumber other ) {
+        int maxLength = Math.max(this.parts.size(), other.parts.size())
+        for (int i = 0; i < maxLength; i++) {
+            int a = i < this.parts.size() ? this.parts[i] : 0
+            int b = i < other.parts.size() ? other.parts[i] : 0
+            int cmp = a <=> b
+            if (cmp != 0) return cmp
+        }
+        return 0
+    }
+
+    boolean equals(Object o) {
+        return this.compareTo( o as VersionNumber ) == 0
+    }
+
+    int hashCode() {
+        return parts.hashCode()
+    }
+
+    String toString() {
+        return parts.join(".")
+    }
+}
+
+ext.VersionNumber = new VersionNumber( '' )
