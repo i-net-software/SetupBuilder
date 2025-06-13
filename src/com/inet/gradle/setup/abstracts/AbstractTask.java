@@ -18,6 +18,7 @@ package com.inet.gradle.setup.abstracts;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
@@ -30,7 +31,6 @@ import org.gradle.api.GradleException;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.file.FileTree;
-import org.gradle.api.internal.DocumentationRegistry;
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
 import org.gradle.api.internal.file.FileLookup;
@@ -43,9 +43,6 @@ import org.gradle.api.internal.file.copy.CopySpecResolver;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
 import org.gradle.api.internal.project.ProjectInternal;
-////if gradleVersion >= 7.0
-import org.gradle.api.model.ObjectFactory;
-////endif
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -53,6 +50,7 @@ import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
+import org.gradle.util.GradleVersion;
 /*// if gradleVersion < 4.2
 import org.gradle.api.internal.tasks.SimpleWorkResult;
 import org.gradle.internal.nativeplatform.filesystem.FileSystem;
@@ -66,10 +64,12 @@ import com.inet.gradle.setup.util.TempPath;
 
 import groovy.lang.Closure;
 
-/*// if gradleVersion >= 7.0
+//// if gradleVersion >= 7.0
 import org.gradle.api.internal.DocumentationRegistry;
 import org.gradle.api.model.ObjectFactory;
-*/// endif
+import org.gradle.api.internal.provider.PropertyFactory;
+import org.gradle.process.ExecOperations;
+//// endif
 
 /**
  * Base class for all setup task.
@@ -186,13 +186,46 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
             }
         }
 
-        /*// if gradleVersion < 3.4
-        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem() );
-        //// elif gradleVersion < 7.2
-        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getFileSystem(), true );
-        */// else
-        CopyActionExecuter copyActionExecuter = new CopyActionExecuter( getInstantiator(), getObjectFactory(), getFileSystem(), true, getDocumentationRegistry() );
-        //// endif
+        CopyActionExecuter copyActionExecuter = null;
+        StringBuilder errors = new StringBuilder();
+        CONSTRUCTORS: for( Constructor<?> constructor : CopyActionExecuter.class.getConstructors() ) {
+            Class<?>[] paramTypes = constructor.getParameterTypes();
+            Object[] args = new Object[paramTypes.length];
+            for( int i = 0; i < paramTypes.length; i++ ) {
+                Class<?> type = paramTypes[i];
+                Object param;
+                if( type == Instantiator.class ) {
+                    param = getInstantiator();
+                } else if( type == FileSystem.class ) {
+                    param = getFileSystem();
+                } else if( type == boolean.class || type == Boolean.class ) {
+                    param = Boolean.TRUE;
+                    //// if gradleVersion >= 7.0
+                } else if( type == ObjectFactory.class ) {
+                    param = getObjectFactory();
+                } else if( type == DocumentationRegistry.class ) {
+                    param = getDocumentationRegistry();
+                } else if( type == PropertyFactory.class ) {
+                    param = getPropertyFactory();
+                    //// endif
+                } else {
+                    errors.append( type.getName() ).append( " " );
+                    continue CONSTRUCTORS;
+                }
+                args[i] = param;
+            }
+
+            try {
+                constructor.setAccessible( true );
+                copyActionExecuter = (CopyActionExecuter)constructor.newInstance( args );
+                break;
+            } catch( Throwable th ) {
+                throw new GradleException( "Not supported Gradle Version: " + GradleVersion.current(), th );
+            }
+        }
+        if( copyActionExecuter == null ) {
+            throw new GradleException( "Not supported Gradle Version: " + GradleVersion.current() + " Can't create instance of CopyActionExecuter. Missing parameter types: " + errors );
+        }
 
         CopyAction copyAction = new CopyAction() {
             @Override
@@ -236,6 +269,16 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
 
     @Inject
     protected ObjectFactory getObjectFactory() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected PropertyFactory getPropertyFactory() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Inject
+    protected ExecOperations getExecOperations() {
         throw new UnsupportedOperationException();
     }
     //// endif

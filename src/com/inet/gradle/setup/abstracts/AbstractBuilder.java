@@ -24,9 +24,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.gradle.api.Project;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.initialization.DefaultBuildCancellationToken;
 import org.gradle.internal.concurrent.DefaultExecutorFactory;
+import org.gradle.process.ExecResult;
 import org.gradle.process.internal.DefaultExecAction;
 
 import com.inet.gradle.setup.util.IndentationOutputStream;
@@ -146,12 +148,14 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
      */
     @SuppressWarnings( "resource" )
     protected void exec( ArrayList<String> parameters, InputStream input, OutputStream output, OutputStream error, boolean ignoreExitValue ) {
+        Project project = task.getProject();
+
         // print command line to the log
         StringBuilder log = new StringBuilder( "\tCommand: " );
         for( String para : parameters ) {
 
             if ( para == null ) {
-                task.getProject().getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
+                project.getLogger().lifecycle( "Parameter not set. This will fail now:" + log.toString() );
             } else {
                 log.append( '\"' ).append( para );
                 if( para.endsWith( "\\" ) ) {
@@ -160,42 +164,36 @@ public abstract class AbstractBuilder<T extends AbstractTask, S extends Abstract
                 log.append( "\" " );
             }
         }
-        task.getProject().getLogger().lifecycle( log.toString() );
+        project.getLogger().lifecycle( log.toString() );
 
-        /*// if gradleVersion < 4.5
-        DefaultExecAction action = new DefaultExecAction( fileResolver );
-        //// elif gradleVersion < 4.8
-        DefaultExecAction action = new DefaultExecAction( fileResolver, new DefaultExecutorFactory().create( "exec setup" ) );
+        OutputStream output_ = output == null ? new IndentationOutputStream( System.out ) : output;
+
+        OutputStream error_ = error == null ? new IndentationOutputStream( System.err ) : error;
+
+        /*// if gradleVersion < 7
+        ExecResult execResult = project.exec( action -> {
         */// else
-        DefaultExecAction action = new DefaultExecAction( fileResolver, new DefaultExecutorFactory().create( "exec setup" ), new DefaultBuildCancellationToken());
+        ExecResult execResult = task.getExecOperations().exec( action -> {
         //// endif
-        action.setCommandLine( parameters );
-        action.setIgnoreExitValue( ignoreExitValue );
-        action.setWorkingDir( buildDir );
+            action.setCommandLine( parameters );
+            action.setIgnoreExitValue( ignoreExitValue );
+            action.setWorkingDir( buildDir );
 
-        if( input != null ) {
-            action.setStandardInput( input );
-        }
+            if( input != null ) {
+                action.setStandardInput( input );
+            }
 
-        if( output == null ) {
-            output = new IndentationOutputStream( System.out );
-        }
+            action.setStandardOutput( output_ );
+            action.setErrorOutput( error_ );
+        });
 
-        if( error == null ) {
-            error = new IndentationOutputStream( System.err );
-        }
-
-        action.setStandardOutput( output );
-        action.setErrorOutput( error );
         try {
-            action.execute();
-        } catch( Throwable th ) {
-            throw new RuntimeException( th );
+            execResult.rethrowFailure();
         } finally {
             try {
-                output.flush();
+                output_.flush();
             } catch( IOException e ) {
-                task.getProject().getLogger().error( e.getLocalizedMessage() );
+                project.getLogger().error( e.getLocalizedMessage() );
             }
         }
     }
