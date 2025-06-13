@@ -61,9 +61,8 @@ if ( !version.equalsIgnoreCase(baseVersion) ) {
 
 if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
     apply from: '../BuildScripts/base.gradle' // for internal build system
-    preparePublish.dependsOn 'publishPluginJavaDocsJar'
+    preparePublish.dependsOn 'javadocJar'
     preparePublish.dependsOn 'jar'
-    preparePublish.dependsOn 'publishPluginJar'
     println "Uploading into internal Repository"
 
     if ( System.getProperty("snapshot") ) {
