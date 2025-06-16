@@ -1452,7 +1452,7 @@ class WxsFileBuilder extends XmlFileBuilder<Msi> {
         // add a vbscript action to set the instance names
         action = getOrCreateChildById( product, "CustomAction", "SetInstanceID" );
         addAttributeIfNotExists( action, "Script", "vbscript" );
-        try( Scanner scanner = new Scanner( task.getMultiInstanceScript().openStream(), "UTF8" ) ) {
+        try( Scanner scanner = new Scanner( task.getMultiInstanceScriptURL().openStream(), "UTF8" ) ) {
             String vbscript = scanner.useDelimiter( "\\A" ).next(); // read the completely file into a string
             vbscript = vbscript.replace( "\r\n", "\n" ); // \n will be replaced with platform default characters. https://bugs.openjdk.java.net/browse/JDK-8133452
             action.setTextContent( vbscript );

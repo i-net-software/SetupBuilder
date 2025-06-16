@@ -18,6 +18,8 @@ package com.inet.gradle.setup.msi;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -260,9 +262,21 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the template
      * @throws MalformedURLException if any error occur
+     * @throws URISyntaxException if any error occur
      */
     @Input
-    public URL getWxsTemplateURL() throws MalformedURLException {
+    public URI getWxsTemplateURI() throws MalformedURLException, URISyntaxException {
+        return getWxsTemplateURL().toURI();
+    }
+
+    /**
+     * Get a URL to a *.wxs file for the WIX Toolset
+     *
+     * @return the template
+     * @throws MalformedURLException if any error occur
+     */
+    @Internal
+    URL getWxsTemplateURL() throws MalformedURLException {
         if( wxsTemplate != null ) {
             return getProject().file( wxsTemplate ).toURI().toURL();
         }
@@ -429,9 +443,21 @@ public class Msi extends AbstractSetupTask {
      *
      * @return the URL
      * @throws MalformedURLException if any error occur
+     * @throws URISyntaxException if any error occur
      */
     @Input
-    public URL getMultiInstanceScript() throws MalformedURLException {
+    public URI getMultiInstanceScript() throws MalformedURLException, URISyntaxException {
+        return getMultiInstanceScriptURL().toURI();
+    }
+
+    /**
+     * Get the URL to a vbscript that set the instance name.
+     *
+     * @return the URL
+     * @throws MalformedURLException if any error occur
+     */
+    @Internal
+    URL getMultiInstanceScriptURL() throws MalformedURLException {
         if( multiInstanceScript != null ) {
             return getProject().file( multiInstanceScript ).toURI().toURL();
         }
