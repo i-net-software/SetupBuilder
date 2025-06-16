@@ -24,7 +24,6 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractTask;
 
@@ -82,7 +81,8 @@ public class AppBundlerGradleTask extends AbstractTask {
      * @param closure the data for signing
      */
     public void codeSign( Closure<AppBundler> closure ) {
-        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, getFileResolver()) );
+        codeSign = new OSXCodeSign<AppBundlerGradleTask, AppBundler>( this, getFileResolver() );
+        getProject().configure( codeSign, closure );
     }
 
     /**

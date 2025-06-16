@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import org.gradle.api.Action;
 import org.gradle.api.internal.file.FileResolver;
-import org.gradle.util.ConfigureUtil;
 
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
@@ -334,7 +333,8 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
      * @param closure the notarization information
      */
     public void notarization( Closure<OSXNotarize<T, S>> closure ) {
-        this.notarization = ConfigureUtil.configure( closure, new OSXNotarize<T, S>(getTask(), fileResolver, this) );
+        this.notarization = new OSXNotarize<T, S>( getTask(), fileResolver, this );
+        getTask().getProject().configure( this.notarization, closure );
     }
 
     /**

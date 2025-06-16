@@ -5,8 +5,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Locale;
 
-import org.gradle.util.ConfigureUtil;
-
 import com.inet.gradle.setup.SetupBuilder;
 
 import groovy.lang.Closure;
@@ -98,7 +96,7 @@ public class LocalizedResource implements Serializable {
 
         LocalizedResource res = new LocalizedResource( parent );
         if ( resource instanceof Closure<?> ) {
-            res = ConfigureUtil.configure((Closure<?>)resource, res);
+            parent.getProject().configure( res, (Closure<?>)resource );
         } else {
             res.setLocale( parent.getDefaultResourceLanguage() );
             res.setResource( resource );

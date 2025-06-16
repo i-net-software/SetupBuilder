@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.gradle.util.ConfigureUtil;
-
 import com.inet.gradle.setup.SetupBuilder;
 
 import groovy.lang.Closure;
@@ -174,7 +172,7 @@ public class MsiLocalizedResource implements Serializable {
 
         MsiLocalizedResource res = new MsiLocalizedResource( parent, temporaryDirectory );
         if( resource instanceof Closure<?> ) {
-            res = ConfigureUtil.configure( (Closure<?>)resource, res );
+            parent.getProject().configure( res, (Closure<?>)resource );
         } else {
             res.setLocale( parent.getDefaultResourceLanguage() );
             res.setResource( resource );
