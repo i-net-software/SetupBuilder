@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.apache.tools.ant.types.FileSet;
 import org.gradle.api.Action;
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Optional;
@@ -36,7 +35,6 @@ import com.inet.gradle.setup.abstracts.AbstractUnixSetupTask;
 import com.inet.gradle.setup.abstracts.LocalizedResource;
 import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.GradleUtils;
-import com.oracle.appbundler.Architecture;
 
 import groovy.lang.Closure;
 
@@ -105,8 +103,7 @@ public class Dmg extends AbstractUnixSetupTask {
                 SetupBuilder setup = getSetupBuilder();
                 project.getLogger().lifecycle( "\tPreparing " + setup.getServices().size() + " appBuilders."  );
                 for( Service service : setup.getServices() ) {
-                    ProjectInternal projInternal = (ProjectInternal)project;
-                    OSXApplicationBuilder builder = new OSXApplicationBuilder( Dmg.this, setup, projInternal.getFileResolver() );
+                    OSXApplicationBuilder builder = new OSXApplicationBuilder( Dmg.this, setup, getFileResolver() );
                     builder.configSubTasks( service );
                     appBuilders.add( builder );
                 }
@@ -121,9 +118,8 @@ public class Dmg extends AbstractUnixSetupTask {
      */
     @Override
     public void build() {
-        ProjectInternal project = (ProjectInternal)getProject();
         getProject().getLogger().lifecycle( "\tStarting the build."  );
-        new DmgBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new DmgBuilder( this, getSetupBuilder(), getFileResolver() ).build();
     }
 
     /**
@@ -277,18 +273,16 @@ public class Dmg extends AbstractUnixSetupTask {
      * @param closure the data for signing
      */
     public void setCodeSign( Closure<OSXCodeSign<Dmg, SetupBuilder>> closure ) {
-        ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<Dmg, SetupBuilder>( this, project.getFileResolver() ) );
+        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<Dmg, SetupBuilder>( this, getFileResolver() ) );
     }
-    
+
     /**
      * Set the needed information for signing the setup.
      *
      * @param action the data for signing
      */
     public void setCodeSign( Action<? super OSXCodeSign<? super Dmg,? super SetupBuilder>> action ) {
-        ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = new OSXCodeSign<>(this, project.getFileResolver());
+        codeSign = new OSXCodeSign<>( this, getFileResolver() );
         action.execute(codeSign);
     }
 

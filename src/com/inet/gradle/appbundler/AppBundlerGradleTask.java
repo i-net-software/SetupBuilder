@@ -20,7 +20,6 @@ import java.io.File;
 
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
@@ -61,8 +60,7 @@ public class AppBundlerGradleTask extends AbstractTask {
      */
     @Override
     public void build() {
-        ProjectInternal project = (ProjectInternal)getProject();
-        new AppBundlerBuilder( this, getAppBuilder(), project.getFileResolver() ).build();
+        new AppBundlerBuilder( this, getAppBuilder(), getFileResolver() ).build();
     }
 
     /**
@@ -84,19 +82,17 @@ public class AppBundlerGradleTask extends AbstractTask {
      * @param closure the data for signing
      */
     public void codeSign( Closure<AppBundler> closure ) {
-        ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, project.getFileResolver()) );
+        codeSign = ConfigureUtil.configure( closure, new OSXCodeSign<AppBundlerGradleTask,AppBundler>(this, getFileResolver()) );
     }
-    
+
     /**
      * Set the needed information for signing the setup.
      * 
      * @param action the data for signing
      */
     public void codeSign( Action<? super OSXCodeSign<? super AppBundlerGradleTask,? super AppBundler>> action ) {
-        ProjectInternal project = (ProjectInternal)getProject();
-        codeSign = new OSXCodeSign<>(this, project.getFileResolver());
-        action.execute(codeSign);
+        codeSign = new OSXCodeSign<>( this, getFileResolver() );
+        action.execute( codeSign );
     }
 
     /**

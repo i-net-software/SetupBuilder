@@ -28,7 +28,6 @@ import java.util.List;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.internal.file.CopyActionProcessingStreamAction;
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
@@ -111,8 +110,7 @@ public class Msi extends AbstractSetupTask {
             throw new GradleException( "Could not extract required ressources.", e );
         }
 
-        ProjectInternal project = (ProjectInternal)getProject();
-        new MsiBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new MsiBuilder( this, getSetupBuilder(), getFileResolver() ).build();
     }
 
     /**

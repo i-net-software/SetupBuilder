@@ -15,7 +15,6 @@
  */
 package com.inet.gradle.setup.unix.deb;
 
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 
@@ -53,8 +52,7 @@ public class Deb extends Unix {
      */
     @Override
     public void build() {
-        ProjectInternal project = (ProjectInternal)getProject();
-        new DebBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new DebBuilder( this, getSetupBuilder(), getFileResolver() ).build();
     }
 
     @Input

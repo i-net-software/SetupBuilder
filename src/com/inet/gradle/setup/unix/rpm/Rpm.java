@@ -17,7 +17,6 @@ package com.inet.gradle.setup.unix.rpm;
 
 import java.util.ArrayList;
 
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.Optional;
 
@@ -61,8 +60,7 @@ public class Rpm extends Unix {
      */
     @Override
     public void build() {
-        ProjectInternal project = (ProjectInternal)getProject();
-        new RpmBuilder( this, getSetupBuilder(), project.getFileResolver() ).build();
+        new RpmBuilder( this, getSetupBuilder(), getFileResolver() ).build();
     }
 
     /**

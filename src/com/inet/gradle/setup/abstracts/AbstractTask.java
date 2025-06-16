@@ -42,7 +42,6 @@ import org.gradle.api.internal.file.copy.CopySpecInternal;
 import org.gradle.api.internal.file.copy.CopySpecResolver;
 import org.gradle.api.internal.file.copy.DefaultCopySpec;
 import org.gradle.api.internal.file.copy.FileCopyDetailsInternal;
-import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.Internal;
@@ -94,8 +93,7 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         this.extension = extension;
         this.rootSpec = (CopySpecInternal)getProject().copySpec( (Closure<CopySpec>)null );
 
-        ProjectInternal project = (ProjectInternal)getProject();
-        setupBuilder = project.getExtensions().getByType( setupType );
+        setupBuilder = getProject().getExtensions().getByType( setupType );
         setGroup( "build" ); // for displaying in buildship
 
         try {
