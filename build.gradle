@@ -150,7 +150,6 @@ if (Os.isFamily(Os.FAMILY_MAC)) {
 task runSetupBuilderTestTasks(type: GradleBuild) {
     check.dependsOn runSetupBuilderTestTasks
     dir = file('testBuilds')
-    startParameter.projectProperties = ['org.gradle.buildFile' : 'setupBuilder.gradle'] // should rename setupBuilder.gradle to build.gradle
     tasks = ['clean', dependingTask]
 }
 
