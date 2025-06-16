@@ -5,6 +5,7 @@ buildscript {
         }
     }
     dependencies {
+        apply from: "${buildscript.sourceFile.parentFile.parentFile}/scripts/VersionNumber.gradle"
         apply from: "${buildscript.sourceFile.parentFile.parentFile}/scripts/SetupBuilderVersion.gradle"
         classpath 'de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
     }
@@ -44,8 +45,8 @@ setupBuilder {
     from jar.outputs
 
     bundleJre = 1.8
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    java.sourceCompatibility = 1.8
+    java.targetCompatibility = 1.8
     mainClass = 'com.inet.testapplication.TestLauncher'
     mainJar = 'testBuilds.jar'
 
@@ -110,16 +111,17 @@ msi.dependsOn jar
 import org.apache.tools.ant.taskdefs.condition.Os
 task preparePrefPane(type: GradleBuild) {
 
-    buildFile '../../SetupBuilderOSXPrefPane/build.gradle'
+    buildDir = '../../SetupBuilderOSXPrefPane'
     tasks = ['clean', 'uploadArchives']
 
     processResources.dependsOn 'preparePrefPane'
 
     onlyIf {
-        file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
+        file('../../SetupBuilderOSXPrefPane/build.gradle').exists() && Os.isFamily(Os.FAMILY_MAC)
     }
 }
 
+/** buildFile does not exits anymore
 // run the following task as a dependency to the "check"-task.
 task runAppBundlerTest(type: GradleBuild) {
 
@@ -145,3 +147,4 @@ task runJNLPBundlerTest(type: GradleBuild) {
         file(buildFile).exists() && Os.isFamily(Os.FAMILY_MAC)
     }
 }
+*/

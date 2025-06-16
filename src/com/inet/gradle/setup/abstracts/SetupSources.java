@@ -175,14 +175,13 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         return getRootSpec().from( arg0 );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /*//if gradleVersion < 9.0
     @Override
     @Internal
     default Integer getDirMode() {
         return getRootSpec().getDirMode();
     }
+    *///endif
 
     /**
      * {@inheritDoc}
@@ -202,14 +201,13 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         return getRootSpec().getExcludes();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /*//if gradleVersion < 9.0
     @Override
     @Internal
     default Integer getFileMode() {
         return getRootSpec().getFileMode();
     }
+    *///endif
 
     /**
      * {@inheritDoc}
@@ -318,13 +316,12 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         getRootSpec().setCaseSensitive( arg0 );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /*//if gradleVersion < 9.0
     @Override
     default CopyProcessingSpec setDirMode( Integer arg0 ) {
         return getRootSpec().setDirMode( arg0 );
     }
+    *///endif
 
     /**
      * {@inheritDoc}
@@ -342,13 +339,12 @@ public interface SetupSources extends CopySpec, CopySpecSource {
         return getRootSpec().setExcludes( arg0 );
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /*//if gradleVersion < 9.0
     @Override
     default CopyProcessingSpec setFileMode( Integer arg0 ) {
         return getRootSpec().setFileMode( arg0 );
     }
+    *///endif
 
     /**
      * {@inheritDoc}

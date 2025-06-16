@@ -58,7 +58,7 @@ public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, Setup
                 ex.printStackTrace();
                 throw new RuntimeException( ex );
             }
-            gradleBuild.setBuildFile( new File( prefPaneSource, "build.gradle" ) );
+            gradleBuild.setDir( prefPaneSource );
         } );
         gradleBuild.dependsOn( gradleBuildInit );
     }

@@ -80,8 +80,8 @@ class JPPTask extends DefaultTask {
             def vd = parseDouble(varContent);
             def ld = parseDouble(lit);
             if ( var.toLowerCase().indexOf('version') > 0 ) {
-                vd = VersionNumber.parse(varContent)
-                ld = VersionNumber.parse(lit)
+                vd = project.VersionNumber.parse(varContent)
+                ld = project.VersionNumber.parse(lit)
             }
 
             if (op.equals("=") || op.equals("==")) {
