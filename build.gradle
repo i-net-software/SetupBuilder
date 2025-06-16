@@ -100,18 +100,19 @@ javadoc {
 gradlePlugin {
     website = 'https://github.com/i-net-software/SetupBuilder'
     vcsUrl = 'https://github.com/i-net-software/SetupBuilder'
-    description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
 
     plugins {
         setupBuilderPlugin {
             id = 'de.inetsoftware.setupbuilder'
             implementationClass = 'com.inet.gradle.setup.SetupBuilderPlugin'
             displayName = 'Gradle Setup Builder plugin'
+            description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file.'
             tags.set( ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ] )
         }
         appBundlerPlugin {
             id = 'de.inetsoftware.appbundler'
             implementationClass = 'com.inet.gradle.appbundler.AppBundlerPlugin'
+            description = 'Create a Java bundled application for OSX'
             displayName = 'Gradle Application Bundler plugin for OSX'
             tags.set( ['app'] )
         }
