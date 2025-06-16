@@ -1,6 +1,6 @@
 language: groovy
 jdk:
-- openjdk8
+- openjdk17
 env:
   matrix:
   - LIB_GRADLE_VERSION=7.6 DEPLOY=true
