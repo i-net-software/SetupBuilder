@@ -107,13 +107,13 @@ gradlePlugin {
             id = 'de.inetsoftware.setupbuilder'
             implementationClass = 'com.inet.gradle.setup.SetupBuilderPlugin'
             displayName = 'Gradle Setup Builder plugin'
-            tags = ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ]
+            tags.set( ['setup', 'installer', 'msi', 'dmg', 'deb', 'rpm', 'windows', 'linux', 'osx' ] )
         }
-        appBunderPlugin {
+        appBundlerPlugin {
             id = 'de.inetsoftware.appbundler'
-            implementationClass = 'com.inet.gradle.setup.SetupBuilderPlugin'
+            implementationClass = 'com.inet.gradle.appbundler.AppBundlerPlugin'
             displayName = 'Gradle Application Bundler plugin for OSX'
-            tags = ['app']
+            tags.set( ['app'] )
         }
     }
 }
