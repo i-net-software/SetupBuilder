@@ -22,8 +22,7 @@ install:
   - "./gradlew publish"
 deploy:
   provider: releases
-  api_key:
-    secure: MMB1giHuop1R9hws7WsnB5EFmep7lW7DjkpkR6t9ifUAUhIOPDMin3L1YG5fpRw8L7xOuGytCQphaQt+O1FhJoRZcPeoZHPVF3AEGYcUYzbpWUREhaAewBP/47CP95wckfEWdCzRbzwNhxaJQdidmg4P2g2Rt+yVZUQ1nOgXuJk+eHd3vczHEOuSZXa2CuVCmQP+Kfb8YRuRpLP//HAZ4s51IbLGDa4urgwcx06IEfrc/PN8umJNdjWAMdNpP4tkc2VvH17onb81wSc/esYjEprRiAWTuKLUXzTPz53J0VFhMelEAjLtRVP84KNGzCMzBMOMqs+Am9Fl3HFNf9MSoSvBCdXWVFlWudarvEt3kg9TNeFNAkaV40t62OIIALOGm2sOsg1MGaCbOCdfz12IZzRAyalnhcCTAqJjvfPNleAMz7sDxULzUqrjvPFROPWFPNYStDMNPYaq6AAZqPp6rPiP34b/owcSH5a2sSbhz6zdVcC8SknCvp9QNMNTaoJQIWVQKEoxYkZrkc1wibymXasciVR2ejNzBG5CDYWLLId3Uu4RDSaLWXZtAE9hKvbP0D/WNELRz2JKNVICEysPGdDB2HQTeJ/ynKdagfN4KWEDa5q1dgnUe+qMlo3XshCmdTMX3+rOlZi6ovpa90vTKKW3q5hxC/KMiy9LdA7Ag4k=
+  token: $GITHUB_TOKEN
   file_glob: true
   file: "./build/libs/SetupBuilder-*"
   skip_cleanup: true
