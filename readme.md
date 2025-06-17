@@ -27,7 +27,10 @@ Plugin and Gradle Version
 | 1.8, 3.0.x     | 3.0            |
 | 3.1.x          | 3.1 - 3.3      |
 | 3.4.x          | 3.4 - 4.3      |
-| 4.5.x          | >= 4.5         |
+| 4.5.x          | 4.5 - 4.7      |
+| 4.8.x          | 4.8 - 7.1      |
+| 7.2.x          | 7.2 - 8.3      |
+| 8.4.x          | >= 8.4         |
 
 There is a file [SetupBuilderVersion.gradle](scripts/SetupBuilderVersion.gradle) to export the required version of SetupBuilder depending on the Gradle version. It can be used to automatically obtain the correct SetupBuilder version.
 
