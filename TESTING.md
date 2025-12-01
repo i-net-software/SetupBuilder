@@ -26,7 +26,7 @@ Comprehensive test script that checks:
    brew install wix
    ```
 
-2. **Java 8+** (required for Launch4j):
+2. **Java 8+** (required):
    ```bash
    java -version  # Should show Java 8 or higher
    ```
@@ -36,32 +36,23 @@ Comprehensive test script that checks:
 ### Run Tests
 
 ```bash
-# Run comprehensive test
-./test-cross-platform.sh
+# Run all tests (unit + integration)
+./gradlew test
 
-# Test compilation
-./gradlew compileJava --no-daemon
+# Run only unit tests
+./gradlew test --tests "*Test" --exclude-task integrationTest
 
-# Test Launch4j classifier selection
-groovy test-launch4j-classifier.groovy
-
-# Test WiX detection
-groovy test-wix-detection.groovy
+# View test results
+cat build/test-results/test/TEST-*.xml
 ```
 
 ### Expected Results
 
-**Platform Detection:**
-- ✓ Should detect macOS
-- ✓ Should identify architecture (x86_64 or arm64)
-
-**WiX v4:**
-- If installed: ✓ Should find `wix` command
-- If not installed: ⚠ Warning, but build should still compile
-
-**Launch4j:**
-- ✓ Should select `workdir-mac` classifier
-- ✓ Should compile successfully
+All 24 tests should pass:
+- ✓ Platform detection tests (5)
+- ✓ WiX detection tests (9)
+- ✓ Launch4j classifier tests (5)
+- ✓ Integration tests (5) - checks Java, WiX installation, system properties
 
 ## Testing on Linux
 
@@ -75,7 +66,7 @@ groovy test-wix-detection.groovy
    # Or use package manager specific to your distribution
    ```
 
-2. **Java 8+** (required for Launch4j):
+2. **Java 8+** (required):
    ```bash
    java -version  # Should show Java 8 or higher
    ```
@@ -85,32 +76,17 @@ groovy test-wix-detection.groovy
 ### Run Tests
 
 ```bash
-# Run comprehensive test
-./test-cross-platform.sh
-
-# Test compilation
-./gradlew compileJava --no-daemon
-
-# Test Launch4j classifier selection
-groovy test-launch4j-classifier.groovy
-
-# Test WiX detection
-groovy test-wix-detection.groovy
+# Run all tests
+./gradlew test
 ```
 
 ### Expected Results
 
-**Platform Detection:**
-- ✓ Should detect Linux
-- ✓ Should identify architecture (x86_64, arm64, etc.)
-
-**WiX v4:**
-- If installed: ✓ Should find `wix` command
-- If not installed: ⚠ Warning, but build should still compile
-
-**Launch4j:**
-- ✓ Should select `workdir-linux64` (for 64-bit) or `workdir-linux` (for 32-bit)
-- ✓ Should compile successfully
+All 24 tests should pass:
+- ✓ Platform detection tests (5)
+- ✓ WiX detection tests (9)
+- ✓ Launch4j classifier tests (5)
+- ✓ Integration tests (5)
 
 ## Testing on Windows
 
@@ -119,29 +95,22 @@ groovy test-wix-detection.groovy
    - WiX v3: Install from wixtoolset.org
    - WiX v4: Install via .NET tool: `dotnet tool install --global wix`
 
-2. **Java 8+** (required for Launch4j)
+2. **Java 8+** (required)
 
 ### Run Tests
 
 ```bash
-# Run comprehensive test (Git Bash)
-./test-cross-platform.sh
-
-# Test compilation
-./gradlew compileJava --no-daemon
+# Run all tests
+./gradlew test
 ```
 
 ### Expected Results
 
-**Platform Detection:**
-- ✓ Should detect Windows
-
-**WiX:**
-- ✓ Should find WiX tools (candle.exe/light.exe for v3, or wix.exe for v4)
-
-**Launch4j:**
-- ✓ Should select `workdir-win32` classifier
-- ✓ Should compile successfully
+All 24 tests should pass:
+- ✓ Platform detection tests (5)
+- ✓ WiX detection tests (9)
+- ✓ Launch4j classifier tests (5)
+- ✓ Integration tests (5)
 
 ## Manual Testing Checklist
 
@@ -173,10 +142,16 @@ To add automated testing to GitHub Actions:
 
 ```yaml
 # Add to .github/workflows/ci.yml
-- name: Test cross-platform support
-  run: |
-    ./test-cross-platform.sh
-    ./gradlew compileJava --no-daemon
+- name: Run tests
+  run: ./gradlew test --no-daemon
+
+- name: Upload test results
+  if: always()
+  uses: actions/upload-artifact@v4
+  with:
+    name: test-results
+    path: build/test-results/test/
+    retention-days: 7
 ```
 
 ## Troubleshooting
