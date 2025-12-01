@@ -14,27 +14,29 @@ jobs:
     strategy:
       matrix:
         include:
+          # deploy: true = stable Gradle versions that publish snapshots and can be used for releases
+          # deploy: false = test-only versions (newer/experimental versions or cross-platform testing)
           - os: ubuntu-latest
             gradle-version: '7.6'
-            deploy: true
+            deploy: true  # Stable: Used for SetupBuilder 7.2.x releases
           - os: ubuntu-latest
             gradle-version: '8.4'
-            deploy: true
+            deploy: true  # Stable: Used for SetupBuilder 8.4.x releases
           - os: ubuntu-latest
             gradle-version: '8.14.2'
-            deploy: false
+            deploy: false  # Test-only: Newer 8.x version
           - os: ubuntu-latest
             gradle-version: '9.2.1'
-            deploy: false
+            deploy: false  # Test-only: Future Gradle 9 support
           - os: windows-latest
             gradle-version: '8.4'
-            deploy: false
+            deploy: false  # Cross-platform testing only
           - os: macos-latest
             gradle-version: '8.4'
-            deploy: false
+            deploy: false  # Cross-platform testing only
           - os: macos-latest
             gradle-version: '9.2.1'
-            deploy: false
+            deploy: false  # Cross-platform testing only
     
     steps:
       - name: Checkout code
