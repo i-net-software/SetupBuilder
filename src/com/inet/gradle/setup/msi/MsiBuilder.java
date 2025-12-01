@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.CopySpec;
 import org.gradle.api.internal.file.FileResolver;
+import org.gradle.internal.os.OperatingSystem;
 
 import com.inet.gradle.setup.SetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractBuilder;
@@ -41,11 +42,18 @@ import groovy.lang.Closure;
 
 /**
  * Build a MSI setup for Windows.
+ * Supports both WiX v3 (candle.exe/light.exe) and WiX v4 (wix build) toolchains.
+ * Automatically detects which version is available and uses it accordingly.
+ * Works on Windows, Linux, and macOS when WiX v4 is installed.
+ * 
  * @author Volker Berlin
  */
 class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
 
     private SetupBuilder setup;
+    private static final OperatingSystem OS = OperatingSystem.current();
+    private static Boolean wixV4Available = null; // Cache the detection result
+    private static String wixV4Path = null; // Cache the path to wix command
 
     /**
      * Create a new instance
@@ -56,6 +64,123 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
     MsiBuilder( Msi msi, SetupBuilder setup, FileResolver fileResolver ) {
         super( msi, fileResolver );
         this.setup = setup;
+    }
+
+    /**
+     * Check if running on Windows
+     * @return true if Windows
+     */
+    private static boolean isWindows() {
+        return OS.isWindows();
+    }
+
+    /**
+     * Check if running on Linux
+     * @return true if Linux
+     */
+    private static boolean isLinux() {
+        return OS.isLinux();
+    }
+
+    /**
+     * Check if running on macOS
+     * @return true if macOS
+     */
+    private static boolean isMacOs() {
+        return OS.isMacOsX();
+    }
+
+    /**
+     * Detect if WiX v4 is available
+     * @return true if WiX v4 is available, false if only v3 is available
+     */
+    private static boolean isWixV4Available() {
+        if( wixV4Available != null ) {
+            return wixV4Available;
+        }
+
+        // Try to find the 'wix' command (WiX v4)
+        String wixCommand = isWindows() ? "wix.exe" : "wix";
+        wixV4Path = findCommandInPath( wixCommand );
+        
+        if( wixV4Path != null ) {
+            // Verify it's actually WiX v4 by checking version
+            try {
+                ArrayList<String> versionCheck = new ArrayList<>();
+                versionCheck.add( wixV4Path );
+                versionCheck.add( "--version" );
+                String output = execForOutput( versionCheck );
+                // WiX v4 should output something like "WiX Toolset v4.x.x"
+                if( output != null && ( output.contains( "WiX Toolset v4" ) || output.contains( "wix v4" ) || output.matches( ".*\\bv4\\.\\d+.*" ) ) ) {
+                    wixV4Available = true;
+                    return true;
+                }
+            } catch( Exception e ) {
+                // If version check fails, assume it's not v4
+                wixV4Path = null;
+            }
+        }
+
+        wixV4Available = false;
+        return false;
+    }
+
+    /**
+     * Find a command in the system PATH
+     * @param command the command name
+     * @return the full path if found, null otherwise
+     */
+    private static String findCommandInPath( String command ) {
+        String path = System.getenv( "PATH" );
+        if( path == null ) {
+            return null;
+        }
+
+        String[] pathDirs = path.split( File.pathSeparator );
+        for( String dir : pathDirs ) {
+            File commandFile = new File( dir, command );
+            if( commandFile.exists() && commandFile.canExecute() ) {
+                return commandFile.getAbsolutePath();
+            }
+        }
+
+        // Also check WIX environment variable
+        String wixEnv = System.getenv( "WIX" );
+        if( wixEnv != null ) {
+            File commandFile = new File( wixEnv, "bin" + File.separator + command );
+            if( commandFile.exists() && commandFile.canExecute() ) {
+                return commandFile.getAbsolutePath();
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Execute a command and return its output
+     * @param parameters command and parameters
+     * @return the output string, or null if execution failed
+     */
+    private static String execForOutput( ArrayList<String> parameters ) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder( parameters );
+            pb.redirectErrorStream( true );
+            Process process = pb.start();
+            java.io.InputStream is = process.getInputStream();
+            java.io.BufferedReader reader = new java.io.BufferedReader( new java.io.InputStreamReader( is ) );
+            StringBuilder output = new StringBuilder();
+            String line;
+            while( ( line = reader.readLine() ) != null ) {
+                output.append( line ).append( "\n" );
+            }
+            int exitCode = process.waitFor();
+            if( exitCode == 0 ) {
+                return output.toString();
+            }
+        } catch( Exception e ) {
+            // Ignore exceptions, return null
+        }
+        return null;
     }
 
     /**
@@ -167,15 +292,81 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
     }
 
     /**
-     * Call the candle.exe tool.
+     * Call WiX v4 build command (unified build process)
+     * @param wxsFile the WiX source file
+     * @param outputFile the output MSI file
+     * @param language the target language
+     * @param languageResources the language resource files
+     */
+    private void callWixV4Build( File wxsFile, File outputFile, MsiLanguages language, String[] languageResources ) {
+        ArrayList<String> parameters = new ArrayList<>();
+        parameters.add( wixV4Path );
+        parameters.add( "build" );
+        parameters.add( "-arch" );
+        parameters.add( task.getArch() );
+        parameters.add( "-out" );
+        parameters.add( outputFile.getAbsolutePath() );
+
+        // Add extensions
+        for( String extension : task.getWixExtensions() ) {
+            parameters.add( "-ext" );
+            parameters.add( extension );
+        }
+        parameters.add( "-ext" );
+        parameters.add( "WixUIExtension" );
+        parameters.add( "-ext" );
+        parameters.add( "WixUtilExtension" );
+
+        // Add culture/locale
+        parameters.add( "-cultures:" + language.getCulture() );
+
+        // Add language resources
+        if( languageResources != null ) {
+            for( String location : languageResources ) {
+                parameters.add( "-loc" );
+                parameters.add( location );
+            }
+        }
+
+        // Set a localized EULA file
+        File localizedRtfFile = MsiLocalizedResource.localizedRtfFile( task.getTemporaryDir(), language );
+        if( localizedRtfFile.exists() ) {
+            parameters.add( "-dWixUILicenseRtf=" + localizedRtfFile.getAbsolutePath() );
+        }
+
+        // Add external files
+        for( File external : task.getExternals() ) {
+            parameters.add( external.getAbsolutePath() );
+        }
+
+        // Add the main wxs file
+        parameters.add( wxsFile.getAbsolutePath() );
+
+        // Check if we should skip msi validation
+        if( task.isSkipValidation() ) {
+            parameters.add( "-sval" );
+        }
+
+        exec( parameters );
+    }
+
+    /**
+     * Call the candle.exe tool (WiX v3) or skip if using WiX v4.
      */
     private void candle() {
+        // WiX v4 doesn't need a separate candle step - it's integrated into 'wix build'
+        if( isWixV4Available() ) {
+            task.getProject().getLogger().debug( "Using WiX v4 - skipping candle step (integrated into build)" );
+            return;
+        }
+
+        // WiX v3: compile .wxs to .wixobj
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
         parameters.add( "-arch" );
         parameters.add( task.getArch() );
         parameters.add( "-out" );
-        parameters.add( buildDir.getAbsolutePath() + '\\' );
+        parameters.add( buildDir.getAbsolutePath() + File.separator );
         parameters.add( getWxsFile().getAbsolutePath() );
         for( File external : task.getExternals() ) {
             parameters.add( external.getAbsolutePath() );
@@ -187,17 +378,28 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
         parameters.add( "-ext" );
         parameters.add( "WixUtilExtension" );
 
-        callWixTool( "candle.exe", parameters );
+        // Use platform-appropriate tool name
+        String toolName = isWindows() ? "candle.exe" : "candle";
+        callWixTool( toolName, parameters );
     }
 
     /**
-     * Call the light.exe tool.
+     * Call the light.exe tool (WiX v3) or use wix build (WiX v4).
      * @param language the target language
      * @param languageResources the language resource files
      * @return the generated msi file
      */
     private File light( MsiLanguages language, String[] languageResources ) {
         File out = new File( buildDir, setup.getArchiveName() + '_' + language.getCulture() + ".msi" );
+
+        if( isWixV4Available() ) {
+            // WiX v4: Use unified 'wix build' command
+            task.getProject().getLogger().info( "Using WiX v4 to build MSI" );
+            callWixV4Build( getWxsFile(), out, language, languageResources );
+            return out;
+        }
+
+        // WiX v3: Use separate light.exe tool
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "-nologo" );
         parameters.add( "-sice:ICE60" ); // accept *.ttf files to install in the install directory
@@ -234,7 +436,9 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
         }
 
         parameters.add( "*.wixobj" );
-        callWixTool( "light.exe", parameters );
+        // Use platform-appropriate tool name
+        String toolName = isWindows() ? "light.exe" : "light";
+        callWixTool( toolName, parameters );
         return out;
     }
 
@@ -413,35 +617,54 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
      * @return the path
      */
     private static String getToolPath( String tool ) {
-        // first check the environ variable WIX
+        // First check the environment variable WIX (works on all platforms)
         String wix = System.getenv( "WIX" );
         if( wix == null ) {
-            wix = System.getProperty( "WIX" ); // try the system property because a property can be set easer from a gradle script
+            wix = System.getProperty( "WIX" ); // try the system property because a property can be set easier from a gradle script
         }
         if( wix != null ) {
             File file = new File( wix );
-            file = new File( file, "bin\\" + tool );
+            // Use platform-appropriate path separator
+            file = new File( file, "bin" + File.separator + tool );
             if( file.exists() ) {
                 return file.getAbsolutePath();
             }
         }
 
+        if( isWindows() ) {
+            // Windows-specific search paths
+            return getWindowsToolPath( tool );
+        } else {
+            // Linux/macOS search paths
+            return getUnixToolPath( tool );
+        }
+    }
+
+    /**
+     * Get WiX tool path on Windows
+     * @param tool the tool name
+     * @return the path
+     */
+    private static String getWindowsToolPath( String tool ) {
         // search on well known folders
         String programFilesStr = System.getenv( "ProgramFiles(x86)" );
         if( programFilesStr == null ) {
             programFilesStr = System.getenv( "ProgramW6432" );
         }
         if( programFilesStr == null ) {
-            throw new GradleException( "Environment variable ProgramFiles not found." );
+            throw new GradleException( "Environment variable ProgramFiles not found. Please set the WIX environment variable to point to your WiX installation." );
         }
 
         File programFiles = new File( programFilesStr );
         String[] programs = programFiles.list();
+        if( programs == null ) {
+            throw new GradleException( tool + " was not found. Please set the WIX environment variable to point to your WiX installation." );
+        }
 
         // Searching the WiX Toolset
         for( String program : programs ) {
             if( program.toLowerCase().startsWith( "wix toolset" ) ) {
-                File file = new File( programFiles, program + "\\bin\\" + tool );
+                File file = new File( programFiles, program + File.separator + "bin" + File.separator + tool );
                 if( file.exists() ) {
                     return file.getAbsolutePath();
                 }
@@ -453,11 +676,13 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
             if( program.equalsIgnoreCase( "WixEdit" ) ) {
                 File wixEdit = new File( programFiles, program );
                 String[] wixEditFiles = wixEdit.list();
-                for( String wixEditFile : wixEditFiles ) {
-                    if( wixEditFile.toLowerCase().startsWith( "wix" ) ) {
-                        File file = new File( wixEdit, wixEditFile + "\\" + tool );
-                        if( file.exists() ) {
-                            return file.getAbsolutePath();
+                if( wixEditFiles != null ) {
+                    for( String wixEditFile : wixEditFiles ) {
+                        if( wixEditFile.toLowerCase().startsWith( "wix" ) ) {
+                            File file = new File( wixEdit, wixEditFile + File.separator + tool );
+                            if( file.exists() ) {
+                                return file.getAbsolutePath();
+                            }
                         }
                     }
                 }
@@ -465,5 +690,61 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
         }
 
         throw new GradleException( tool + " was not found. You need to install the WiX Toolset or set the environment variable WIX. You can download the WiX Toolset from http://wixtoolset.org/" );
+    }
+
+    /**
+     * Get WiX tool path on Linux/macOS
+     * @param tool the tool name
+     * @return the path
+     */
+    private static String getUnixToolPath( String tool ) {
+        // Check common installation paths for WiX v4 (cross-platform)
+        List<String> searchPaths = new ArrayList<>();
+        
+        // Check if tool is in PATH
+        String path = System.getenv( "PATH" );
+        if( path != null ) {
+            String[] pathDirs = path.split( File.pathSeparator );
+            for( String dir : pathDirs ) {
+                File toolFile = new File( dir, tool );
+                if( toolFile.exists() && toolFile.canExecute() ) {
+                    return toolFile.getAbsolutePath();
+                }
+            }
+        }
+
+        // Common installation locations
+        if( isMacOs() ) {
+            // macOS: Homebrew installation
+            searchPaths.add( "/usr/local/bin/" + tool );
+            searchPaths.add( "/opt/homebrew/bin/" + tool );
+            searchPaths.add( System.getProperty( "user.home" ) + "/.local/bin/" + tool );
+        } else if( isLinux() ) {
+            // Linux: Package manager installations
+            searchPaths.add( "/usr/bin/" + tool );
+            searchPaths.add( "/usr/local/bin/" + tool );
+            searchPaths.add( System.getProperty( "user.home" ) + "/.local/bin/" + tool );
+        }
+
+        // Check user home directory
+        String userHome = System.getProperty( "user.home" );
+        searchPaths.add( userHome + "/wix/bin/" + tool );
+        searchPaths.add( userHome + "/.wix/bin/" + tool );
+
+        // Check if WIX environment variable points to a directory
+        String wixEnv = System.getenv( "WIX" );
+        if( wixEnv != null ) {
+            searchPaths.add( 0, wixEnv + "/bin/" + tool ); // Check this first
+        }
+
+        for( String pathStr : searchPaths ) {
+            File toolFile = new File( pathStr );
+            if( toolFile.exists() && toolFile.canExecute() ) {
+                return toolFile.getAbsolutePath();
+            }
+        }
+
+        throw new GradleException( tool + " was not found. Please install WiX v4 (cross-platform) or set the WIX environment variable. " +
+            "On macOS: brew install wix. On Linux: install via package manager or download from http://wixtoolset.org/" );
     }
 }
