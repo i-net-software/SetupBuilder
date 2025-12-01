@@ -273,9 +273,12 @@ task runSetupBuilderTestTasks(type: GradleBuild) {
     tasks = ['clean', dependingTask]
     
     // Only run if test or check tasks are explicitly requested (not as dependencies)
+    // AND only on macOS (testBuilds has platform-specific requirements)
     onlyIf {
         def requestedTasks = project.gradle.startParameter.taskNames
-        return requestedTasks.contains('test') || requestedTasks.contains('check')
+        def isRequested = requestedTasks.contains('test') || requestedTasks.contains('check')
+        def isMacOS = Os.isFamily(Os.FAMILY_MAC)
+        return isRequested && isMacOS
     }
 }
 
