@@ -282,10 +282,11 @@ task runSetupBuilderTestTasks(type: GradleBuild) {
         def isRequested = requestedTasks.contains('test') || requestedTasks.contains('check')
         
         // Detect CI environment (GitHub Actions, Jenkins, Travis, etc.)
-        def isCI = System.getenv('CI') == 'true' || 
-                   System.getenv('GITHUB_ACTIONS') == 'true' ||
+        // GitHub Actions sets CI=true and GITHUB_ACTIONS=true
+        def isCI = System.getenv('CI') != null || 
+                   System.getenv('GITHUB_ACTIONS') != null ||
                    System.getenv('JENKINS_URL') != null ||
-                   System.getenv('TRAVIS') == 'true'
+                   System.getenv('TRAVIS') != null
         
         return isRequested && !isCI
     }
