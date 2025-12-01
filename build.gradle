@@ -271,6 +271,12 @@ task runSetupBuilderTestTasks(type: GradleBuild) {
     check.dependsOn runSetupBuilderTestTasks
     dir = file('testBuilds')
     tasks = ['clean', dependingTask]
+    
+    // Only run if test or check tasks are explicitly requested (not as dependencies)
+    onlyIf {
+        def requestedTasks = project.gradle.startParameter.taskNames
+        return requestedTasks.contains('test') || requestedTasks.contains('check')
+    }
 }
 
 afterEvaluate {
