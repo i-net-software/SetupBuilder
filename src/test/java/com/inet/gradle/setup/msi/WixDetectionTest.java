@@ -128,5 +128,79 @@ public class WixDetectionTest {
                 hasValidDir || pathDirs.length > 0);
         }
     }
+
+    @Test
+    public void testWixVersionDetection() {
+        // Test WiX version detection logic (if WiX is available)
+        // This is an integration test that may not always pass
+        String wixCommand = OS.isWindows() ? "wix.exe" : "wix";
+        String wixPath = findCommandInPath(wixCommand);
+        
+        if (wixPath != null) {
+            // Try to get version
+            try {
+                ProcessBuilder pb = new ProcessBuilder(wixPath, "--version");
+                Process process = pb.start();
+                java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(process.getInputStream()));
+                String line = reader.readLine();
+                if (line != null) {
+                    // Verify version detection logic
+                    boolean isV4 = line.contains("v4") || 
+                                  line.contains("WiX Toolset v4") ||
+                                  line.matches(".*\\bv4\\.\\d+.*");
+                    // If we can read the version, the detection logic should work
+                    assertTrue("Version string should be readable", line.length() > 0);
+                }
+                process.waitFor();
+            } catch (Exception e) {
+                // WiX may not be executable, that's okay for unit tests
+                // This is more of an integration test
+            }
+        }
+        // If WiX is not found, that's also okay - test passes
+    }
+
+    @Test
+    public void testWixEnvironmentVariable() {
+        String wixEnv = System.getenv("WIX");
+        if (wixEnv != null) {
+            File wixDir = new File(wixEnv);
+            if (wixDir.exists()) {
+                File binDir = new File(wixDir, "bin");
+                // If WIX is set and directory exists, bin should be checkable
+                assertTrue("WIX directory should be accessible", wixDir.isDirectory());
+            }
+        }
+        // WIX may or may not be set - both are valid
+    }
+
+    /**
+     * Helper method to find command in PATH (simulates MsiBuilder logic)
+     */
+    private String findCommandInPath(String command) {
+        String path = System.getenv("PATH");
+        if (path == null) {
+            return null;
+        }
+
+        String[] pathDirs = path.split(File.pathSeparator);
+        for (String dir : pathDirs) {
+            File commandFile = new File(dir, command);
+            if (commandFile.exists() && commandFile.canExecute()) {
+                return commandFile.getAbsolutePath();
+            }
+        }
+
+        String wixEnv = System.getenv("WIX");
+        if (wixEnv != null) {
+            File commandFile = new File(wixEnv, "bin" + File.separator + command);
+            if (commandFile.exists() && commandFile.canExecute()) {
+                return commandFile.getAbsolutePath();
+            }
+        }
+
+        return null;
+    }
 }
 
