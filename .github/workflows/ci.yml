@@ -84,7 +84,7 @@ jobs:
           echo "LIB_GRADLE_VERSION=${{ matrix.gradle-version }}" >> $GITHUB_ENV
       
       - name: Run Gradle wrapper
-        run: gradle wrapper
+        run: gradle wrapper --gradle-version ${{ matrix.gradle-version }}
         shell: bash
       
       - name: Build plugin

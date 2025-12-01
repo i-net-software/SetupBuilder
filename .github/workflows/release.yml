@@ -108,7 +108,7 @@ jobs:
           cat gradle.properties
       
       - name: Run Gradle wrapper
-        run: gradle wrapper
+        run: gradle wrapper --gradle-version ${{ steps.gradle_version.outputs.gradle_version }}
       
       - name: Build plugin
         run: ./gradlew clean build -x test --no-daemon
