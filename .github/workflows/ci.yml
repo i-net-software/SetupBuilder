@@ -12,6 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     strategy:
+      fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
         include:
           # Deployable Gradle versions (deploy: true) - these are the ONLY versions that:
