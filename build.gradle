@@ -273,12 +273,21 @@ task runSetupBuilderTestTasks(type: GradleBuild) {
     tasks = ['clean', dependingTask]
     
     // Only run if test or check tasks are explicitly requested (not as dependencies)
-    // AND only on macOS (testBuilds has platform-specific requirements)
+    // AND not in CI environment (testBuilds has environment-specific requirements:
+    // - macOS: needs Java 8 for DMG builds
+    // - Windows: needs Java in specific path for MSI builds
+    // - Linux: needs deb/rpm build tools)
     onlyIf {
         def requestedTasks = project.gradle.startParameter.taskNames
         def isRequested = requestedTasks.contains('test') || requestedTasks.contains('check')
-        def isMacOS = Os.isFamily(Os.FAMILY_MAC)
-        return isRequested && isMacOS
+        
+        // Detect CI environment (GitHub Actions, Jenkins, Travis, etc.)
+        def isCI = System.getenv('CI') == 'true' || 
+                   System.getenv('GITHUB_ACTIONS') == 'true' ||
+                   System.getenv('JENKINS_URL') != null ||
+                   System.getenv('TRAVIS') == 'true'
+        
+        return isRequested && !isCI
     }
 }
 
