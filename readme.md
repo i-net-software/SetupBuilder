@@ -1,10 +1,45 @@
 Gradle Setup Builder Plugin
 ====
 
-[![Build Status](https://api.travis-ci.com/i-net-software/SetupBuilder.svg)](https://app.travis-ci.com/github/i-net-software/SetupBuilder)
+[![Build Status](https://github.com/i-net-software/SetupBuilder/workflows/CI/badge.svg)](https://github.com/i-net-software/SetupBuilder/actions)
 [![License](https://img.shields.io/badge/license-Apache_License_2.0-blue.svg)](https://github.com/i-net-software/SetupBuilder/blob/master/license.txt)
 
 The Setup Builder is a plugin for Gradle which can create a native setups for different platforms like Windows, Linux and OSX. The output is a *.msi, a *.deb, a *.rpm or a *.dmg file. The target is an installer for Java applications.
+
+> **Note:** This plugin is now published to Maven Central. Snapshot versions are available from Sonatype snapshots repository. See [Using Snapshots](#using-snapshots) section below.
+
+## Using Snapshots
+
+Snapshot versions are published to Sonatype snapshots repository. To use snapshots in your project, add the snapshot repository to your build:
+
+```groovy
+buildscript {
+    repositories {
+        maven {
+            url uri('https://oss.sonatype.org/content/repositories/snapshots/')
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'de.inetsoftware:SetupBuilder:8.4.24-SNAPSHOT'
+    }
+}
+```
+
+Alternatively, for local development, you can publish to your local Maven repository:
+
+```bash
+./gradlew publishToMavenLocal
+```
+
+Then use `mavenLocal()` in your repositories:
+
+```groovy
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+```
 
 System Requirements
 ----
@@ -36,18 +71,30 @@ There is a file [SetupBuilderVersion.gradle](scripts/SetupBuilderVersion.gradle)
 
 It can be used as followed:
 
-    buildscript {
-        repositories {
-            maven {
-                url uri('https://plugins.gradle.org/m2/')
-            }
-        }
-        dependencies {
-            apply from: 'https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/scripts/SetupBuilderVersion.gradle'
-            classpath 'gradle.plugin.de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
+**Using Gradle Plugin Portal (recommended):**
+```groovy
+plugins {
+    id 'de.inetsoftware.setupbuilder' version '8.4.23'
+}
+```
+
+**Using buildscript (legacy):**
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
+        // For snapshots, add Sonatype snapshot repository
+        maven {
+            url uri('https://oss.sonatype.org/content/repositories/snapshots/')
         }
     }
-    apply plugin: 'de.inetsoftware.setupbuilder'
+    dependencies {
+        apply from: 'https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/scripts/SetupBuilderVersion.gradle'
+        classpath 'de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
+    }
+}
+apply plugin: 'de.inetsoftware.setupbuilder'
+```
 
 Tasks
 ----
@@ -64,18 +111,25 @@ Sample Usage
 ----
 ### Base Sample
 
-    buildscript {
-        repositories {
-            maven {
-                url uri('https://plugins.gradle.org/m2/')
-            }
-        }
-        dependencies {
-            apply from: 'https://raw.githubusercontent.com/i-net-software/SetupBuilder/master/scripts/SetupBuilderVersion.gradle'
-            classpath 'gradle.plugin.de.inetsoftware:SetupBuilder:' + setupBuilderVersion()
-        }
+**Using plugins block (recommended):**
+```groovy
+plugins {
+    id 'de.inetsoftware.setupbuilder' version '8.4.23'
+}
+```
+
+**Or using buildscript:**
+```groovy
+buildscript {
+    repositories {
+        mavenCentral()
     }
-    apply plugin: 'de.inetsoftware.setupbuilder'
+    dependencies {
+        classpath 'de.inetsoftware:SetupBuilder:8.4.23'
+    }
+}
+apply plugin: 'de.inetsoftware.setupbuilder'
+```
     
     setupBuilder {
         vendor = 'i-net software'
@@ -120,6 +174,20 @@ Create a zip file with the same files define in setupBuilder extension.
         }
     }
 
+
+## Development
+
+For local development, you can build and publish to your local Maven repository:
+
+```bash
+./gradlew publishToMavenLocal
+```
+
+Then use `mavenLocal()` in your repositories. See [Using Snapshots](#using-snapshots) section above.
+
+## Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.
 
 License
 ----

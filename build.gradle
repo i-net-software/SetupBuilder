@@ -1,5 +1,7 @@
 plugins {
     id "com.gradle.plugin-publish" version "1.3.1"
+    id 'signing' // Required for Maven Central
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0' // Automates Sonatype Nexus publishing
 }
 
 apply plugin: 'java'
@@ -11,17 +13,43 @@ apply from: "${buildscript.sourceFile.parentFile}/scripts/javapreprocessor.gradl
 group = 'de.inetsoftware'
 
 def LIB_GRADLE_VERSION = System.getenv('LIB_GRADLE_VERSION') ?: '8.1.0'     // Gradle version for the wrapper
-def buildVersion    = '23'                                                  // build version
-def baseVersion     = '8.0'                                                 // Base Version to build, depends on gradle version.
 
 wrapper.gradleVersion = LIB_GRADLE_VERSION
 def gVersion = VersionNumber.parse( gradle.gradleVersion )
 println 'Gradle version: ' + gVersion
 
-// Fetch version from script.
+// Load version from gradle.properties file directly
+def propertiesFile = file("${project.projectDir}/gradle.properties")
+def versionProperty = '8.4.23'
+def isSnapshot = false
+
+if (propertiesFile.exists()) {
+    def props = new Properties()
+    propertiesFile.withInputStream { props.load(it) }
+    versionProperty = props.getProperty('version', '8.4.23')
+}
+
+def baseVersionFromProps = versionProperty.split('-')[0]  // Remove -SNAPSHOT if present
+isSnapshot = versionProperty.contains('-SNAPSHOT')
+
+// Fetch version mapping script to validate/adjust version based on Gradle version
 apply from: "${buildscript.sourceFile.parentFile}/scripts/SetupBuilderVersion.gradle"
-version = setupBuilderVersion(buildVersion)
-baseVersion += '.' + buildVersion
+def expectedBaseVersion = setupBuilderVersion('0').split('\\.')[0..1].join('.')  // Get major.minor (e.g., "8.4")
+def actualBaseVersion = baseVersionFromProps.split('\\.')[0..1].join('.')  // Get major.minor from properties
+
+// Extract build number (patch version) from gradle.properties version
+def buildNumber = baseVersionFromProps.split('\\.')[2] ?: '0'
+
+// Validate version compatibility with Gradle version
+if (actualBaseVersion != expectedBaseVersion) {
+    println "WARNING: Version in gradle.properties (${actualBaseVersion}) doesn't match expected version for Gradle ${gradle.gradleVersion} (${expectedBaseVersion})"
+    println "Adjusting version to match Gradle compatibility..."
+    version = "${expectedBaseVersion}.${buildNumber}" + (isSnapshot ? '-SNAPSHOT' : '')
+} else {
+    version = versionProperty
+}
+
+def baseVersion = "${actualBaseVersion}.${buildNumber}"
 println 'SetupBuilder version: ' + version
 
 java.sourceCompatibility = 1.8
@@ -39,9 +67,7 @@ sourceSets {
     main {
         java {
             srcDirs = ['src']
-            if ( !version.equalsIgnoreCase(baseVersion) ) {
-                srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
-            }
+            srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
         }
         resources {
             srcDirs = ['src']
@@ -51,44 +77,115 @@ sourceSets {
     }
 }
 
-/* Configure for ClearReports Version and copy files if needed */
-if ( !version.equalsIgnoreCase(baseVersion) ) {
-    JPP.setJPPSources( "src", [
-        "gradleVersion" : "${gVersion}",
-        "outputDirectory" : "${buildDir}/preparedSrc-${gVersion}"
-    ]);
+/* Configure JPP */
+JPP.setJPPSources( "src", [
+    "gradleVersion" : "${gVersion}",
+    "outputDirectory" : "${buildDir}/preparedSrc-${gVersion}"
+]);
+
+// Configure publishing
+// - Snapshots: Published to Sonatype snapshot repository
+// - Releases: Published to Sonatype staging repository (then closed and released)
+// - Local development: Use `./gradlew publishToMavenLocal` to publish to mavenLocal()
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = 'Gradle Setup Builder Plugin'
+                description = 'The Setup Builder is a plugin for Gradle which can create native setups for different platforms like Windows, Linux and OSX.'
+                url = 'https://github.com/i-net-software/SetupBuilder'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'inetsoftware'
+                        name = 'i-net software'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/i-net-software/SetupBuilder.git'
+                    developerConnection = 'scm:git:ssh://github.com/i-net-software/SetupBuilder.git'
+                    url = 'https://github.com/i-net-software/SetupBuilder'
+                }
+            }
+        }
+    }
+    
+    // For local development, use mavenLocal()
+    repositories {
+        mavenLocal()
+    }
 }
 
-if( !System.getProperty("local") && file( '../BuildScripts/base.gradle' ).exists() ) {
-    apply from: '../BuildScripts/base.gradle' // for internal build system
-    preparePublish.dependsOn 'javadocJar'
-    preparePublish.dependsOn 'jar'
-    println "Uploading into internal Repository"
+println "Publishing version: ${version}"
+println "Note: For local development, use './gradlew publishToMavenLocal'"
+println "      For snapshots, use './gradlew publishToSonatype' (requires Sonatype credentials)"
+println "      Snapshots are available at: https://oss.sonatype.org/content/repositories/snapshots/"
 
-    if ( System.getProperty("snapshot") ) {
-        version += '-SNAPSHOT' // setting version to snapshot
-    }
-} else {
-    println "Uploading into local '../repo'"
-    version += System.getenv('DEPLOY') != null ?'':'-SNAPSHOT' // setting version to snapshot
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
+// Configure Nexus Publish Plugin for Sonatype/Maven Central
+// Configure for both snapshots and releases
+// Snapshots go to: https://oss.sonatype.org/content/repositories/snapshots/
+// Releases go to staging, then are closed and released to Maven Central
+nexusPublishing {
         repositories {
-            maven {
-                url = '../repo'
+            sonatype {
+                // New Central Portal URLs
+                nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+                snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+                // Credentials - try both property name variations
+                username.set(
+                    project.findProperty('ossrhUsername') 
+                        ?: project.findProperty('sonatypeUsername')
+                        ?: System.getenv('SONATYPE_USERNAME') 
+                        ?: System.getenv('OSSRH_USERNAME')
+                        ?: ""
+                )
+                password.set(
+                    project.findProperty('ossrhPassword')
+                        ?: project.findProperty('sonatypePassword')
+                        ?: System.getenv('SONATYPE_PASSWORD')
+                        ?: System.getenv('OSSRH_PASSWORD')
+                        ?: ""
+                )
+                // Staging profile ID - should be the UUID from Sonatype, not the domain
+                // Get it from: https://central.sonatype.com/ -> Staging Profiles
+                // Or leave it out to auto-detect by groupId
+                // If you have a staging profile UUID, uncomment and set it:
+                // stagingProfileId.set('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx')
             }
         }
+    
+    // Configure closeStagingRepositories task (only for releases, not snapshots)
+    closeStagingRepositories {
+        closeStagingRepositories.dependsOn 'publishToSonatype'
+        // Only close staging for releases (non-snapshot versions)
+        onlyIf { !version.toString().endsWith('-SNAPSHOT') }
     }
-    publish.dependsOn 'assemble'
+    
+    // For snapshots, just publish (don't close staging)
+    // For releases, close and release staging repositories
+    if (!version.toString().endsWith('-SNAPSHOT')) {
+        publish.finalizedBy 'closeStagingRepositories'
+    }
+}
 
-    clean.doLast {
-        println "Cleaning local repository folder"
-        file('../repo').deleteDir()
+// Configure signing for Maven Central
+// Sign both snapshots and releases when credentials are available
+signing {
+    required { 
+        (System.getenv('SIGNING_KEY') != null || project.findProperty('signing.key') != null)
     }
+    useInMemoryPgpKeys( 
+        System.getenv('SIGNING_KEY') ?: project.findProperty('signing.key'), 
+        System.getenv('SIGNING_PASSWORD') ?: project.findProperty('signing.password') 
+    )
+    sign publishing.publications.mavenJava
 }
 
 javadoc {

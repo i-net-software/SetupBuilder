@@ -1,7 +1,10 @@
 buildscript {
     repositories {
+        mavenLocal()
+        mavenCentral()
+        // For snapshots, add Sonatype snapshot repository
         maven {
-            url uri('../../repo')
+            url uri('https://oss.sonatype.org/content/repositories/snapshots/')
         }
     }
     dependencies {

@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    name: Build and Test (Gradle ${{ matrix.gradle-version }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        include:
+          - gradle-version: '7.6'
+            deploy: true
+          - gradle-version: '8.4'
+            deploy: true
+          - gradle-version: '8.14.2'
+            deploy: false
+          - gradle-version: '9.0.0-milestone-9'
+            deploy: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fakeroot
+      
+      - name: Setup Gradle ${{ matrix.gradle-version }}
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ matrix.gradle-version }}
+      
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ matrix.gradle-version }}-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-${{ matrix.gradle-version }}-
+            ${{ runner.os }}-gradle-
+      
+      - name: Set Gradle version environment variable
+        run: |
+          echo "LIB_GRADLE_VERSION=${{ matrix.gradle-version }}" >> $GITHUB_ENV
+      
+      - name: Run Gradle wrapper
+        run: gradle wrapper
+      
+      - name: Build plugin
+        run: ./gradlew clean build -x test --no-daemon
+      
+      - name: Run tests
+        run: ./gradlew check --no-daemon
+      
+      - name: Validate plugin
+        run: ./gradlew validatePlugins --no-daemon
+      
+      - name: Publish snapshot to Sonatype
+        if: matrix.deploy == 'true' && github.event_name == 'push'
+        continue-on-error: true
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          ./gradlew publishToSonatype --no-daemon \
+            -Psigning.key="$SIGNING_KEY" \
+            -Psigning.password="$SIGNING_PASSWORD"
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-gradle${{ matrix.gradle-version }}
+          path: build/test-results/
+          retention-days: 7
+      
+      - name: Upload build artifacts
+        if: matrix.deploy == 'true' && matrix.gradle-version == '8.4'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/libs/*.jar
+          retention-days: 1
+
