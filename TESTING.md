@@ -17,35 +17,6 @@ Comprehensive test script that checks:
 ./test-cross-platform.sh
 ```
 
-### 2. `verify-platform-logic.sh`
-Verifies platform detection and Launch4j classifier logic using Java.
-
-**Usage:**
-```bash
-./verify-platform-logic.sh
-```
-
-**What it tests:**
-- Platform detection (OS name and architecture)
-- File separator correctness
-- Launch4j classifier selection logic
-- Validates classifier against known Maven Central packages
-
-### 3. `test-launch4j-classifier.groovy` (Optional)
-Tests Launch4j workdir classifier selection logic. Requires Groovy.
-
-**Usage:**
-```bash
-groovy test-launch4j-classifier.groovy
-```
-
-### 4. `test-wix-detection.groovy` (Optional)
-Tests WiX v4 detection and path resolution. Requires Groovy.
-
-**Usage:**
-```bash
-groovy test-wix-detection.groovy
-```
 
 ## Testing on macOS
 

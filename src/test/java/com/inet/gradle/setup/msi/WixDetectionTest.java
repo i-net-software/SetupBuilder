@@ -53,14 +53,6 @@ public class WixDetectionTest {
     }
 
     @Test
-    public void testWixEnvironmentVariable() {
-        String wix = System.getenv("WIX");
-        // WIX may or may not be set - both are valid
-        // Just verify we can check it without errors
-        assertTrue("Should be able to check WIX environment variable", true);
-    }
-
-    @Test
     public void testPathSeparatorForPath() {
         String pathSeparator = File.pathSeparator;
         assertNotNull("Path separator should not be null", pathSeparator);
