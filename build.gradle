@@ -61,6 +61,10 @@ repositories {
 
 dependencies {
     api gradleApi()
+    
+    // Test dependencies
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.hamcrest:hamcrest-core:2.2'
 }
 
 sourceSets {
@@ -68,16 +72,23 @@ sourceSets {
         java {
             srcDirs = ['src']
             srcDirs = ["${buildDir}/preparedSrc-${gVersion}"]
+            exclude '**/test/**'  // Exclude test files from main source set
         }
         resources {
             srcDirs = ['src']
             exclude '**/*.java'
             exclude '**/package.html'
+            exclude '**/test/**'  // Exclude test files from resources
+        }
+    }
+    test {
+        java {
+            srcDirs = ['src/test']
         }
     }
 }
 
-/* Configure JPP */
+/* Configure JPP - exclude test files */
 JPP.setJPPSources( "src", [
     "gradleVersion" : "${gVersion}",
     "outputDirectory" : "${buildDir}/preparedSrc-${gVersion}"
