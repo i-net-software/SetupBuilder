@@ -188,15 +188,27 @@ nexusPublishing {
 
 // Configure signing for Maven Central
 // Sign both snapshots and releases when credentials are available
-signing {
-    required { 
-        (System.getenv('SIGNING_KEY') != null || project.findProperty('signing.key') != null)
+// Note: Signing is only required for Maven Central, not for mavenLocal()
+def hasSigningKey = (System.getenv('SIGNING_KEY') != null || project.findProperty('signing.key') != null)
+def isPublishingToMavenLocal = gradle.startParameter.taskNames.any { 
+    it.contains('MavenLocal') || it.contains('mavenLocal')
+}
+
+if (!isPublishingToMavenLocal && hasSigningKey) {
+    // Only sign when publishing to Sonatype and signing key is available
+    signing {
+        required { true }
+        useInMemoryPgpKeys( 
+            System.getenv('SIGNING_KEY') ?: project.findProperty('signing.key'), 
+            System.getenv('SIGNING_PASSWORD') ?: project.findProperty('signing.password') 
+        )
+        sign publishing.publications.mavenJava
     }
-    useInMemoryPgpKeys( 
-        System.getenv('SIGNING_KEY') ?: project.findProperty('signing.key'), 
-        System.getenv('SIGNING_PASSWORD') ?: project.findProperty('signing.password') 
-    )
-    sign publishing.publications.mavenJava
+} else {
+    // Skip signing for mavenLocal
+    signing {
+        required { false }
+    }
 }
 
 javadoc {
