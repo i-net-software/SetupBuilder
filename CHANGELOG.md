@@ -14,7 +14,7 @@
   * Snapshots are published to Sonatype snapshot repository
   * Releases are published to Maven Central via Sonatype
 * **CI/CD**: Migrated from Travis CI to GitHub Actions
-  * CI workflow tests with multiple Gradle versions (7.6, 8.4, 8.14.2, 9.0.0-milestone-9)
+  * CI workflow tests with multiple Gradle versions (7.6, 8.4, 8.14.2, 9.2.1) across multiple platforms (Ubuntu, Windows, macOS)
   * Release workflow automatically publishes to Sonatype and Gradle Plugin Portal
 
 ### Added
