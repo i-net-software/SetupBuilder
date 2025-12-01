@@ -53,12 +53,15 @@ jobs:
           MAJOR=$(echo "$VERSION" | cut -d. -f1)
           MINOR=$(echo "$VERSION" | cut -d. -f2)
           
+          # Deployable Gradle versions (must match deploy: true in CI workflow matrix)
+          # This is the single source of truth for which Gradle versions can be used for releases
+          DEPLOYABLE_VERSIONS="7.6 8.4"
+          
           # Map to Gradle version based on SetupBuilder version
           # Based on SetupBuilderVersion.gradle logic:
           # - 8.4.x -> Gradle 8.4 (deploy: true in CI)
           # - 7.2.x -> Gradle 7.6 (deploy: true in CI)
           # - < 7.2 -> Gradle 7.6 (fallback)
-          # Note: Only Gradle versions with deploy: true in CI should be used for releases
           if [ "$MAJOR" -gt 8 ] || ([ "$MAJOR" -eq 8 ] && [ "$MINOR" -ge 4 ]); then
             GRADLE_VERSION="8.4"
           elif [ "$MAJOR" -gt 7 ] || ([ "$MAJOR" -eq 7 ] && [ "$MINOR" -ge 2 ]); then
@@ -69,8 +72,8 @@ jobs:
           
           # Validate that we're using a deployable Gradle version
           # (matches deploy: true versions in CI workflow)
-          if [ "$GRADLE_VERSION" != "7.6" ] && [ "$GRADLE_VERSION" != "8.4" ]; then
-            echo "::error::Gradle version $GRADLE_VERSION is not deployable. Only 7.6 and 8.4 are supported for releases."
+          if ! echo "$DEPLOYABLE_VERSIONS" | grep -q "\b$GRADLE_VERSION\b"; then
+            echo "::error::Gradle version $GRADLE_VERSION is not deployable. Deployable versions: $DEPLOYABLE_VERSIONS"
             exit 1
           fi
           

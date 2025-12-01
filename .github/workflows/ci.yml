@@ -14,14 +14,23 @@ jobs:
     strategy:
       matrix:
         include:
-          # deploy: true = stable Gradle versions that publish snapshots and can be used for releases
-          # deploy: false = test-only versions (newer/experimental versions or cross-platform testing)
+          # Deployable Gradle versions (deploy: true) - these are the ONLY versions that:
+          # 1. Publish snapshots to Sonatype
+          # 2. Upload build artifacts
+          # 3. Can be used for releases (see release.yml for validation)
+          # 
+          # To add a new deployable version:
+          # 1. Add it here with deploy: true
+          # 2. Update DEPLOYABLE_VERSIONS in release.yml
+          # 3. Update the version mapping logic in release.yml if needed
           - os: ubuntu-latest
             gradle-version: '7.6'
             deploy: true  # Stable: Used for SetupBuilder 7.2.x releases
           - os: ubuntu-latest
             gradle-version: '8.4'
             deploy: true  # Stable: Used for SetupBuilder 8.4.x releases
+          
+          # Test-only versions (deploy: false) - for compatibility testing, not releases
           - os: ubuntu-latest
             gradle-version: '8.14.2'
             deploy: false  # Test-only: Newer 8.x version
