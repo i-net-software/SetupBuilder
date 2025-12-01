@@ -148,14 +148,50 @@
 
 ### Phase 4: Script Execution
 
-1. **VBScript Alternatives**:
-   - For non-Windows: Use Java-based alternatives or skip
-   - Or use Wine to run VBScript files
-   - Or rewrite scripts in cross-platform language (Groovy/Java)
+**Status: ✅ Implemented (Option D - Conditional Execution)**
 
-2. **MsiTran.exe**:
-   - WiX v4 may have cross-platform equivalent
-   - Or use Wine/Docker for v3 compatibility
+1. **VBScript Alternatives** (Implemented):
+   - ✅ **Option D**: Conditional execution - skip on non-Windows with warnings
+   - Methods `patchLangID()` and `addTranslation()` now check platform
+   - Multi-language builds limited to primary language on non-Windows
+   - Informative warnings logged when operations are skipped
+
+2. **MsiTran.exe** (Implemented):
+   - ✅ **Option D**: Conditional execution - skip on non-Windows with warnings
+   - Method `msitran()` returns null on non-Windows
+   - Transform file creation skipped on non-Windows platforms
+   - Build continues with single-language MSI
+
+**TODO: Option A - Java-based Implementation**
+
+For full cross-platform multi-language support, implement Java-based alternatives:
+
+1. **MSI Database Manipulation Libraries**:
+   - Research and integrate Java libraries for MSI file manipulation:
+     - `msi4j` or similar libraries
+     - Direct MSI database access (MSI files are SQL databases)
+   - Modify `_SummaryInformation` stream for language IDs
+   - Access `Property` table for language settings
+
+2. **MSI Transform Creation**:
+   - Implement MST file creation in Java:
+     - MST files are MSI databases containing differences
+     - Compare two MSI databases and compute differences
+     - Create transform database with language-specific changes
+   - Alternative: Use Wine to run MsiTran.exe if available
+
+3. **MSI Transform Application**:
+   - Add transforms to MSI `_Storages` table:
+     - Transform storage name = language code (e.g., "1033" for en-US)
+     - Update `_SummaryInformation` stream with transform references
+   - Use JNA/COM4J to call Windows Installer APIs via Wine (if available)
+
+4. **Implementation Hints** (see code comments):
+   - `patchLangID()`: Modify MSI `_SummaryInformation` stream directly
+   - `msitran()`: Compare MSI databases and create transform file
+   - `addTranslation()`: Insert transform into MSI `_Storages` table
+   - Consider using Apache POI for OLE Structured Storage manipulation
+   - Or use direct binary manipulation of MSI compound document format
 
 ## Files to Modify
 
@@ -235,23 +271,41 @@
 
 ## Estimated Effort
 
-- **Phase 1** (Platform Detection): 2-4 hours
-- **Phase 2** (WiX v4 Support): 8-16 hours
-- **Phase 3** (Launch4j): 2-4 hours
-- **Phase 4** (Scripts & Polish): 4-8 hours
-- **Testing**: 8-16 hours
-- **Documentation**: 2-4 hours
+- **Phase 1** (Platform Detection): ✅ 2-4 hours - **COMPLETED**
+- **Phase 2** (WiX v4 Support): ✅ 8-16 hours - **COMPLETED**
+- **Phase 3** (Launch4j): ✅ 2-4 hours - **COMPLETED**
+- **Phase 4** (Scripts & Polish - Option D): ✅ 2-4 hours - **COMPLETED**
+- **Phase 4** (Option A - Java-based): ⏭️ 16-32 hours - **FUTURE WORK**
+- **Testing**: ⏭️ 8-16 hours - **PENDING**
+- **Documentation**: ✅ 2-4 hours - **COMPLETED**
 
-**Total**: ~26-52 hours
+**Completed**: ~16-28 hours  
+**Remaining (Option A)**: ~16-32 hours  
+**Total (with Option A)**: ~32-60 hours
 
-## Next Steps
+## Implementation Status
 
 1. ✅ Review current implementation (this document)
-2. ⏭️ Update version to 8.4.24-SNAPSHOT
-3. ⏭️ Implement Phase 1 (Platform Detection & Path Handling)
-4. ⏭️ Test on Linux/macOS with WiX v4
-5. ⏭️ Implement Phase 2 (WiX v4 Support)
-6. ⏭️ Implement Phase 3 (Launch4j Cross-Platform)
-7. ⏭️ Update documentation
-8. ⏭️ Add CI/CD tests for cross-platform builds
+2. ✅ Update version to 8.4.24-SNAPSHOT
+3. ✅ Implement Phase 1 (Platform Detection & Path Handling)
+4. ✅ Implement Phase 2 (WiX v4 Support)
+5. ✅ Implement Phase 3 (Launch4j Cross-Platform)
+6. ✅ Implement Phase 4 (Script Execution - Option D)
+7. ⏭️ Test on Linux/macOS with WiX v4
+8. ⏭️ Update documentation
+9. ⏭️ Add CI/CD tests for cross-platform builds
+10. ⏭️ Future: Implement Phase 4 Option A (Java-based MSI manipulation)
+
+## Current Limitations
+
+**Multi-Language MSI Support:**
+- ✅ Single-language MSI builds work on all platforms
+- ⚠️ Multi-language MSI builds only work on Windows
+- ⚠️ On Linux/macOS: Only primary language is used, warnings are logged
+- ⏭️ Future: Full multi-language support via Java-based implementation (Option A)
+
+**Windows-Only Tools:**
+- MsiTran.exe: Skipped on non-Windows (transforms not created)
+- VBScript (cscript): Skipped on non-Windows (language patches not applied)
+- These limitations are documented in code with TODO comments for Option A implementation
 

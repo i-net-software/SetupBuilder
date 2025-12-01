@@ -197,21 +197,46 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
             buildLauch4j();
             candle();
 
-            ResourceUtils.extract( getClass(), "sdk/MsiTran.exe", buildDir );
-            ResourceUtils.extract( getClass(), "sdk/wilangid.vbs", buildDir );
-            ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
+            // Extract Windows-specific tools only on Windows (or if Wine/Docker is available)
+            // TODO Option A: Replace with Java-based MSI manipulation libraries
+            //   - Use libraries like 'msi4j' or 'windows-installer' Java libraries
+            //   - Or use COM4J/JNA to call Windows Installer APIs via Wine
+            //   - Or implement MSI database manipulation directly using Java
+            if( isWindows() ) {
+                ResourceUtils.extract( getClass(), "sdk/MsiTran.exe", buildDir );
+                ResourceUtils.extract( getClass(), "sdk/wilangid.vbs", buildDir );
+                ResourceUtils.extract( getClass(), "sdk/wisubstg.vbs", buildDir );
+            } else {
+                task.getProject().getLogger().warn( "MSI multi-language support: Windows-only tools (MsiTran.exe, VBScript) are not available on " + 
+                    ( isLinux() ? "Linux" : "macOS" ) + ". Multi-language MSI builds will be limited. " +
+                    "Only the primary language will be supported. For full multi-language support, build on Windows or use Wine/Docker." );
+            }
 
             List<MsiLanguages> languages = task.getLanguages();
             String[] languageResources = getLanguageResources();
 
+            // Check if multi-language build is requested on non-Windows
+            if( !isWindows() && languages.size() > 1 ) {
+                task.getProject().getLogger().warn( "Multi-language MSI build requested on " + 
+                    ( isLinux() ? "Linux" : "macOS" ) + ", but only single-language builds are supported. " +
+                    "Only the first language (" + languages.get( 0 ).getCulture() + ") will be used." );
+            }
+
             File mui = light( languages.get( 0 ), languageResources );
             HashMap<MsiLanguages, File> translations = new HashMap<>();
-            for( int i = 1; i < languages.size(); i++ ) {
-                MsiLanguages language = languages.get( i );
-                File file = light( language, languageResources );
-                patchLangID( file, language );
-                File mst = msitran( mui, file, language );
-                translations.put( language, mst );
+            
+            // Multi-language support: Only process additional languages on Windows
+            // TODO Option A: Implement cross-platform multi-language support using Java-based MSI manipulation
+            if( isWindows() && languages.size() > 1 ) {
+                for( int i = 1; i < languages.size(); i++ ) {
+                    MsiLanguages language = languages.get( i );
+                    File file = light( language, languageResources );
+                    patchLangID( file, language );
+                    File mst = msitran( mui, file, language );
+                    if( mst != null ) {
+                        translations.put( language, mst );
+                    }
+                }
             }
 
             // Now create a msi with all files
@@ -219,15 +244,20 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
             candle();
             mui = light( languages.get( 0 ), languageResources );
 
-            // Add the translations to the msi with all files
-            StringBuilder langIDs = new StringBuilder( languages.get( 0 ).getLangID() );
-            for( Entry<MsiLanguages, File> entry : translations.entrySet() ) {
-                MsiLanguages language = entry.getKey();
-                File mst = entry.getValue();
-                addTranslation( mui, mst, language );
-                langIDs.append( ',' ).append( language.getLangID() );
+            // Add the translations to the msi with all files (Windows only)
+            if( isWindows() && !translations.isEmpty() ) {
+                StringBuilder langIDs = new StringBuilder( languages.get( 0 ).getLangID() );
+                for( Entry<MsiLanguages, File> entry : translations.entrySet() ) {
+                    MsiLanguages language = entry.getKey();
+                    File mst = entry.getValue();
+                    addTranslation( mui, mst, language );
+                    langIDs.append( ',' ).append( language.getLangID() );
+                }
+                patchLangID( mui, langIDs.toString() );
+            } else if( !isWindows() && languages.size() > 1 ) {
+                // On non-Windows, just use the primary language
+                task.getProject().getLogger().info( "MSI built with primary language only: " + languages.get( 0 ).getCulture() );
             }
-            patchLangID( mui, langIDs.toString() );
 
             // signing and moving the final msi file
             signTool( mui );
@@ -444,10 +474,31 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
 
     /**
      * Change the language ID of a *.msi file.
+     * 
+     * Windows-only: Uses VBScript (cscript) to modify MSI database.
+     * 
+     * TODO Option A: Java-based implementation
+     *   To implement cross-platform support, consider:
+     *   1. Use MSI database manipulation libraries:
+     *      - 'msi4j' or similar Java libraries for MSI file manipulation
+     *      - Direct MSI database access using Java (MSI files are SQL databases)
+     *   2. Use JNA/COM4J to call Windows Installer APIs via Wine:
+     *      - MsiDatabaseOpenView, MsiViewExecute, MsiRecordSetString
+     *   3. Implement direct MSI database modification:
+     *      - MSI files are OLE Structured Storage (compound documents)
+     *      - Use libraries like Apache POI for OLE or direct binary manipulation
+     *      - Modify the _SummaryInformation stream or Property table directly
+     * 
      * @param file a msi file
      * @param language the target language
      */
     private void patchLangID( File file, MsiLanguages language ) {
+        if( !isWindows() ) {
+            task.getProject().getLogger().warn( "patchLangID: Skipping language ID patch on non-Windows platform. " +
+                "MSI will use default language. For full multi-language support, build on Windows." );
+            return;
+        }
+        
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "cscript" );
         parameters.add( "//Nologo" );
@@ -460,10 +511,22 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
 
     /**
      * Set all languages IDs for which translations was added.
+     * 
+     * Windows-only: Uses VBScript (cscript) to modify MSI database.
+     * 
+     * TODO Option A: See patchLangID(File, MsiLanguages) for implementation hints.
+     *   This method modifies the Package language IDs in the MSI _SummaryInformation stream.
+     * 
      * @param mui the multilingual user interface (MUI) installer file
      * @param langIDs a comma separated list of languages IDs
      */
     private void patchLangID( File mui, String langIDs ) {
+        if( !isWindows() ) {
+            task.getProject().getLogger().warn( "patchLangID: Skipping package language ID patch on non-Windows platform. " +
+                "MSI will use default language. For full multi-language support, build on Windows." );
+            return;
+        }
+        
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "cscript" );
         parameters.add( "//Nologo" );
@@ -476,12 +539,37 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
 
     /**
      * Call the msitran.exe tool and create a transform file (*.mst).
+     * 
+     * Windows-only: Uses MsiTran.exe to create transform files for multi-language support.
+     * 
+     * TODO Option A: Java-based implementation
+     *   To implement cross-platform support, consider:
+     *   1. Use MSI transform generation libraries:
+     *      - Implement MST file creation using Java (MST files are MSI databases with differences)
+     *      - Use MSI database APIs to compute differences between two MSI files
+     *   2. Use Wine to run MsiTran.exe:
+     *      - Check if Wine is available: `which wine` or `wine --version`
+     *      - Execute: `wine MsiTran.exe -g mui.msi file.msi output.mst`
+     *   3. Use WiX v4 tools (if available):
+     *      - Check if WiX v4 has cross-platform transform tools
+     *      - May have `wix transform` or similar command
+     *   4. Direct MSI database manipulation:
+     *      - Compare two MSI databases and create transform
+     *      - Transform = differences between base MSI and localized MSI
+     * 
      * @param mui the multilingual user interface (MUI) installer file
      * @param file the current msi file
      * @param language current language
-     * @return the *.mst file
+     * @return the *.mst file, or null on non-Windows
      */
     private File msitran( File mui, File file, MsiLanguages language ) {
+        if( !isWindows() ) {
+            task.getProject().getLogger().warn( "msitran: Skipping transform file creation on non-Windows platform. " +
+                "Multi-language MSI support requires Windows or Wine. Returning null." );
+            file.delete(); // Clean up the file since we can't process it
+            return null;
+        }
+        
         File mst = new File( buildDir, language.getCulture() + ".mst" );
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( new File( buildDir, "sdk/MsiTran.exe" ).getAbsolutePath() );
@@ -496,11 +584,40 @@ class MsiBuilder extends AbstractBuilder<Msi, SetupBuilder> {
 
     /**
      * Add a transform file to the msi file
+     * 
+     * Windows-only: Uses VBScript (cscript) to add transform files to MSI.
+     * 
+     * TODO Option A: Java-based implementation
+     *   To implement cross-platform support, consider:
+     *   1. Use MSI database manipulation to add transforms:
+     *      - MSI transforms are stored in the _Storages table
+     *      - Use MSI database APIs to insert transform storage entries
+     *      - Transform storage name format: language code (e.g., "1033" for en-US)
+     *   2. Use JNA/COM4J to call Windows Installer APIs via Wine:
+     *      - MsiDatabaseApplyTransform, MsiGetSummaryInformation
+     *   3. Direct MSI database modification:
+     *      - Add transform to _Storages table in MSI database
+     *      - Update _SummaryInformation stream with transform references
+     * 
      * @param mui the multilingual user interface (MUI) installer file
      * @param mst the transform file
      * @param language current language
      */
     private void addTranslation( File mui, File mst, MsiLanguages language ) {
+        if( !isWindows() ) {
+            task.getProject().getLogger().warn( "addTranslation: Skipping transform addition on non-Windows platform. " +
+                "Multi-language MSI support requires Windows. Transform file will be deleted." );
+            if( mst != null && mst.exists() ) {
+                mst.delete();
+            }
+            return;
+        }
+        
+        if( mst == null || !mst.exists() ) {
+            task.getProject().getLogger().warn( "addTranslation: Transform file does not exist, skipping." );
+            return;
+        }
+        
         ArrayList<String> parameters = new ArrayList<>();
         parameters.add( "cscript" );
         parameters.add( "//Nologo" );
