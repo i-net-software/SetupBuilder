@@ -88,8 +88,8 @@ jobs:
         run: gradle wrapper --gradle-version ${{ matrix.gradle-version }}
         shell: bash
       
-      - name: Build plugin
-        run: ./gradlew clean build -x test --no-daemon
+      - name: Build and publish plugin to mavenLocal
+        run: ./gradlew clean build publishToMavenLocal -x test --no-daemon
         shell: bash
       
       - name: Run tests
