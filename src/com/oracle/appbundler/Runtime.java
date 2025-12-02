@@ -33,6 +33,9 @@ import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FileSet;
 
+/**
+ * Represents a Java runtime for the application bundle.
+ */
 public class Runtime extends FileSet {
 
     /**

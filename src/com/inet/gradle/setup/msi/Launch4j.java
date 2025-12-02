@@ -5,8 +5,12 @@ import java.io.Serializable;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.DesktopStarter;
 
+/**
+ * Configuration for Launch4j executable creation.
+ */
 public class Launch4j extends DesktopStarter implements Serializable {
 
+    /** The requested execution level (e.g., "requireAdministrator"). */
     private String requestedExecutionLevel = "requireAdministrator";
 
     /**

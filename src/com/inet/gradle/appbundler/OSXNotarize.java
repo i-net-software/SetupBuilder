@@ -16,16 +16,29 @@ import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.abstracts.AbstractTask;
 
+/**
+ * Builder for macOS notarization.
+ */
 public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T, S> {
 
+    /** Notarization username, plain password, and keychain password item. */
     private String            username, passwordPlain, passwordKeychainItem;
 
+    /** Apple Developer Team ID. */
     private String            teamId;
 
+    /** Whether to output debug information. */
     private boolean           debugOutput = false;
 
+    /** The code signing instance. */
     private OSXCodeSign<T, S> codesign;
 
+    /**
+     * Creates a new OSXNotarize instance.
+     * @param task the task instance
+     * @param fileResolver the file resolver
+     * @param codesign the code sign instance
+     */
     public OSXNotarize( T task, FileResolver fileResolver, OSXCodeSign<T, S> codesign ) {
         super( task, fileResolver );
         this.codesign = codesign;

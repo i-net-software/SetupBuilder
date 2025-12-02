@@ -23,6 +23,9 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.tasks.TaskContainer;
 
+/**
+ * Utility class for Gradle operations.
+ */
 public abstract class GradleUtils {
 
     /**

@@ -72,11 +72,19 @@ public class DocumentType {
      * 
      * @param extension the extension
      */
+    /**
+     * Sets a single file extension.
+     * @param extension the file extension
+     */
     public void setFileExtension( String extension ) {
         extensions = null;
         fileExtension( extension );
     }
 
+    /**
+     * Gets the file extensions.
+     * @return the list of file extensions
+     */
     public List<String> getFileExtension() {
         return extensions;
     }
@@ -90,6 +98,10 @@ public class DocumentType {
         this.extensions = extensions;
     }
 
+    /**
+     * Gets the document type name.
+     * @return the document type name, or a default name if not set
+     */
     public String getName() {
         if( name != null && !name.isEmpty() ) {
             return name;
@@ -97,6 +109,10 @@ public class DocumentType {
         return setup.getProject().getName() + " file";
     }
 
+    /**
+     * Sets the document type name.
+     * @param name the document type name
+     */
     public void setName( String name ) {
         this.name = name;
     }
@@ -122,6 +138,10 @@ public class DocumentType {
         this.mimetype = mimetype;
     }
 
+    /**
+     * Gets the document role.
+     * @return the document role
+     */
     public String getRole() {
         return role;
     }
@@ -135,6 +155,10 @@ public class DocumentType {
         this.role = role;
     }
 
+    /**
+     * Gets the document icons.
+     * @return the icons, or the setup builder icons if not set
+     */
     public Object getIcons() {
         if( icons != null ) {
             return icons;
@@ -142,6 +166,10 @@ public class DocumentType {
         return setup.getIcons();
     }
 
+    /**
+     * Sets the document icons.
+     * @param icons the icons
+     */
     public void setIcons( Object icons ) {
         this.icons = icons;
     }

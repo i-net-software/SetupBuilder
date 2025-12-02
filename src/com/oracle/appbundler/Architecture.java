@@ -30,19 +30,33 @@ package com.oracle.appbundler;
 public class Architecture {
     private String name = null;
 
+    /**
+     * Gets the architecture name.
+     * @return the architecture name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the architecture name.
+     * @param name the architecture name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return name;
     }
 
+    /**
+     * Creates an Architecture instance from a name.
+     * @param name the architecture name
+     * @return the Architecture instance
+     */
     public static Architecture from( String name ) {
         Architecture architecture = new Architecture();
         architecture.setName( name );

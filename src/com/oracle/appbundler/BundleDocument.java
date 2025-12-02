@@ -49,23 +49,48 @@ public class BundleDocument implements IconContainer {
         return new String(stringArray);
     }
     
+    /**
+     * Sets the file extensions.
+     * @param extensionsString comma-separated list of extensions
+     */
     public void setExtensions(String extensionsString) {
         extensions = getListFromCommaSeparatedString(extensionsString, "Extensions", true);
     }
 
+    /**
+     * Sets the content types.
+     * @param contentTypesString comma-separated list of content types
+     */
     public void setContentTypes(String contentTypesString) {
         contentTypes = getListFromCommaSeparatedString(contentTypesString, "Content Types");
     }
 
+    /**
+     * Sets the exportable types.
+     * @param exportableTypesString comma-separated list of exportable types
+     */
     public void setExportableTypes(String exportableTypesString) {
         exportableTypes = getListFromCommaSeparatedString(exportableTypesString, "Exportable Types");
     }
 
+    /**
+     * Parses a comma-separated string into a list.
+     * @param listAsString the comma-separated string
+     * @param attributeName the attribute name for error messages
+     * @return the list of strings
+     */
     public static List<String> getListFromCommaSeparatedString(String listAsString,
             final String attributeName) {
         return getListFromCommaSeparatedString(listAsString, attributeName, false);
     }
             
+    /**
+     * Parses a comma-separated string into a list.
+     * @param listAsString the comma-separated string
+     * @param attributeName the attribute name for error messages
+     * @param lowercase true to convert to lowercase
+     * @return the list of strings
+     */
     public static List<String> getListFromCommaSeparatedString(String listAsString,
             final String attributeName, final boolean lowercase) {
         if(listAsString == null) {
@@ -91,22 +116,42 @@ public class BundleDocument implements IconContainer {
         return stringList;
     }
     
+    /**
+     * Sets the icon path.
+     * @param icon the icon path
+     */
     public void setIcon(String icon) {
       this.icon = icon;
     }
 
+    /**
+     * Sets the document name.
+     * @param name the document name
+     */
     public void setName(String name) {
       this.name = name;
     }
 
+    /**
+     * Sets the document role.
+     * @param role the document role
+     */
     public void setRole(String role) {
       this.role = capitalizeFirst(role);
     }
     
+    /**
+     * Sets the handler rank.
+     * @param handlerRank the handler rank
+     */
     public void setHandlerRank(String handlerRank) {
       this.handlerRank = capitalizeFirst(handlerRank);
     } 
       
+    /**
+     * Sets whether this is a package.
+     * @param isPackageString "true" or "false"
+     */
     public void setIsPackage(String isPackageString) {
         if(isPackageString.trim().equalsIgnoreCase("true")) {
             this.isPackage = true;
@@ -115,34 +160,66 @@ public class BundleDocument implements IconContainer {
         }
     }
     
+    /**
+     * Gets the icon path.
+     * @return the icon path
+     */
     public String getIcon() {
         return icon;
     }
 
+    /**
+     * Gets the document name.
+     * @return the document name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the document role.
+     * @return the document role
+     */
     public String getRole() {
         return role;
     }
 
+    /**
+     * Gets the handler rank.
+     * @return the handler rank
+     */
     public String getHandlerRank() {
         return handlerRank;
     }
     
+    /**
+     * Gets the file extensions.
+     * @return the list of extensions
+     */
     public List<String> getExtensions() {
         return extensions;
     }
     
+    /**
+     * Gets the content types.
+     * @return the list of content types
+     */
     public List<String> getContentTypes() {
         return contentTypes;
     }
     
+    /**
+     * Gets the exportable types.
+     * @return the list of exportable types
+     */
     public List<String> getExportableTypes() {
         return exportableTypes;
     }
     
+    /**
+     * Gets the icon file.
+     * @return the icon file, or null if not available
+     */
     public File getIconFile() {
         if (icon == null) { return null; }
 
@@ -153,10 +230,18 @@ public class BundleDocument implements IconContainer {
         return ifile;
     }
     
+    /**
+     * Checks if an icon is set.
+     * @return true if an icon is set
+     */
     public boolean hasIcon() {
         return icon != null;
     }
     
+    /**
+     * Checks if this is a package.
+     * @return true if this is a package
+     */
     public boolean isPackage() {
         return isPackage;
     }

@@ -28,6 +28,7 @@ import com.inet.gradle.setup.image.ImageFactory;
  * @author gamma
  */
 public class Application {
+    /** The setup builder instance. */
     protected final AbstractSetupBuilder setup;
 
     private String                       displayName, mainJar, mainClass, executable, description, workDir, startArguments;

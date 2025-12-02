@@ -18,12 +18,18 @@ import com.inet.gradle.setup.abstracts.AbstractBuilder;
 import com.inet.gradle.setup.abstracts.AbstractSetupBuilder;
 import com.inet.gradle.setup.util.ResourceUtils;
 
+/**
+ * Abstract builder for Unix-based package formats (deb, rpm, etc.).
+ */
 public abstract class UnixBuilder<T extends Unix, S extends AbstractSetupBuilder> extends AbstractBuilder<T, S> {
 
+    /** The setup builder instance. */
     protected SetupBuilder setup;
 
+    /** The Java command suffix. */
     private String         javaCommandSuffix  = "/bin/java";
 
+    /** The main Java executable path. Default Java Location. */
     protected String       javaMainExecutable = "/usr" + javaCommandSuffix; // Default Java Location
 
     /**

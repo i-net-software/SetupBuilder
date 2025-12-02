@@ -58,10 +58,13 @@ import com.inet.gradle.setup.util.ResourceUtils;
  */
 public class DmgBuilder extends AbstractBuilder<Dmg, SetupBuilder> {
 
+    /** The image source root and first executable name. */
     private String       imageSourceRoot, firstExecutableName;
 
+    /** The setup builder instance. */
     private SetupBuilder setup;
 
+    /** The temporary path handler. */
     private TempPath     tempPath;
 
     /**

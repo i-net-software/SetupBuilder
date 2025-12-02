@@ -40,26 +40,42 @@ public class JLink {
     private ArrayList<String> arguments = new ArrayList<>();
     private ExecTask exec = new ExecTask();
 
+    /** Creates a new JLink instance. */
     public JLink() {
         exec.init();
     }
 
+    /**
+     * Gets the runtime path.
+     * @return the runtime path
+     */
     public String getRuntime() {
         return runtime;
     }
 
+    /**
+     * Sets the runtime path.
+     * @param runtime the runtime path
+     */
     public void setRuntime(String runtime) {
         this.runtime = runtime;
     }
 
+    /**
+     * Sets the task instance.
+     * @param task the AppBundlerTask instance
+     */
     public void setTask(AppBundlerTask task) {
         exec.bindToOwner(task);
     }
 
-    /* Provide canonical path so that runtime can be specified via a
+    /**
+     * Gets the canonical directory path.
+     * Provide canonical path so that runtime can be specified via a
      * version-agnostic path (relative link, e.g. `current-jre`) while
      * still preserving the original runtime directory name, e.g.
      * `jre1.8.0_45.jre`.
+     * @return the canonical directory
      */
     public File getDir() {
         File dir = new File(runtime);
@@ -70,6 +86,11 @@ public class JLink {
         }
     }
 
+    /**
+     * Adds a configured JMod.
+     * @param jmod the JMod instance
+     * @throws BuildException if name is missing
+     */
     public void addConfiguredJMod(JMod jmod) throws BuildException {
         String name = jmod.getName();
 
@@ -80,6 +101,11 @@ public class JLink {
         jmods.add(name);
     }
 
+    /**
+     * Adds a configured argument.
+     * @param argument the argument
+     * @throws BuildException if value is missing
+     */
     public void addConfiguredArgument(Argument argument) throws BuildException {
         String value = argument.getValue();
 
@@ -90,6 +116,11 @@ public class JLink {
         arguments.add(value);
     }
 
+    /**
+     * Copies the JLink runtime to the target directory.
+     * @param targetDir the target directory
+     * @throws IOException if an I/O error occurs
+     */
     public void copyTo(File targetDir) throws IOException {
         File runtimeHomeDirectory = getDir();
         File runtimeContentsDirectory = runtimeHomeDirectory.getParentFile();

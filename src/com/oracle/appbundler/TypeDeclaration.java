@@ -44,50 +44,95 @@ public class TypeDeclaration implements IconContainer {
     private List<String> mimeTypes = null;
     private List<String> extensions = null;
 
+    /** Creates a new TypeDeclaration with default conformsTo value. */
     public TypeDeclaration() {
         this.conformsTo = Arrays.asList(new String[]{"public.data"});
     }
     
+    /**
+     * Checks if this type declaration is imported.
+     * @return true if imported
+     */
     public boolean isImported() {
         return imported;
     }
 
+    /**
+     * Sets whether this type declaration is imported.
+     * @param imported true if imported
+     */
     public void setImported(boolean imported) {
         this.imported = imported;
     }
 
+    /**
+     * Gets the type identifier.
+     * @return the identifier
+     */
     public String getIdentifier() {
         return identifier;
     }
 
+    /**
+     * Sets the type identifier.
+     * @param identifier the identifier
+     */
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
+    /**
+     * Gets the reference URL.
+     * @return the reference URL
+     */
     public String getReferenceUrl() {
         return referenceUrl;
     }
 
+    /**
+     * Sets the reference URL.
+     * @param referenceUrl the reference URL
+     */
     public void setReferenceUrl(String referenceUrl) {
         this.referenceUrl = referenceUrl;
     }
 
+    /**
+     * Gets the description.
+     * @return the description
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * Sets the description.
+     * @param description the description
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * Gets the icon path.
+     * @return the icon path
+     */
     public String getIcon() {
         return icon;
     }
 
+    /**
+     * Sets the icon path.
+     * @param icon the icon path
+     */
     public void setIcon(String icon) {
         this.icon = icon;
     }
 
+    /**
+     * Gets the icon file.
+     * @return the icon file, or null if not available
+     */
     public File getIconFile() {
         if (icon == null) { return null; }
 
@@ -98,38 +143,74 @@ public class TypeDeclaration implements IconContainer {
         return ifile;
     }
     
+    /**
+     * Checks if an icon is set.
+     * @return true if an icon is set
+     */
     public boolean hasIcon() {
         return icon != null;
     }
     
+    /**
+     * Gets the conformsTo list.
+     * @return the conformsTo list
+     */
     public List<String> getConformsTo() {
         return conformsTo;
     }
 
+    /**
+     * Sets the conformsTo list from a comma-separated string.
+     * @param conformsToAsString the comma-separated string
+     */
     public void setConformsTo(String conformsToAsString) {
         this.conformsTo = getListFromCommaSeparatedString(conformsToAsString, "Conforms To");
     }
 
+    /**
+     * Gets the OS types list.
+     * @return the OS types list
+     */
     public List<String> getOsTypes() {
         return osTypes;
     }
 
+    /**
+     * Sets the OS types list from a comma-separated string.
+     * @param osTypesAsString the comma-separated string
+     */
     public void setOsTypes(String osTypesAsString) {
         this.osTypes = getListFromCommaSeparatedString(osTypesAsString, "OS Types");
     }
 
+    /**
+     * Gets the MIME types list.
+     * @return the MIME types list
+     */
     public List<String> getMimeTypes() {
         return mimeTypes;
     }
 
+    /**
+     * Sets the MIME types list from a comma-separated string.
+     * @param mimeTypesAsString the comma-separated string
+     */
     public void setMimeTypes(String mimeTypesAsString) {
         this.mimeTypes = getListFromCommaSeparatedString(mimeTypesAsString, "Mime Types", true);
     }
 
+    /**
+     * Gets the extensions list.
+     * @return the extensions list
+     */
     public List<String> getExtensions() {
         return extensions;
     }
 
+    /**
+     * Sets the extensions list from a comma-separated string.
+     * @param extensionsAsString the comma-separated string
+     */
     public void setExtensions(String extensionsAsString) {
         this.extensions = getListFromCommaSeparatedString(extensionsAsString, "Extensions", true);
     }

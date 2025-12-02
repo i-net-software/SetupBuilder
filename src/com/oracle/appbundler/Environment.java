@@ -25,6 +25,9 @@
  */
 package com.oracle.appbundler;
 
+/**
+ * Represents an environment variable for the application bundle.
+ */
 public class Environment extends Option {
     
 }

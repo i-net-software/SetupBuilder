@@ -137,111 +137,220 @@ public class AppBundlerTask extends Task {
     
     private Logger logger;
 
+    /**
+     * Sets the logger instance.
+     * @param logger the logger instance
+     */
     public void setLogger( Logger logger ) {
         this.logger = logger;
     }
     
     
+    /**
+     * Sets the output directory for the application bundle.
+     * @param outputDirectory the output directory
+     */
     public void setOutputDirectory(File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
+    /**
+     * Sets the application name.
+     * @param name the application name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Sets the display name of the application.
+     * @param displayName the display name
+     */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    /**
+     * Sets the bundle identifier.
+     * @param identifier the bundle identifier
+     */
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
+    /**
+     * Sets the application icon file.
+     * @param icon the icon file
+     */
     public void setIcon(File icon) {
         this.icon = icon;
     }
 
+    /**
+     * Sets the executable name.
+     * @param executable the executable name
+     */
     public void setExecutableName(String executable) {
         this.executableName = executable;
     }
 
+    /**
+     * Sets the short version string.
+     * @param shortVersion the short version string
+     */
     public void setShortVersion(String shortVersion) {
         this.shortVersion = shortVersion;
     }
 
+    /**
+     * Sets the version string.
+     * @param version the version string
+     */
     public void setVersion(String version) {
         this.version = version;
     }
 
+    /**
+     * Sets the code signature.
+     * @param signature the code signature
+     */
     public void setSignature(String signature) {
         this.signature = signature;
     }
 
+    /**
+     * Sets the copyright string.
+     * @param copyright the copyright string
+     */
     public void setCopyright(String copyright) {
         this.copyright = copyright;
     }
 
+    /**
+     * Sets the privileged flag.
+     * @param privileged the privileged flag
+     */
     public void setPrivileged(String privileged) {
         this.privileged = privileged;
     }
 
+    /**
+     * Sets the working directory.
+     * @param workingDirectory the working directory
+     */
     public void setWorkingDirectory(String workingDirectory) {
         this.workingDirectory = workingDirectory;
     }
 
+    /**
+     * Sets the required JVM version.
+     * @param v the required JVM version
+     */
     public void setJVMRequired(String v){
         this.jvmRequired = v;
     }
 
+    /**
+     * Sets whether JRE is preferred.
+     * @param preferred true if JRE is preferred
+     */
     public void setJREPreferred(boolean preferred){
         this.jrePreferred = preferred;
     }
 
+    /**
+     * Sets whether JDK is preferred.
+     * @param preferred true if JDK is preferred
+     */
     public void setJDKPreferred(boolean preferred){
         this.jdkPreferred = preferred;
     }
 
+    /**
+     * Sets the minimum system version requirement.
+     * @param v the minimum system version
+     */
     public void setMinimumSystemVersion(String v){
         this.minimumSystemVersion = v;
     }
 
+    /**
+     * Sets the application category.
+     * @param applicationCategory the application category
+     */
     public void setApplicationCategory(String applicationCategory) {
         this.applicationCategory = applicationCategory;
     }
 
+    /**
+     * Sets whether the application is high resolution capable.
+     * @param highResolutionCapable true if high resolution capable
+     */
     public void setHighResolutionCapable(boolean highResolutionCapable) {
         this.highResolutionCapable = highResolutionCapable;
     }
 
+    /**
+     * Sets whether to hide the dock icon.
+     * @param hideDock true to hide the dock icon
+     */
     public void setHideDockIcon(boolean hideDock) {
         this.hideDockIcon = hideDock;
     }
 
+    /**
+     * Sets debug mode.
+     * @param enabled true to enable debug mode
+     */
     public void setDebug(boolean enabled) {
         this.isDebug = enabled;
     }
 
+    /**
+     * Sets whether the application supports automatic graphics switching.
+     * @param supportsAutomaticGraphicsSwitching true if supported
+     */
     public void setSupportsAutomaticGraphicsSwitching(boolean supportsAutomaticGraphicsSwitching) {
         this.supportsAutomaticGraphicsSwitching = supportsAutomaticGraphicsSwitching;
     }
 
+    /**
+     * Sets whether to ignore PSN (Process Serial Number).
+     * @param ignorePSN true to ignore PSN
+     */
     public void setIgnorePSN(boolean ignorePSN) {
         this.ignorePSN = ignorePSN;
     }
 
+    /**
+     * Sets the main class name.
+     * @param mainClassName the main class name
+     */
     public void setMainClassName(String mainClassName) {
         this.mainClassName = mainClassName;
     }
 
+    /**
+     * Sets the JNLP launcher name.
+     * @param jnlpLauncherName the JNLP launcher name
+     */
     public void setJnlpLauncherName(String jnlpLauncherName) {
         this.jnlpLauncherName = jnlpLauncherName;
     }
 
+    /**
+     * Sets the JAR launcher name.
+     * @param jarLauncherName the JAR launcher name
+     */
     public void setJarLauncherName(String jarLauncherName) {
         this.jarLauncherName = jarLauncherName;
     }
 
+    /**
+     * Adds a configured runtime.
+     * @param runtime the runtime configuration
+     * @throws BuildException if runtime is already specified or conflicts with jlink
+     */
     public void addConfiguredRuntime(Runtime runtime) throws BuildException {
         if (this.runtime != null) {
             throw new BuildException("Runtime already specified.");
@@ -254,6 +363,11 @@ public class AppBundlerTask extends Task {
         this.runtime = runtime;
     }
 
+    /**
+     * Adds a configured JLink.
+     * @param jlink the JLink configuration
+     * @throws BuildException if jlink is already specified or conflicts with runtime
+     */
     public void addConfiguredJLink(JLink jlink) throws BuildException {
         if (this.jlink != null) {
             throw new BuildException("JLink already specified.");
@@ -267,25 +381,46 @@ public class AppBundlerTask extends Task {
         this.jlink = jlink;
     }
 
+    /**
+     * Sets the classpath reference.
+     * @param ref the classpath reference
+     */
     public void setClasspathRef(Reference ref) {
 
         this.classPathRef = ref;
     }
 
+    /**
+     * Sets the plist class paths.
+     * @param plistClassPaths comma-separated list of class paths
+     */
     public void setPlistClassPaths(String plistClassPaths) {
         for (String tok : plistClassPaths.split("\\s*,\\s*")) {
             this.plistClassPaths.add(tok);
         }
     }
 
+    /**
+     * Adds a configured classpath.
+     * @param classPath the classpath fileset
+     */
     public void addConfiguredClassPath(FileSet classPath) {
         this.classPath.add(classPath);
     }
 
+    /**
+     * Adds a configured library path.
+     * @param libraryPath the library path fileset
+     */
     public void addConfiguredLibraryPath(FileSet libraryPath) {
         this.libraryPath.add(libraryPath);
     }
 
+    /**
+     * Adds a configured bundle document.
+     * @param document the bundle document
+     * @throws BuildException if document content type or extension is missing
+     */
     public void addConfiguredBundleDocument(BundleDocument document) {
         if ((document.getContentTypes() == null) && (document.getExtensions() == null)) {
             throw new BuildException("Document content type or extension is required.");
@@ -293,6 +428,11 @@ public class AppBundlerTask extends Task {
         this.bundleDocuments.add(document);
     }
 
+    /**
+     * Adds a configured type declaration.
+     * @param typeDeclaration the type declaration
+     * @throws BuildException if identifier is missing
+     */
     public void addConfiguredTypeDeclaration(TypeDeclaration typeDeclaration) {
         if (typeDeclaration.getIdentifier() == null) {
             throw new BuildException("Type declarations must have an identifier.");
@@ -304,6 +444,11 @@ public class AppBundlerTask extends Task {
         }
     }
 
+    /**
+     * Adds a configured plist entry.
+     * @param plistEntry the plist entry
+     * @throws BuildException if key or value is missing
+     */
     public void addConfiguredPlistEntry(PlistEntry plistEntry) {
         if (plistEntry.getKey() == null) {
             throw new BuildException("Name is required.");
@@ -318,6 +463,11 @@ public class AppBundlerTask extends Task {
         this.plistEntries.add(plistEntry);
     }
 
+    /**
+     * Adds a configured environment variable.
+     * @param environment the environment variable
+     * @throws BuildException if name or value is missing
+     */
     public void addConfiguredEnvironment(Environment environment) {
         if (environment.getName() == null) {
             throw new BuildException("Name is required.");
@@ -329,6 +479,11 @@ public class AppBundlerTask extends Task {
         this.environments.add(environment);
     }
 
+    /**
+     * Adds a configured option.
+     * @param option the option
+     * @throws BuildException if value is missing
+     */
     public void addConfiguredOption(Option option) throws BuildException {
         String value = option.getValue();
 
@@ -339,6 +494,11 @@ public class AppBundlerTask extends Task {
         options.add(option);
     }
 
+    /**
+     * Adds a configured argument.
+     * @param argument the argument
+     * @throws BuildException if value is missing
+     */
     public void addConfiguredArgument(Argument argument) throws BuildException {
         String value = argument.getValue();
 
@@ -348,6 +508,12 @@ public class AppBundlerTask extends Task {
 
         arguments.add(value);
     }
+    
+    /**
+     * Adds a configured URL scheme.
+     * @param argument the scheme argument
+     * @throws BuildException if value is missing
+     */
     public void addConfiguredScheme(Argument argument) throws BuildException {
         String value = argument.getValue();
 
@@ -358,6 +524,11 @@ public class AppBundlerTask extends Task {
         this.registeredProtocols.add(value);
     }
 
+    /**
+     * Adds a configured architecture.
+     * @param architecture the architecture
+     * @throws BuildException if name is missing
+     */
     public void addConfiguredArch(Architecture architecture) throws BuildException {
         String name = architecture.getName();
 
@@ -605,6 +776,12 @@ public class AppBundlerTask extends Task {
         }
     }
 
+    /**
+     * Copies document icons to the resources directory.
+     * @param iconContainers the icon containers
+     * @param resourcesDirectory the resources directory
+     * @throws IOException if an I/O error occurs
+     */
     public void copyDocumentIcons(final ArrayList<? extends IconContainer> iconContainers,
             File resourcesDirectory) throws IOException {
         for(IconContainer iconContainer: iconContainers) {
@@ -874,6 +1051,14 @@ public class AppBundlerTask extends Task {
         }
     }
 
+    /**
+     * Writes a string array to the XML stream.
+     * @param xout the XML stream writer
+     * @param key the key name
+     * @param values the values to write
+     * @param indentationDepth the indentation depth
+     * @throws XMLStreamException if an XML error occurs
+     */
     public void writeStringArray(XMLStreamWriter xout, final String key,
             final Iterable<String> values, int indentationDepth) throws XMLStreamException {
         if (values != null) {
@@ -890,6 +1075,13 @@ public class AppBundlerTask extends Task {
         }
     }
 
+  /**
+   * Writes bundle documents to the XML stream.
+   * @param xout the XML stream writer
+   * @param bundleDocuments the bundle documents
+   * @param indentationDepth the indentation depth
+   * @throws XMLStreamException if an XML error occurs
+   */
   public void writeBundleDocuments(XMLStreamWriter xout,
                                    final ArrayList<BundleDocument> bundleDocuments,
                                    int indentationDepth) throws XMLStreamException {
@@ -929,6 +1121,13 @@ public class AppBundlerTask extends Task {
     xout.writeCharacters("\n");
   }
 
+  /**
+   * Writes type declarations to the XML stream.
+   * @param xout the XML stream writer
+   * @param typeDeclarations the type declarations
+   * @param indentationDepth the indentation depth
+   * @throws XMLStreamException if an XML error occurs
+   */
   public void writeTypeDeclarations(XMLStreamWriter xout,
             final ArrayList<TypeDeclaration> typeDeclarations, int indentationDepth) throws XMLStreamException {
         writeIndentation(xout, indentationDepth);
@@ -974,6 +1173,12 @@ public class AppBundlerTask extends Task {
         xout.writeCharacters("\n");
     }
 
+    /**
+     * Writes indentation to the XML stream.
+     * @param xout the XML stream writer
+     * @param depth the indentation depth
+     * @throws XMLStreamException if an XML error occurs
+     */
     public void writeIndentation(XMLStreamWriter xout, int depth) throws XMLStreamException {
         for (int i = 0; i < depth; i++) {
             xout.writeCharacters("    ");

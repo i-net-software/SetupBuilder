@@ -18,8 +18,10 @@ import com.oracle.appbundler.PlistEntry;
  */
 public class OSXApplicationBuilder extends AbstractOSXApplicationBuilder<Dmg, SetupBuilder> {
 
+    /** The service instance. */
     private Service            service;
 
+    /** The preference pane creator instance. */
     private OSXPrefPaneCreator prefPaneCreator;
 
     /**

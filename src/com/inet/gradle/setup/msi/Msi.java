@@ -477,7 +477,10 @@ public class Msi extends AbstractSetupTask {
      * Possible values for install scope
      */
     public static enum InstallScope {
-        perUser, perMachine
+        /** Install per user. */
+        perUser,
+        /** Install per machine. */
+        perMachine
     }
 
     /**

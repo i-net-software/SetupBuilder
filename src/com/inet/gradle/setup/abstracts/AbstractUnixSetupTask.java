@@ -8,6 +8,10 @@ import org.gradle.api.tasks.Input;
  */
 public abstract class AbstractUnixSetupTask extends AbstractSetupTask {
 
+    /**
+     * Creates a new Unix setup task.
+     * @param extension the file extension for the installer
+     */
     public AbstractUnixSetupTask( String extension ) {
         super( extension );
     }

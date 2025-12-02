@@ -67,14 +67,35 @@ public class ResourceUtils {
         unZipIt( file, folder, null );
     }
 
+    /**
+     * Unzips a file to a folder with a name transformation closure.
+     * @param file the zip file
+     * @param folder the target folder
+     * @param nameClosure the name transformation function
+     */
     public static void unZipIt( File file, File folder, Function<String, String> nameClosure ) {
         unZipIt( file, folder, nameClosure, null );
     }
 
+    /**
+     * Unzips a file to a folder with name and stream transformation closures.
+     * @param file the zip file
+     * @param folder the target folder
+     * @param nameClosure the name transformation function
+     * @param streamClosure the stream transformation function
+     */
     public static void unZipIt( File file, File folder, Function<String, String> nameClosure, Function<InputStream, InputStream> streamClosure ) {
         unZipIt( file, folder, "", nameClosure, null );
     }
 
+    /**
+     * Unzips a file to a folder with filtering and transformation closures.
+     * @param file the zip file
+     * @param folder the target folder
+     * @param startsWith filter entries starting with this string
+     * @param nameClosure the name transformation function
+     * @param streamClosure the stream transformation function
+     */
     public static void unZipIt( File file, File folder, String startsWith, Function<String, String> nameClosure, Function<InputStream, InputStream> streamClosure ) {
 
         // create output directory if not exists

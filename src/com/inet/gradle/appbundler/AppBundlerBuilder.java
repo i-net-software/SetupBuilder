@@ -27,6 +27,7 @@ import com.inet.gradle.setup.abstracts.DesktopStarter;
  */
 public class AppBundlerBuilder extends AbstractBuilder<AppBundlerGradleTask,AppBundler> {
 
+    /** The AppBundler setup instance. */
     private AppBundler setup;
 
     /**

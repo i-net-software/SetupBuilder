@@ -43,6 +43,7 @@ public class Deb extends Unix {
     
     private String  compression;
 
+    /** Creates a new Debian package builder. */
     public Deb() {
         super( "deb" );
     }
@@ -55,26 +56,43 @@ public class Deb extends Unix {
         new DebBuilder( this, getSetupBuilder(), getFileResolver() ).build();
     }
 
+    /**
+     * Gets the package priority.
+     * @return the package priority
+     */
     @Input
     @Optional
     public String getPriority() {
         return priority;
     }
 
+    /**
+     * Sets the package priority.
+     * @param priority the package priority
+     */
     public void setPriority( String priority ) {
         this.priority = priority;
     }
 
+    /**
+     * Gets the estimated installation size.
+     * @return the estimated installation size
+     */
     @Input
     @Optional
     public String getInstallSize() {
         return installSize;
     }
 
+    /**
+     * Sets the estimated installation size.
+     * @param installSize the estimated installation size
+     */
     public void setInstallSize( String installSize ) {
         this.installSize = installSize;
     }
 
+    /** {@inheritDoc} */
     @Input
     @Optional
     @Override
@@ -82,15 +100,24 @@ public class Deb extends Unix {
         return recommends;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setRecommends( String recommends ) {
         this.recommends = recommends;
     }
 
+    /**
+     * Checks if package validation should be performed.
+     * @return true if package validation should be performed
+     */
     public boolean shouldCheckPackage() {
         return checkPackage;
     }
 
+    /**
+     * Sets whether package validation should be performed.
+     * @param checkPackage true if package validation should be performed
+     */
     public void setCheckPackage( boolean checkPackage ) {
         this.checkPackage = checkPackage;
     }
@@ -114,32 +141,56 @@ public class Deb extends Unix {
         this.lintianOptions = lintianOptions;
     }
 
+    /**
+     * Gets the maintainer email address.
+     * @return the maintainer email address
+     */
     @Input
     @Optional
     public String getMaintainerEmail() {
         return maintainerEmail;
     }
 
+    /**
+     * Sets the maintainer email address.
+     * @param maintainerEmail the maintainer email address
+     */
     public void setMaintainerEmail( String maintainerEmail ) {
         this.maintainerEmail = maintainerEmail;
     }
 
+    /**
+     * Gets the changelog entry.
+     * @return the changelog entry
+     */
     @Input
     @Optional
     public String getChanges() {
         return changes;
     }
 
+    /**
+     * Sets the changelog entry.
+     * @param changes the changelog entry
+     */
     public void setChanges( String changes ) {
         this.changes = changes;
     }
     
+    /**
+     * Gets the compression method for the package.
+     * @return the compression method
+     */
     @Input
     @Optional
     public String getCompression() {
         return compression;
     }
     
+    /**
+     * Sets the compression method for the package.
+     * @param compression the compression method
+     */
     public void setCompression( String compression ) {
         this.compression = compression;
     }

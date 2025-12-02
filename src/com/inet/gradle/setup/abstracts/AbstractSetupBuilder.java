@@ -40,6 +40,7 @@ import groovy.lang.Closure;
  */
 public class AbstractSetupBuilder implements SetupSources {
 
+    /** The Gradle project instance. */
     protected final Project        project;
 
     private final CopySpecInternal rootSpec;

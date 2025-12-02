@@ -35,10 +35,15 @@ import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.unix.deb.DebControlFileBuilder.Script;
 import com.inet.gradle.setup.util.Logging;
 
+/**
+ * Builder for Debian package files.
+ */
 public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
 
+    /** The Debian control file builder. */
     private DebControlFileBuilder  controlBuilder;
 
+    /** The Debian document file builder. */
     private DebDocumentFileBuilder documentBuilder;
 
     /**

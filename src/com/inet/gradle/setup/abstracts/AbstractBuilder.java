@@ -43,10 +43,13 @@ import com.inet.gradle.setup.util.IndentationOutputStream;
  */
 public abstract class AbstractBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> implements Serializable {
 
+    /** The concrete task instance. */
     protected transient T task;
 
+    /** The file resolver for resolving file paths. */
     protected transient FileResolver fileResolver;
 
+    /** The build directory for temporary files. */
     protected transient File buildDir;
 
     /**

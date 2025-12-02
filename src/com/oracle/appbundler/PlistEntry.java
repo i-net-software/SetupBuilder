@@ -25,21 +25,40 @@
  */
 package com.oracle.appbundler;
 
+/**
+ * Represents a plist entry with a key, value, and type.
+ */
 public class PlistEntry extends Option {
     private String type = null;
 
+    /**
+     * Sets the plist entry key.
+     * @param key the key
+     */
     public void setKey(String key) {
         setName(key);
     }
 
+    /**
+     * Gets the plist entry key.
+     * @return the key
+     */
     public String getKey() {
         return getName();
     }
 
+    /**
+     * Sets the plist entry type.
+     * @param type the type
+     */
     public void setType(String type) {
         this.type = type;
     }
 
+    /**
+     * Gets the plist entry type.
+     * @return the type
+     */
     public String getType() {
         return type;
     }

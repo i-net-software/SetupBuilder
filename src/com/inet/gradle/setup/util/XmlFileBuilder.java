@@ -42,16 +42,30 @@ import com.inet.gradle.setup.abstracts.AbstractSetupTask;
  */
 public class XmlFileBuilder<T extends AbstractSetupTask> {
 
+    /** The task instance. */
     public final T            task;
 
+    /** The setup builder instance. */
     public final SetupBuilder setup;
 
+    /** The XML file to build. */
     public final File         xmlFile;
 
+    /** The build directory. */
     public final File         buildDir;
 
+    /** The XML document. */
     public final Document     doc;
 
+    /**
+     * Creates a new XmlFileBuilder instance.
+     * @param task the task instance
+     * @param setup the setup builder
+     * @param xmlFile the XML file to build
+     * @param buildDir the build directory
+     * @param template the template URL, or null to create a new document
+     * @throws Exception if an error occurs
+     */
     public XmlFileBuilder( T task, SetupBuilder setup, File xmlFile, File buildDir, URL template ) throws Exception {
         this.task = task;
         this.setup = setup;
@@ -104,10 +118,23 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         el.appendChild( doc.createTextNode( text ) );
     }
 
+    /**
+     * Gets or creates a child element.
+     * @param parent the parent node
+     * @param name the child element name
+     * @return the child element
+     */
     public Element getOrCreateChild( Node parent, String name ) {
         return getOrCreateChild( parent, name, true );
     }
 
+    /**
+     * Gets or creates a child element.
+     * @param parent the parent node
+     * @param name the child element name
+     * @param append true to append, false to prepend
+     * @return the child element
+     */
     public Element getOrCreateChild( Node parent, String name, boolean append ) {
         Node first = parent.getFirstChild();
         for( Node child = first; child != null; child = child.getNextSibling() ) {
@@ -140,6 +167,13 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         return child;
     }
 
+    /**
+     * Creates a new child element.
+     * @param parent the parent node
+     * @param name the child element name
+     * @param append true to append, false to prepend
+     * @return the new child element
+     */
     public Element createChild( Node parent, String name, boolean append ) {
         Document doc = parent instanceof Document ? (Document)parent : parent.getOwnerDocument();
         Element child = doc.createElement( name );
@@ -152,14 +186,37 @@ public class XmlFileBuilder<T extends AbstractSetupTask> {
         return child;
     }
 
+    /**
+     * Gets or creates a child element by ID.
+     * @param parent the parent node
+     * @param name the child element name
+     * @param id the ID value
+     * @return the child element
+     */
     public Element getOrCreateChildById( Node parent, String name, String id ) {
         return getOrCreateChildByKeyValue( parent, name, "Id", id, true );
     }
 
+    /**
+     * Gets or creates a child element by ID.
+     * @param parent the parent node
+     * @param name the child element name
+     * @param id the ID value
+     * @param append true to append, false to prepend
+     * @return the child element
+     */
     public Element getOrCreateChildById( Node parent, String name, String id, boolean append ) {
         return getOrCreateChildByKeyValue( parent, name, "Id", id, append );
     }
 
+    /**
+     * Gets or creates a child element by key-value pair.
+     * @param parent the parent node
+     * @param name the child element name
+     * @param key the key attribute name
+     * @param value the key attribute value
+     * @return the child element
+     */
     public Element getOrCreateChildByKeyValue( Node parent, String name, String key, String value ) {
         return getOrCreateChildByKeyValue( parent, name, key, value, true );
     }

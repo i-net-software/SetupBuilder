@@ -21,20 +21,36 @@ import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.util.ReplacingInputStream;
 import com.inet.gradle.setup.util.ResourceUtils;
 
+/**
+ * Builder for macOS Preference Pane creation.
+ */
 public class OSXPrefPaneCreator extends AbstractOSXApplicationBuilder<Dmg, SetupBuilder> {
 
+    /** The build directory. */
     private File    buildDir;
 
+    /** The Gradle project instance. */
     private Project project;
 
+    /** The service instance. */
     private Service service;
 
+    /** The display name. */
     private String displayName;
 
+    /** The internal name. */
     private String internalName;
     
+    /** The preference pane source file. */
     private File prefPaneSource;
 
+    /**
+     * Creates a new OSXPrefPaneCreator instance.
+     * @param task the Dmg task
+     * @param setup the setup builder
+     * @param fileResolver the file resolver
+     * @param service the service instance
+     */
     protected OSXPrefPaneCreator( Dmg task, SetupBuilder setup, FileResolver fileResolver, Service service ) {
         super( task, setup, fileResolver );
         buildDir = task.getTemporaryDir();

@@ -17,8 +17,11 @@ import java.util.LinkedList;
 @SuppressWarnings({"serial"})
 public class XmlElement extends LinkedList<XmlElement>
 {
+    /** The XML element attributes. */
     private final XmlElementAttributes m_attributes;
+    /** The XML element value. */
     private final String m_value;
+    /** The XML element name. */
     private final String m_name;
 
     /**

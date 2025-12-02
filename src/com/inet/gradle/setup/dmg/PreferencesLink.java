@@ -11,10 +11,13 @@ import java.io.Serializable;
  */
 public class PreferencesLink implements Serializable {
 
+    /** The link title. */
     private String  title;
 
+    /** The action to execute. */
     private String  action;
 
+    /** Whether to run as root. */
     private boolean runAsRoot = false;
 
     /**

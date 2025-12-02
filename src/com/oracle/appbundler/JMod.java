@@ -30,10 +30,18 @@ package com.oracle.appbundler;
 public class JMod {
     private String name = null;
 
+    /**
+     * Gets the JMod name.
+     * @return the JMod name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the JMod name.
+     * @param name the JMod name
+     */
     public void setName(String name) {
         this.name = name;
     }

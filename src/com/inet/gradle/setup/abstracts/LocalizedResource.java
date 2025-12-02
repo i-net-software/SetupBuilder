@@ -16,8 +16,11 @@ import groovy.lang.Closure;
  */
 public class LocalizedResource implements Serializable {
 
+    /** The locale for this resource. */
     private Locale locale;
+    /** The resource object. */
     private Object resource;
+    /** The setup builder instance. */
     private transient SetupBuilder setup;
 
     /**

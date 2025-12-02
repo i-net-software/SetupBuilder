@@ -33,8 +33,12 @@ import com.inet.gradle.setup.abstracts.Service;
 import com.inet.gradle.setup.unix.UnixBuilder;
 import com.inet.gradle.setup.util.Logging;
 
+/**
+ * Builder for RPM package files.
+ */
 public class RpmBuilder extends UnixBuilder<Rpm, SetupBuilder> {
 
+    /** The RPM control file builder. */
     private RpmControlFileBuilder controlBuilder;
 
     /**

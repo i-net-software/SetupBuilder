@@ -7,6 +7,7 @@ package com.inet.gradle.setup.util;
  */
 public class Logging {
 
+    /** Whether debug logging is enabled via the _SETUPBUILDER_DEBUG environment variable. */
     public static final boolean        DEBUG_LOG               = System.getenv( "_SETUPBUILDER_DEBUG" ) != null;
 
     /**

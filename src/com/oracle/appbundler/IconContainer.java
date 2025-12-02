@@ -25,8 +25,25 @@ package com.oracle.appbundler;
 
 import java.io.File;
 
+/**
+ * Interface for classes that provide icon information.
+ */
 public interface IconContainer {
+    /**
+     * Checks if an icon is set.
+     * @return true if an icon is set
+     */
     public boolean hasIcon();
+    
+    /**
+     * Gets the icon path.
+     * @return the icon path
+     */
     public String getIcon();
+    
+    /**
+     * Gets the icon file.
+     * @return the icon file, or null if not available
+     */
     public File getIconFile();
 }

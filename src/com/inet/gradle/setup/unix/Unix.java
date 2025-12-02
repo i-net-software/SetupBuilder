@@ -56,6 +56,10 @@ public abstract class Unix extends AbstractUnixSetupTask {
 
     private Object bundleJre;
 
+    /**
+     * Creates a new Unix setup task.
+     * @param format the package format (e.g., "deb", "rpm")
+     */
     public Unix( String format ) {
         super( format );
     }

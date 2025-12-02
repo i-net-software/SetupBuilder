@@ -39,8 +39,11 @@ public class OSXCodeSign<T extends AbstractTask, S extends AbstractSetupBuilder>
                                                     "</dict>\n" + 
                                                     "</plist>";
 
+    /** Code signing identity, product identity, identifier, keychain, keychain password, and entitlements. */
     private String identity, productIdentity, identifier, keychain, keychainPassword, entitlements = INTERNAL_ENTITLEMENT;
+    /** Whether to ignore errors, enable deep signing, and enable hardened runtime. */
     private boolean ignoreError, deepsign = true, hardened = true;
+    /** The notarization instance. */
     private OSXNotarize<T, S> notarization = null;
 
     /**

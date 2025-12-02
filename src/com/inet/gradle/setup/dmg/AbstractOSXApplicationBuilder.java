@@ -49,8 +49,10 @@ import com.oracle.appbundler.Runtime;
  */
 public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S extends AbstractSetupBuilder> extends AbstractBuilder<T, S> {
 
+    /** The setup builder instance. */
     private S              setup;
 
+    /** The AppBundler task instance. */
     private AppBundlerTask appBundler;
 
     /**
@@ -363,6 +365,10 @@ public abstract class AbstractOSXApplicationBuilder<T extends AbstractTask, S ex
         return appBundler;
     }
 
+    /**
+     * Gets the setup builder instance.
+     * @return the setup builder instance
+     */
     protected S getSetupBuilder() {
         return setup;
     }

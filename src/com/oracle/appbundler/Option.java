@@ -56,18 +56,34 @@ public class Option {
     private String value = null;
     private String name = null;
 
+    /**
+     * Gets the option value.
+     * @return the option value
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets the option value.
+     * @param value the option value
+     */
     public void setValue(String value) {
         this.value = value;
     }
 
+    /**
+     * Gets the option name.
+     * @return the option name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the option name.
+     * @param name the option name
+     */
     public void setName(final String name) {
         this.name = name;
     }

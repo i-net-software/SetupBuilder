@@ -239,42 +239,74 @@ public abstract class AbstractTask extends DefaultTask implements SetupSources {
         copyActionExecuter.execute( copySpec, copyAction );
     }
 
+    /**
+     * Gets the instantiator service.
+     * @return the instantiator service
+     */
     @Inject
     protected Instantiator getInstantiator() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the file system service.
+     * @return the file system service
+     */
     @Inject
     protected FileSystem getFileSystem() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the file resolver service.
+     * @return the file resolver service
+     */
     @Inject
     protected FileResolver getFileResolver() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the file lookup service.
+     * @return the file lookup service
+     */
     @Inject
     protected FileLookup getFileLookup() {
         throw new UnsupportedOperationException();
     }
 
     //// if gradleVersion >= 7.0
+    /**
+     * Gets the documentation registry service.
+     * @return the documentation registry service
+     */
     @Inject
     protected DocumentationRegistry getDocumentationRegistry() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the object factory service.
+     * @return the object factory service
+     */
     @Inject
     protected ObjectFactory getObjectFactory() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the property factory service.
+     * @return the property factory service
+     */
     @Inject
     protected PropertyFactory getPropertyFactory() {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Gets the exec operations service for executing external processes.
+     * @return the exec operations service
+     */
     @Inject
     protected ExecOperations getExecOperations() {
         throw new UnsupportedOperationException();

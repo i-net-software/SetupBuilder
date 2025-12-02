@@ -33,10 +33,18 @@ package com.oracle.appbundler;
 public class Argument {
     private String value = null;
 
+    /**
+     * Gets the argument value.
+     * @return the argument value
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets the argument value.
+     * @param value the argument value
+     */
     public void setValue(String value) {
         this.value = value;
     }

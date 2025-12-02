@@ -23,14 +23,19 @@ import groovy.lang.Closure;
  */
 public class MsiLocalizedResource implements Serializable {
 
+    /** The MSI language locale. */
     private MsiLanguages locale;
 
+    /** The resource object. */
     private Object       resource;
 
+    /** The setup builder instance. */
     private transient SetupBuilder setup;
 
+    /** Whether this resource is overridable. */
     private boolean      overridable;
 
+    /** The temporary directory. */
     private File         temporaryDirectory;
 
     /**
