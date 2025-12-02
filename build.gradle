@@ -202,7 +202,26 @@ if (!isPublishingToMavenLocal && hasSigningKey) {
             System.getenv('SIGNING_KEY') ?: project.findProperty('signing.key'), 
             System.getenv('SIGNING_PASSWORD') ?: project.findProperty('signing.password') 
         )
-        sign publishing.publications.mavenJava
+        sign publishing.publications
+    }
+    
+    // Ensure signing runs before publishing
+    // The signing plugin should automatically handle dependencies, but we configure
+    // them explicitly to ensure proper ordering
+    afterEvaluate {
+        tasks.withType(PublishToMavenRepository).configureEach { publishTask ->
+            if (publishTask.repository.name == 'sonatype') {
+                // Find all sign tasks and make publish depend on them
+                // Use a direct iteration to avoid configureEach context issues
+                def signTasks = tasks.findAll { task ->
+                    task.name.startsWith('sign') && 
+                    (task.name.endsWith('Publication') || task.name.contains('Publication'))
+                }
+                signTasks.each { signTask ->
+                    publishTask.dependsOn signTask
+                }
+            }
+        }
     }
 } else {
     // Skip signing for mavenLocal
