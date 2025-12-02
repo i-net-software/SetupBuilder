@@ -19,9 +19,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
@@ -150,6 +155,8 @@ public class Launch4jCreator {
                                 }
                                 return entryName;
                             });
+                            // Set execute permissions on extracted binaries (required for cross-platform builds)
+                            setExecutePermissionsOnBinaries( project, libDir);
                             project.getLogger().debug( "Launch4j: Extracted workdir from " + file.getName() );
                         } catch( Exception e ) {
                             project.getLogger().warn( "Launch4j: Failed to extract workdir from " + file.getName() + ": " + e.getMessage() );
@@ -172,6 +179,64 @@ public class Launch4jCreator {
             lauch4jClassLoader = new URLClassLoader( urls.toArray( new URL[urls.size()] ), getClass().getClassLoader() );
         }
         return lauch4jClassLoader;
+    }
+
+    /**
+     * Set execute permissions on binaries extracted from Launch4j workdir.
+     * This is required for cross-platform builds (Linux/macOS) where binaries
+     * are extracted without execute permissions.
+     * 
+     * Known binaries that need execute permissions:
+     * - bin/windres (Windows resource compiler, used on Linux/macOS for cross-compilation)
+     * - bin/ld (linker)
+     * - Other binaries in bin/ directories
+     *
+     * @param project the project
+     * @param libDir the directory containing extracted Launch4j workdir files
+     */
+    private void setExecutePermissionsOnBinaries( Project project, File libDir ) {
+        if( !libDir.exists() || !libDir.isDirectory() ) {
+            project.getLogger().debug( "Launch4j Warning: libDir does not exist or is not a directory: " + libDir.getAbsolutePath() );
+            return;
+        }
+        
+        try {
+            Path libPath = libDir.toPath();
+            Files.walkFileTree( libPath, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile( Path file, java.nio.file.attribute.BasicFileAttributes attrs ) throws IOException {
+                    // Set execute permissions on files in bin/ directories
+                    // Launch4j workdir packages contain binaries in bin/ subdirectories
+                    Path relativePath = libPath.relativize( file );
+                    String pathStr = relativePath.toString().replace( File.separator, "/" );
+                    
+                    // Check if it's in a bin/ directory (all files in bin/ should be executable)
+                    boolean isBinary = pathStr.contains( "/bin/" );
+                    
+                    if( isBinary ) {
+                        try {
+                            // Try POSIX permissions first (Linux/macOS)
+                            Set<PosixFilePermission> perms = Files.getPosixFilePermissions( file );
+                            perms.add( PosixFilePermission.OWNER_EXECUTE );
+                            perms.add( PosixFilePermission.GROUP_EXECUTE );
+                            perms.add( PosixFilePermission.OTHERS_EXECUTE );
+                            Files.setPosixFilePermissions( file, perms );
+                            project.getLogger().debug( "Launch4j setExecutePermissionsOnBinaries: " + file.toAbsolutePath() );
+                        } catch( UnsupportedOperationException e ) {
+                            // On Windows, POSIX permissions aren't supported
+                            // Use Java's setExecutable() method instead
+                            file.toFile().setExecutable( true, false );
+                        }
+                    }
+                    
+                    return FileVisitResult.CONTINUE;
+                }
+            } );
+        } catch( IOException e ) {
+            // Log warning but don't fail - this is a best-effort fix
+            // The user can manually chmod if needed
+            System.err.println( "Warning: Failed to set execute permissions on Launch4j binaries: " + e.getMessage() );
+        }
     }
 
     /**
