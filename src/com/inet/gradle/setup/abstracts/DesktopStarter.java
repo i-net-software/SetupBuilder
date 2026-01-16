@@ -34,6 +34,8 @@ public class DesktopStarter extends ProtocolHandler {
     private Location           location;
 
     private List<DocumentType> documentTypes = new ArrayList<>();
+    
+    private List<String> additionalSettings = new ArrayList<String>();
 
     /**
      * Create a new DesktopStarter
@@ -147,4 +149,23 @@ public class DesktopStarter extends ProtocolHandler {
     public List<DocumentType> getDocumentType() {
         return documentTypes;
     }
+    
+    /**
+     * Adds additional settings to the desktop starter. These settings will be written directly to the desktop file.
+     * 
+     * @param setting the setting (normally in form of key=value) for the desktop file.
+     */
+    public void additionalSettings(String setting) {
+        additionalSettings.add( setting );
+    }
+    
+    /**
+     * Return a list with addition settings for the desktop starter.
+     * 
+     * @return a list of additional settings for the desktop starter.
+     */
+    public List<String> getAdditionalSettings() {
+        return additionalSettings;
+    }
+    
 }

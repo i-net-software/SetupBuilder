@@ -28,6 +28,9 @@
 * **Documentation**: Added "Using Snapshots" section to README.md
   * Instructions for adding Sonatype snapshot repository
   * Instructions for using `mavenLocal()` for local development
+* **Additional Settings for the DesktopStarter**: Added a list to the DesktopStarter for adding additional settings
+  * For DEB and RPM installers these additional settings will be added at the end of the '.desktop' files.
+  * For examples you can add localize keys (Name[en]=... ) or StartupWMClass=... to the '.desktop' file.
 
 ### Fixed
 * Fixed Gradle 8.4 compatibility issues with `CopyProcessingSpec` interface methods

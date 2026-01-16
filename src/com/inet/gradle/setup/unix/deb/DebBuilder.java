@@ -452,6 +452,9 @@ public class DebBuilder extends UnixBuilder<Deb, SetupBuilder> {
             if( starter.getCategories() != null ) {
                 fw.write( "Categories=" + starter.getCategories() + "\n" );
             }
+            for( String additionalSetting : starter.getAdditionalSettings() ) {
+                fw.write( additionalSetting + "\n" );
+            }
         }
 
         // register the mime type and the default app for the extensions
