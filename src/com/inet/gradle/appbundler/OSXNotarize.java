@@ -24,6 +24,13 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
 
     private boolean           debugOutput = false;
 
+    /** Maximum number of retries for notarization submission in case of transient errors. */
+    private int               maxRetries = 3;
+
+    /** Initial backoff time in seconds for retries. Doubles each attempt. */
+    private int               retryBackoffSeconds = 30;
+
+    /** The code signing instance. */
     private OSXCodeSign<T, S> codesign;
 
     public OSXNotarize( T task, FileResolver fileResolver, OSXCodeSign<T, S> codesign ) {
@@ -122,6 +129,40 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
+     * Set the maximum number of retries for the notarization submission in case of transient errors.
+     * Default is 3.
+     * @param maxRetries the maximum number of retries
+     */
+    public void setMaxRetries( int maxRetries ) {
+        this.maxRetries = maxRetries;
+    }
+
+    /**
+     * Returns the maximum number of retries for the notarization submission.
+     * @return the maximum number of retries
+     */
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    /**
+     * Set the initial backoff time in seconds for retries. Doubles each attempt.
+     * Default is 30 seconds.
+     * @param retryBackoffSeconds the initial backoff time in seconds
+     */
+    public void setRetryBackoffSeconds( int retryBackoffSeconds ) {
+        this.retryBackoffSeconds = retryBackoffSeconds;
+    }
+
+    /**
+     * Returns the initial backoff time in seconds for retries.
+     * @return the initial backoff time in seconds
+     */
+    public int getRetryBackoffSeconds() {
+        return retryBackoffSeconds;
+    }
+
+    /**
      * Adds default commands for the xcrun process
      * @param command the list of commands so far
      */
@@ -150,10 +191,9 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
     }
 
     /**
-     * Start the notarization process for the given file
+     * Start the notarization process for the given file. Retries on transient errors.
      * @param notarizeFile the file to notarize
      * @return the UUID for the process to keep working with
-     * @throws XmlParseException in case the received plist xml file was erroneous
      */
     private String requestNotarization( File notarizeFile ) {
 
@@ -164,37 +204,101 @@ public class OSXNotarize<T extends AbstractTask, S extends AbstractSetupBuilder>
         addDefaultOptionsToXCRunCommand( command );
         command.add( notarizeFile.getAbsolutePath() );
 
-        ByteArrayOutputStream error = new ByteArrayOutputStream();
-        String output = exec( true, error, command.toArray( new String[command.size()] ) );
-        if( isDebugOutput() ) {
-            task.getProject().getLogger().lifecycle( output );
-        }
+        Logger logger = task.getProject().getLogger();
+        int attempts = maxRetries;
 
-        try {
-            Map<String, Object> plist = Plist.fromXml( output );
-            return (String)plist.get( "id" );
-        } catch( ClassCastException | XmlParseException e ) {
-            Logger logger = task.getProject().getLogger();
-            logger.error( "An error occured while checking the noraization response." );
-            if( !isDebugOutput() ) {
-                // Debug in addition
-                logger.error( "Debug output START:" );
-                logger.error( output );
-                logger.error( "Debug output END" );
+        for( int attempt = 0; attempt <= attempts; attempt++ ) {
+            ByteArrayOutputStream error = new ByteArrayOutputStream();
+            String output = exec( true, error, command.toArray( new String[command.size()] ) );
+            if( isDebugOutput() ) {
+                logger.lifecycle( output );
             }
 
-            logger.error( "The Error stream produced:" );
-            logger.error( error.toString() );
+            try {
+                Map<String, Object> plist = Plist.fromXml( output );
+                return (String)plist.get( "id" );
+            } catch( ClassCastException | XmlParseException e ) {
 
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            PrintStream stream = new PrintStream( bos );
-            e.printStackTrace( stream );
-            logger.error( "This is the exception it produced:" );
-            logger.error( bos.toString() );
-            logger.error( "End of Output." );
+                String errorText = error.toString();
+                String combined = output + " " + errorText;
+
+                if( isRetriableRateLimit( combined ) ) {
+                    if( attempt < attempts ) {
+                        int waitSeconds = retryBackoffSeconds * (int)Math.pow( 2, attempt );
+                        logger.lifecycle( "Notarization submission was rate-limited (503 Slow Down)." );
+                        logger.lifecycle( "Retrying in " + waitSeconds + " seconds (attempt " + (attempt + 2) + " of " + (attempts + 1) + ")..." );
+                        try {
+                            Thread.sleep( 1000L * waitSeconds );
+                        } catch( InterruptedException ie ) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
+                        continue;
+                    }
+                    logger.error( "Notarization submission was rate-limited after all retries." );
+                } else if( isLicenseAgreementError( combined ) ) {
+                    logger.error( "The Apple Developer Program License Agreement appears to have been updated." );
+                    logger.error( "You must accept the new agreement in App Store Connect before notarization can proceed:" );
+                    logger.error( "  1. Log in to https://appstoreconnect.apple.com" );
+                    logger.error( "  2. Go to 'Agreements, Tax and Banking'" );
+                    logger.error( "  3. Review and accept the updated agreement" );
+                    break; // no retries for license agreement
+                } else if( attempt < attempts ) {
+                    int waitSeconds = retryBackoffSeconds * (int)Math.pow( 2, attempt );
+                    logger.lifecycle( "Notarization submission failed, retrying in " + waitSeconds + " seconds (attempt " + (attempt + 2) + " of " + (attempts + 1) + ")..." );
+                    try {
+                        Thread.sleep( 1000L * waitSeconds );
+                    } catch( InterruptedException ie ) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                    continue;
+                }
+
+                logger.error( "An error occured while checking the notarization response." );
+                if( !isDebugOutput() ) {
+                    logger.error( "Debug output START:" );
+                    logger.error( output );
+                    logger.error( "Debug output END" );
+                }
+                logger.error( "The Error stream produced:" );
+                logger.error( errorText );
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                PrintStream stream = new PrintStream( bos );
+                e.printStackTrace( stream );
+                logger.error( "This is the exception it produced:" );
+                logger.error( bos.toString() );
+                logger.error( "End of Output." );
+            }
         }
 
         return null;
+    }
+
+    /**
+     * Check if the error output indicates an AWS S3 rate limiting response (503 Slow Down).
+     * @param text the combined output and error text
+     * @return true if the response indicates rate limiting
+     */
+    private static boolean isRetriableRateLimit( String text ) {
+        String lower = text.toLowerCase();
+        return lower.contains( "503" ) || lower.contains( "slow down" ) || lower.contains( "serviceunavailable" );
+    }
+
+    /**
+     * Check if the error output indicates that the Apple Developer Program License Agreement
+     * needs to be accepted.
+     * @param text the combined output and error text
+     * @return true if the response indicates a license agreement issue
+     */
+    private static boolean isLicenseAgreementError( String text ) {
+        String lower = text.toLowerCase();
+        return lower.contains( "license agreement" ) ||
+               lower.contains( "program license" ) ||
+               (lower.contains( "license" ) && lower.contains( "agreed" )) ||
+               (lower.contains( "agreement" ) && lower.contains( "not yet been accepted" )) ||
+               lower.contains( "apple developer agreement" );
     }
 
     /**
