@@ -16,6 +16,10 @@
 * **CI/CD**: Migrated from Travis CI to GitHub Actions
   * CI workflow tests with multiple Gradle versions (7.6, 8.4, 8.14.2, 9.2.1) across multiple platforms (Ubuntu, Windows, macOS)
   * Release workflow automatically publishes to Sonatype and Gradle Plugin Portal
+* **Windows Services**: Updated Apache Commons Daemon procrun (`prunsrv.exe`, `prunmgr.exe`) for x86 and x64 from 1.2.2 to 1.6.1
+  * Requires Windows 10 or Windows Server 2016 or later
+  * The binaries are statically linked and need no Visual C++ runtime
+  * There is no new build for ia64, `ia64/prunsrv.exe` is unchanged
 
 ### Added
 * **Sonatype Publishing**: Added full Sonatype/Maven Central publishing support
