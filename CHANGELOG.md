@@ -1,6 +1,6 @@
 # SetupBuilder Changelog
 
-## 8.4.23 (Unreleased)
+## 8.4.23 (v8.4.23)
 
 ### Changed
 * **Version Management**: Simplified version management - version now read from `gradle.properties` instead of hardcoded `buildVersion` variable
