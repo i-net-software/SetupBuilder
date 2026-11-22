@@ -1,5 +1,14 @@
 # SetupBuilder Changelog
 
+## 8.4.24 (Unreleased)
+
+### Changed
+* **Internal Publishing**: Restored the upload into the internal repository of i-net software, as up to version 8.4.22
+  * Active when the SetupBuilder is checked out next to the `BuildScripts`; `-Dlocal` switches it off
+  * `publish` or `publishInternal` uploads the jar, the javadoc and the sources jar with an `ivy.xml`; Sonatype is skipped unless a Sonatype task is requested
+  * The version is `-PreleaseVersion=x.y.z`, else the release tag `vx.y.z` on HEAD, else the snapshot version
+  * The public release to Maven Central and the Gradle Plugin Portal is unchanged
+
 ## 8.4.23 (v8.4.23)
 
 ### Changed

@@ -50,6 +50,31 @@ if (actualBaseVersion != expectedBaseVersion) {
 }
 
 def baseVersion = "${actualBaseVersion}.${buildNumber}"
+
+// Internal build system of i-net software: if the SetupBuilder is checked out next to the BuildScripts, `publish`
+// uploads it into the internal repository, as up to version 22. -Dlocal switches this off.
+// The version of the upload is -PreleaseVersion=x.y.z, else the release tag vx.y.z on HEAD, else the snapshot version.
+def internalBuildScripts = file( '../BuildScripts/base.gradle' )
+def isInternalBuild = !System.getProperty( 'local' ) && internalBuildScripts.exists()
+if ( isInternalBuild ) {
+    def releaseVersion = project.findProperty( 'releaseVersion' )
+    if ( !releaseVersion ) {
+        try {
+            def tag = [ 'git', 'describe', '--tags', '--exact-match', 'HEAD' ].execute( null, projectDir )
+            tag.waitFor()
+            def tagName = tag.text.trim()
+            if ( tag.exitValue() == 0 && tagName ==~ /v?\d+\.\d+\.\d+/ ) {
+                releaseVersion = tagName - ~/^v/
+            }
+        } catch( Exception e ) {
+            println "No release tag found: ${e.message}"
+        }
+    }
+    if ( releaseVersion ) {
+        version = releaseVersion
+    }
+}
+
 println 'SetupBuilder version: ' + version
 
 java.sourceCompatibility = 1.8
@@ -181,8 +206,37 @@ nexusPublishing {
     
     // For snapshots, just publish (don't close staging)
     // For releases, close and release staging repositories
-    if (!version.toString().endsWith('-SNAPSHOT')) {
+    // The internal upload does not touch Sonatype.
+    if (!version.toString().endsWith('-SNAPSHOT') && !isInternalBuild) {
         publish.finalizedBy 'closeStagingRepositories'
+    }
+}
+
+if ( isInternalBuild ) {
+    println "Uploading into the internal repository (use -Dlocal to skip)"
+    apply from: internalBuildScripts
+    // preparePublish takes the artifacts of the archives configuration. The plugin-publish plugin creates
+    // javadocJar and sourcesJar late, so they are added after the evaluation.
+    afterEvaluate {
+        artifacts {
+            archives tasks.named( 'javadocJar' )
+            archives tasks.named( 'sourcesJar' )
+        }
+    }
+    preparePublish.dependsOn 'jar', 'javadocJar', 'sourcesJar'
+
+    // `publish` uploads only internally, unless a Sonatype task is requested explicitly
+    if ( !gradle.startParameter.taskNames.any { it.toLowerCase().contains( 'sonatype' ) } ) {
+        tasks.matching { it.name.contains( 'Sonatype' ) }.configureEach { enabled = false }
+    }
+    // Only the publication of the BuildScripts goes into the internal ivy repository. The ivy publications of
+    // java-gradle-plugin have the same module name and would overwrite its ivy.xml.
+    tasks.matching { it.name ==~ /publish.+IvyPublicationToIvyRepository/ }.configureEach { enabled = false }
+
+    task publishInternal {
+        group = 'publishing'
+        description = 'Uploads the SetupBuilder into the internal repository of i-net software'
+        dependsOn 'publishIvyPublicationToIvyRepository'
     }
 }
 
